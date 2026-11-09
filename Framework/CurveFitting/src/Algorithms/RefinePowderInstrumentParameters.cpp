@@ -29,7 +29,6 @@
 
 #include "MantidGeometry/Crystal/UnitCell.h"
 
-#include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
 
 #include <fstream>

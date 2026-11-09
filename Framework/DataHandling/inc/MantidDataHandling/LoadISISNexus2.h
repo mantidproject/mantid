@@ -19,7 +19,7 @@
 #include "MantidNexus/NexusDescriptorLazy.h"
 #include "MantidNexus/NexusFile.h"
 
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 
 #include <climits>
 
@@ -162,13 +162,13 @@ private:
   /// Monitors, map spectrum index to monitor group name
   std::map<specnum_t, std::string> m_monitors;
   /// A pointer to the ISISRunLogs creator
-  boost::scoped_ptr<API::ISISRunLogs> m_logCreator;
+  std::unique_ptr<API::ISISRunLogs> m_logCreator;
   /// Progress reporting object
   std::shared_ptr<API::Progress> m_progress;
   /// Personal wrapper for sqrt to allow msvs to compile
   static double dblSqrt(double in);
   // Handle to the NeXus file
-  boost::scoped_ptr<Nexus::File> m_nexusFile;
+  std::unique_ptr<Nexus::File> m_nexusFile;
 
   bool findSpectraDetRangeInFile(const Nexus::NXEntry &entry, std::vector<specnum_t> &spectrum_index, int64_t ndets,
                                  int64_t n_vms_compat_spectra, const std::map<specnum_t, std::string> &monitors,

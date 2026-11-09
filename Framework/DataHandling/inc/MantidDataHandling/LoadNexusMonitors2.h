@@ -11,7 +11,7 @@
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidNexus/NexusFile.h"
-#include <boost/scoped_array.hpp>
+#include <memory>
 
 namespace Mantid {
 

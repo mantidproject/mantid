@@ -16,7 +16,6 @@
 #include <Poco/File.h>
 #include <QCoreApplication>
 #include <QSharedPointer>
-#include <boost/algorithm/string.hpp>
 #include <utility>
 
 using namespace Mantid::Kernel;

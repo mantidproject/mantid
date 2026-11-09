@@ -11,7 +11,7 @@
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
 
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 
 using namespace Mantid;
 using namespace Mantid::DataObjects;
@@ -47,7 +47,7 @@ public:
     bool used[2] = {true, true};
     CoordTransformDistance ct(2, center, used);
 
-    boost::scoped_ptr<CoordTransform> clone(ct.clone());
+    std::unique_ptr<CoordTransform> clone(ct.clone());
     coord_t out = 0;
     coord_t in1[2] = {0, 3};
     TS_ASSERT_THROWS_NOTHING(clone->apply(in1, &out));

@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidSINQ/PoldiUtilities/UncertainValue.h"
-#include "boost/format.hpp"
 #include <cmath>
 #include <stdexcept>
 

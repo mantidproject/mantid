@@ -26,8 +26,8 @@
 #include <algorithm>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/trim.hpp>
-#include <boost/scoped_ptr.hpp>
 #include <fstream>
+#include <memory>
 #include <set>
 
 namespace Mantid::DataHandling {
@@ -97,7 +97,7 @@ void UpdateInstrumentFromFile::exec() {
     LoadEventNexus eventNexus;
 
     // we open and close the HDF5 file.
-    boost::scoped_ptr<Nexus::NexusDescriptorLazy> descriptorNexusLazy(new Nexus::NexusDescriptorLazy(filename));
+    std::unique_ptr<Nexus::NexusDescriptorLazy> descriptorNexusLazy(new Nexus::NexusDescriptorLazy(filename));
 
     if (isisNexus.confidence(*descriptorNexusLazy) > 0 || eventNexus.confidence(*descriptorNexusLazy) > 0) {
       const auto &rootEntry = descriptorNexusLazy->firstEntryNameType();

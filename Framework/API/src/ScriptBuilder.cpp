@@ -20,8 +20,7 @@
 #include "MantidKernel/WarningSuppressions.h"
 
 #include <boost/algorithm/string/classification.hpp>
-#include <boost/range/algorithm/remove_if.hpp>
-#include <boost/utility.hpp>
+#include <iterator>
 #include <set>
 #include <utility>
 
@@ -83,7 +82,7 @@ void ScriptBuilder::writeHistoryToStream(std::ostringstream &os, std::vector<His
     os << std::string(depth, '#');
     os << " End of child algorithms of " << algHistory->name() << "\n";
 
-    if (boost::next(iter) == m_historyItems.end() || !boost::next(iter)->isUnrolled()) {
+    if (std::next(iter) == m_historyItems.end() || !std::next(iter)->isUnrolled()) {
 
       if (m_timestampCommands) {
         os << " # " << algHistory->executionDate().toISO8601String();
@@ -257,7 +256,7 @@ const std::string ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &al
   }
 
   std::string historyEntry = assignmentStatement + name + "(" + propStr + ")";
-  historyEntry.erase(boost::remove_if(historyEntry, boost::is_any_of("\n\r")), historyEntry.end());
+  std::erase_if(historyEntry, boost::is_any_of("\n\r"));
   return historyEntry;
 }
 

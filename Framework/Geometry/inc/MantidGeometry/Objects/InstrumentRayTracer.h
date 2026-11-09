@@ -9,10 +9,10 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/Track.h"
-#include <boost/unordered_map.hpp>
 #include <deque>
 #include <list>
 #include <mutex>
+#include <unordered_map>
 
 namespace Mantid {
 namespace Kernel {
@@ -71,7 +71,7 @@ private:
   /// when getResults is called.
   mutable Track m_resultsTrack;
   /// Map of component index -> bounding box.
-  mutable boost::unordered_map<size_t, BoundingBox> m_boxCache;
+  mutable std::unordered_map<size_t, BoundingBox> m_boxCache;
   /// Mutex to lock box cache
   mutable std::mutex m_mutex;
 };

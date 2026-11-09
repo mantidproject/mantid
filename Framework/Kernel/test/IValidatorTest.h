@@ -27,9 +27,9 @@ public:
   const double *head() const { return m_head; }
 
 private:
-  std::string check(const boost::any &value) const override {
+  std::string check(const std::any &value) const override {
     using HeldType = std::vector<double>;
-    const HeldType *dataPtr = boost::any_cast<const HeldType *>(value);
+    const HeldType *dataPtr = std::any_cast<const HeldType *>(value);
     m_head = dataPtr->data();
     return "";
   }

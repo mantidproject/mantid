@@ -8,7 +8,6 @@
 
 #include "MantidCrystal/DisjointElement.h"
 #include "MantidCrystal/DllConfig.h"
-#include <boost/scoped_ptr.hpp>
 #include <map>
 #include <memory>
 #include <vector>
@@ -46,7 +45,7 @@ public:
 
 private:
   /// Pointer to implementation
-  boost::scoped_ptr<ImplClusterRegister> m_Impl;
+  std::unique_ptr<ImplClusterRegister> m_Impl;
 };
 
 } // namespace Crystal

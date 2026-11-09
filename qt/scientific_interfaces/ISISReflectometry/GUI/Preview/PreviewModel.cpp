@@ -21,7 +21,6 @@
 #include "ROIType.h"
 
 #include <boost/optional.hpp>
-#include <boost/utility/in_place_factory.hpp>
 
 #include <algorithm>
 #include <filesystem>

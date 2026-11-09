@@ -9,8 +9,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/VMD.h"
-#include <boost/algorithm/string.hpp>
-#include <boost/format.hpp>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;

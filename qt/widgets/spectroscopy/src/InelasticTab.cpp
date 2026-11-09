@@ -27,7 +27,7 @@
 #include <QtXml>
 
 #include <boost/algorithm/string/find.hpp>
-#include <boost/pointer_cast.hpp>
+#include <memory>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;

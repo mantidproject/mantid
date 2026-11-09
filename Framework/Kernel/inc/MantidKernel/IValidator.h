@@ -11,7 +11,7 @@
 #include "MantidKernel/IValidator_fwd.h"
 
 #ifndef Q_MOC_RUN
-#include <boost/any.hpp>
+#include <any>
 #include <memory>
 #endif
 #include <stdexcept>
@@ -53,7 +53,7 @@ public:
 
   /**
    * Deal with a C-style string by first converting it to a std::string
-   * so that boost::any can deal with it, calls isValid(std::string)
+   * so that std::any can deal with it, calls isValid(std::string)
    * @param value :: The value to be checked
    * @returns An error message to display to users or an empty string on no
    * error
@@ -96,7 +96,7 @@ public:
    *  @returns An error message to display to users or an empty string on no
    *error
    */
-  virtual std::string check(const boost::any &) const = 0;
+  virtual std::string check(const std::any &) const = 0;
 
 private:
   /** Calls the validator for a type that is not a pointer type
@@ -106,7 +106,7 @@ private:
    */
   template <typename T> std::string runCheck(const T &value, const std::false_type &) const {
     const T *valuePtr = &value; // Avoid a copy by storing the pointer in the any holder
-    return check(boost::any(valuePtr));
+    return check(std::any(valuePtr));
   }
 
   /** Calls the validator for a type that is either a raw pointer or a
@@ -126,7 +126,7 @@ private:
    * error
    */
   template <typename T> std::string runCheckWithDataItemPtr(const T &value, const std::false_type &) const {
-    return check(boost::any(value));
+    return check(std::any(value));
   }
   /** Calls the validator for a pointer type that IS convertible to
    * DataItem_sptr
@@ -135,7 +135,7 @@ private:
    * error
    */
   template <typename T> std::string runCheckWithDataItemPtr(const T &value, const std::true_type &) const {
-    return check(boost::any(std::static_pointer_cast<DataItem>(value)));
+    return check(std::any(std::static_pointer_cast<DataItem>(value)));
   }
 };
 

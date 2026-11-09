@@ -8,7 +8,7 @@
 #include "MantidKernel/SpinStateValidator.h"
 
 #include "MantidKernel/SpinStateHelpers.h"
-#include <boost/algorithm/string.hpp>
+#include <algorithm>
 #include <sstream>
 
 namespace Mantid::Kernel {

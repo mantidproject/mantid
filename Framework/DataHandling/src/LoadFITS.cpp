@@ -18,7 +18,7 @@
 #include "MantidKernel/UnitFactory.h"
 
 #include <boost/algorithm/string.hpp>
-#include <boost/scoped_array.hpp>
+#include <memory>
 
 #include <Poco/BinaryReader.h>
 #include <filesystem>

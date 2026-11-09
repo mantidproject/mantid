@@ -7,7 +7,6 @@
 #pragma once
 
 #include "FunctionParserTest.h"
-#include <boost/scoped_ptr.hpp>
 #include <memory>
 #include <vector>
 

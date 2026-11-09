@@ -8,8 +8,6 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "boost/version.hpp"
-
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidCurveFitting/Algorithms/VesuvioCalculateMS.h"

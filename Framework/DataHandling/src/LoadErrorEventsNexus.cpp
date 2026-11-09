@@ -15,6 +15,7 @@
 #include "MantidDataHandling/PulseIndexer.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidNexus/NexusIOHelper.h"
+#include <functional>
 
 namespace Mantid {
 namespace DataHandling {
@@ -93,7 +94,7 @@ void LoadErrorEventsNexus::exec() {
   const auto event_times = Nexus::IOHelper::readNexusVector<float>(file, "event_time_offset");
   const auto event_index =
       std::make_shared<std::vector<uint64_t>>(Nexus::IOHelper::readNexusVector<uint64_t>(file, "event_index"));
-  const auto bankPulseTimes = std::make_shared<BankPulseTimes>(boost::ref(file), periodLog->valuesAsVector());
+  const auto bankPulseTimes = std::make_shared<BankPulseTimes>(std::ref(file), periodLog->valuesAsVector());
 
   file.closeGroup(); // bank_error_events
   file.closeGroup(); // entry

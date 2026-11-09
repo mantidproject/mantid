@@ -8,11 +8,11 @@
 
 namespace Mantid::PythonInterface {
 
-std::string PythonObjectTypeValidator::check(boost::any const &value) const {
+std::string PythonObjectTypeValidator::check(std::any const &value) const {
   boost::python::object obj;
   try {
-    obj = *(boost::any_cast<boost::python::object const *>(value));
-  } catch (boost::bad_any_cast const &) {
+    obj = *(std::any_cast<boost::python::object const *>(value));
+  } catch (std::bad_any_cast const &) {
     return "Attempting to run a python type validator on an object that is not a python object";
   }
   std::string ret;

@@ -18,6 +18,7 @@
 #include "MantidKernel/VMD.h"
 
 #include <map>
+#include <type_traits>
 #include <vector>
 
 using namespace Mantid::Kernel;
@@ -29,25 +30,25 @@ namespace Mantid::MDAlgorithms {
 namespace {
 // ---------- Template deduction of the event type
 // --------------------------------
-// See boost::type_traits documentation
+// See <type_traits> documentation
 
 /// Type trait to indicate that a general type is not a full MDEvent
-template <typename MDE, size_t nd> struct IsFullEvent : boost::false_type {};
+template <typename MDE, size_t nd> struct IsFullEvent : std::false_type {};
 
 /// Specialization of type trait to indicate that a MDEvent is a full event
-template <size_t nd> struct IsFullEvent<MDEvent<nd>, nd> : boost::true_type {};
+template <size_t nd> struct IsFullEvent<MDEvent<nd>, nd> : std::true_type {};
 
 /**
  * Specialization if isFullEvent for DataObjects
  * to return true
  */
-template <typename MDE, size_t nd> bool isFullMDEvent(const boost::true_type & /*unused*/) { return true; }
+template <typename MDE, size_t nd> bool isFullMDEvent(const std::true_type & /*unused*/) { return true; }
 
 /**
  * Specialization if isFullEvent for DataObjects
  * to return false
  */
-template <typename MDE, size_t nd> bool isFullMDEvent(const boost::false_type & /*unused*/) { return false; }
+template <typename MDE, size_t nd> bool isFullMDEvent(const std::false_type & /*unused*/) { return false; }
 
 /**
  * Returns true if the templated type is a full MDEvent
@@ -60,10 +61,10 @@ template <typename MDE, size_t nd> bool isFullMDEvent() { return isFullMDEvent<M
  * @param box :: A reference to the box containing the peak
  */
 template <typename MDE, size_t nd>
-void addDetectors(DataObjects::Peak &peak, MDBoxBase<MDE, nd> &box, const boost::true_type & /*unused*/) {
+void addDetectors(DataObjects::Peak &peak, MDBoxBase<MDE, nd> &box, const std::true_type & /*unused*/) {
   if (box.getNumChildren() > 0) {
     std::cerr << "Box has children\n";
-    addDetectors(peak, box, boost::true_type());
+    addDetectors(peak, box, std::true_type());
   }
   auto *mdBox = dynamic_cast<MDBox<MDE, nd> *>(&box);
   if (!mdBox) {
@@ -80,8 +81,7 @@ void addDetectors(DataObjects::Peak &peak, MDBoxBase<MDE, nd> &box, const boost:
 /// Add detectors based on lean events. Always throws as they do not know their
 /// IDs
 template <typename MDE, size_t nd>
-void addDetectors(DataObjects::Peak & /*unused*/, MDBoxBase<MDE, nd> & /*unused*/,
-                  const boost::false_type & /*unused*/) {
+void addDetectors(DataObjects::Peak & /*unused*/, MDBoxBase<MDE, nd> & /*unused*/, const std::false_type & /*unused*/) {
   throw std::runtime_error("FindPeaksMD - Workspace contains lean events, "
                            "cannot include detector information");
 }

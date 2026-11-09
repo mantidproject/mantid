@@ -21,7 +21,6 @@
 #include <numeric>
 #include <set>
 
-#include <boost/algorithm/string.hpp>
 #include <utility>
 
 using namespace Mantid::API;

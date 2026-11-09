@@ -12,7 +12,7 @@
 #include "MantidCrystal/DllConfig.h"
 #include "MantidCrystal/HardThresholdBackground.h"
 #include "MantidKernel/V3D.h"
-#include <boost/function.hpp>
+#include <functional>
 
 namespace Mantid {
 namespace Geometry {
@@ -35,7 +35,7 @@ private:
   /// MD coordinates to use
   Mantid::Kernel::SpecialCoordinateSystem m_mdCoordinates;
   /// Pointer to member function used for coordinate determination.
-  boost::function<Mantid::Kernel::V3D(const Mantid::Geometry::IPeak *)> m_coordFunction;
+  std::function<Mantid::Kernel::V3D(const Mantid::Geometry::IPeak *)> m_coordFunction;
 
 public:
   /// Constructor

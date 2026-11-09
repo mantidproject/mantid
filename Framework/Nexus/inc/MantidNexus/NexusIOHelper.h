@@ -9,7 +9,7 @@
 #include "MantidNexus/NexusFile.h"
 
 #include <algorithm>
-#include <boost/any.hpp>
+#include <any>
 #include <cstdint>
 #include <numeric>
 #include <string>

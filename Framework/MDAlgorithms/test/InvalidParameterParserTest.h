@@ -8,8 +8,8 @@
 
 #include "MantidMDAlgorithms/InvalidParameter.h"
 #include "MantidMDAlgorithms/InvalidParameterParser.h"
-#include <boost/scoped_ptr.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 #include <vector>
 
 #include <Poco/DOM/DOMParser.h>
@@ -32,7 +32,7 @@ public:
     InvalidParameterParser parser;
     Mantid::API::ImplicitFunctionParameter *iparam = parser.createParameter(pDoc->documentElement());
     InvalidParameter *pInvalidParam = dynamic_cast<InvalidParameter *>(iparam);
-    boost::scoped_ptr<InvalidParameter> invalparam(pInvalidParam);
+    std::unique_ptr<InvalidParameter> invalparam(pInvalidParam);
 
     TSM_ASSERT("The paramter generated should be an InvalidParamter", nullptr != pInvalidParam);
     TSM_ASSERT_EQUALS("The invalid parameter has not been parsed correctly.", "x", invalparam->getValue());

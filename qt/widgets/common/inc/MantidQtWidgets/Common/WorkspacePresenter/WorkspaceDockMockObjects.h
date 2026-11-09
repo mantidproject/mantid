@@ -11,7 +11,6 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h"
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h"
-#include <boost/enable_shared_from_this.hpp>
 #include <gmock/gmock.h>
 #include <memory>
 

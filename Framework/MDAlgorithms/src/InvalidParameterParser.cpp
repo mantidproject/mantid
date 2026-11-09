@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/InvalidParameterParser.h"
 #include "MantidAPI/ImplicitFunctionParameterParserFactory.h"
-#include <boost/algorithm/string.hpp>
 #include <utility>
 
 namespace Mantid::MDAlgorithms {

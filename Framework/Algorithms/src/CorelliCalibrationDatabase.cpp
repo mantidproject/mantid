@@ -24,7 +24,6 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <muParser.h>
 
-#include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <filesystem>
 #include <sstream>

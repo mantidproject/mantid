@@ -17,8 +17,8 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 
-#include <boost/scoped_array.hpp>
 #include <cmath>
+#include <memory>
 
 using namespace Mantid::CurveFitting::Functions;
 

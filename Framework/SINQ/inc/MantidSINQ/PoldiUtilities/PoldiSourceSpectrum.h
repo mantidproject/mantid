@@ -10,7 +10,7 @@
 #include "MantidKernel/Interpolation.h"
 #include "MantidSINQ/DllConfig.h"
 
-#include "boost/shared_ptr.hpp"
+#include <memory>
 
 namespace Mantid {
 namespace Poldi {
