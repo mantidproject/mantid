@@ -58,7 +58,7 @@ jobs:
           fi
       - name: Create pull request
         if: github.event_name != 'pull_request' && steps.update-pixi-version.outputs.updated == 'true'
-        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        uses: peter-evans/create-pull-request@15733dbdfeedb4f7fdb73d13c6f5ac83b710fab8 # v8.1.2
         with:
           token: ${{ secrets.MANTID_BUILDER_TOKEN }}
           author: mantid-builder <mantid-builder@users.noreply.github.com>
@@ -118,7 +118,7 @@ jobs:
           fi
       - name: Create pull request
         if: github.event_name != 'pull_request'
-        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        uses: peter-evans/create-pull-request@15733dbdfeedb4f7fdb73d13c6f5ac83b710fab8 # v8.1.2
         with:
           token: ${{ secrets.MANTID_BUILDER_TOKEN }}
           author: mantid-builder <mantid-builder@users.noreply.github.com>
