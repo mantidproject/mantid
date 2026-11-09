@@ -40,6 +40,9 @@ general_params = {
         -0.0006,  # Bank 14
     ],
     "custom_focused_bin_widths": -0.0006,
+    "vanadium_strip_peak_fwhm": [15] * 12 + [100, 60],
+    "vanadium_strip_peak_tolerance": [8] * 12 + [10, 10],
+    "vanadium_strip_peak_repeat": [1] * 12 + [2, 2],
 }
 
 long_mode_off_params = {
