@@ -1395,11 +1395,7 @@ MantidVec &EventList::dataX() {
   // Handing out a mutable MantidVec would allow the length to be changed, so
   // FixedLengthVector::mutableRawData() is protected and Histogram is its only friend. The
   // deprecated legacy accessor is therefore the only way to express this.
-  GNU_DIAG_OFF("deprecated-declarations")
-  MSVC_DIAG_OFF(4996)
-  return m_histogram.dataX();
-  MSVC_DIAG_ON(4996)
-  GNU_DIAG_ON("deprecated-declarations")
+  ALLOW_DEPRECATED(return m_histogram.dataX());
 }
 
 /** Deprecated, use x() instead. Returns a const reference to the x data.

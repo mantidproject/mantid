@@ -123,7 +123,7 @@ std::shared_ptr<ReferenceFrame const> getReferenceFrameDeprecated(const Instrume
                  "For more information, see the instrument access layers concept page: "
                  "https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html") < 0)
     throw boost::python::error_already_set();
-  return self.getReferenceFrame();
+  ALLOW_DEPRECATED(return self.getReferenceFrame());
 }
 
 // Ignore -Wconversion warnings coming from boost::python

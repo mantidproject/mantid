@@ -27,6 +27,7 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/FloatingPointComparison.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include <fstream>
 using Mantid::Kernel::EnabledWhenProperty;
@@ -680,7 +681,7 @@ std::tuple<V3D, double> PredictPeaks::getPeakParametersFromQ(const V3D &q) const
 /** Cache the reference frame and beam direction using the instrument
  */
 void PredictPeaks::setReferenceFrameAndBeamDirection() {
-  m_refFrame = m_inst->getReferenceFrame();
+  ALLOW_DEPRECATED(m_refFrame = m_inst->getReferenceFrame());
   m_refBeamDir = m_refFrame->vecPointingAlongBeam();
 }
 
