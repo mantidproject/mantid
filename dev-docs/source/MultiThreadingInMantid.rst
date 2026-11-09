@@ -98,6 +98,49 @@ reference obtained to the input data in the previous line. The solution
 is to make sure the non-const calls come before the const ones (in this
 case by reversing the two lines).
 
+Thread pool
+###########
+
+OpenMP suits loops where every iteration does a similar amount of work. For
+work made of irregular tasks, ``Kernel::ThreadPool`` reuses a fixed set of
+threads (by default one per core) and feeds them tasks from a scheduler, which
+avoids the cost of creating a thread per task. Tasks derive from
+``Kernel::Task``, and ``Kernel::FunctionTask`` wraps any callable. The optional
+cost tells the scheduler roughly how expensive each task is.
+
+.. code-block:: c++
+
+   #include "MantidKernel/FunctionTask.h"
+   #include "MantidKernel/ThreadPool.h"
+   #include "MantidKernel/ThreadScheduler.h"
+
+   std::mutex mutex;
+   std::size_t total = 0;
+
+   Kernel::ThreadPool pool(new Kernel::ThreadSchedulerFIFO());
+   for (std::size_t i = 0; i < 10; ++i) {
+     const double cost = static_cast<double>(i);
+     pool.schedule(std::make_shared<Kernel::FunctionTask>(
+         [&, i] {
+           std::lock_guard<std::mutex> lock(mutex);
+           total += i;
+         },
+         cost));
+   }
+   pool.joinAll(); // runs the tasks and waits for them to finish
+
+``DefaultEventLoader`` (loading event NeXus banks) and the MD box splitting are
+examples of the thread pool in use.
+
+Threading Building Blocks
+#########################
+
+Some newer framework code uses `oneTBB <https://github.com/uxlfoundation/oneTBB>`__
+directly, mainly ``tbb::parallel_for`` with ``tbb::blocked_range``, plus
+``tbb::parallel_reduce`` and ``tbb::parallel_sort``, e.g. in ``EventWorkspace``
+and the event compression and loading code. TBB balances work between threads
+automatically, which helps when iterations take very different amounts of time.
+
 Python
 ------
 

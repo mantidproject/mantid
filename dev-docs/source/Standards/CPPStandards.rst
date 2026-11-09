@@ -56,7 +56,7 @@ The contents of the header file should be arranged in the following
 order:
 
 - ``#pragma once`` header guard to prevent duplicate imports.
-- ``#include`` directives in the following order, where each section shold be
+- ``#include`` directives in the following order, where each section should be
   sorted alphabetically:
 
   - Main Module Header

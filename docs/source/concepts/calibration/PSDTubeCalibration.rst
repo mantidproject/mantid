@@ -24,9 +24,9 @@ Examples
 Presentations
 -------------
 
--  `Tube_Calibration.pdf <https://archive.mantidproject.org/images/b/bc/Tube_Calibration.pdf>`__
+-  `Tube_Calibration.pdf <https://github.com/mantidproject/documents/blob/main/Presentations/TubeCalibration/Tube_Calibration.pdf>`__
 -  `ISIS control software
-   update.pdf <https://archive.mantidproject.org/images/9/9a/ISIS_control_software_update.pdf>`__
+   update.pdf <https://github.com/mantidproject/documents/blob/main/Presentations/TubeCalibration/ISIS_control_software_update.pdf>`__
 
 Detailed documentation
 ----------------------

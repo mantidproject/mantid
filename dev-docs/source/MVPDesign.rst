@@ -140,7 +140,7 @@ Doing presenter-view communication with connections is the cleaner of
 the two, so this method should be used unless writing a GUI in
 C++. You'll notice that, in both cases, the view never passes data
 (for example, the input from a text box) directly to the presenter,
-instead it justs tells the presenter that something needs to be
+instead it just tells the presenter that something needs to be
 done. In passive-view MVP the presenter, in handling this, gets any
 data it needs from the view using the view's **get** methods.
 
@@ -281,6 +281,8 @@ has several advantages:
 If it is felt that the design must be hand coded then this should be
 discussed with a senior developer.
 
+.. _ReusableWidgets:
+
 Reusable Widgets
 ----------------
 
@@ -290,9 +292,22 @@ ability to enter a filename string to search for a file along with a
 behaviour should be captured in a new composite widget that can be
 reused by other components.
 
-The new widget should be placed in the MantidWidgets plugin and a
-wrapper created in the DesignerPlugins plugin so that the new widget
-type can be used from within the Qt Designer.
+The new widget should be placed in ``qt/widgets/common``. A widget that
+takes input from the user should derive from ``MantidWidget`` and
+implement ``getUserInput()`` and ``setUserInput()``, so that its value can
+be read and set through a common interface, as ``DataSelector`` and
+``FileFinderWidget`` do.
+
+To use the widget in a form, add a placeholder widget of its base class in
+Qt Designer and promote it to the new class (right-click, *Promote to...*,
+giving the class name and header). Options that should be set per form can
+be declared as Qt properties with ``Q_PROPERTY``, e.g.
+
+.. code-block:: c++
+
+   Q_PROPERTY(QStringList WorkspaceTypes READ getWorkspaceTypes WRITE setWorkspaceTypes)
+
+and then set as dynamic properties in Qt Designer.
 
 The current set of reusable items are:
 
