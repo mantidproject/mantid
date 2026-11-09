@@ -118,13 +118,12 @@ class ReflectometryISISSumBanksTest(unittest.TestCase):
         masked_ws = "masked"
 
         alg = ReflectometryISISSumBanks()
-        alg.getProperty = MagicMock()
-        alg.getProperty.return_value.isDefault = False
-        alg.getProperty.return_value.value = "ExampleROI"
+        alg.initialize()
+        alg.setProperty("ROIDetectorIDs", "ExampleROI")
         alg.mask_detectors = MagicMock(return_value=masked_ws)
 
         self.assertEqual(alg.mask_workspace(test_ws), masked_ws)
-        alg.mask_detectors.assert_called_with(test_ws, "ExampleROI")
+        alg.mask_detectors.assert_called_with(test_ws, "ExampleROI", True)
 
     def test_mask_detectors(self):
         roi_detector_id = 200
@@ -138,6 +137,17 @@ class ReflectometryISISSumBanksTest(unittest.TestCase):
                 self.assertFalse(detector_info.isMasked(det_index))
             else:
                 self.assertTrue(detector_info.isMasked(det_index))
+
+    def test_mask_detectors_can_reuse_owned_data_and_preserves_monitors(self):
+        workspace = CreateSampleWorkspace(StoreInADS=False, NumMonitors=2)
+        monitors = [i for i in range(workspace.getNumberHistograms()) if workspace.spectrumInfo().isMonitor(i)]
+        original = [workspace.readY(i).copy() for i in monitors]
+        result = ReflectometryISISSumBanks().mask_detectors(workspace, "200", preserve_input=False)
+        self.assertIs(result, workspace)
+        self.assertFalse(result.detectorInfo().isMasked(result.detectorInfo().indexOf(200)))
+        self.assertTrue(result.detectorInfo().isMasked(result.detectorInfo().indexOf(201)))
+        for index, values in zip(monitors, original):
+            numpy.testing.assert_array_equal(result.readY(index), values)
 
     def test_sum_banks(self):
         num_banks = 3
