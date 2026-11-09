@@ -33,7 +33,7 @@ public:
   virtual std::string name() const { return m_function->name(); }
   /// Set the workspace. Make
   /// @param ws :: Shared pointer to a workspace
-  virtual void setWorkspace(std::shared_ptr<const Workspace> ws) { UNUSED_ARG(ws) }
+  virtual void setWorkspace(std::shared_ptr<const Workspace> ws) { UNUSED_ARG(ws); }
   /// Get the workspace
   // virtual std::shared_ptr<const API::Workspace> getWorkspace()const {return
   // m_function->getWorkspace();}

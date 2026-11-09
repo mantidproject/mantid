@@ -32,7 +32,7 @@ add_definitions(-D_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING)
 set(CMAKE_CXX_FLAGS
     "${CMAKE_CXX_FLAGS} \
   /MP /W3 /bigobj \
-  /wd4251 /wd4275 /wd4373 /EHsc \
+  /wd4251 /wd4275 /wd4373 /wd4661 /EHsc \
   /experimental:external /external:W0 "
 )
 # the warnings suppressed are:
@@ -45,6 +45,10 @@ set(CMAKE_CXX_FLAGS
 #
 # 4373 previous versions of the compiler did not override when parameters only differed by const/volatile qualifiers.
 # This is basically saying that it now follows the C++ standard and doesn't seem useful
+#
+# 4661 no suitable definition provided for explicit template instantiation request. An exported class that derives from
+# a class template specialization exports that base too, but member definitions kept in a .hxx file are only visible
+# where the library explicitly instantiates it, e.g. PropertyWithValue.cpp.
 #
 # /EHsc Full compiler support for the Standard C++ exception handling model
 # https://learn.microsoft.com/en-us/cpp/build/reference/eh-exception-handling-model?view=msvc-170

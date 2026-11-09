@@ -9,10 +9,12 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include <optional>
 
@@ -182,3 +184,6 @@ private:
 };
 } // namespace API
 } // namespace Mantid
+
+// Instantiated and exported by API/src/PropertyWithValue.cpp
+MANTID_API_EXTERN_TEMPLATE(Mantid::Kernel::PropertyWithValue<std::shared_ptr<Mantid::API::IPeaksWorkspace>>);

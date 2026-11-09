@@ -154,7 +154,7 @@ add_subdirectory(test)
 target_include_directories(
   LiveData PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/LiveData> $<INSTALL_INTERFACE:include/Mantid>
 )
-generate_mantid_export_header(LiveData FALSE)
+generate_mantid_export_header(LiveData FALSE GENERATE_UNUSED_ARG)
 
 # Installation settings
 mtd_install_framework_lib(TARGETS LiveData PLUGIN_LIB)

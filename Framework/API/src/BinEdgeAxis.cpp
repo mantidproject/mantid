@@ -43,7 +43,7 @@ BinEdgeAxis::BinEdgeAxis(std::span<double const> edges)
  * called
  */
 Axis *BinEdgeAxis::clone(const MatrixWorkspace *const parentWorkspace) {
-  UNUSED_ARG(parentWorkspace)
+  UNUSED_ARG(parentWorkspace);
   return new BinEdgeAxis(*this);
 }
 
@@ -53,7 +53,7 @@ Axis *BinEdgeAxis::clone(const MatrixWorkspace *const parentWorkspace) {
  * @returns A pointer to a copy of the NumericAxis on which the method is called
  */
 Axis *BinEdgeAxis::clone(const std::size_t length, const MatrixWorkspace *const parentWorkspace) {
-  UNUSED_ARG(parentWorkspace)
+  UNUSED_ARG(parentWorkspace);
   auto *newAxis = new BinEdgeAxis(*this);
   newAxis->m_values.clear();
   newAxis->m_values.resize(length);

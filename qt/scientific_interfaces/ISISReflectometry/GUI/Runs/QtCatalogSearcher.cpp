@@ -176,7 +176,7 @@ void QtCatalogSearcher::finishHandle(const Mantid::API::IAlgorithm *alg) {
 }
 
 void QtCatalogSearcher::errorHandle(const Mantid::API::IAlgorithm *alg, const std::string &what) {
-  UNUSED_ARG(what)
+  UNUSED_ARG(what);
   stopObserving(alg);
   if (!hasActiveCatalogSession()) {
     m_notifyee->notifySearchFailed();

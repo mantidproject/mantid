@@ -59,7 +59,7 @@ public:
 class FakeExceptionThrowingStreamSubscriber : public Mantid::LiveData::IKafkaStreamSubscriber {
 public:
   void subscribe() override {}
-  void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
+  void subscribe(int64_t offset) override { UNUSED_ARG(offset); }
   void consumeMessage(std::string *buffer, int64_t &offset, int32_t &partition, std::string &topic) override {
     buffer->clear();
     UNUSED_ARG(offset);
@@ -91,7 +91,7 @@ public:
 class FakeEmptyStreamSubscriber : public Mantid::LiveData::IKafkaStreamSubscriber {
 public:
   void subscribe() override {}
-  void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
+  void subscribe(int64_t offset) override { UNUSED_ARG(offset); }
   void consumeMessage(std::string *buffer, int64_t &offset, int32_t &partition, std::string &topic) override {
     buffer->clear();
     UNUSED_ARG(offset);
@@ -231,7 +231,7 @@ class FakeISISEventSubscriber : public Mantid::LiveData::IKafkaStreamSubscriber 
 public:
   explicit FakeISISEventSubscriber(int32_t nperiods) : m_nperiods(nperiods), m_nextPeriod(0) {}
   void subscribe() override {}
-  void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
+  void subscribe(int64_t offset) override { UNUSED_ARG(offset); }
   void consumeMessage(std::string *message, int64_t &offset, int32_t &partition, std::string &topic) override {
     assert(message);
 
@@ -271,7 +271,7 @@ private:
 class FakeEventSubscriber : public Mantid::LiveData::IKafkaStreamSubscriber {
 public:
   void subscribe() override {}
-  void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
+  void subscribe(int64_t offset) override { UNUSED_ARG(offset); }
   void consumeMessage(std::string *message, int64_t &offset, int32_t &partition, std::string &topic) override {
     assert(message);
 
@@ -321,7 +321,7 @@ private:
 class FakeHistoSubscriber : public Mantid::LiveData::IKafkaStreamSubscriber {
 public:
   void subscribe() override {}
-  void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
+  void subscribe(int64_t offset) override { UNUSED_ARG(offset); }
   void consumeMessage(std::string *message, int64_t &offset, int32_t &partition, std::string &topic) override {
     assert(message);
 
@@ -370,7 +370,7 @@ private:
 class FakeSampleEnvironmentSubscriber : public Mantid::LiveData::IKafkaStreamSubscriber {
 public:
   void subscribe() override {}
-  void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
+  void subscribe(int64_t offset) override { UNUSED_ARG(offset); }
   void consumeMessage(std::string *message, int64_t &offset, int32_t &partition, std::string &topic) override {
     assert(message);
 
@@ -405,7 +405,7 @@ class FakeRunInfoStreamSubscriber : public Mantid::LiveData::IKafkaStreamSubscri
 public:
   explicit FakeRunInfoStreamSubscriber(int32_t nperiods) : m_nperiods(nperiods) {}
   void subscribe() override {}
-  void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
+  void subscribe(int64_t offset) override { UNUSED_ARG(offset); }
   void consumeMessage(std::string *buffer, int64_t &offset, int32_t &partition, std::string &topic) override {
     assert(buffer);
 
@@ -446,7 +446,7 @@ private:
 class FakeRunInfoStreamSubscriberVaryingNPeriods : public Mantid::LiveData::IKafkaStreamSubscriber {
 public:
   void subscribe() override {}
-  void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
+  void subscribe(int64_t offset) override { UNUSED_ARG(offset); }
   void consumeMessage(std::string *buffer, int64_t &offset, int32_t &partition, std::string &topic) override {
     assert(buffer);
 
@@ -489,7 +489,7 @@ class FakeVariablePeriodSubscriber : public Mantid::LiveData::IKafkaStreamSubscr
 public:
   explicit FakeVariablePeriodSubscriber(uint32_t startOffset) : m_nextOffset(startOffset) {}
   void subscribe() override {}
-  void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
+  void subscribe(int64_t offset) override { UNUSED_ARG(offset); }
   void consumeMessage(std::string *buffer, int64_t &offset, int32_t &partition, std::string &topic) override {
     assert(buffer);
 
@@ -558,7 +558,7 @@ class FakeDataStreamSubscriber : public Mantid::LiveData::IKafkaStreamSubscriber
 public:
   explicit FakeDataStreamSubscriber(int64_t stopOffset) : m_stopOffset(stopOffset) {}
   void subscribe() override {}
-  void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
+  void subscribe(int64_t offset) override { UNUSED_ARG(offset); }
   void consumeMessage(std::string *buffer, int64_t &offset, int32_t &partition, std::string &topic) override {
     assert(buffer);
 

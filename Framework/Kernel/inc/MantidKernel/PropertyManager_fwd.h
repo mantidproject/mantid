@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidKernel/DllConfig.h"
 #include <memory>
 
 namespace Mantid {
@@ -15,7 +16,7 @@ namespace Kernel {
 */
 
 /// forward declare of Mantid::Kernel::PropertyManager
-class PropertyManager;
+class MANTID_KERNEL_DLL PropertyManager;
 /// shared pointer to Mantid::Kernel::PropertyManager
 using PropertyManager_sptr = std::shared_ptr<PropertyManager>;
 /// shared pointer to Mantid::Kernel::PropertyManager(const version)
