@@ -145,3 +145,54 @@ and likewise a mantidqt only build with,
 
 Specifying `MANTID_FRAMEWORK_LIB=SYSTEM` requires that we have installed the Framework and its cmake config files somewhere on the CMAKE_PREFIX_PATH.
 This will enable the framework to be found using `find_package(MantidFramework)`.
+
+.. _BuildingWithCMake_tbbmalloc:
+
+tbbmalloc in Python on Linux
+############################
+
+On Linux, Mantid preloads Intel TBB's scalable allocator (``libtbbmalloc_proxy.so.2``).
+The Workbench launcher sets ``LD_PRELOAD`` itself.
+``python``, ``ipython`` and Jupyter kernels get it from two files in the environment's ``site-packages``:
+
+* ``mantid-tbbmalloc.pth`` imports ``_mantid_tbbmalloc_preload`` whenever the interpreter starts.
+* ``_mantid_tbbmalloc_preload.py`` restarts the interpreter once with the same arguments
+  and with ``$CONDA_PREFIX/lib/libtbbmalloc_proxy.so.2`` prepended to ``LD_PRELOAD``.
+
+The sources are in ``Framework/PythonInterface/tbbmalloc``.
+The conda package installs them.
+A developer build (anything that is not ``CONDA_BUILD``) copies them into the ``site-packages`` of the
+environment it is configured against, for example your pixi environment, next to the editable installs of the Python packages.
+Building writes these files outside the build directory,
+so they apply to every ``python`` started from that environment, whether or not it imports ``mantid``.
+
+The hook does nothing when:
+
+* ``MANTID_DISABLE_TBBMALLOC`` is set to any non-empty value,
+* the proxy is already loaded, for example by the Workbench launcher or because a parent process set ``LD_PRELOAD``,
+* ``LD_PRELOAD`` already contains a sanitizer runtime,
+* Python is embedded in another program, for example a C++ test executable that starts an interpreter,
+* Python is started with ``-S``, which skips ``.pth`` files,
+* ``libtbbmalloc_proxy.so.2`` is not in the environment's ``lib`` directory.
+
+To check whether a Python process is using tbbmalloc:
+
+.. code-block:: sh
+
+  python -c "print('libtbbmalloc_proxy' in open('/proc/self/maps').read())"
+
+Builds that do not preload tbbmalloc (``-DUSE_TBBMALLOC=OFF``, or ``-DUSE_SANITIZER=Address``) do not install the hook.
+Configuring one of them removes a hook that an earlier build copied into the environment,
+and their launch scripts set ``MANTID_DISABLE_TBBMALLOC=1``.
+If you delete a build directory, the hook stays in the environment.
+To remove it by hand:
+
+.. code-block:: sh
+
+  rm "$(python -S -c 'import sysconfig; print(sysconfig.get_path("purelib"))')"/{mantid-tbbmalloc.pth,_mantid_tbbmalloc_preload.py}
+
+Set ``MANTID_DISABLE_TBBMALLOC=1`` when running Python under a tool that replaces or tracks ``malloc``,
+such as ``valgrind``, ``heaptrack`` or a preloaded ``jemalloc``.
+Otherwise the proxy is prepended to ``LD_PRELOAD`` and takes over the allocator.
+``valgrind`` also does not follow ``exec`` without ``--trace-children=yes``,
+so it would only see the short-lived process that restarts itself.
