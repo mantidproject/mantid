@@ -11,7 +11,6 @@
 #include "MantidAPI/Sample.h"
 #include "MantidDataHandling/CreateSampleShape.h"
 #include "MantidDataHandling/SampleEnvironmentFactory.h"
-#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Container.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"

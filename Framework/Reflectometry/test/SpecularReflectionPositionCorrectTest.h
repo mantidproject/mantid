@@ -10,7 +10,6 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/V3D.h"

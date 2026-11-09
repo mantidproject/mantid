@@ -10,7 +10,6 @@
 #include "MantidAPI/WorkspaceUnitValidator.h"
 
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"

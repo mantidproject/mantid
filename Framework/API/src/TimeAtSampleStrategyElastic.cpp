@@ -10,7 +10,6 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TimeAtSampleStrategyElastic.h"
 #include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 
 using namespace Mantid::Kernel;
