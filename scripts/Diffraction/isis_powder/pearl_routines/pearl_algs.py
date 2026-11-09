@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import mantid.simpleapi as mantid
+from Diffraction.isis_powder.routines.instrument_settings import expand_parameter_list
 from mantid.kernel import logger
 
 import Diffraction.isis_powder.routines.common as common
@@ -164,24 +165,15 @@ def normalise_ws_current(ws_to_correct, monitor_ws, spline_coeff, lambda_values,
     return normalised_ws
 
 
-def strip_bragg_peaks(ws_list_to_correct):
-    # TODO move hardcoded spline values into adv. config
-    if len(ws_list_to_correct) == 14:
-        # Strip peaks on banks 1-12 (or 0-11 using 0 based index)
-        for index, ws in enumerate(ws_list_to_correct[:12]):
-            ws_list_to_correct[index] = mantid.StripPeaks(InputWorkspace=ws, OutputWorkspace=ws, FWHM=15, Tolerance=8)
+def strip_bragg_peaks(ws_list_to_correct, peak_fwhm, peak_tolerance, strip_repeat):
+    len_workspaces = len(ws_list_to_correct)
+    peak_fwhm = expand_parameter_list(peak_fwhm, len_workspaces)
+    peak_tolerance = expand_parameter_list(peak_tolerance, len_workspaces)
+    strip_repeat = expand_parameter_list(strip_repeat, len_workspaces)
 
-        # Banks 13 / 14 have broad peaks which are missed so compensate for that and run twice as peaks are very broad
-        for _ in range(2):
-            ws_list_to_correct[12] = mantid.StripPeaks(
-                InputWorkspace=ws_list_to_correct[12], OutputWorkspace=ws_list_to_correct[12], FWHM=100, Tolerance=10
-            )
-
-            ws_list_to_correct[13] = mantid.StripPeaks(
-                InputWorkspace=ws_list_to_correct[13], OutputWorkspace=ws_list_to_correct[13], FWHM=60, Tolerance=10
-            )
-    else:
-        for index, ws in enumerate(ws_list_to_correct):
-            ws_list_to_correct[index] = mantid.StripPeaks(InputWorkspace=ws, OutputWorkspace=ws, FWHM=15, Tolerance=8)
+    print(f"{ws_list_to_correct=}")
+    for i, ws in enumerate(ws_list_to_correct):
+        for _ in range(strip_repeat[i]):
+            ws_list_to_correct[i] = mantid.StripPeaks(InputWorkspace=ws_list_to_correct[i], OutputWorkspace=ws_list_to_correct[i], FWHM=peak_fwhm[i], Tolerance=peak_tolerance[i])
 
     return ws_list_to_correct
