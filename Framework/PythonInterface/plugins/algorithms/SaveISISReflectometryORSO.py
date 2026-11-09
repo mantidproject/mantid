@@ -1160,6 +1160,10 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         if calib_file_entry:
             dataset.add_measurement_additional_file(calib_file_entry, comment="Calibration file")
 
+        pol_eff_entry = refl_dataset.polarization_efficiencies_entry
+        if pol_eff_entry:
+            dataset.add_measurement_additional_file(pol_eff_entry, comment="Polarization efficiencies file")
+
     def _get_rb_number_and_doi(self, run) -> Union[Tuple[str, str], Tuple[None, None]]:
         """
         Check if the experiment RB number can be found in the workspace logs.
