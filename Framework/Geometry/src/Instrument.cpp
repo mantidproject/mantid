@@ -680,6 +680,7 @@ std::vector<IDetector_const_sptr> Instrument::getDetectors(const std::set<detid_
  *"SamplePos" Component
  */
 void Instrument::markAsSamplePos(const IComponent *comp) {
+  resetBeamlineCache();
   if (m_map)
     throw std::runtime_error("Instrument::markAsSamplePos() called on a "
                              "parametrized Instrument object.");
@@ -713,6 +714,7 @@ void Instrument::markAsSamplePos(const IComponent *comp) {
  *"source" Component
  */
 void Instrument::markAsSource(const IComponent *comp) {
+  resetBeamlineCache();
   if (m_map)
     throw std::runtime_error("Instrument::markAsSource() called on a "
                              "parametrized Instrument object.");
@@ -736,6 +738,7 @@ void Instrument::markAsSource(const IComponent *comp) {
  *
  */
 void Instrument::markAsDetector(const IDetector *det) {
+  resetBeamlineCache();
   if (m_map)
     throw std::runtime_error("Instrument::markAsDetector() called on a "
                              "parametrized Instrument object.");
@@ -770,6 +773,7 @@ void Instrument::markAsDetectorIncomplete(const IDetector *det) {
 /// Sorts the detector cache. Called after all detectors have been marked via
 /// markAsDetectorIncomplete.
 void Instrument::markAsDetectorFinalize() {
+  resetBeamlineCache();
   // We're already finalized! We can't finalize any further!
   if (isFinalized())
     return;
@@ -798,6 +802,7 @@ void Instrument::markAsDetectorFinalize() {
  * @throw Exception::ExistsError if cannot add detector to cache
  */
 void Instrument::markAsMonitor(const IDetector *det) {
+  resetBeamlineCache();
   if (m_map)
     throw std::runtime_error("Instrument::markAsMonitor() called on a "
                              "parametrized Instrument object.");
@@ -837,6 +842,7 @@ void Instrument::markAsMonitorIncomplete(const IDetector *det) {
  *  @note this method is O(N); for removing many detectors, use removeDetectorIncomplete instead
  */
 void Instrument::removeDetector(IDetector *det) {
+  resetBeamlineCache();
   if (m_map)
     throw std::runtime_error("Instrument::removeDetector() called on a "
                              "parameterized Instrument object.");
@@ -882,6 +888,7 @@ void Instrument::removeDetectorIncomplete(IDetector const *det) {
  * @note This method does not remove the detectors from the parent assembly; this must be done separately.
  */
 void Instrument::removeDetectorFinalize() {
+  resetBeamlineCache();
   if (m_map)
     throw std::runtime_error("Instrument::removeDetectorFinalize() called on a "
                              "parameterized Instrument object.");
@@ -1357,6 +1364,7 @@ std::vector<ParameterMap::Entry> Instrument::legacyParameters() const {
 
   const auto &componentInfo = pmap.componentInfo();
   const auto &detectorInfo = pmap.detectorInfo();
+  auto const baseComponentInfo = baseInstr.cachedBeamline().first;
   for (size_t i = 0; i < componentInfo.size(); ++i) {
 
     const int64_t parentIndex = componentInfo.parent(i);
@@ -1395,10 +1403,9 @@ std::vector<ParameterMap::Entry> Instrument::legacyParameters() const {
       }
     }
 
-    const IComponent *baseComponent = componentInfo.componentID(i)->getBaseComponent();
     // Generic sca scale factors
     const auto newScaleFactor = Kernel::toVector3d(componentInfo.scaleFactor(i));
-    if ((newScaleFactor - toVector3d(baseComponent->getScaleFactor())).norm() >= 1e-9) {
+    if ((newScaleFactor - toVector3d(baseComponentInfo->scaleFactor(i))).norm() >= 1e-9) {
       legacy.add(i, makeParameter(ParameterMap::pV3D(), ParameterMap::scale(), componentInfo.scaleFactor(i)));
     }
 
@@ -1407,14 +1414,14 @@ std::vector<ParameterMap::Entry> Instrument::legacyParameters() const {
     Eigen::Quaterniond relRot = toQuaterniond(componentInfo.relativeRotation(i));
 
     // Tolerance 1e-9 m as in Beamline::DetectorInfo::isEquivalent.
-    if ((relPos - toVector3d(baseComponent->getRelativePos())).norm() >= 1e-9) {
+    if ((relPos - toVector3d(baseComponentInfo->relativePosition(i))).norm() >= 1e-9) {
       if (isDetFixedInBank) {
         throw std::runtime_error(
             "Cannot create legacy parameters: Position parameters for GridDetectorPixel are not supported");
       }
       legacy.add(i, makeParameter(ParameterMap::pV3D(), ParameterMap::pos(), Kernel::toV3D(relPos)));
     }
-    if ((relRot * toQuaterniond(baseComponent->getRelativeRot()).conjugate()).vec().norm() >= imag_norm_max) {
+    if ((relRot * toQuaterniond(baseComponentInfo->relativeRotation(i)).conjugate()).vec().norm() >= imag_norm_max) {
       legacy.add(i, makeParameter(ParameterMap::pQuat(), ParameterMap::rot(), Kernel::toQuat(relRot)));
     }
   }
@@ -1440,38 +1447,62 @@ void Instrument::parseTreeAndCacheBeamline() {
   if (isParametrized())
     throw std::logic_error(
         "Instrument::parseTreeAndCacheBeamline must be called with the base instrument, not a parametrized instrument");
+  std::lock_guard<std::mutex> const lock{m_beamlineMutex};
   std::tie(m_componentInfo, m_detectorInfo) = InstrumentVisitor::makeWrappers(*this);
 }
 
+/// Drops the cached base beamline after the tree is edited, so that the next attach walks the tree again.
+void Instrument::resetBeamlineCache() {
+  std::lock_guard<std::mutex> const lock{m_beamlineMutex};
+  m_componentInfo = nullptr;
+  m_detectorInfo = nullptr;
+}
+
+/// Returns the cached base beamline, building it if parseTreeAndCacheBeamline() has not, i.e. treats the tree as
+/// finished.
+std::pair<std::shared_ptr<const ComponentInfo>, std::shared_ptr<const DetectorInfo>>
+Instrument::cachedBeamline() const {
+  if (isParametrized())
+    throw std::logic_error("Instrument::cachedBeamline must be called with the base instrument, not a parametrized "
+                           "instrument");
+  std::lock_guard<std::mutex> const lock{m_beamlineMutex};
+  if (!m_componentInfo)
+    std::tie(m_componentInfo, m_detectorInfo) = InstrumentVisitor::makeWrappers(*this);
+  return {m_componentInfo, m_detectorInfo};
+}
+
 /** Return ComponentInfo and DetectorInfo for instrument given by pmap.
  *
- * If suitable ComponentInfo and DetectorInfo are found in this or the
- * (optional) `source` pmap they are simply copied, otherwise the instrument
- * tree is parsed. */
+ * They are cloned from the `source` pmap if it has them, else from the cached base beamline, so that every
+ * ComponentInfo of this instrument shares the same base. Only a map that already holds parameters (a detached map)
+ * needs the tree to be parsed again, since its legacy position parameters have to be applied. */
 std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
 Instrument::makeBeamline(ParameterMap &pmap, const ParameterMap *source) const {
-  // If we have source and it has Beamline objects just copy them
   if (source && source->hasComponentInfo(this)) {
     return makeWrappers(pmap, source->componentInfo(), source->detectorInfo());
   }
-  // If pmap is empty and base instrument has Beamline objects just copy them
-  if (pmap.empty() && m_componentInfo) {
-    return makeWrappers(pmap, *m_componentInfo, *m_detectorInfo);
+  if (pmap.empty()) {
+    auto const [componentInfo, detectorInfo] = cachedBeamline();
+    return makeWrappers(pmap, *componentInfo, *detectorInfo);
   }
-  // pmap not empty and/or no cached Beamline objects found
   return InstrumentVisitor::makeWrappers(*this, &pmap);
 }
 
-/** Return ComponentInfo and DetectorInfo for instrument given by pmap.
- *
- * Force the creation of new ComponentInfo and DetectorInfo for instrument,
- * even if they already exist */
-std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
-Instrument::makeBeamlineNew(ParameterMap &pmap) const {
-  return InstrumentVisitor::makeWrappers(*this, &pmap);
+/// Return ComponentInfo and DetectorInfo for the unparametrized instrument, cloned from the cached base beamline,
+/// with a parameter store of their own.
+std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>> Instrument::makeBaseBeamline() const {
+  auto const [componentInfo, detectorInfo] = cachedBeamline();
+  auto compInfo = componentInfo->cloneWithoutDetectorInfo();
+  auto detInfo = std::make_unique<DetectorInfo>(*detectorInfo);
+  compInfo->m_componentInfo->setDetectorInfo(detInfo->m_detectorInfo.get());
+  compInfo->m_parameterInfo = std::make_shared<ParameterInfo>();
+  detInfo->m_parameterInfo = compInfo->m_parameterInfo;
+  compInfo->m_referenceFrame = getReferenceFrame();
+  detInfo->m_referenceFrame = compInfo->m_referenceFrame;
+  return {std::move(compInfo), std::move(detInfo)};
 }
 
-/// Sets up links between m_detectorInfo and m_componentInfo.
+/// Sets up links between m_detectorInfo, m_componentInfo, and m_instrument.
 std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
 Instrument::makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo,
                          const DetectorInfo &detectorInfo) const {

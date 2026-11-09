@@ -358,6 +358,20 @@ public:
     }
   }
 
+  void test_workspaces_of_one_instrument_share_its_base() {
+    auto const instrument = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    ExperimentInfo first;
+    first.setInstrument(instrument);
+    ExperimentInfo second;
+    second.setInstrument(instrument);
+    ExperimentInfo other;
+    other.setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(1));
+
+    TS_ASSERT(first.componentInfo().hasSameBase(second.componentInfo()));
+    TS_ASSERT(first.componentInfo().hasSameBase(first.baseComponentInfo()));
+    TS_ASSERT(!first.componentInfo().hasSameBase(other.componentInfo()));
+  }
+
   void test_baseComponentInfo_is_unaffected_by_moves_and_rotations() {
     ExperimentInfo expInfo;
     expInfo.setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(1));

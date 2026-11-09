@@ -21,7 +21,6 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Instrument/InstrumentMetadata.h"
-#include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
@@ -917,7 +916,7 @@ ComponentInfo &ExperimentInfo::mutableComponentInfo() {
  *
  * This is the geometry as it was loaded from the instrument definition, before any parameters
  * (e.g. moves or rotations by MoveInstrumentComponent/RotateInstrumentComponent, or calibration)
- * were applied. It is built by walking the base instrument tree on first use, and is invalidated
+ * were applied. It is cloned from the base instrument's cached beamline on first use, and is invalidated
  * by setInstrument(), as is any reference obtained from componentInfo().
  */
 Geometry::ComponentInfo const &ExperimentInfo::baseComponentInfo() const {
@@ -926,7 +925,7 @@ Geometry::ComponentInfo const &ExperimentInfo::baseComponentInfo() const {
   if (!m_baseComponentInfo) {
     // The wrappers refer to sptr_instrument without owning it. That is safe because setInstrument() resets them
     // before replacing sptr_instrument, and they are declared after it, so are destroyed before it.
-    std::tie(m_baseComponentInfo, m_baseDetectorInfo) = InstrumentVisitor::makeWrappers(*sptr_instrument);
+    std::tie(m_baseComponentInfo, m_baseDetectorInfo) = sptr_instrument->makeBaseBeamline();
   }
   return *m_baseComponentInfo;
 }
