@@ -76,10 +76,9 @@ ctest -R 'tools\.python_typing\.' --output-on-failure
 ```
 
 The tests cover generator behavior, stub freshness, and an analyzer smoke check
-for the `ConvertUnits` signature. The PR workflow runs these tests as part of
-its `UnitTest` selection. In the current branch, that smoke test still invokes
-both Pyright and ty; if ty is removed from the development dependencies, update
-the test to require and run Pyright only.
+for the `ConvertUnits` signature that requires Pyright to reject an invalid
+`Target` value. The PR workflow runs these tests as part of its `UnitTest`
+selection.
 
 For an interactive fixture named `check_mantid_types.py` in the configured
 build directory, run:

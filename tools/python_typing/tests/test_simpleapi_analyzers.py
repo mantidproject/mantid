@@ -10,7 +10,7 @@ from pathlib import Path
 
 
 class SimpleAPIAnalyzerSmokeTest(unittest.TestCase):
-    def test_ty_and_pyright_read_convertunits_signature(self):
+    def test_pyright_reads_convertunits_signature(self):
         repo_root = Path(__file__).resolve().parents[3]
         source_root = repo_root / "Framework/PythonInterface"
         build_paths = [path for path in sys.path if Path(path).is_dir() and any(Path(path).glob("_kernel*"))]
@@ -22,28 +22,9 @@ class SimpleAPIAnalyzerSmokeTest(unittest.TestCase):
             fixture = temporary_path / "simpleapi_smoke.py"
             fixture.write_text(fixture_text)
 
-            ty = shutil.which("ty")
             pyright = shutil.which("pyright")
-            self.assertIsNotNone(ty, "ty must be installed in the development environment")
             self.assertIsNotNone(pyright, "Pyright must be installed in the development environment")
 
-            ty_result = subprocess.run(
-                [
-                    ty,
-                    "check",
-                    "--python",
-                    sys.executable,
-                    "--extra-search-path",
-                    str(source_root),
-                    *sum((["--extra-search-path", path] for path in build_paths), []),
-                    "--ignore",
-                    "import-not-found",
-                    str(fixture),
-                ],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
             pyright_config = temporary_path / "pyrightconfig.json"
             pyright_config.write_text(
                 json.dumps(
@@ -64,10 +45,9 @@ class SimpleAPIAnalyzerSmokeTest(unittest.TestCase):
                 check=False,
             )
 
-        for analyzer, result in (("ty", ty_result), ("Pyright", pyright_result)):
-            output = result.stdout + result.stderr
-            self.assertNotEqual(result.returncode, 0, f"{analyzer} accepted an invalid Target value")
-            self.assertIn(marker, output, f"{analyzer} did not report the invalid Target value:\n{output}")
+        output = pyright_result.stdout + pyright_result.stderr
+        self.assertNotEqual(pyright_result.returncode, 0, "Pyright accepted an invalid Target value")
+        self.assertIn(marker, output, f"Pyright did not report the invalid Target value:\n{output}")
 
 
 if __name__ == "__main__":
