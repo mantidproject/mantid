@@ -2519,7 +2519,7 @@ public:
     while (count < 10) {
       // Rotate the bank
       auto &compInfo = m_workspaceSans.mutableComponentInfo();
-      compInfo.setRotation(compInfo.indexOf(m_sansBank->getComponentID()), m_zRotation);
+      compInfo.setRotation(m_sansBank->index(), m_zRotation);
 
       V3D pos;
       for (size_t i = 1; i < m_workspaceSans.getNumberHistograms(); ++i) {
@@ -2544,7 +2544,7 @@ public:
     while (count < 10) {
       // move the bank
       auto &compInfo = m_workspaceSans.mutableComponentInfo();
-      compInfo.setPosition(compInfo.indexOf(m_sansBank->getComponentID()), m_pos);
+      compInfo.setPosition(m_sansBank->index(), m_pos);
 
       V3D pos;
       for (size_t i = 1; i < m_workspaceSans.getNumberHistograms(); ++i) {
@@ -2560,7 +2560,7 @@ public:
     while (count < 10) {
       // Rotate the bank
       auto &compInfo = m_workspaceSans.mutableComponentInfo();
-      compInfo.setRotation(compInfo.indexOf(m_sansBank->getComponentID()), m_zRotation);
+      compInfo.setRotation(m_sansBank->index(), m_zRotation);
 
       V3D pos;
       const auto &spectrumInfo = m_workspaceSans.spectrumInfo();
@@ -2577,7 +2577,7 @@ public:
     while (count < 10) {
       // move the bank
       auto &compInfo = m_workspaceSans.mutableComponentInfo();
-      compInfo.setPosition(compInfo.indexOf(m_sansBank->getComponentID()), m_pos);
+      compInfo.setPosition(m_sansBank->index(), m_pos);
 
       V3D pos;
       const auto &spectrumInfo = m_workspaceSans.spectrumInfo();

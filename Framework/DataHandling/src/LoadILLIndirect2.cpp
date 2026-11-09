@@ -380,7 +380,7 @@ void LoadILLIndirect2::moveComponent(const std::string &componentName, double tw
   newPos.spherical(r, twoTheta, phi);
   g_log.debug() << componentName << " : t = " << theta << " ==> t = " << twoTheta << "\n";
   auto &compInfo = m_localWorkspace->mutableComponentInfo();
-  const auto componentIndex = compInfo.indexOf(component->getComponentID());
+  const auto componentIndex = component->index();
   compInfo.setPosition(componentIndex, newPos);
 }
 

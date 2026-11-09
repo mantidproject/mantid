@@ -115,7 +115,7 @@ void MoveInstrumentComponent::exec() {
   }
 
   auto &componentInfo = inputW ? inputW->mutableComponentInfo() : inputP->mutableComponentInfo();
-  auto compIndex = componentInfo.indexOf(comp->getComponentID());
+  auto compIndex = comp->index();
   if (!moveFixedDetectors && ComponentInfoBankHelpers::isDetectorFixedInBank(componentInfo, compIndex)) {
     // DetectorInfo makes changing positions possible but we keep the old
     // behavior of ignoring position changes for Structured banks.

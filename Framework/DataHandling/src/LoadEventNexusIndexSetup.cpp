@@ -108,7 +108,7 @@ IndexInfo LoadEventNexusIndexSetup::makeIndexInfo(const std::vector<std::string>
     const auto &bank = instrument->getComponentByName(bankName);
     std::vector<size_t> dets;
     if (bank) {
-      const auto bankIndex = componentInfo.indexOf(bank->getComponentID());
+      const auto bankIndex = bank->index();
       dets = componentInfo.detectorsInSubtree(bankIndex);
       for (const auto detIndex : dets) {
         spectrumDefinitions.emplace_back(detIndex);

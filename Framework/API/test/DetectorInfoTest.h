@@ -346,7 +346,7 @@ public:
     TS_ASSERT_EQUALS(detInfo.position(0), V3D(0.0, -0.1, 5.0));
 
     auto &compInfo = m_workspace.mutableComponentInfo();
-    compInfo.setPosition(compInfo.indexOf(root->getComponentID()), oldPos + offset);
+    compInfo.setPosition(root->index(), oldPos + offset);
 
     TS_ASSERT_EQUALS(detInfo.sourcePosition(), V3D(1.0, 0.0, -20.0));
     TS_ASSERT_EQUALS(detInfo.samplePosition(), V3D(1.0, 0.0, 0.0));
@@ -361,7 +361,7 @@ public:
     TS_ASSERT_EQUALS(info.position(0), V3D(1.0, -0.1, 5.0));
 
     // Reset
-    compInfo.setPosition(compInfo.indexOf(root->getComponentID()), oldPos);
+    compInfo.setPosition(root->index(), oldPos);
   }
 
   void test_setRotation_component() {
@@ -373,7 +373,7 @@ public:
     Quat rot(180.0, e2);
 
     auto &compInfo = m_workspace.mutableComponentInfo();
-    compInfo.setRotation(compInfo.indexOf(root->getComponentID()), rot);
+    compInfo.setRotation(root->index(), rot);
 
     // Rotations *and* positions have changed since *parent* was rotated
     TS_ASSERT_EQUALS(detInfo.rotation(0), rot);
@@ -394,7 +394,7 @@ public:
     TS_ASSERT_EQUALS(info.position(0), V3D(0.0, -0.1, -5.0));
 
     // Reset
-    compInfo.setRotation(compInfo.indexOf(root->getComponentID()), oldRot);
+    compInfo.setRotation(root->index(), oldRot);
   }
 
   void test_setRotation_component_moved_root() {
@@ -407,8 +407,8 @@ public:
     Quat rot(180.0, e2);
 
     auto &compInfo = m_workspace.mutableComponentInfo();
-    compInfo.setPosition(compInfo.indexOf(root->getComponentID()), V3D{0.0, 0.0, 1.0});
-    compInfo.setRotation(compInfo.indexOf(root->getComponentID()), rot);
+    compInfo.setPosition(root->index(), V3D{0.0, 0.0, 1.0});
+    compInfo.setRotation(root->index(), rot);
 
     // Rotations *and* positions have changed since *parent* was rotated
     TS_ASSERT_EQUALS(detInfo.rotation(0), rot);
@@ -429,8 +429,8 @@ public:
     TS_ASSERT_EQUALS(info.position(0), V3D(0.0, -0.1, -4.0));
 
     // Reset
-    compInfo.setRotation(compInfo.indexOf(root->getComponentID()), oldRot);
-    compInfo.setPosition(compInfo.indexOf(root->getComponentID()), oldPos);
+    compInfo.setRotation(root->index(), oldRot);
+    compInfo.setPosition(root->index(), oldPos);
   }
 
   void test_setRotation_setPosition_commute() {
@@ -445,7 +445,7 @@ public:
 
     // Note the order: We are going in a (figurative) square...
     auto &compInfo = m_workspace.mutableComponentInfo();
-    const size_t rootIndex = compInfo.indexOf(root->getComponentID());
+    const size_t rootIndex = root->index();
     compInfo.setRotation(rootIndex, rot);
     compInfo.setPosition(rootIndex, pos);
     compInfo.setRotation(rootIndex, oldRot);
@@ -481,8 +481,8 @@ public:
     V3D delta2{1.0, 3.0, 2.0};
 
     auto &compInfo = ws.mutableComponentInfo();
-    const size_t rootIndex = compInfo.indexOf(root->getComponentID());
-    const size_t bankIndex = compInfo.indexOf(bank->getComponentID());
+    const size_t rootIndex = root->index();
+    const size_t bankIndex = bank->index();
     compInfo.setRotation(rootIndex, rot);
     compInfo.setPosition(rootIndex, delta1);
     compInfo.setPosition(bankIndex, delta1 + delta2);
@@ -654,7 +654,7 @@ public:
     const auto &root = instrument->getComponentByName("SimpleFakeInstrument");
 
     auto &compInfo = m_workspace.mutableComponentInfo();
-    compInfo.setPosition(compInfo.indexOf(root->getComponentID()), Kernel::V3D(0.1, 0.0, 0.0));
+    compInfo.setPosition(root->index(), Kernel::V3D(0.1, 0.0, 0.0));
     for (int repeat = 0; repeat < 32; ++repeat) {
       Kernel::V3D result;
       const auto &detectorInfo = m_workspace.detectorInfo();

@@ -870,7 +870,7 @@ public:
     TSM_ASSERT_EQUALS("Instrument should yield entire tree of component indices",
                       compInfo.componentsInSubtree(compInfo.indexOf(instrumentId)).size(), nComponents);
 
-    TS_ASSERT_EQUALS(compInfo.indexOf(inst->getComponentID()), compInfo.parent(compInfo.indexOf(bankId)));
+    TS_ASSERT_EQUALS(inst->index(), compInfo.parent(compInfo.indexOf(bankId)));
   }
 
   void test_readParameterMap_semicolons_in_value() {
@@ -966,7 +966,7 @@ public:
     expt.setInstrument(inst);
 
     const auto &componentInfo = expt.componentInfo();
-    const auto compIndex = componentInfo.indexOf(comp->getComponentID());
+    const auto compIndex = comp->index();
     const auto &logfileParameters = componentInfo.logfileParameters();
     TS_ASSERT_EQUALS(logfileParameters.size(), 1);
     TS_ASSERT_EQUALS(logfileParameters.begin()->first, std::make_pair(compIndex, std::string("a-double")));
@@ -982,7 +982,7 @@ public:
     withParameter.setInstrument(inst);
     ExperimentInfo without;
     without.setInstrument(inst);
-    const auto compIndex = withParameter.componentInfo().indexOf(comp->getComponentID());
+    const auto compIndex = comp->index();
 
     withParameter.mutableComponentInfo().addLogfileParameter(compIndex, "a-double",
                                                              makeLogfileParameter("a-double", "1.5", comp));
@@ -1001,7 +1001,7 @@ public:
     const auto comp = inst->getChild(0).get();
     ExperimentInfo original;
     original.setInstrument(inst);
-    const auto compIndex = original.componentInfo().indexOf(comp->getComponentID());
+    const auto compIndex = comp->index();
     original.mutableComponentInfo().addLogfileParameter(compIndex, "a-double",
                                                         makeLogfileParameter("a-double", "1.5", comp));
 

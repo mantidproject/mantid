@@ -290,11 +290,11 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan) {
     auto &compInfo = instrumentWorkspace->mutableComponentInfo();
 
     Geometry::IComponent_const_sptr detectors = instrument->getComponentByName("detectors");
-    const auto detCompIndex = compInfo.indexOf(detectors->getComponentID());
+    const auto detCompIndex = detectors->index();
     const auto tubes = compInfo.children(detCompIndex);
     const size_t nTubes = tubes.size();
     Geometry::IComponent_const_sptr tube1 = instrument->getComponentByName("tube_1");
-    const auto tube1CompIndex = compInfo.indexOf(tube1->getComponentID());
+    const auto tube1CompIndex = tube1->index();
     const auto pixels = compInfo.children(tube1CompIndex);
     const size_t nPixels = pixels.size();
 
@@ -319,7 +319,7 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan) {
         const double finalAngle = fabs(ref - angle);
         g_log.debug() << "Rotating " << compName << "to " << finalAngle << "rad\n";
         newPos.spherical(r, finalAngle, phi);
-        const auto componentIndex = compInfo.indexOf(component->getComponentID());
+        const auto componentIndex = component->index();
         compInfo.setPosition(componentIndex, newPos);
       }
     }
@@ -340,7 +340,7 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan) {
         }
         g_log.debug() << "Moving " << compName << " to " << y << "\n";
         V3D pos = component->getPos() + translation;
-        const auto componentIndex = compInfo.indexOf(component->getComponentID());
+        const auto componentIndex = component->index();
         compInfo.setPosition(componentIndex, pos);
       }
       m_maxHeight = double(nPixels + 1) * m_pixelHeight / 2 + maxYOffset;
@@ -721,7 +721,7 @@ void LoadILLDiffraction::moveTwoThetaZero(double twoTheta0Read) {
   Quat rotation(twoTheta0Actual, V3D(0, 1, 0));
   g_log.debug() << "Setting 2theta0 to " << twoTheta0Actual;
   auto &componentInfo = m_outWorkspace->mutableComponentInfo();
-  const auto componentIndex = componentInfo.indexOf(component->getComponentID());
+  const auto componentIndex = component->index();
   componentInfo.setRotation(componentIndex, rotation);
 }
 
