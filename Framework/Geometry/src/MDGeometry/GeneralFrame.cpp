@@ -44,13 +44,7 @@ Mantid::Kernel::SpecialCoordinateSystem GeneralFrame::equivalientSpecialCoordina
 bool GeneralFrame::isQ() const { return false; }
 
 bool GeneralFrame::isSameType(const MDFrame &frame) const {
-  auto isSameType = true;
-  try {
-    [[maybe_unused]] const auto &tmp = dynamic_cast<const GeneralFrame &>(frame);
-  } catch (std::bad_cast &) {
-    isSameType = false;
-  }
-  return isSameType;
+  return (dynamic_cast<const GeneralFrame *>(&frame) != nullptr);
 }
 
 } // namespace Mantid::Geometry

@@ -43,14 +43,6 @@ Mantid::Kernel::SpecialCoordinateSystem QLab::equivalientSpecialCoordinateSystem
 
 bool QLab::isQ() const { return true; }
 
-bool QLab::isSameType(const MDFrame &frame) const {
-  auto isSameType = true;
-  try {
-    [[maybe_unused]] const auto &tmp = dynamic_cast<const QLab &>(frame);
-  } catch (std::bad_cast &) {
-    isSameType = false;
-  }
-  return isSameType;
-}
+bool QLab::isSameType(const MDFrame &frame) const { return (dynamic_cast<const QLab *>(&frame) != nullptr); }
 
 } // namespace Mantid::Geometry
