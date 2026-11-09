@@ -70,7 +70,7 @@ long_mode_off_params = {
     ],
     "custom_focused_cropping_values": (1500, 19990),
     "monitor_spline_coefficient": 20,
-    "spline_coefficient": 60,
+    "spline_coefficient": [45] * 9 + [50] * 3 + [20] * 2,
 }
 
 long_mode_on_params = {
