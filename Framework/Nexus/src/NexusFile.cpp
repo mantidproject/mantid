@@ -2,7 +2,6 @@
 #include "MantidNexus/H5Util.h"
 #include "MantidNexus/NexusException.h"
 #include "MantidNexus/hdf5_type_helper.h"
-#include "MantidNexus/inverted_napi.h"
 #include "MantidTypes/Core/DateAndTime.h"
 #include <H5Cpp.h>
 #include <Poco/Logger.h>
