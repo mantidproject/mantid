@@ -37,6 +37,7 @@ class IDetector;
 class InstrumentMetadata;
 class ParameterMap;
 class PositionAndRotationAccumulator;
+class ReferenceFrame;
 class XMLInstrumentParameter;
 } // namespace Geometry
 
@@ -170,6 +171,8 @@ public:
   Geometry::InstrumentMetadata const &instrumentMetadata() const;
 
   std::string getInstrumentName() const;
+
+  std::shared_ptr<Geometry::ReferenceFrame const> getReferenceFrame() const;
 
   void invalidateSpectrumDefinition(const size_t index);
   void updateSpectrumDefinitionIfNecessary(const size_t index) const;

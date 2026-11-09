@@ -153,7 +153,7 @@ void CreateDetectorTable::setup() {
 
   hasDiffConstants = (ws->getEMode() == DeltaEMode::Elastic);
 
-  beamAxisIndex = ws->componentInfo().referenceFrame()->pointingAlongBeam();
+  beamAxisIndex = ws->getReferenceFrame()->pointingAlongBeam();
   sampleDist = ws->getInstrument()->getSample()->getPos()[beamAxisIndex];
 
   if (workspaceIndices.empty()) {

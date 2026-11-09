@@ -92,7 +92,7 @@ void MayersSampleCorrection::exec() {
 
   MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS);
   // Instrument constants
-  const auto frame = inputWS->componentInfo().referenceFrame();
+  const auto frame = inputWS->getReferenceFrame();
 
   // Sample
   const auto &sampleShape = inputWS->sample().getShape();

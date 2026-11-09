@@ -413,7 +413,7 @@ class TestSideBySideShapeRenderer(unittest.TestCase):
         workspace.componentInfo.return_value = comp_info
         workspace.detectorInfo.return_value = det_info
 
-        workspace.componentInfo().referenceFrame().vecPointingAlongBeam.return_value = np.array([0.0, 0.0, 1.0])
+        workspace.getReferenceFrame().vecPointingAlongBeam.return_value = np.array([0.0, 0.0, 1.0])
 
         return workspace
 

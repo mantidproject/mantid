@@ -445,7 +445,7 @@ void VesuvioCalculateGammaBackground::createOutputWorkspaces() {
 
 void VesuvioCalculateGammaBackground::cacheInstrumentGeometry() {
   auto inst = m_inputWS->getInstrument();
-  const auto &componentInfo = m_inputWS->componentInfo();
+  auto const &componentInfo = m_inputWS->componentInfo();
   auto refFrame = componentInfo.referenceFrame();
   auto upAxis = refFrame->pointingUp();
   m_samplePos = componentInfo.samplePosition();

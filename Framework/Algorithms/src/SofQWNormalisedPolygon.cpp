@@ -475,7 +475,7 @@ void SofQWNormalisedPolygon::initAngularCachesNonPSD(const MatrixWorkspace &work
   m_twoThetaLowers = std::vector<double>(nhist, skipDetector);
   m_twoThetaUppers = std::vector<double>(nhist, skipDetector);
 
-  const auto referenceFrame = workspace.componentInfo().referenceFrame();
+  const auto referenceFrame = workspace.getReferenceFrame();
   const auto beamDir = referenceFrame->vecPointingAlongBeam();
 
   const auto &detectorInfo = workspace.detectorInfo();

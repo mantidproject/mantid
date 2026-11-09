@@ -14,6 +14,7 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/InstrumentMetadata.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument_fwd.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Objects/ShapeRotation.h"
@@ -187,6 +188,8 @@ void export_ExperimentInfo() {
            "Return the axis the instrument view is wrapped around by default.")
       .def("getInstrumentName", &ExperimentInfo::getInstrumentName, args("self"),
            "Return the name of the instrument for this experiment.")
+      .def("getReferenceFrame", &ExperimentInfo::getReferenceFrame, args("self"),
+           "Return the reference frame of the instrument for this experiment.")
       .def("setSample", setSample, args("self", "sample"))
       .def("setRun", setRun, args("self", "run"))
       .def("populateInstrumentParameters", &ExperimentInfo::populateInstrumentParameters, (arg("self")),

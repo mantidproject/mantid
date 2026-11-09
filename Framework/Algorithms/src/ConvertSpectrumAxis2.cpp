@@ -171,7 +171,7 @@ void ConvertSpectrumAxis2::createThetaMap(API::Progress &progress, const std::st
  */
 double ConvertSpectrumAxis2::inPlaneTwoTheta(const size_t index, const API::MatrixWorkspace_sptr &inputWS) const {
   const auto spectrumInfo = inputWS->spectrumInfo();
-  const auto refFrame = inputWS->componentInfo().referenceFrame();
+  const auto refFrame = inputWS->getReferenceFrame();
   const V3D position = spectrumInfo.position(index) - spectrumInfo.samplePosition();
 
   double angle =
@@ -188,7 +188,7 @@ double ConvertSpectrumAxis2::inPlaneTwoTheta(const size_t index, const API::Matr
  */
 double ConvertSpectrumAxis2::signedInPlaneTwoTheta(const size_t index, const API::MatrixWorkspace_sptr &inputWS) const {
   const auto spectrumInfo = inputWS->spectrumInfo();
-  const auto refFrame = inputWS->componentInfo().referenceFrame();
+  const auto refFrame = inputWS->getReferenceFrame();
 
   const auto samplePos = spectrumInfo.samplePosition();
   const auto beamLine = samplePos - spectrumInfo.sourcePosition();

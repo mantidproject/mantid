@@ -624,7 +624,7 @@ const Geometry::SampleEnvironment *
 SetSample::setSampleEnvironmentFromXML(API::ExperimentInfo &exptInfo,
                                        const Kernel::PropertyManager_const_sptr &canGeomArgs,
                                        const Kernel::PropertyManager_const_sptr &canMaterialArgs) {
-  const auto refFrame = exptInfo.componentInfo().referenceFrame();
+  const auto refFrame = exptInfo.getReferenceFrame();
   const auto xml = tryCreateXMLFromArgsOnly(*canGeomArgs, *refFrame);
   if (!xml.empty()) {
     ShapeFactory sFactory;
@@ -729,7 +729,7 @@ void SetSample::setSampleShape(API::ExperimentInfo &experiment, const Kernel::Pr
 
   // Try known shapes or CSG first if supplied
   if (isDictionaryPopulated(args)) {
-    const auto refFrame = experiment.componentInfo().referenceFrame();
+    const auto refFrame = experiment.getReferenceFrame();
     auto xml = tryCreateXMLFromArgsOnly(*args, *refFrame);
     if (!xml.empty()) {
       Kernel::Matrix<double> rotationMatrix = experiment.run().getGoniometer().getR();

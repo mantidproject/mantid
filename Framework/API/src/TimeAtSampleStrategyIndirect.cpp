@@ -28,7 +28,7 @@ namespace Mantid::API {
  */
 TimeAtSampleStrategyIndirect::TimeAtSampleStrategyIndirect(MatrixWorkspace_const_sptr ws)
     : m_spectrumInfo(ws->spectrumInfo()), m_L1s(m_spectrumInfo.l1()),
-      m_beamDir(ws->componentInfo().referenceFrame()->vecPointingAlongBeam()), m_componentInfo(ws->componentInfo()),
+      m_beamDir(ws->getReferenceFrame()->vecPointingAlongBeam()), m_componentInfo(ws->componentInfo()),
       m_detectorInfo(ws->detectorInfo()) {}
 
 /**

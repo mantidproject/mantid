@@ -109,7 +109,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_workspace.getXMinMax.side_effect = get_x_min_max
         mock_workspace.getIntegratedCountsForWorkspaceIndices.return_value = [100 * i for i in detector_ids]
         mock_workspace.clone.return_value = mock_workspace
-        mock_workspace.componentInfo().referenceFrame().vecPointingAlongBeam.return_value = [0, 0, 1]
+        mock_workspace.getReferenceFrame().vecPointingAlongBeam.return_value = [0, 0, 1]
         return mock_workspace
 
     def _setup_model(

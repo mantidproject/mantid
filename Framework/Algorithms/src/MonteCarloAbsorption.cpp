@@ -422,7 +422,7 @@ MatrixWorkspace_uptr MonteCarloAbsorption::createOutputWorkspace(const MatrixWor
 void MonteCarloAbsorption::interpolateFromSparse(MatrixWorkspace &targetWS, const SparseWorkspace &sparseWS,
                                                  const Mantid::Algorithms::InterpolationOption &interpOpt) {
   const auto &spectrumInfo = targetWS.spectrumInfo();
-  const auto refFrame = targetWS.componentInfo().referenceFrame();
+  const auto refFrame = targetWS.getReferenceFrame();
   PARALLEL_FOR_IF(Kernel::threadSafe(targetWS, sparseWS))
   for (int64_t i = 0; i < static_cast<decltype(i)>(spectrumInfo.size()); ++i) {
     PARALLEL_START_INTERRUPT_REGION

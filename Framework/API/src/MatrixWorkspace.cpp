@@ -938,7 +938,7 @@ double MatrixWorkspace::detectorSignedTwoTheta(const Geometry::IDetector &det) c
     throw Kernel::Exception::InstrumentDefinitionError("Source and sample are at same position!");
   }
   // Get the instrument up axis.
-  V3D const &thetaSignAxis = componentInfo().referenceFrame()->vecThetaSign();
+  V3D const &thetaSignAxis = getReferenceFrame()->vecThetaSign();
   return det.getSignedTwoTheta(samplePos, beamLine, thetaSignAxis);
 }
 
