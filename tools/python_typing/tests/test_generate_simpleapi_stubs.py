@@ -170,6 +170,43 @@ class GenerateSimpleAPIStubsTest(unittest.TestCase):
         self.assertTrue(stub.endswith("-> MatrixWorkspace: ..."))
         self.assertEqual(generator._used_array_aliases, {"_Float1DArray"})
 
+    def test_compiler_specific_type_names_produce_identical_stubs(self):
+        # typeid names for std::vector<unsigned int>, unsigned int and size_t on each platform, plus the
+        # Python class size_t is exported as (unsigned long, or unsigned long long on Windows)
+        platform_type_names = {
+            "libstdc++": ("St6vectorIjSaIjEE", "j", "m", "ULongPropertyWithValue"),
+            "libc++": ("NSt3__16vectorIjNS_9allocatorIjEEEE", "j", "m", "ULongPropertyWithValue"),
+            "msvc": (
+                "class std::vector<unsigned int,class std::allocator<unsigned int> >",
+                "unsigned int",
+                "unsigned __int64",
+                "ULongLongPropertyWithValue",
+            ),
+        }
+        stubs = {}
+        for platform, (vector_type, uint_type, size_type, size_class) in platform_type_names.items():
+            generator._unsupported_property_types.clear()
+            algorithm = _PropertyAlgorithm(
+                {
+                    "Indices": _property("Indices", vector_type, valid="Required", class_name="UInt32ArrayProperty"),
+                    "Count": _property("Count", uint_type, class_name="UIntPropertyWithValue"),
+                    "Size": _property("Size", size_type, class_name=size_class),
+                },
+                inputs=["Indices", "Count", "Size"],
+                outputs=[],
+            )
+            modules = _mantid_modules()
+            modules["mantid.api"].AlgorithmManager = types.SimpleNamespace(createUnmanaged=lambda _name, _version: algorithm)
+            with patch.dict(sys.modules, modules):
+                _, stubs[platform] = generator._stub_for_algorithm("UnsignedProperties", 1)
+            self.assertEqual(generator._unsupported_property_types, set(), msg=platform)
+
+        self.assertIn("Indices: _Int1DArray | int | str,", stubs["libstdc++"])
+        self.assertIn("Count: int | str | None = ...", stubs["libstdc++"])
+        self.assertIn("Size: int | str | None = ...", stubs["libstdc++"])
+        self.assertEqual(stubs["libc++"], stubs["libstdc++"])
+        self.assertEqual(stubs["msvc"], stubs["libstdc++"])
+
     def test_file_property_extensions_are_not_emitted_as_literals(self):
         filename = _property("Filename", "string", valid="Required", allowed=(".nxs.h5", ".nxs", "_event.nxs"), class_name="FileProperty")
         algorithm = _PropertyAlgorithm(

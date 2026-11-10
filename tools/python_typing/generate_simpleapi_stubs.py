@@ -4,7 +4,9 @@
 from __future__ import annotations
 
 import argparse
+import difflib
 import importlib
+import itertools
 import keyword
 import shutil
 import subprocess
@@ -24,13 +26,25 @@ _ARRAY_ALIASES = {
     "int list": ("_Int1DArray", "int"),
     "long list": ("_Int1DArray", "int"),
     "unsigned int list": ("_Int1DArray", "int"),
-    "St6vectorIjSaIjEE": ("_Int1DArray", "int"),
     "str list": ("_Str1DArray", None),
 }
 _ARRAY_ALIAS_DEFINITIONS = {
     "_Float1DArray": "Sequence[float] | numpy.ndarray",
     "_Int1DArray": "Sequence[int] | numpy.ndarray",
     "_Str1DArray": "Sequence[str]",
+}
+# Property::type() falls back to the compiler-specific typeid name for unsigned
+# types, so identify those by the Python class the bindings export them as
+# (mantid/kernel/src/Exports/PropertyWithValue.cpp and ArrayProperty.cpp),
+# which is the same everywhere.
+_UNNAMED_PROPERTY_CLASS_TYPES = {
+    "UIntPropertyWithValue": "number",
+    "ULongPropertyWithValue": "number",
+    "ULongLongPropertyWithValue": "number",
+    "UInt32ArrayProperty": "unsigned int list",
+    "VectorUIntPropertyWithValue": "unsigned int list",
+    "VectorULongPropertyWithValue": "unsigned int list",
+    "VectorULongLongPropertyWithValue": "unsigned int list",
 }
 _MAX_OPTIONAL_OUTPUT_VARIANTS = 3
 _FITTING_ALGORITHMS = {
@@ -44,10 +58,15 @@ _FITTING_ALGORITHMS = {
 _CUSTOM_ALGORITHMS = {"Load", "StartLiveData", "CutMD", "RenameWorkspace"}
 
 
+def _property_type(prop) -> str:
+    """Return a compiler-independent name for the property's value type."""
+    return _UNNAMED_PROPERTY_CLASS_TYPES.get(type(prop).__name__, prop.type)
+
+
 def _type_for(prop) -> str:
     """Map Mantid property metadata to a conservative Python type."""
     global _used_function_types
-    prop_type = prop.type
+    prop_type = _property_type(prop)
     prop_class = type(prop).__name__
 
     if "Workspace" in prop_type or prop_class.endswith("WorkspaceProperty"):
@@ -72,8 +91,8 @@ def _type_for(prop) -> str:
         if allowed and len(allowed) <= 30:
             return f"Literal[{', '.join(repr(value) for value in allowed)}]"
         return "str"
-    if prop_type == "number" or prop_type in {"j", "m"}:
-        if prop_class.startswith(("Int", "Long", "UInt", "ULong")) or prop_type in {"j", "m"}:
+    if prop_type == "number":
+        if prop_class.startswith(("Int", "Long", "UInt", "ULong")):
             return "int"
         return "float"
     if prop_type == "boolean":
@@ -83,8 +102,6 @@ def _type_for(prop) -> str:
     if prop_type in {"dbl list", "int list", "long list", "unsigned int list"}:
         item_type = "float" if prop_type == "dbl list" else "int"
         return f"list[{item_type}]"
-    if prop_type == "St6vectorIjSaIjEE":
-        return "list[int]"
     if prop_type == "Dictionary":
         return "dict[str, Any]"
     if prop_type == "optional boolean":
@@ -101,8 +118,9 @@ def _parameter_type_for(prop) -> str:
     bare scalar becomes a one-element array (see SequenceTypeHandler::set).
     """
     annotation = _type_for(prop)
-    if annotation.startswith("list[") and prop.type in _ARRAY_ALIASES:
-        alias, scalar = _ARRAY_ALIASES[prop.type]
+    prop_type = _property_type(prop)
+    if annotation.startswith("list[") and prop_type in _ARRAY_ALIASES:
+        alias, scalar = _ARRAY_ALIASES[prop_type]
         _used_array_aliases.add(alias)
         return f"{alias} | {scalar} | str" if scalar else f"{alias} | str"
     if annotation == "list[list[str]]":
@@ -554,6 +572,10 @@ def main() -> int:
         current = args.output.read_text() if args.output.exists() else ""
         if current != contents:
             print(f"Stubs are stale: {args.output}", file=sys.stderr)
+            diff = difflib.unified_diff(
+                current.splitlines(keepends=True), contents.splitlines(keepends=True), "committed", "generated", n=1
+            )
+            sys.stderr.writelines(itertools.islice(diff, 200))
             return 1
         return 0
 

@@ -7,7 +7,7 @@
 """Test the exposed ArrayProperty"""
 
 import unittest
-from mantid.kernel import FloatArrayProperty, StringArrayProperty, IntArrayProperty, Direction, NullValidator
+from mantid.kernel import FloatArrayProperty, StringArrayProperty, IntArrayProperty, UInt32ArrayProperty, Direction, NullValidator
 from mantid.api import PythonAlgorithm
 import numpy as np
 
@@ -155,6 +155,13 @@ class ArrayPropertyTest(unittest.TestCase):
         self.assertEqual(float_arr.dtype(), "f")
         self.assertEqual(int_arr.dtype(), "i")
         self.assertEqual(str_arr.dtype(), "S1")
+
+    def test_uint32_array_property_holds_unsigned_int_values(self):
+        arr = UInt32ArrayProperty("indices", [1, 2, 5], NullValidator(), Direction.Input)
+        self._check_object_attributes(arr, "indices", Direction.Input, length=3)
+        self.assertEqual(arr.dtype(), "I")
+        self.assertEqual(arr.value.dtype, np.uint32)
+        np.testing.assert_array_equal(arr.value, [1, 2, 5])
 
     def test_construct_numpy_array_with_given_dtype_float(self):
         # Set up
