@@ -347,18 +347,8 @@ std::string ShapeFactory::parseSphere(Poco::XML::Element *pElem, std::map<int, s
   Element *pElemCentre = getOptionalShapeElement(pElem, "centre");
   Element *pElemRadius = getShapeElement(pElem, "radius");
   const double radius = getDoubleAttribute(pElemRadius, "val");
-  V3D centre = pElemCentre ? parsePosition(pElemCentre) : DEFAULT_CENTRE;
-
-  // Only rotate the normal vector by the rotate-all and goniometer tags
-  // Special case: do not obey rotate tag as rotation around the centre of sphere is unneccessary
-  if (m_rotateAllMatrix != Kernel::Matrix<double>(3, 3, true)) {
-    // Apply automatic rotation due to the rotate-all tag
-    centre.rotate(m_rotateAllMatrix);
-  }
-  if (m_gonioRotateMatrix != Kernel::Matrix<double>(3, 3, true)) {
-    // Apply automatic rotation due to the goniometer that should NOT be manually defined by the user
-    centre.rotate(m_gonioRotateMatrix);
-  }
+  // <rotate> cannot move a sphere, so it is not read
+  const V3D centre = rotateWithWholeShape(pElemCentre ? parsePosition(pElemCentre) : DEFAULT_CENTRE);
 
   prim[l_id] = std::make_shared<Sphere>(centre, radius);
   const auto algebra = sphereAlgebra(l_id);
@@ -831,6 +821,9 @@ std::string ShapeFactory::parseCone(Poco::XML::Element *pElem, std::map<int, std
   // getDoubleAttribute can throw - put the calls above any new
   const double angle = getDoubleAttribute(pElemAngle, "val");
   const double height = getDoubleAttribute(pElemHeight, "val");
+  if (height < 0.0) {
+    throw std::runtime_error("ShapeFactory::parseCone(): height < 0.0");
+  }
 
   // Rotate the tip and the axis exactly as createGeometryHandler rotates the ShapeInfo it builds from
   // the same XML, so the surfaces and the metadata cannot describe the cone in two different places
@@ -1476,7 +1469,7 @@ std::shared_ptr<CSGObject> ShapeFactory::createHexahedralShape(double xlb, doubl
  *
  * @return the rotated centre and axis
  */
-std::pair<V3D, V3D> ShapeFactory::applyShapeRotations(Poco::XML::Element *pElem, V3D centre, V3D axis) {
+std::pair<V3D, V3D> ShapeFactory::applyShapeRotations(Poco::XML::Element *pElem, V3D centre, V3D axis) const {
   if (Element *pElemRotate = getOptionalShapeElement(pElem, "rotate")) {
     const std::vector<double> rotateAngles = DegreesToRadians(parsePosition(pElemRotate));
     axis.rotate(generateMatrix(rotateAngles[0], rotateAngles[1], rotateAngles[2]));
@@ -1504,7 +1497,7 @@ V3D ShapeFactory::rotateWithWholeShape(V3D vector) const {
  * @return the rotated base and axis
  */
 std::pair<V3D, V3D> ShapeFactory::rotatedCylinderBase(Poco::XML::Element *pElem, const V3D &base, const V3D &axis,
-                                                      const double height) {
+                                                      const double height) const {
   const auto [midpoint, normVec] = applyShapeRotations(pElem, base + axis * (0.5 * height), axis);
   return {midpoint - normVec * (0.5 * height), normVec};
 }

@@ -537,6 +537,15 @@ public:
     TS_ASSERT(shape_sptr->isValid(V3D(0.01, 0.01, -1)));
   }
 
+  void testConeWithNegativeHeight() {
+    const std::string xmlShape =
+        "<cone id=\"shape\"><tip-point x=\"0\" y=\"0\" z=\"0\"/><axis x=\"0\" y=\"0\" z=\"1\"/>"
+        "<angle val=\"8.1\"/><height val=\"-1\"/></cone><algebra val=\"shape\"/> ";
+    auto shape_sptr = getObject(xmlShape);
+    TS_ASSERT(shape_sptr);
+    TS_ASSERT(!shape_sptr->hasValidShape());
+  }
+
   void testConeUseDirectStringArgument() {
     // algebra line is essential
     std::string xmlShape = "<cone id=\"shape\"> ";
