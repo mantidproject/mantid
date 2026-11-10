@@ -73,7 +73,7 @@ void CompositeValidator::add(const Kernel::IValidator_sptr &child) { m_children.
  *  @param value :: The workspace to test
  *  @return A user level description of the first problem it finds otherwise ""
  */
-std::string CompositeValidator::check(const std::any &value) const {
+std::string CompositeValidator::check(const boost::any &value) const {
   switch (m_relation) {
   case CompositeRelation::AND:
     return checkAll(value);
@@ -84,7 +84,7 @@ std::string CompositeValidator::check(const std::any &value) const {
   }
 }
 
-std::string CompositeValidator::checkAll(const std::any &value) const {
+std::string CompositeValidator::checkAll(const boost::any &value) const {
   for (const auto &validator : m_children) {
     const auto error = validator->check(value);
     // exit on the first error, to avoid passing doing more tests on invalid
@@ -96,7 +96,7 @@ std::string CompositeValidator::checkAll(const std::any &value) const {
   return "";
 }
 
-std::string CompositeValidator::checkAny(const std::any &value) const {
+std::string CompositeValidator::checkAny(const boost::any &value) const {
   std::stringstream errorStream;
 
   // Lambda to check if a validator is valid. If it is not valid then

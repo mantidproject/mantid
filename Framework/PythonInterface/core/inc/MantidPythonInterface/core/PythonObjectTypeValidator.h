@@ -52,7 +52,7 @@ public:
 private:
   object pythonClass;
 
-  std::string check(std::any const &value) const override;
+  std::string check(boost::any const &value) const override;
 };
 
 } // namespace Mantid::PythonInterface

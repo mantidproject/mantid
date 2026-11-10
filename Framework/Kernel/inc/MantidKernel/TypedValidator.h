@@ -18,7 +18,7 @@ namespace Mantid {
 namespace Kernel {
 /**
 TypedValidator provides an layer on top of IValidator to ensure
-that the template TYPE is extract from the std::any instance
+that the template TYPE is extract from the boost::any instance
 and passed down to the concrete validator instance. Most validators
 will probably want to inherit from this rather than IValidator
 directly.
@@ -49,11 +49,11 @@ private:
    *  @returns An error message to display to users or an empty string on no
    * error
    */
-  std::string check(const std::any &value) const override {
+  std::string check(const boost::any &value) const override {
     try {
-      const HeldType *dataPtr = std::any_cast<const HeldType *>(value);
+      const HeldType *dataPtr = boost::any_cast<const HeldType *>(value);
       return checkValidity(*dataPtr);
-    } catch (std::bad_any_cast &) {
+    } catch (boost::bad_any_cast &) {
       return "Value was not of expected type.";
     }
   }
@@ -67,11 +67,11 @@ template <typename HeldType> TypedValidator<HeldType> &TypedValidator<HeldType>:
 
 /**
  * Specialization for std::shared_ptr<T> types.
- * std::any_cast cannot convert between types, the type extracted must match
+ * boost::any_cast cannot convert between types, the type extracted must match
  * the
  * the stored type. In our case IValidator ensures that all items that inherit
  * from
- * DataItem are stored as a DataItem_sptr within the std::any instance. Once
+ * DataItem are stored as a DataItem_sptr within the boost::any instance. Once
  * extracted
  * the DataItem can then be downcast to the Validator::TYPE.
  * The advantage of this is that Validator types then don't have to match
@@ -99,7 +99,7 @@ private:
    * @returns An error message to display to users or an empty string on no
    * error
    */
-  std::string check(const std::any &value) const override {
+  std::string check(const boost::any &value) const override {
     try {
       const ElementType_sptr typedValue = extractValue(value);
       return checkValidity(typedValue);
@@ -112,7 +112,7 @@ private:
    * @param value :: The value
    * @returns The concrete type
    */
-  ElementType_sptr extractValue(const std::any &value) const {
+  ElementType_sptr extractValue(const boost::any &value) const {
 // Despite the name and hash code being identical, operator== is returning false
 // in Release mode
 // with clang and libc++. The simplest workaround is to compare hash codes.
@@ -132,8 +132,8 @@ private:
    * @param value :: The value
    * @returns The concrete type
    */
-  ElementType_sptr extractFromDataItem(const std::any &value) const {
-    const DataItem_sptr data = std::any_cast<DataItem_sptr>(value);
+  ElementType_sptr extractFromDataItem(const boost::any &value) const {
+    const DataItem_sptr data = boost::any_cast<DataItem_sptr>(value);
     // First try and push it up to the type of the validator
     ElementType_sptr typedValue = std::dynamic_pointer_cast<ElementType>(data);
     if (!typedValue) {
@@ -146,10 +146,10 @@ private:
    * @param value :: The value
    * @returns The concrete type
    */
-  ElementType_sptr extractFromSharedPtr(const std::any &value) const {
+  ElementType_sptr extractFromSharedPtr(const boost::any &value) const {
     try {
-      return std::any_cast<ElementType_sptr>(value);
-    } catch (std::bad_any_cast &) {
+      return boost::any_cast<ElementType_sptr>(value);
+    } catch (boost::bad_any_cast &) {
       throw std::invalid_argument("Value was not a shared_ptr type");
     }
   }

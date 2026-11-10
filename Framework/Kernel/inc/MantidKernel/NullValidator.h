@@ -22,7 +22,7 @@ public:
   IValidator_sptr clone() const override;
 
 private:
-  std::string check(const std::any &) const override;
+  std::string check(const boost::any &) const override;
 };
 
 } // namespace Kernel
