@@ -83,19 +83,49 @@ so Python code reaches named parameters through the access layer rather than the
 InstrumentMetadata
 __________________
 
-``InstrumentMetadata`` holds the information that describes the instrument as a whole rather than any one component:
+``Geometry::InstrumentMetadata`` holds the information that belongs to the instrument as a whole rather than to any one component,
+so it does not fit the index-based layers:
 
 * the dates the instrument definition is valid from and to,
 * the name of the instrument definition file and its XML text,
 * the default view and view axis for the :ref:`instrument viewer <InstrumentViewer>`, and
 * for indirect geometry instruments, the separate physical instrument, if the definition has one.
 
-It is created when the instrument is loaded and is shared by workspaces that share the instrument.
-In C++ it is obtained from ``ExperimentInfo::instrumentMetadata()``, e.g.
-``ws->instrumentMetadata().validFromDate()`` replaces ``ws->getInstrument()->getValidFromDate()``.
-In Python the values are available directly on the workspace or ``ExperimentInfo``, see the table in `What to use instead`_.
+``ParameterMap::buildInstrumentMetadata`` creates it from the legacy instrument when the instrument is set on a workspace,
+and ``ExperimentInfo`` shares ownership of it in the same way as the ``ComponentInfo`` and ``DetectorInfo``.
+Copies of a workspace share the same ``InstrumentMetadata`` rather than rebuilding it.
+Use ``ExperimentInfo::instrumentMetadata()`` instead of the matching ``Instrument`` methods:
 
-The physical instrument is still a legacy ``Instrument`` object.
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - Legacy ``Instrument`` method
+     - Replacement
+   * - ``getValidFromDate()`` / ``getValidToDate()``
+     - ``instrumentMetadata().validFromDate()`` / ``validToDate()``
+   * - ``getFilename()`` / ``getXmlText()``
+     - ``instrumentMetadata().filename()`` / ``xmlText()``
+   * - ``getDefaultView()`` / ``getDefaultAxis()``
+     - ``instrumentMetadata().defaultView()`` / ``defaultAxis()``
+   * - ``getPhysicalInstrument()``
+     - ``instrumentMetadata().hasPhysicalInstrument()``, then ``physicalComponentInfo()`` / ``physicalDetectorInfo()``
+
+The physical instrument is held as its own ``ComponentInfo`` and ``DetectorInfo``, built without the workspace's parameters,
+because those are keyed by the components of the neutronic instrument.
+``physicalComponentInfo()`` and ``physicalDetectorInfo()`` throw if the definition has no physical instrument,
+so check ``hasPhysicalInstrument()`` first.
+
+``InstrumentMetadata`` has setters for the values that can change after the instrument is loaded:
+``setFileName()``, ``setXmlText()``, ``setDefaultView()`` and ``setDefaultViewAxis()``.
+The validity dates and the physical instrument have no setters and are fixed when the ``InstrumentMetadata`` is created.
+``ExperimentInfo::instrumentMetadata()`` gives read-only access, so the setters cannot be called on a workspace's metadata.
+This matters because copies of a workspace share one ``InstrumentMetadata``.
+
+Python does not expose the ``InstrumentMetadata`` object itself.
+Instead ``ExperimentInfo``, and so every workspace, has ``instrumentValidFromDate()``, ``instrumentValidToDate()``,
+``instrumentFilename()``, ``instrumentXmlText()``, ``instrumentDefaultView()`` and ``instrumentDefaultAxis()``;
+see the table in `What to use instead`_.
 
 Changes for Rollout
 -------------------
