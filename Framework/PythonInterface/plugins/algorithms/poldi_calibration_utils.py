@@ -18,16 +18,22 @@ the timing offset. The geometry enters only through c_i and theta_i."""
 from __future__ import annotations
 
 import copy
-from collections.abc import Callable, Sequence
+from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
 import numpy as np
 from scipy.special import erf
 
-from mantid.kernel import Quat, V3D
-from plugins.algorithms.calibration_utils import NormalEquationSums, _angle_axis, project_out, rot_y, scale_bg
-from plugins.algorithms.component_info_utils import resolve_component_index
-from plugins.algorithms.diffraction_utils import get_live_spectra, get_tths_and_l2s
+from plugins.algorithms.calibration_utils import (
+    BankGeometry,
+    NormalEquationSums,
+    RigidBanks,
+    ScaleBackgroundFit,
+    WeightedCounts,
+    project_out,
+    weighted_residuals,
+)
+from plugins.algorithms.diffraction_utils import get_tths_and_l2s
 from plugins.algorithms.poldi_utils import _get_flux_arrays, get_instrument_settings_from_log, get_t0_parameters, get_tof_d1Ang
 
 if TYPE_CHECKING:
@@ -37,150 +43,26 @@ CHOPPER = "chopper"
 LAMBDA_RANGE = (1.0, 5.99)  # Angstrom, inside the IDF's WavelengthDistribution table (0.986 - 5.994)
 
 
-class PixelGeometry:
-    """Pixel positions in the frame of their bank, so bank and block moves can be applied in numpy.
-
-    Pixels outside `bank_names` keep their starting position and DIFC. c_i is the starting Mantid value scaled by the geometric factor
-    g = (L_cs + L2) sin(theta), so the absolute constant is always Mantid's."""
+class PixelGeometry(BankGeometry):
+    """BankGeometry with POLDI's chopper slits and incident flux, and a DIFC covering the chopper-detector path."""
 
     def __init__(self, ws: MatrixWorkspace, bank_names: Sequence[str]):
-        comp_info, spec_info, det_info = ws.componentInfo(), ws.spectrumInfo(), ws.detectorInfo()
-        self.live_spectra = get_live_spectra(ws)
-        _, l2s = get_tths_and_l2s(ws, self.live_spectra)
         cycle_time, slit_offsets, _, l1_chop = get_instrument_settings_from_log(ws)
+        super().__init__(ws, bank_names, ws.spectrumInfo().l1() - l1_chop)
+        comp_info = ws.componentInfo()
         t0 = get_t0_parameters(comp_info, comp_info.indexOfAny(CHOPPER))[0]
         self.slit_cycle_fractions = slit_offsets / cycle_time - t0  # slit positions as a fraction of the cycle
-        self.chopper_sample_distance = spec_info.l1() - l1_chop
-        self.initial_difc = get_tof_d1Ang(ws, l2s, l1_chop, self.live_spectra)
+        self.initial_difc = get_tof_d1Ang(ws, get_tths_and_l2s(ws, self.live_spectra)[1], l1_chop, self.live_spectra)
         self.flux_wavelengths, self.flux = _get_flux_arrays(ws, *LAMBDA_RANGE, n_points=500)
         self.flux_slopes = np.diff(self.flux) / np.diff(self.flux_wavelengths)  # dflux/dlambda on each table segment
-        self.sample_position = np.array(comp_info.samplePosition())
-        beam = self.sample_position - np.array(comp_info.sourcePosition())
-        self.beam_direction = beam / np.linalg.norm(beam)
-        self.bank_names = list(bank_names)
-        self.detector_indices = np.array([det_info.indexOf(ws.getSpectrum(i).getDetectorIDs()[0]) for i in range(ws.getNumberHistograms())])
-        bank_idx = [resolve_component_index(bank, comp_info) for bank in self.bank_names]
-        self.bank_of_spectrum = np.full(self.detector_indices.size, -1)
-        for ib, b in enumerate(bank_idx):
-            self.bank_of_spectrum[np.isin(self.detector_indices, comp_info.detectorsInSubtree(b))] = ib
-        # banks are rotated about Y only, so (x, z, roty) with y fixed describes them
-        self.bank_y_positions = np.array([comp_info.position(b)[1] for b in bank_idx])
-        self.initial_bank_params = np.concatenate(
-            [[comp_info.position(b)[0], comp_info.position(b)[2], comp_info.rotation(b).getEulerAngles("YZX")[0]] for b in bank_idx]
-        )
-        self.initial_positions = np.array([comp_info.position(int(d)) for d in self.detector_indices])
-        self.positions_in_bank = np.zeros_like(self.initial_positions)
-        for ib, b in enumerate(bank_idx):
-            sel = self.bank_of_spectrum == ib
-            rel = self.initial_positions[sel] - np.array(comp_info.position(b))
-            self.positions_in_bank[sel] = rel @ rot_y(self.initial_bank_params[3 * ib + 2])  # R^T rel, row-wise
-        # detector blocks (modules) holding live pixels of the refined banks, as each such pixel's parent component.
-        # The data cannot constrain a block with no live pixel, so it is not refined
-        live_in_bank = self.live_spectra & (self.bank_of_spectrum >= 0)
-        parents = [comp_info.parent(int(d)) if live else -1 for d, live in zip(self.detector_indices, live_in_bank)]
-        block_idx = sorted({p for p in parents if p >= 0})
-        self.block_of_spectrum = np.array([block_idx.index(p) if p >= 0 else -1 for p in parents])
-        self.block_names = [comp_info.fullName(b).partition("/")[2] for b in block_idx]  # path below the instrument root
-        self.bank_of_block = [int(self.bank_of_spectrum[self.block_of_spectrum == m][0]) for m in range(len(block_idx))]
-        # in the bank frame; the block component's own position, which is what RotateInstrumentComponent rotates about
-        self.block_centres = np.array(
-            [
-                (np.array(comp_info.position(b)) - comp_info.position(bank_idx[ib])) @ rot_y(self.initial_bank_params[3 * ib + 2])
-                for b, ib in zip(block_idx, self.bank_of_block)
-            ]
-        )
-        # (angle, axis) of each block's fixed rotation within its bank, so apply_geometry can set block rotations absolutely
-        self.block_rotations_in_bank = [
-            _angle_axis(Quat(-self.initial_bank_params[3 * ib + 2], V3D(0, 1, 0)) * comp_info.rotation(b))
-            for b, ib in zip(block_idx, self.bank_of_block)
-        ]
-        self.initial_geometric_factor = self._geometric_factor_and_sin_theta(self.pixel_positions(self.initial_bank_params))[0]
-
-    def pixel_positions(self, bank_params: np.ndarray[float], block_params: np.ndarray[float] | None = None) -> np.ndarray[float]:
-        """Absolute pixel positions after bank moves (x, z, roty per bank) and optional block moves (shift along the
-        bank normal, tilt about the vertical through the block centre)."""
-        local = self.positions_in_bank if block_params is None else self._positions_in_bank_after_block_moves(block_params)
-        out = self.initial_positions.copy()  # pixels outside the refined banks stay where they are
-        for ib in range(len(self.bank_names)):
-            sel = self.bank_of_spectrum == ib
-            x, z, roty = bank_params[3 * ib : 3 * ib + 3]
-            out[sel] = local[sel] @ rot_y(roty).T + [x, self.bank_y_positions[ib], z]
-        return out
-
-    def _positions_in_bank_after_block_moves(self, block_params: np.ndarray[float]) -> np.ndarray[float]:
-        local = self.positions_in_bank.copy()
-        for m, centre in enumerate(self.block_centres):
-            sel = self.block_of_spectrum == m
-            normal, tilt = block_params[2 * m : 2 * m + 2]
-            local[sel] = (local[sel] - centre) @ rot_y(tilt).T + centre + [0.0, 0.0, normal]
-        return local
-
-    def _geometric_factor_and_sin_theta(self, positions: np.ndarray[float]) -> tuple[np.ndarray[float], np.ndarray[float]]:
-        rel = positions - self.sample_position
-        l2 = np.linalg.norm(rel, axis=1)
-        sin_t = np.sqrt(0.5 * (1.0 - rel @ self.beam_direction / np.where(l2 > 0, l2, 1.0)))
-        return (self.chopper_sample_distance + l2) * sin_t, sin_t
-
-    def difc_and_sin_theta(
-        self, bank_params: np.ndarray[float], block_params: np.ndarray[float] | None = None
-    ) -> tuple[np.ndarray[float], np.ndarray[float]]:
-        """Chopper-path DIFC c_i (us/A) and sin(theta_i) of every spectrum."""
-        g, sin_t = self._geometric_factor_and_sin_theta(self.pixel_positions(bank_params, block_params))
-        in_bank = self.bank_of_spectrum >= 0
-        return np.where(in_bank, self.initial_difc * g / np.where(in_bank, self.initial_geometric_factor, 1.0), self.initial_difc), sin_t
 
 
-class RigidBanks:
-    """Geometry parameters (x, z, roty) per bank, mapped to (c, sin_t) and their derivatives for the fit."""
-
-    BANK_FINITE_DIFF_STEPS = (1e-5, 1e-5, 1e-4)  # m, m, deg
-
-    def __init__(self, geometry: PixelGeometry):
-        self.geometry = geometry
-        self.initial_params = geometry.initial_bank_params.copy()
-        self.param_names = [f"{bank}.{par}" for bank in geometry.bank_names for par in ("x", "z", "roty")]
-        self.finite_diff_steps = np.tile(self.BANK_FINITE_DIFF_STEPS, len(geometry.bank_names))
-
-    def difc_and_derivatives(self, q: np.ndarray[float]) -> tuple[np.ndarray[float], np.ndarray[float], np.ndarray[float]]:
-        """c and sin_t of every spectrum, and d(c, sin_t)/dq (nspec, 2, nq) by central differences."""
-        c, sin_t = self.geometry.difc_and_sin_theta(*self.split_bank_and_block_params(q))
-        dpixel_dq = np.empty((c.size, 2, q.size))
-        for a, step in enumerate(self.finite_diff_steps):
-            dq = np.zeros(q.size)
-            dq[a] = step
-            plus = np.array(self.geometry.difc_and_sin_theta(*self.split_bank_and_block_params(q + dq)))  # (2, nspec)
-            minus = np.array(self.geometry.difc_and_sin_theta(*self.split_bank_and_block_params(q - dq)))
-            dpixel_dq[:, :, a] = ((plus - minus) / (2 * step)).T
-        return c, sin_t, dpixel_dq
-
-    def split_bank_and_block_params(self, q: np.ndarray[float]) -> tuple[np.ndarray[float], np.ndarray[float] | None]:
-        return q, None
-
-
-class BankModules(RigidBanks):
-    """Rigid banks plus, per detector block, a shift along the bank normal and a tilt about the vertical."""
-
-    BLOCK_FINITE_DIFF_STEPS = (1e-5, 1e-3)  # m, deg
-
-    def __init__(self, geometry: PixelGeometry, bank_params: np.ndarray[float]):
-        super().__init__(geometry)
-        self.n_bank_params = len(bank_params)
-        self.initial_params = np.concatenate([bank_params, np.zeros(2 * len(geometry.block_names))])
-        self.param_names += [f"{block}.{par}" for block in geometry.block_names for par in ("normal", "tilt")]
-        self.finite_diff_steps = np.concatenate([self.finite_diff_steps, np.tile(self.BLOCK_FINITE_DIFF_STEPS, len(geometry.block_names))])
-
-    def split_bank_and_block_params(self, q: np.ndarray[float]) -> tuple[np.ndarray[float], np.ndarray[float] | None]:
-        return q[: self.n_bank_params], q[self.n_bank_params :]
-
-
-class FoldedData:
-    """Counts (nspec, nbins) on one folded chopper cycle of cycle_time us, with Poisson weights.
-
-    Not a dataclass: Mantid loads plugin modules outside sys.modules, which dataclasses cannot handle."""
+class FoldedData(WeightedCounts):
+    """Counts on one folded chopper cycle of cycle_time us."""
 
     def __init__(self, counts: np.ndarray[float], cycle_time: float):
-        self.counts, self.cycle_time = counts, cycle_time
-        self.weights = 1.0 / np.sqrt(counts + 1.0)
+        super().__init__(counts)
+        self.cycle_time = cycle_time
 
 
 class TimingModel:
@@ -294,13 +176,7 @@ def model_counts(
     return (*(v.reshape(shape) for v in (m, dm_dc, dm_dsin, dm_dtz, dm_dkappa, dm_dsrel)), dm_dA.reshape((d_hkl.size, *shape)))
 
 
-def weighted_residuals(data: FoldedData, m: np.ndarray[float]) -> tuple[np.ndarray[float], np.ndarray[float]]:
-    """Residuals r = w (y - s m - b) (nspec, nbins) at each spectrum's best scale s and background b, and s."""
-    scale, bg = scale_bg(data.counts, m, data.weights)
-    return data.weights * (data.counts - scale[:, None] * m - bg[:, None]), scale
-
-
-class CalibrationFit:
+class CalibrationFit(ScaleBackgroundFit):
     """Levenberg-Marquardt fit of the forward model to folded counts.
 
     Parameters, in order: geometry q | timing parameters | kappa, sigma_rel | reflection intensities A.
@@ -436,67 +312,3 @@ class CalibrationFit:
         timing_cols = [J_tz * self.timing_model.params_to_tz[j, a] for a in range(self.n_timing_params)]
         J_other = np.stack(timing_cols + [project(dm_dkappa), project(dm_dsrel)] + [project(dA) for dA in dm_dA])
         return np.stack([project(dm_dc), project(dm_dsin)]), J_other
-
-    def fit(self, max_iter: int = 50, tol: float = 1e-9, step_tol: float = 1e-6, lam: float = 1e-3) -> CalibrationFit:
-        cost, normal, grad = self.evaluate_cost_and_derivatives(self.params)
-        f = self.is_free
-        for _ in range(max_iter):
-            Nf, gf = normal[np.ix_(f, f)], grad[f]
-            scale = np.sqrt(np.maximum(np.diag(Nf), 1e-300))
-            while lam <= 1e8:
-                step = np.zeros_like(self.params)
-                step[f] = -np.linalg.solve(Nf / np.outer(scale, scale) + lam * np.eye(f.sum()), gf / scale) / scale
-                trial_cost = self.evaluate_cost(self.params + step)
-                if trial_cost < cost:
-                    lam = max(lam / 5, 1e-7)
-                    break
-                lam *= 5
-            else:
-                break  # no downhill step: converged to within numerical precision
-            rel = (cost - trial_cost) / cost
-            self.params = self.params + step
-            cost, normal, grad = self.evaluate_cost_and_derivatives(self.params)
-            # steps far below the statistical uncertainties: stops noise-free fits, whose cost falls without plateauing
-            if rel < tol or np.abs(step[f] * scale).max() < step_tol:
-                break
-        self.cost = cost
-        n_live = int(self.geometry.live_spectra.sum())
-        n_data = sum(n_live * ds.counts.shape[1] for ds in self.datasets)
-        n_fitted = int(f.sum()) + 2 * n_live * len(self.datasets)  # + per-spectrum scale and background
-        self.reduced_chi_squared = sum(np.sum(r**2) for r in self.residuals) / (n_data - n_fitted)
-        cov = np.full((self.params.size, self.params.size), np.nan)
-        cov[np.ix_(f, f)] = np.linalg.pinv(normal[np.ix_(f, f)]) * self.reduced_chi_squared
-        self.errors = np.sqrt(np.diag(cov))
-        return self
-
-
-def apply_geometry(
-    ws: MatrixWorkspace,
-    geom: PixelGeometry,
-    bank_params: np.ndarray[float],
-    exec_child: Callable[..., object],
-    block_params: np.ndarray[float] | None = None,
-) -> None:
-    """Move the banks of ws to (x, z, roty), then the blocks to their normal shift and tilt about the block centre from
-    the state geom was built from. All moves are absolute, so they do not depend on what was applied to ws before.
-    Without block_params the blocks are not moved, so they keep any earlier block moves relative to their bank."""
-    for ib, bank in enumerate(geom.bank_names):
-        x, z, roty = bank_params[3 * ib : 3 * ib + 3]
-        exec_child("RotateInstrumentComponent", Workspace=ws, ComponentName=bank, X=0, Y=1, Z=0, Angle=roty, RelativeRotation=False)
-        exec_child(
-            "MoveInstrumentComponent", Workspace=ws, ComponentName=bank, X=x, Y=geom.bank_y_positions[ib], Z=z, RelativePosition=False
-        )
-    if block_params is None:
-        return
-    for m, block in enumerate(geom.block_names):
-        ib = geom.bank_of_block[m]
-        x, z, roty = bank_params[3 * ib : 3 * ib + 3]
-        normal, tilt = block_params[2 * m : 2 * m + 2]
-        x_block, y_block, z_block = rot_y(roty) @ (geom.block_centres[m] + [0.0, 0.0, normal]) + [x, geom.bank_y_positions[ib], z]
-        exec_child("MoveInstrumentComponent", Workspace=ws, ComponentName=block, X=x_block, Y=y_block, Z=z_block, RelativePosition=False)
-        # the bank's rotation plus the tilt about Y, then the block's fixed rotation within its bank on top, as a relative
-        # rotation is current * Quat(angle, axis). Turning the fitted angle about Y alone also keeps clear of
-        # RotateInstrumentComponent rejecting any axis with X + Y + Z = 0
-        exec_child("RotateInstrumentComponent", Workspace=ws, ComponentName=block, X=0, Y=1, Z=0, Angle=roty + tilt, RelativeRotation=False)
-        angle, (ax, ay, az) = geom.block_rotations_in_bank[m]
-        exec_child("RotateInstrumentComponent", Workspace=ws, ComponentName=block, X=ax, Y=ay, Z=az, Angle=angle, RelativeRotation=True)

@@ -11,17 +11,8 @@ from numpy.testing import assert_allclose, assert_array_equal
 
 from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import AddSampleLog, CloneWorkspace, ConvertToPointData, LoadEmptyInstrument, MaskDetectors, Rebin
-from plugins.algorithms.calibration_utils import scale_bg
-from plugins.algorithms.poldi_calibration_utils import (
-    BankModules,
-    CalibrationFit,
-    FoldedData,
-    PixelGeometry,
-    RigidBanks,
-    TimingModel,
-    apply_geometry,
-    model_counts,
-)
+from plugins.algorithms.calibration_utils import BankModules, RigidBanks, apply_geometry, scale_bg
+from plugins.algorithms.poldi_calibration_utils import CalibrationFit, FoldedData, PixelGeometry, TimingModel, model_counts
 from plugins.algorithms.diffraction_utils import get_tths_and_l2s
 from plugins.algorithms.poldi_utils import exec_alg, get_tof_d1Ang, get_instrument_settings_from_log
 
