@@ -19,8 +19,6 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 
-graphify-out/
-
 # CxxTest was copied into the repository; retain its Makefiles as part of the source tree.
 !Testing/Tools/cxxtest/**/Makefile
 

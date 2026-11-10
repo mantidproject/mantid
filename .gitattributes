@@ -15,4 +15,3 @@ pixi.lock merge=binary linguist-language=YAML linguist-generated=true -diff
 
 # .dot files are diff'd using Word on Windows by default
 *.dot !diff
-graphify-out/graph.json merge=graphify
