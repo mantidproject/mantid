@@ -509,10 +509,13 @@ class FullInstrumentViewModel:
         spherical_positions: np.ndarray,
         counts: np.ndarray,
     ) -> list[DetectorInfo]:
+        component_info = self._workspace.componentInfo()
+        spectrum_info = self._workspace.spectrumInfo()
         return [
-            DetectorInfo(det.getName(), det_id, ws_index, xyz, spherical, det.getFullName(), int(count))
+            DetectorInfo(component_info.name(det), det_id, ws_index, xyz, spherical, component_info.fullName(det), int(count))
             for ws_index, det_id, xyz, spherical, count in zip(ws_indices, det_ids, xyz_positions, spherical_positions, counts, strict=True)
-            for det in (self._workspace.getDetector(int(ws_index)),)
+            # the first detector of the spectrum
+            for det in (spectrum_info.getSpectrumDefinition(int(ws_index))[0][0],)
         ]
 
     def detector_info_text_for_workspace_index(self, picked_index: int) -> list[DetectorInfo]:

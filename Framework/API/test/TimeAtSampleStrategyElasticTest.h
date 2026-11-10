@@ -13,9 +13,7 @@
 #include "MantidAPI/TimeAtSampleStrategy.h"
 #include "MantidAPI/TimeAtSampleStrategyElastic.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/V3D.h"
 
@@ -35,12 +33,6 @@ public:
 
     auto ws = WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument();
 
-    auto instrument = ws->getInstrument();
-
-    auto sample = instrument->getSample();
-
-    auto source = instrument->getSource();
-
     const auto &spectrumInfo = ws->spectrumInfo();
 
     const double L1 = spectrumInfo.l1();
@@ -57,23 +49,20 @@ public:
 
     auto ws = WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument();
 
-    auto instrument = ws->getInstrument();
+    const auto &componentInfo = ws->componentInfo();
 
-    auto sample = instrument->getSample();
+    const V3D beamDir = componentInfo.referenceFrame()->vecPointingAlongBeam();
 
-    auto source = instrument->getSource();
+    const V3D sourcePos = componentInfo.sourcePosition();
 
-    const V3D &beamDir = instrument->getReferenceFrame()->vecPointingAlongBeam();
+    const V3D monitorPos = ws->spectrumInfo().position(monitorIndex);
 
-    auto monitor = ws->getDetector(monitorIndex);
-
-    const double L1 = source->getPos().distance(sample->getPos());
+    const double L1 = componentInfo.l1();
 
     TimeAtSampleStrategyElastic strategy(ws);
     Correction correction = strategy.calculate(monitorIndex);
 
-    TSM_ASSERT_EQUALS("L1/L1m", std::abs(L1 / beamDir.scalar_prod(source->getPos() - monitor->getPos())),
-                      correction.factor);
+    TSM_ASSERT_EQUALS("L1/L1m", std::abs(L1 / beamDir.scalar_prod(sourcePos - monitorPos)), correction.factor);
     TS_ASSERT_EQUALS(0., correction.offset);
   }
 };

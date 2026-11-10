@@ -11,7 +11,6 @@
 #include "MantidAPI/Sample.h"
 #include "MantidDataHandling/CreateSampleShape.h"
 #include "MantidDataHandling/SampleEnvironmentFactory.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Container.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -582,7 +581,7 @@ SetSample::setSampleEnvironmentFromFile(API::ExperimentInfo &exptInfo, const Ker
   // The specifications need to be qualified by the facility and instrument.
   // Check instrument for name and then lookup facility if facility
   // is unknown then set to default facility & instrument.
-  const auto instOnWS = exptInfo.getInstrumentName();
+  const auto &instOnWS = exptInfo.getInstrumentName();
   const auto &config = ConfigService::Instance();
   std::string facilityName, instrumentName;
   try {
@@ -624,7 +623,7 @@ const Geometry::SampleEnvironment *
 SetSample::setSampleEnvironmentFromXML(API::ExperimentInfo &exptInfo,
                                        const Kernel::PropertyManager_const_sptr &canGeomArgs,
                                        const Kernel::PropertyManager_const_sptr &canMaterialArgs) {
-  const auto refFrame = exptInfo.getInstrument()->getReferenceFrame();
+  const auto refFrame = exptInfo.getReferenceFrame();
   const auto xml = tryCreateXMLFromArgsOnly(*canGeomArgs, *refFrame);
   if (!xml.empty()) {
     ShapeFactory sFactory;
@@ -729,7 +728,7 @@ void SetSample::setSampleShape(API::ExperimentInfo &experiment, const Kernel::Pr
 
   // Try known shapes or CSG first if supplied
   if (isDictionaryPopulated(args)) {
-    const auto refFrame = experiment.getInstrument()->getReferenceFrame();
+    const auto refFrame = experiment.getReferenceFrame();
     auto xml = tryCreateXMLFromArgsOnly(*args, *refFrame);
     if (!xml.empty()) {
       Kernel::Matrix<double> rotationMatrix = experiment.run().getGoniometer().getR();

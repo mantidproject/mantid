@@ -13,6 +13,7 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentMetadata.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument_fwd.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/Converters/PySequenceToVector.h"
@@ -170,6 +171,8 @@ void export_ExperimentInfo() {
            "Return the axis the instrument view is wrapped around by default.")
       .def("getInstrumentName", &ExperimentInfo::getInstrumentName, args("self"),
            "Return the name of the instrument for this experiment.")
+      .def("getReferenceFrame", &ExperimentInfo::getReferenceFrame, return_value_policy<RemoveConstSharedPtr>(),
+           args("self"), "Return the reference frame of the instrument for this experiment.")
       .def("setSample", setSample, args("self", "sample"))
       .def("setRun", setRun, args("self", "run"))
       .def("populateInstrumentParameters", &ExperimentInfo::populateInstrumentParameters, (arg("self")),

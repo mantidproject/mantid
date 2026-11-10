@@ -13,7 +13,6 @@
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAlgorithms/SampleCorrections/MayersSampleCorrectionStrategy.h"
 #include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -92,8 +91,7 @@ void MayersSampleCorrection::exec() {
 
   MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS);
   // Instrument constants
-  auto instrument = inputWS->getInstrument();
-  const auto frame = instrument->getReferenceFrame();
+  const auto frame = inputWS->getReferenceFrame();
 
   // Sample
   const auto &sampleShape = inputWS->sample().getShape();

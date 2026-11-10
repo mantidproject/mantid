@@ -121,8 +121,7 @@ void AnnularRingAbsorption::attachSample(const MatrixWorkspace_sptr &workspace) 
 }
 
 void AnnularRingAbsorption::runCreateSampleShape(const API::MatrixWorkspace_sptr &workspace) {
-  auto inst = workspace->getInstrument();
-  auto refFrame = inst->getReferenceFrame();
+  auto refFrame = workspace->getReferenceFrame();
 
   bool childLog = g_log.is(Logger::Priority::PRIO_DEBUG);
   auto alg = this->createChildAlgorithm("CreateSampleShape", -1, -1, childLog);

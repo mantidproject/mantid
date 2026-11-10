@@ -17,6 +17,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include "boost/make_shared.hpp"
 
@@ -344,7 +345,9 @@ Geometry::IDetector_const_sptr Peak::getDetector() const { return m_det; }
 Geometry::Instrument_const_sptr Peak::getInstrument() const { return m_inst; }
 
 /** Return a shared ptr to the reference frame from the instrument for this peak. */
-std::shared_ptr<const Geometry::ReferenceFrame> Peak::getReferenceFrame() const { return m_inst->getReferenceFrame(); }
+std::shared_ptr<const Geometry::ReferenceFrame> Peak::getReferenceFrame() const {
+  ALLOW_DEPRECATED(return m_inst->getReferenceFrame());
+}
 
 /// For RectangularDetectors only, returns the row (y) of the pixel of the detector or -1 if not found
 int Peak::getRow() const { return m_row; }
@@ -570,7 +573,7 @@ void Peak::setQLabFrame(const Mantid::Kernel::V3D &qLab, std::optional<double> d
   if (norm_q == 0.0)
     throw std::invalid_argument("Peak::setQLabFrame(): Q cannot be 0,0,0.");
 
-  std::shared_ptr<const ReferenceFrame> refFrame = this->m_inst->getReferenceFrame();
+  ALLOW_DEPRECATED(std::shared_ptr<const ReferenceFrame> refFrame = this->m_inst->getReferenceFrame());
   const V3D refBeamDir = refFrame->vecPointingAlongBeam();
   // Default for ki-kf has -q
   const double qSign = (m_convention != "Crystallography") ? 1.0 : -1.0;

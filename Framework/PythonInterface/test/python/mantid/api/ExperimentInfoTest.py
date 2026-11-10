@@ -49,6 +49,12 @@ class ExperimentInfoTest(unittest.TestCase):
         # No instrument in test workspace, so size is 0.
         self.assertEqual(detInfo.size(), 0)
 
+    def test_getReferenceFrame(self):
+        refFrame = self._expt_ws.getReferenceFrame()
+        self.assertEqual(refFrame.vecPointingUp()[0], 0)  # x
+        self.assertEqual(refFrame.vecPointingUp()[1], 1)  # y
+        self.assertEqual(refFrame.vecPointingUp()[2], 0)  # z
+
     def test_baseComponentInfo_keeps_original_geometry_after_moves(self):
         ws = CreateSampleWorkspace(NumBanks=2, BankPixelWidth=3, OutputWorkspace="base_component_info_ws")
         component_info = ws.componentInfo()

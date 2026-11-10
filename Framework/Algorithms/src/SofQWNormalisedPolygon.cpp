@@ -15,8 +15,8 @@
 #include "MantidDataObjects/FractionalRebinning.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Crystal/AngleUnits.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
@@ -366,7 +366,8 @@ void SofQWNormalisedPolygon::exec() {
   if (twoThetaTable) {
     initAngularCachesTable(*inputWS, *twoThetaTable);
   } else {
-    std::vector<double> par = inputWS->getInstrument()->getNumberParameter("detector-neighbour-offset");
+    ComponentInfo const &compInfo = inputWS->componentInfo();
+    std::vector<double> par = compInfo.getNumberParameter(compInfo.root(), "detector-neighbour-offset");
     if (par.empty()) {
       this->initAngularCachesNonPSD(*inputWS);
     } else {
@@ -474,8 +475,7 @@ void SofQWNormalisedPolygon::initAngularCachesNonPSD(const MatrixWorkspace &work
   m_twoThetaLowers = std::vector<double>(nhist, skipDetector);
   m_twoThetaUppers = std::vector<double>(nhist, skipDetector);
 
-  auto inst = workspace.getInstrument();
-  const auto referenceFrame = inst->getReferenceFrame();
+  const auto referenceFrame = workspace.getReferenceFrame();
   const auto beamDir = referenceFrame->vecPointingAlongBeam();
 
   const auto &detectorInfo = workspace.detectorInfo();

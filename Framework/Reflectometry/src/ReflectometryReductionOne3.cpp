@@ -244,7 +244,7 @@ void ReflectometryReductionOne3::initalizeMembers() {
 
   // Cache the spectrum info and reference frame
   m_spectrumInfo = &m_runWS->spectrumInfo();
-  m_refFrame = m_runWS->componentInfo().referenceFrame();
+  m_refFrame = m_runWS->getReferenceFrame();
   m_partialBins = getProperty("IncludePartialBins");
 
   // Find and cache detector groups and theta0
