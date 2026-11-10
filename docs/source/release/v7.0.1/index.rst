@@ -7,6 +7,8 @@ Mantid 7.0.1 Release Notes
 This is a patch release that corrects some significant issues since :ref:`version 7.0.0 <v7.0.0>`.
 
 The changes are:
+- Remove workaround for qsettings location on nfs home area `#42716 <https://github.com/mantidproject/mantid/pull/42716>`_
+- Fix bug creating ReflectometryISISLoadAndProcess dialog `#42646 <https://github.com/mantidproject/mantid/pull/42646/>`_
 
 Citation
 --------
