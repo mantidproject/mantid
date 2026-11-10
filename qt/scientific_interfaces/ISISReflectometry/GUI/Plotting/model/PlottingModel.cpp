@@ -5,7 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "PlottingModel.h"
-#include "GUI/Common/RunWorkspaceResolver.h"
+#include "Common/GroupHelper.h"
+#include "Common/Parse.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -46,6 +47,29 @@ struct WorkspaceGroupInputs {
 const std::unordered_map<std::string, IndexRegion> instrumentDetectorIndexRegions{
     {"INTER", {0, 0}}, {"POLREF", {4, 643}}, {"OFFSPEC", {0, 0}}, {"SURF", {0, 0}}, {"CRISP", {0, 0}},
 };
+
+Mantid::API::MatrixWorkspace_sptr findProcessedInputWorkspace(std::string const &reducedWorkspaceName,
+                                                              std::optional<int> period) {
+  auto &ads = Mantid::API::AnalysisDataService::Instance();
+  if (!ads.doesExist(reducedWorkspaceName))
+    return nullptr;
+
+  for (auto const &output : getMembers(ads.retrieve(reducedWorkspaceName))) {
+    if (!output || !output->run().hasProperty("reflectometry_processed_tof_workspace"))
+      continue;
+    auto const inputName = output->run().getProperty("reflectometry_processed_tof_workspace")->value();
+    if (!ads.doesExist(inputName))
+      return nullptr;
+    for (auto const &input : getMembers(ads.retrieve(inputName))) {
+      if (!input)
+        continue;
+      if (!period || (input->run().hasProperty("current_period") &&
+                      parseNonNegativeInt(input->run().getProperty("current_period")->value()) == period))
+        return input;
+    }
+  }
+  return nullptr;
+}
 
 IndexRegion configuredInstrumentRegion(std::unordered_map<std::string, IndexRegion> const &regions,
                                        std::string const &instrumentName, std::string const &regionName) {
@@ -320,8 +344,8 @@ std::string detectorMapWorkspaceName(PlottingWorkspace const &workspace, Detecto
 std::string createAlignmentWorkspace(PlottingWorkspace const &workspace, AlignmentXAxis const xAxis,
                                      std::string const &instrumentName) {
   auto &ads = Mantid::API::AnalysisDataService::Instance();
-  auto const rawWorkspace = findInputWorkspace(workspace.runNumbers, workspace.periodNumber, {workspace.workspaceName});
-  if (!rawWorkspace) {
+  auto const processedWorkspace = findProcessedInputWorkspace(workspace.workspaceName, workspace.periodNumber);
+  if (!processedWorkspace) {
     return "";
   }
 
@@ -334,7 +358,7 @@ std::string createAlignmentWorkspace(PlottingWorkspace const &workspace, Alignme
   auto const fittedPeakWorkspace = outputWorkspace + alignmentFittedPeakWorkspaceSuffix;
   auto const peakCentreWorkspace = outputWorkspace + alignmentPeakCentreWorkspaceSuffix;
 
-  auto detectorSpectraWorkspace = extractDetectorSpectra(rawWorkspace, instrumentName);
+  auto detectorSpectraWorkspace = extractDetectorSpectra(processedWorkspace, instrumentName);
   auto peakFit = fitSpecularPeak(detectorSpectraWorkspace);
   auto fittedWorkspace = peakFit.fitWorkspace ? extractSpectrum(peakFit.fitWorkspace, 1) : nullptr;
   auto const peakCentre = xValueForFractionalWorkspaceIndex(*detectorSpectraWorkspace, peakFit.peakCentre, xAxis);
@@ -373,8 +397,8 @@ std::vector<std::string> createAlignmentWorkspaces(std::vector<PlottingWorkspace
 std::string createDetectorMapWorkspace(PlottingWorkspace const &workspace, DetectorMapXAxis const xAxis,
                                        DetectorMapYAxis const yAxis, std::string const &instrumentName) {
   auto &ads = Mantid::API::AnalysisDataService::Instance();
-  auto const rawWorkspace = findInputWorkspace(workspace.runNumbers, workspace.periodNumber, {workspace.workspaceName});
-  if (!rawWorkspace) {
+  auto const processedWorkspace = findProcessedInputWorkspace(workspace.workspaceName, workspace.periodNumber);
+  if (!processedWorkspace) {
     return "";
   }
 
@@ -383,7 +407,7 @@ std::string createDetectorMapWorkspace(PlottingWorkspace const &workspace, Detec
     return outputWorkspace;
   }
 
-  auto detectorMapWorkspace = extractDetectorSpectra(rawWorkspace, instrumentName);
+  auto detectorMapWorkspace = extractDetectorSpectra(processedWorkspace, instrumentName);
   if (xAxis == DetectorMapXAxis::Lambda) {
     detectorMapWorkspace = convertToWavelength(detectorMapWorkspace);
   }

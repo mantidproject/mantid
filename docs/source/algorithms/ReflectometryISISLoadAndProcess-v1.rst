@@ -47,9 +47,21 @@ and unit conversion are still created.
 Ordinary working copies remain outside the ADS. Temporary registrations are used
 only by the slicing and workspace-group paths that require workspace names, and
 are removed after processing, including on failure. Cached TOF data, geometry, and
-event monitors remain available for subsequent reductions. Intermediate summed
-TOF inputs are no longer retained in the ADS; reduced outputs and bank-summed
-outputs retain their existing names.
+event monitors remain available for subsequent reductions.
+
+After a successful reduction, the full-detector processed sample is retained in
+the ADS as ``<binned-output-name>_processed_tof`` (with a ``__`` prefix when inputs
+are hidden). This is the existing working workspace, not another copy. For summed
+runs it contains the combined data; for sliced reductions it retains the full-run
+input. It includes calibration and any in-place detector correction or ROI masking
+applied during processing. Bank summation does not replace this full-detector data.
+
+Reduced outputs carry a ``reflectometry_processed_tof_workspace`` log identifying
+this diagnostic input. Detector-map and alignment plots use that association,
+including the selected period for grouped inputs. The Runs table reads the adjusted
+angle from the reduced output, independently of the diagnostic input's lifetime.
+Outputs without an association must be reduced again before detector-map or alignment plotting.
+Reduced outputs and bank-summed outputs retain their existing names.
 
 If time slicing is enabled, the input run must be an event workspace and have monitors loaded; otherwise, it must be a histogram workspace. If the workspace already exists but is the incorrect type or is missing monitors, it will be reloaded.
 
@@ -85,7 +97,7 @@ Output:
 
 .. testoutput:: ExSingleRun
 
-    Workspaces in the ADS after reduction: ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF', 'TOF_13460']
+    Workspaces in the ADS after reduction: ['IvsQ_13460', 'IvsQ_binned_13460', 'IvsQ_binned_13460_processed_tof', 'TOF', 'TOF_13460']
 
 **Example: Sum multiple input runs**
 
@@ -100,7 +112,7 @@ Output:
 
 .. testoutput:: ExSumRuns
 
-    Workspaces in the ADS after reduction: ['IvsQ_13460+13462', 'IvsQ_binned_13460+13462', 'TOF', 'TOF_13460', 'TOF_13462']
+    Workspaces in the ADS after reduction: ['IvsQ_13460+13462', 'IvsQ_binned_13460+13462', 'IvsQ_binned_13460+13462_processed_tof', 'TOF', 'TOF_13460', 'TOF_13462']
 
 **Example: Sum multiple transmission runs into a single input**
 
@@ -115,7 +127,7 @@ Output:
 
 .. testoutput:: ExSumTransmissionRuns
 
-	Workspaces in the ADS after reduction: ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF', 'TOF_13460', 'TRANS_13463', 'TRANS_13464', 'TRANS_LAM_13463+13464']
+	Workspaces in the ADS after reduction: ['IvsQ_13460', 'IvsQ_binned_13460', 'IvsQ_binned_13460_processed_tof', 'TOF', 'TOF_13460', 'TRANS_13463', 'TRANS_13464', 'TRANS_LAM_13463+13464']
 
 **Example: Two separate transmission run inputs**
 
@@ -131,7 +143,7 @@ Output:
 
 .. testoutput:: ExCombineTransmissionRuns
 
-   Workspaces in the ADS after reduction: ['IvsQ_13460', 'IvsQ_binned_13460', 'TOF', 'TOF_13460', 'TRANS_13463', 'TRANS_13464', 'TRANS_LAM_13463_13464']
+   Workspaces in the ADS after reduction: ['IvsQ_13460', 'IvsQ_binned_13460', 'IvsQ_binned_13460_processed_tof', 'TOF', 'TOF_13460', 'TRANS_13463', 'TRANS_13464', 'TRANS_LAM_13463_13464']
 
 **Example: Slice input run**
 
@@ -146,7 +158,7 @@ Output:
 
 .. testoutput:: ExSliceRun
 
-   Workspaces in the ADS after reduction: ['IvsLam_38415', 'IvsLam_38415_sliced_0_210', 'IvsLam_38415_sliced_210_420', 'IvsLam_38415_sliced_420_610', 'IvsQ_38415', 'IvsQ_38415_sliced_0_210', 'IvsQ_38415_sliced_210_420', 'IvsQ_38415_sliced_420_610', 'IvsQ_binned_38415', 'IvsQ_binned_38415_sliced_0_210', 'IvsQ_binned_38415_sliced_210_420', 'IvsQ_binned_38415_sliced_420_610', 'TOF', 'TOF_38415', 'TOF_38415_monitors', 'TOF_38415_sliced', 'TOF_38415_sliced_0_210', 'TOF_38415_sliced_210_420', 'TOF_38415_sliced_420_610']
+   Workspaces in the ADS after reduction: ['IvsLam_38415', 'IvsLam_38415_sliced_0_210', 'IvsLam_38415_sliced_210_420', 'IvsLam_38415_sliced_420_610', 'IvsQ_38415', 'IvsQ_38415_sliced_0_210', 'IvsQ_38415_sliced_210_420', 'IvsQ_38415_sliced_420_610', 'IvsQ_binned_38415', 'IvsQ_binned_38415_sliced_0_210', 'IvsQ_binned_38415_sliced_210_420', 'IvsQ_binned_38415_sliced_420_610', 'IvsQ_binned_38415_processed_tof', 'TOF', 'TOF_38415', 'TOF_38415_monitors', 'TOF_38415_sliced', 'TOF_38415_sliced_0_210', 'TOF_38415_sliced_210_420', 'TOF_38415_sliced_420_610']
 
 .. seealso :: Algorithm :ref:`algm-ReflectometrySliceEventWorkspace`, :ref:`algm-ReflectometryReductionOneAuto` and the ``ISIS Reflectometry`` interface.
 
