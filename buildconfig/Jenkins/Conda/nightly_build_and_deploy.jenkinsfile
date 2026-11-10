@@ -241,9 +241,9 @@ pipeline {
               deleteDir()
             }
             checkoutSource("${GIT_SHA}")
-            // Build the base set of packages (ones not required for mantidworkbench)
-            // in parallel
-            package_conda('linux-64', 'base')
+            // Build the conda packages for this platform. The mantidworkbench
+            // noarch package is built on Linux only.
+            package_conda('linux-64')
             archive_conda_packages('linux-64')
             archive_conda_packages('noarch')
           }
@@ -274,9 +274,9 @@ pipeline {
               deleteDir()
             }
             checkoutSource("${GIT_SHA}")
-            // Build the base set of packages (ones not required for mantidworkbench)
-            // in parallel
-            package_conda('win-64', 'base')
+            // Build the conda packages for this platform. The mantidworkbench
+            // noarch package is built on Linux only.
+            package_conda('win-64')
             archive_conda_packages('win-64')
           }
           post {
@@ -306,9 +306,9 @@ pipeline {
               deleteDir()
             }
             checkoutSource("${GIT_SHA}")
-            // Build the base set of packages (ones not required for mantidworkbench)
-            // in parallel
-            package_conda('osx-arm64', 'base')
+            // Build the conda packages for this platform. The mantidworkbench
+            // noarch package is built on Linux only.
+            package_conda('osx-arm64')
             archive_conda_packages('osx-arm64')
           }
           post {
@@ -319,7 +319,7 @@ pipeline {
         }
       }
     }
-    stage('Package workbench') {
+    stage('Package standalone matrix') {
       matrix {
         axes {
           axis {
@@ -328,7 +328,7 @@ pipeline {
           }
         }
         stages {
-          stage('package workbench') {
+          stage('Package standalone') {
             when {
               beforeAgent true
               beforeOptions true
@@ -349,7 +349,7 @@ pipeline {
                 deleteDir()
               }
               checkoutSource("${GIT_SHA}")
-              // Copy base packages to build workbench
+              // Copy conda packages required to build standalone packages
               copyArtifacts filter: "**/conda-bld/noarch/*.conda, **/conda-bld/${PLATFORM}/*.conda",
                 fingerprintArtifacts: true,
                 projectName: '${JOB_NAME}',
@@ -357,15 +357,8 @@ pipeline {
                 target: './',
                 flatten: false
 
-              package_conda("${PLATFORM}", "workbench")
-              archive_conda_packages("${PLATFORM}")
               package_standalone("${PLATFORM}")
               archive_standalone_package("${PLATFORM}")
-            }
-            post {
-              always {
-                archive_env_logs("${PLATFORM}")
-              }
             }
           }
         }
@@ -585,32 +578,33 @@ def publish_test_reports() {
   junit "${CHECKOUT_DIR}/build/Testing/SystemTests/scripts/TEST-*.xml"
 }
 
-def package_conda(platform, base_or_workbench) {
+def package_conda(platform) {
   def packagescript_path = "${CISCRIPT_DIR}/package-conda"
   if(platform.startsWith('win')) {
     def workspace_unix_style = toUnixStylePath("${WORKSPACE}")
     bat "\"${WIN_BASH}\" -ex -c \"${packagescript_path}\
-      ${workspace_unix_style} ${package_conda_options(platform, base_or_workbench)}\""
+      ${workspace_unix_style} ${package_conda_options(platform)}\""
   } else {
     sh "${packagescript_path}\
-      ${WORKSPACE} ${package_conda_options(platform, base_or_workbench)}"
+      ${WORKSPACE} ${package_conda_options(platform)}"
   }
 }
 
-def package_conda_options(platform, base_or_workbench) {
-  def package_flags = ""
-  if(base_or_workbench == 'base') {
-    def docs_flags = ""
-    if(platform.startsWith('linux') && buildMantiddocs) {
-      docs_flags = "--build-docs"
-    }
-    package_flags = "--build-mantid-developer --build-mantid --build-qt ${docs_flags}"
+def package_conda_options(platform) {
+  def docs_flags = ""
+
+  if(platform.startsWith('linux') && buildMantiddocs) {
+    docs_flags = "--build-docs"
   }
-  else if(base_or_workbench == 'workbench') {
+
+  def package_flags = "--build-mantid-developer --build-mantid --build-qt ${docs_flags}"
+
+  // Build mantidworkbench noarch package on Linux only.
+  if(platform.startsWith('linux')) {
     if(buildMantiddocs) {
-      package_flags = "--build-workbench"
+      package_flags += " --build-workbench"
     } else {
-      package_flags = "--build-workbench-without-docs"
+      package_flags += " --build-workbench-without-docs"
     }
   }
 
@@ -674,13 +668,10 @@ def prerelease_option() {
 }
 
 def archive_conda_packages(platform) {
-  // Only archive the mantiddocs package if it was built.
-  if(platform != 'noarch' || buildMantiddocs) {
-    archiveArtifacts artifacts: "**/conda-bld/${platform}/*.conda",
-      allowEmptyArchive: false,
-      fingerprint: true,
-      onlyIfSuccessful: true
-  }
+  archiveArtifacts artifacts: "**/conda-bld/${platform}/*.conda",
+    allowEmptyArchive: false,
+    fingerprint: true,
+    onlyIfSuccessful: true
 }
 
 def archive_standalone_package(platform) {
