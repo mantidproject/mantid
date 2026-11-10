@@ -31,7 +31,6 @@ from plugins.algorithms.poldi_utils import _get_flux_arrays, get_instrument_sett
 
 if TYPE_CHECKING:
     from mantid.api import MatrixWorkspace
-    from mantid.geometry import ComponentInfo
 
 CHOPPER = "chopper"
 LAMBDA_RANGE = (1.0, 5.99)  # Angstrom, inside the IDF's WavelengthDistribution table (0.986 - 5.994)
@@ -40,15 +39,6 @@ LAMBDA_RANGE = (1.0, 5.99)  # Angstrom, inside the IDF's WavelengthDistribution 
 def rot_y(deg: float) -> np.ndarray[float]:
     a = np.deg2rad(deg)
     return np.array([[np.cos(a), 0.0, np.sin(a)], [0.0, 1.0, 0.0], [-np.sin(a), 0.0, np.cos(a)]])
-
-
-def _path_below_root(comp_info: ComponentInfo, idx: int) -> str:
-    """'/' path from the child of the instrument root down to idx, e.g. 'SouthBank/reference-sphere-1/block1'."""
-    names = []
-    while comp_info.hasParent(idx):
-        names.append(comp_info.name(idx))
-        idx = comp_info.parent(idx)
-    return "/".join(reversed(names))
 
 
 def _angle_axis(q: Quat) -> tuple[float, np.ndarray[float]]:
@@ -101,7 +91,7 @@ class PixelGeometry:
         parents = [comp_info.parent(int(d)) if live else -1 for d, live in zip(self.detector_indices, live_in_bank)]
         block_idx = sorted({p for p in parents if p >= 0})
         self.block_of_spectrum = np.array([block_idx.index(p) if p >= 0 else -1 for p in parents])
-        self.block_names = [_path_below_root(comp_info, b) for b in block_idx]
+        self.block_names = [comp_info.fullName(b).partition("/")[2] for b in block_idx]  # path below the instrument root
         self.bank_of_block = [int(self.bank_of_spectrum[self.block_of_spectrum == m][0]) for m in range(len(block_idx))]
         # in the bank frame; the block component's own position, which is what RotateInstrumentComponent rotates about
         self.block_centres = np.array(
