@@ -182,8 +182,10 @@ To check whether a Python process is using tbbmalloc:
   python -c "print('libtbbmalloc_proxy' in open('/proc/self/maps').read())"
 
 Builds that do not preload tbbmalloc (``-DUSE_TBBMALLOC=OFF``, or ``-DUSE_SANITIZER=Address``) do not install the hook.
-Configuring one of them removes a hook that an earlier build copied into the environment,
-and their launch scripts set ``MANTID_DISABLE_TBBMALLOC=1``.
+Their launch scripts set ``MANTID_DISABLE_TBBMALLOC=1``.
+The copied ``mantid-tbbmalloc.pth`` starts with a comment naming the build directory that copied it.
+Reconfiguring that build directory with tbbmalloc turned off removes the hook.
+A hook copied by another build directory sharing the environment, or installed by a ``mantid`` conda package, is left in place.
 If you delete a build directory, the hook stays in the environment.
 To remove it by hand:
 

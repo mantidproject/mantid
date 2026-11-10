@@ -20,23 +20,35 @@ if(NOT CONDA_BUILD)
     OUTPUT_VARIABLE _site_packages
     OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ERROR_IS_FATAL ANY
   )
-  set(_installed_hook_files)
-  foreach(_file ${_tbbmalloc_hook_files})
-    get_filename_component(_name ${_file} NAME)
-    list(APPEND _installed_hook_files ${_site_packages}/${_name})
-  endforeach()
+  set(_installed_pth ${_site_packages}/mantid-tbbmalloc.pth)
+  set(_installed_module ${_site_packages}/_mantid_tbbmalloc_preload.py)
+  # The copied .pth names this build directory, so that only the build that copied the hook removes it. Several build
+  # directories can share one environment, and the environment can also hold the hook from a mantid conda package.
+  set(_owner_line "# installed by the Mantid build in ${CMAKE_BINARY_DIR}")
   if(_preload_tbbmalloc)
+    file(READ ${CMAKE_CURRENT_SOURCE_DIR}/mantid-tbbmalloc.pth _pth_contents)
+    file(CONFIGURE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/mantid-tbbmalloc.pth CONTENT "${_owner_line}\n${_pth_contents}"
+         @ONLY
+    )
+    set(_hook_sources ${CMAKE_CURRENT_BINARY_DIR}/mantid-tbbmalloc.pth
+                      ${CMAKE_CURRENT_SOURCE_DIR}/_mantid_tbbmalloc_preload.py
+    )
     add_custom_command(
-      OUTPUT ${_installed_hook_files}
-      COMMAND ${CMAKE_COMMAND} -E copy ${_tbbmalloc_hook_files} ${_site_packages}
-      DEPENDS ${_tbbmalloc_hook_files}
+      OUTPUT ${_installed_pth} ${_installed_module}
+      COMMAND ${CMAKE_COMMAND} -E copy ${_hook_sources} ${_site_packages}
+      DEPENDS ${_hook_sources}
       COMMENT "Installing mantid-tbbmalloc.pth into ${_site_packages}"
     )
-    add_custom_target(TbbmallocDotPth ALL DEPENDS ${_installed_hook_files})
+    add_custom_target(TbbmallocDotPth ALL DEPENDS ${_installed_pth} ${_installed_module})
     add_dependencies(PythonInterface TbbmallocDotPth)
-  else()
-    # this build does not preload tbbmalloc, so remove the hook an earlier configuration copied into the environment
-    file(REMOVE ${_installed_hook_files})
+  elseif(EXISTS ${_installed_pth})
+    # this build does not preload tbbmalloc, so remove the hook if this build directory copied it into the environment
+    file(STRINGS ${_installed_pth} _installed_lines)
+    if("${_owner_line}" IN_LIST _installed_lines)
+      file(REMOVE ${_installed_pth} ${_installed_module})
+    else()
+      message(STATUS "Leaving ${_installed_pth}, which this build directory did not install")
+    endif()
   endif()
 endif()
 
