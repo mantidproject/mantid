@@ -537,6 +537,15 @@ public:
     TS_ASSERT(shape_sptr->isValid(V3D(0.01, 0.01, -1)));
   }
 
+  void testConeWithNegativeHeight() {
+    const std::string xmlShape =
+        "<cone id=\"shape\"><tip-point x=\"0\" y=\"0\" z=\"0\"/><axis x=\"0\" y=\"0\" z=\"1\"/>"
+        "<angle val=\"8.1\"/><height val=\"-1\"/></cone><algebra val=\"shape\"/> ";
+    auto shape_sptr = getObject(xmlShape);
+    TS_ASSERT(shape_sptr);
+    TS_ASSERT(!shape_sptr->hasValidShape());
+  }
+
   void testConeUseDirectStringArgument() {
     // algebra line is essential
     std::string xmlShape = "<cone id=\"shape\"> ";
@@ -708,6 +717,32 @@ public:
     TS_ASSERT(!cuboidRotateAll_sptr->isValid(centre));
   }
 
+  void testRotatePointCuboid() {
+    // the corner-point form SetSample writes for a flat plate: 2 x 1 x 0.2, centred on (0, 10, 0)
+    std::string xmlCuboid = "<cuboid id=\"plate\"> ";
+    xmlCuboid += R"(<left-front-bottom-point x="1.0" y="9.5" z="-0.1" /> )";
+    xmlCuboid += R"(<left-front-top-point x="1.0" y="10.5" z="-0.1" /> )";
+    xmlCuboid += R"(<left-back-bottom-point x="1.0" y="9.5" z="0.1" /> )";
+    xmlCuboid += R"(<right-front-bottom-point x="-1.0" y="9.5" z="-0.1" /> )";
+    xmlCuboid += "</cuboid> <algebra val=\"plate\" /> ";
+
+    V3D centre = V3D(0.0, 10.0, 0.0);
+    V3D centreRotated = V3D(0.0, 0.0, 10.0);
+
+    auto cuboid_sptr = getObject(xmlCuboid);
+    TS_ASSERT(cuboid_sptr->isValid(centre));
+    TS_ASSERT(!cuboid_sptr->isValid(centreRotated));
+
+    auto cuboidRotateAll_sptr = getObject(xmlCuboid + "<rotate-all x=\"90\" y=\"0\" z=\"0\" /> ");
+    TS_ASSERT(cuboidRotateAll_sptr->isValid(centreRotated));
+    TS_ASSERT(!cuboidRotateAll_sptr->isValid(centre));
+
+    auto cuboidGoniometer_sptr =
+        getObject(ShapeFactory().addGoniometerTag(ShapeFactory::generateXRotation(M_PI / 2), xmlCuboid));
+    TS_ASSERT(cuboidGoniometer_sptr->isValid(centreRotated));
+    TS_ASSERT(!cuboidGoniometer_sptr->isValid(centre));
+  }
+
   void testRotateTaperedGuide() {
     std::string xmlGuideStart = "<tapered-guide id=\"Guide\"> ";
     xmlGuideStart += "<aperture-start height=\"2.0\" width=\"2.0\" /> ";
@@ -841,6 +876,29 @@ public:
     TS_ASSERT(!sphereRotateAll_sptr->isValid(centre));
   }
 
+  void testSphereIgnoresItsRotateTags() {
+    // parseSphere never reads <rotate>, so even two of them, which no other shape allows, are not an error
+    const std::string xml = "<sphere id=\"s\"><centre x=\"0\" y=\"0\" z=\"0\"/><radius val=\"1.0\"/>"
+                            "<rotate x=\"90\" y=\"0\" z=\"0\" /><rotate x=\"0\" y=\"90\" z=\"0\" /></sphere>"
+                            "<algebra val=\"s\"/> ";
+    TS_ASSERT_THROWS_NOTHING(getObject(xml));
+  }
+
+  void testIgnoredShapeGetsNoShapeInfo() {
+    // the cylinder's two <rotate> tags get it ignored, leaving the plane as the only primitive
+    const std::string xml = "<cylinder id=\"c\"><centre-of-bottom-base x=\"0\" y=\"0\" z=\"0\"/>"
+                            "<axis x=\"0\" y=\"1\" z=\"0\"/><radius val=\"1.0\"/><height val=\"2.0\"/>"
+                            "<rotate x=\"90\" y=\"0\" z=\"0\" /><rotate x=\"0\" y=\"90\" z=\"0\" /></cylinder>"
+                            "<infinite-plane id=\"p\"><point-in-plane x=\"0\" y=\"0\" z=\"0\"/>"
+                            "<normal-to-plane x=\"0\" y=\"0\" z=\"1\"/></infinite-plane><algebra val=\"p\"/> ";
+    const auto shape = getObject(xml);
+    detail::ShapeInfo::GeometryShape type;
+    std::vector<V3D> points;
+    double innerRadius, radius, height;
+    shape->GetObjectGeom(type, points, innerRadius, radius, height);
+    TS_ASSERT_EQUALS(type, detail::ShapeInfo::GeometryShape::NOSHAPE);
+  }
+
   void testRotateInfinitePlane() {
     std::string xmlInfinitePlaneStart = "<infinite-plane id=\"InfinitePlane\"> ";
     xmlInfinitePlaneStart += "<point-in-plane x=\"0.0\" y=\"0.0\" z=\"20.0\" /> ";
@@ -894,6 +952,37 @@ public:
     auto cylinderRotateAll_sptr = getObject(xmlInfiniteCylinderRotateAll);
     TS_ASSERT(cylinderRotateAll_sptr->isValid(centreRotateAll));
     TS_ASSERT(!cylinderRotateAll_sptr->isValid(centre));
+  }
+
+  void testRotateInfiniteCone() {
+    std::string xmlConeStart = "<infinite-cone id=\"InfiniteCone\"> ";
+    xmlConeStart += "<tip-point x=\"0.0\" y=\"10.0\" z=\"0.0\" /> ";
+    xmlConeStart += "<axis x=\"0.0\" y=\"1.0\" z=\"0.0\" /> ";
+    xmlConeStart += "<angle val=\"20\" /> ";
+    std::string xmlConeEnd = "</infinite-cone> ";
+    xmlConeEnd += "<algebra val=\"InfiniteCone\"/> ";
+
+    // Each point lies 5 from the tip along -axis, where the cone opens out.
+    // <rotate> turns the axis onto +z about the tip; <rotate-all> also moves the tip to (0, 0, 10)
+    V3D inside = V3D(0.0, 5.0, 0.0);
+    V3D insideRotate = V3D(0.0, 10.0, -5.0);
+    V3D insideRotateAll = V3D(0.0, 0.0, 5.0);
+
+    std::string xmlCone = xmlConeStart + xmlConeEnd;
+    auto cone_sptr = getObject(xmlCone);
+    TS_ASSERT(cone_sptr->isValid(inside));
+    TS_ASSERT(!cone_sptr->isValid(insideRotate));
+    TS_ASSERT(!cone_sptr->isValid(insideRotateAll));
+
+    auto coneRotate_sptr = getObject(xmlConeStart + "<rotate x=\"90\" y=\"0\" z=\"0\" /> " + xmlConeEnd);
+    TS_ASSERT(coneRotate_sptr->isValid(insideRotate));
+    TS_ASSERT(!coneRotate_sptr->isValid(inside));
+    TS_ASSERT(!coneRotate_sptr->isValid(insideRotateAll));
+
+    auto coneRotateAll_sptr = getObject(xmlCone + "<rotate-all x=\"90\" y=\"0\" z=\"0\" /> ");
+    TS_ASSERT(coneRotateAll_sptr->isValid(insideRotateAll));
+    TS_ASSERT(!coneRotateAll_sptr->isValid(inside));
+    TS_ASSERT(!coneRotateAll_sptr->isValid(insideRotate));
   }
 
   void testRotateSlice() {
@@ -1022,6 +1111,128 @@ public:
     TS_ASSERT(shape->isValid(V3D(0.0, 0.0, 10.0)));
   }
 
+  /// A rotated shape's ShapeInfo has to move with its surfaces.
+  ///
+  /// createShape reads the XML twice - the parse* functions build the surfaces, createGeometryHandler
+  /// builds the ShapeInfo behind the bounding box, mesh and volume - and only the first rotated, so a
+  /// rotated shape was described in two places at once.
+  ///
+  /// Checked against the same shape written out already rotated, which carries no tag and so cannot
+  /// be affected by whether tags are honoured. Cuboids are exempt: their ShapeInfo comes from the
+  /// shared parseCuboid.
+  void testRotatedShapeInfoFollowsTheSurfaces() {
+    const std::string rotateAll = "<rotate-all x=\"90\" y=\"0\" z=\"0\" /> ";
+
+    // sphere: 1.0 radius centred 10 along +y, so rotating about x takes it to 10 along +z
+    assertShapesMatch("<sphere id=\"s\"><centre x=\"0\" y=\"10.0\" z=\"0\"/><radius val=\"1.0\"/></sphere>"
+                      "<algebra val=\"s\"/> " +
+                          rotateAll,
+                      "<sphere id=\"s\"><centre x=\"0\" y=\"0\" z=\"10.0\"/><radius val=\"1.0\"/></sphere>"
+                      "<algebra val=\"s\"/> ");
+
+    // cylinder: base 10 along +y with its axis along +y, so both the base and the axis move
+    assertShapesMatch("<cylinder id=\"c\"><centre-of-bottom-base x=\"0\" y=\"10.0\" z=\"0\"/>"
+                      "<axis x=\"0\" y=\"1\" z=\"0\"/><radius val=\"1.0\"/><height val=\"2.0\"/></cylinder>"
+                      "<algebra val=\"c\"/> " +
+                          rotateAll,
+                      "<cylinder id=\"c\"><centre-of-bottom-base x=\"0\" y=\"0\" z=\"10.0\"/>"
+                      "<axis x=\"0\" y=\"0\" z=\"1\"/><radius val=\"1.0\"/><height val=\"2.0\"/></cylinder>"
+                      "<algebra val=\"c\"/> ");
+
+    assertShapesMatch("<hollow-cylinder id=\"h\"><centre-of-bottom-base x=\"0\" y=\"10.0\" z=\"0\"/>"
+                      "<axis x=\"0\" y=\"1\" z=\"0\"/><inner-radius val=\"0.5\"/><outer-radius val=\"1.0\"/>"
+                      "<height val=\"2.0\"/></hollow-cylinder><algebra val=\"h\"/> " +
+                          rotateAll,
+                      "<hollow-cylinder id=\"h\"><centre-of-bottom-base x=\"0\" y=\"0\" z=\"10.0\"/>"
+                      "<axis x=\"0\" y=\"0\" z=\"1\"/><inner-radius val=\"0.5\"/><outer-radius val=\"1.0\"/>"
+                      "<height val=\"2.0\"/></hollow-cylinder><algebra val=\"h\"/> ");
+
+    // cone: the case that exposed this, since a cone's ShapeInfo is built by re-parsing the XML
+    assertShapesMatch("<cone id=\"k\"><tip-point x=\"0\" y=\"10.0\" z=\"0\"/>"
+                      "<axis x=\"0\" y=\"1\" z=\"0\"/><angle val=\"20\"/><height val=\"2.0\"/></cone>"
+                      "<algebra val=\"k\"/> " +
+                          rotateAll,
+                      "<cone id=\"k\"><tip-point x=\"0\" y=\"0\" z=\"10.0\"/>"
+                      "<axis x=\"0\" y=\"0\" z=\"1\"/><angle val=\"20\"/><height val=\"2.0\"/></cone>"
+                      "<algebra val=\"k\"/> ");
+  }
+
+  /// A per-primitive <rotate> has to move a shape's ShapeInfo and its surfaces together.
+  ///
+  /// <rotate> turns a shape about its own centre - for a cylinder the midpoint of its axis, not the
+  /// base it is defined by. createGeometryHandler ignored <rotate>, as parseCone did.
+  void testRotateTagMovesShapeInfoAndSurfacesTogether() {
+    // a per-primitive <rotate> sits inside the shape element, unlike <rotate-all>
+    const std::string rotate = "<rotate x=\"90\" y=\"0\" z=\"0\" /> ";
+
+    // cylinder: base 10 along +y with its axis along +y, so its midpoint is 11 along +y and stays
+    // there while the axis turns onto +z, leaving the base a half-height below it along -z
+    assertShapesMatch("<cylinder id=\"c\"><centre-of-bottom-base x=\"0\" y=\"10.0\" z=\"0\"/>"
+                      "<axis x=\"0\" y=\"1\" z=\"0\"/><radius val=\"1.0\"/><height val=\"2.0\"/>" +
+                          rotate + "</cylinder><algebra val=\"c\"/> ",
+                      "<cylinder id=\"c\"><centre-of-bottom-base x=\"0\" y=\"11.0\" z=\"-1.0\"/>"
+                      "<axis x=\"0\" y=\"0\" z=\"1\"/><radius val=\"1.0\"/><height val=\"2.0\"/></cylinder>"
+                      "<algebra val=\"c\"/> ");
+
+    assertShapesMatch("<hollow-cylinder id=\"h\"><centre-of-bottom-base x=\"0\" y=\"10.0\" z=\"0\"/>"
+                      "<axis x=\"0\" y=\"1\" z=\"0\"/><inner-radius val=\"0.5\"/><outer-radius val=\"1.0\"/>"
+                      "<height val=\"2.0\"/>" +
+                          rotate + "</hollow-cylinder><algebra val=\"h\"/> ",
+                      "<hollow-cylinder id=\"h\"><centre-of-bottom-base x=\"0\" y=\"11.0\" z=\"-1.0\"/>"
+                      "<axis x=\"0\" y=\"0\" z=\"1\"/><inner-radius val=\"0.5\"/><outer-radius val=\"1.0\"/>"
+                      "<height val=\"2.0\"/></hollow-cylinder><algebra val=\"h\"/> ");
+
+    // cone: a cone turns about its tip, so only the axis moves
+    assertShapesMatch("<cone id=\"k\"><tip-point x=\"0\" y=\"10.0\" z=\"0\"/>"
+                      "<axis x=\"0\" y=\"1\" z=\"0\"/><angle val=\"20\"/><height val=\"2.0\"/>" +
+                          rotate + "</cone><algebra val=\"k\"/> ",
+                      "<cone id=\"k\"><tip-point x=\"0\" y=\"10.0\" z=\"0\"/>"
+                      "<axis x=\"0\" y=\"0\" z=\"1\"/><angle val=\"20\"/><height val=\"2.0\"/></cone>"
+                      "<algebra val=\"k\"/> ");
+  }
+
+  /// <rotate>, then <rotate-all>, then the goniometer must reach the ShapeInfo and the surfaces in
+  /// that order. Turns about x then z do not commute, so applying them the other way round fails.
+  void testStackedRotationsMoveShapeInfoAndSurfacesInOrder() {
+    const std::string rotateAll = "<rotate-all x=\"90\" y=\"0\" z=\"0\" /> ";
+    const auto withGoniometer = [](const std::string &xml) {
+      return ShapeFactory().addGoniometerTag(NINETY_ABOUT_Z, xml);
+    };
+
+    // sphere: x then z takes 10 along +x to 10 along +y; z then x would take it to +z
+    assertShapesMatch(withGoniometer("<sphere id=\"s\"><centre x=\"10.0\" y=\"0\" z=\"0\"/><radius val=\"1.0\"/>"
+                                     "</sphere><algebra val=\"s\"/> " +
+                                     rotateAll),
+                      "<sphere id=\"s\"><centre x=\"0\" y=\"10.0\" z=\"0\"/><radius val=\"1.0\"/></sphere>"
+                      "<algebra val=\"s\"/> ");
+
+    // cylinder: <rotate> turns the axis onto +z about the midpoint (0, 11, 0); rotate-all takes them
+    // to -y and (0, 0, 11); the goniometer turns the axis onto +x, leaving the base at (-1, 0, 11)
+    const std::string rotate = "<rotate x=\"90\" y=\"0\" z=\"0\" /> ";
+    assertShapesMatch(withGoniometer("<cylinder id=\"c\"><centre-of-bottom-base x=\"0\" y=\"10.0\" z=\"0\"/>"
+                                     "<axis x=\"0\" y=\"1\" z=\"0\"/><radius val=\"1.0\"/><height val=\"2.0\"/>" +
+                                     rotate + "</cylinder><algebra val=\"c\"/> " + rotateAll),
+                      "<cylinder id=\"c\"><centre-of-bottom-base x=\"-1.0\" y=\"0\" z=\"11.0\"/>"
+                      "<axis x=\"1\" y=\"0\" z=\"0\"/><radius val=\"1.0\"/><height val=\"2.0\"/></cylinder>"
+                      "<algebra val=\"c\"/> ");
+
+    assertShapesMatch(withGoniometer("<hollow-cylinder id=\"h\"><centre-of-bottom-base x=\"0\" y=\"10.0\" z=\"0\"/>"
+                                     "<axis x=\"0\" y=\"1\" z=\"0\"/><inner-radius val=\"0.5\"/>"
+                                     "<outer-radius val=\"1.0\"/><height val=\"2.0\"/>" +
+                                     rotate + "</hollow-cylinder><algebra val=\"h\"/> " + rotateAll),
+                      "<hollow-cylinder id=\"h\"><centre-of-bottom-base x=\"-1.0\" y=\"0\" z=\"11.0\"/>"
+                      "<axis x=\"1\" y=\"0\" z=\"0\"/><inner-radius val=\"0.5\"/><outer-radius val=\"1.0\"/>"
+                      "<height val=\"2.0\"/></hollow-cylinder><algebra val=\"h\"/> ");
+
+    // cone: the tip moves only with the whole shape, to (0, 0, 10); the axis follows the cylinder's
+    assertShapesMatch(withGoniometer("<cone id=\"k\"><tip-point x=\"0\" y=\"10.0\" z=\"0\"/>"
+                                     "<axis x=\"0\" y=\"1\" z=\"0\"/><angle val=\"20\"/><height val=\"2.0\"/>" +
+                                     rotate + "</cone><algebra val=\"k\"/> " + rotateAll),
+                      "<cone id=\"k\"><tip-point x=\"0\" y=\"0\" z=\"10.0\"/>"
+                      "<axis x=\"1\" y=\"0\" z=\"0\"/><angle val=\"20\"/><height val=\"2.0\"/></cone>"
+                      "<algebra val=\"k\"/> ");
+  }
+
 private:
   static size_t countOccurrences(const std::string &haystack, const std::string &needle) {
     size_t count = 0;
@@ -1035,6 +1246,55 @@ private:
     for (size_t i = 0; i < 3; ++i) {
       for (size_t j = 0; j < 3; ++j) {
         TS_ASSERT_DELTA(actual[i][j], expected[i][j], 1e-12);
+      }
+    }
+  }
+
+  /// Assert that `xml`, carrying a rotation tag, describes the same shape as `preRotatedXML`, which
+  /// has the rotation written in by hand - in its ShapeInfo and in the points its surfaces contain.
+  /// The ShapeInfo is read directly because a hollow cylinder has no bounding box to read it back
+  /// from.
+  void assertShapesMatch(const std::string &xml, const std::string &preRotatedXML) {
+    const auto tagged = getObject(xml);
+    const auto byHand = getObject(preRotatedXML);
+
+    assertShapeInfoEquals(*tagged, *byHand);
+
+    // Walk a grid spanning the box, so surfaces left behind in the unrotated frame show up as a
+    // disagreement about which points are inside. Cell centres rather than corners keeps the samples
+    // off the surfaces, where the two shapes may round differently.
+    constexpr int cells = 8;
+    const auto byHandBox = byHand->getBoundingBox();
+    const V3D min = byHandBox.minPoint();
+    const V3D step = (byHandBox.maxPoint() - min) / static_cast<double>(cells);
+    for (int i = 0; i < cells; ++i) {
+      for (int j = 0; j < cells; ++j) {
+        for (int k = 0; k < cells; ++k) {
+          const V3D point(min.X() + (i + 0.5) * step.X(), min.Y() + (j + 0.5) * step.Y(),
+                          min.Z() + (k + 0.5) * step.Z());
+          TS_ASSERT_EQUALS(tagged->isValid(point), byHand->isValid(point));
+        }
+      }
+    }
+  }
+
+  /// Assert that two shapes carry the same ShapeInfo: same primitive, same defining points, same sizes.
+  void assertShapeInfoEquals(const CSGObject &actual, const CSGObject &expected) {
+    detail::ShapeInfo::GeometryShape actualType, expectedType;
+    double actualInner(0.0), actualRadius(0.0), actualHeight(0.0);
+    double expectedInner(0.0), expectedRadius(0.0), expectedHeight(0.0);
+    std::vector<V3D> actualPoints, expectedPoints;
+    actual.GetObjectGeom(actualType, actualPoints, actualInner, actualRadius, actualHeight);
+    expected.GetObjectGeom(expectedType, expectedPoints, expectedInner, expectedRadius, expectedHeight);
+
+    TS_ASSERT_EQUALS(actualType, expectedType);
+    TS_ASSERT_DELTA(actualInner, expectedInner, 1e-9);
+    TS_ASSERT_DELTA(actualRadius, expectedRadius, 1e-9);
+    TS_ASSERT_DELTA(actualHeight, expectedHeight, 1e-9);
+    TS_ASSERT_EQUALS(actualPoints.size(), expectedPoints.size());
+    for (size_t i = 0; i < std::min(actualPoints.size(), expectedPoints.size()); ++i) {
+      for (size_t axis = 0; axis < 3; ++axis) {
+        TS_ASSERT_DELTA(actualPoints[i][axis], expectedPoints[i][axis], 1e-9);
       }
     }
   }

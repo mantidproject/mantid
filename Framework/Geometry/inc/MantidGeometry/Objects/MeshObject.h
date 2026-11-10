@@ -68,7 +68,7 @@ public:
   IObject *cloneWithMaterial(const Kernel::Material &material) const override {
     auto *copy = new MeshObject(m_triangles, m_vertices, material);
     copy->m_id = m_id;
-    // the copied vertices are already turned, so the copy is baked just as far as this mesh is
+    // the copied vertices already carry this rotation, so the copy must record it too
     copy->m_appliedRotation = m_appliedRotation;
     return copy;
   }
@@ -195,7 +195,7 @@ private:
   std::vector<Kernel::V3D> m_vertices;
   /// material composition
   Kernel::Material m_material;
-  /// How far the mesh has been baked out of the frame its vertices were defined in
+  /// The goniometer rotation already applied to the vertices - a record only, see getAppliedRotation
   Kernel::Matrix<double> m_appliedRotation{3, 3, true};
 };
 

@@ -467,9 +467,11 @@ Most shapes can be rotated individually or as part of an ensemble, by using the
 ``rotate`` or ``rotate-all`` tags respectively.
 The shapes that can be rotated are: Sphere_, `Cylinder (finite height) <Cylinder_>`_,
 `Hollow Cylinder (finite height) <Hollow Cylinder_>`_, `Infinite Cylinder`_,
-`Slice of Cylinder Ring`_, `Infinite Plane`_, Cuboid_, Hexahedron_ and `Tapered Guide`_.
+`Slice of Cylinder Ring`_, `Infinite Plane`_, Cuboid_, Hexahedron_, `Tapered Guide`_, Cone_ and `Infinite Cone`_.
 
-Use the ``rotate`` tag to rotate a shape **individually around its centre** (or centre-of-bottom-base).
+Use the ``rotate`` tag to rotate a shape **individually around its centre**: the middle of a cylinder's axis, or the
+tip of a cone.
+A cuboid given by its four corner points cannot take a ``rotate`` tag: write the corners already rotated instead.
 The shape is rotated by an angle in degrees around the x,y and z axes in that order. To rotate a
 cuboid 90° clockwise around x and 45° anti-clockwise around y:
 
@@ -507,7 +509,7 @@ sphere on the end of a cylinder (by 90° clockwise around x and 45° anti-clockw
       <algebra val="some-sphere (: stick)" />
       <rotate-all x="90" y="-45" z="0" />
 
-All these rotatable shapes (expect for `Infinite Plane`_ and `Infinite Cylinder`_) can be plotted to check
+All these rotatable shapes (except for `Infinite Plane`_, `Infinite Cylinder`_ and `Infinite Cone`_) can be plotted to check
 your shape definition is correct. For more details see :ref:`Mesh_Plots`.
 
 Shapes will be automatically rotated, if a rotation is set using :ref:`algm-SetGoniometer`.
@@ -564,6 +566,8 @@ A custom bounding-box can be added to shapes using the following notation:
 
 Note for the best effect this bounding box should be enclosing the shape
 as tight as possible.
+A custom bounding box is used as written: ``rotate``, ``rotate-all`` and the goniometer do not turn it,
+so it must enclose the rotated shape.
 
 
 .. categories:: Concepts
