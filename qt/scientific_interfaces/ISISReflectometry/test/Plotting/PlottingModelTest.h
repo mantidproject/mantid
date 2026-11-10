@@ -8,6 +8,7 @@
 
 #include "../../../ISISReflectometry/GUI/Plotting/model/PlottingModel.h"
 #include "../../../ISISReflectometry/TestHelpers/PlottingTestHelpers.h"
+#include "Common/GroupHelper.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -240,12 +241,13 @@ public:
     createConstantWorkspace("IvsQ_12345+12346_2", -100.0, "12345+12346");
     createAlignmentInputWorkspace("processed_input_1", "12345+12346", alignmentYValues(100, 3.0), 1);
     createAlignmentInputWorkspace("processed_input_2", "12345+12346", alignmentYValues(100, 10.0), 2);
-    associateProcessedInput("IvsQ_12345+12346_2", "processed_input");
     auto &ads = Mantid::API::AnalysisDataService::Instance();
     auto processedGroup = std::make_shared<Mantid::API::WorkspaceGroup>();
     processedGroup->addWorkspace(ads.retrieve("processed_input_1"));
     processedGroup->addWorkspace(ads.retrieve("processed_input_2"));
     ads.addOrReplace("processed_input", processedGroup);
+    associateProcessedInput("IvsQ_12345+12346_2", "processed_input", "__TOF_processed");
+    ads.remove("processed_input");
     auto const workspaces = std::vector<PlottingWorkspace>{plottingWorkspace("IvsQ_12345+12346_2", {"12345+12346"}, 2)};
     TS_ASSERT_EQUALS(PlottingModel{}.workspacesForPlotting(workspaces, alignmentOutputSelection()).size(), 1);
     TS_ASSERT_EQUALS(PlottingModel{}.workspacesForPlotting(workspaces, detectorMapOutputSelection()).size(), 1);
@@ -312,6 +314,8 @@ public:
 
     auto const expected = std::vector<std::string>{"__isis_refl_det_map_IvsQ_12345", "__isis_refl_det_map_IvsQ_22345"};
     TS_ASSERT_EQUALS(workspacesForPlotting, expected);
+    assertYValue("__isis_refl_det_map_IvsQ_12345", 14.0);
+    assertYValue("__isis_refl_det_map_IvsQ_22345", 24.0);
     TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_det_map_IvsQ_12345"));
     TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_det_map_IvsQ_22345"));
   }
@@ -490,9 +494,18 @@ private:
     }
   }
 
-  void associateProcessedInput(std::string const &outputName, std::string const &inputName) {
-    auto output = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(outputName);
-    output->mutableRun().addProperty("reflectometry_processed_tof_workspace", inputName);
+  void associateProcessedInput(std::string const &outputName, std::string const &inputId,
+                               std::string const &groupName = "TOF_processed") {
+    auto &ads = Mantid::API::AnalysisDataService::Instance();
+    auto output = ads.retrieveWS<Mantid::API::MatrixWorkspace>(outputName);
+    output->mutableRun().addProperty("reflectometry_processed_tof_id", inputId);
+    auto group = ads.doesExist(groupName) ? ads.retrieveWS<Mantid::API::WorkspaceGroup>(groupName)
+                                          : std::make_shared<Mantid::API::WorkspaceGroup>();
+    for (auto const &input : getMembers(ads.retrieve(inputId))) {
+      input->mutableRun().addProperty("reflectometry_processed_tof_id", inputId);
+      group->addWorkspace(input);
+    }
+    ads.addOrReplace(groupName, group);
   }
 
   void assertYValue(std::string const &workspaceName, double expected, size_t const binIndex = 0,

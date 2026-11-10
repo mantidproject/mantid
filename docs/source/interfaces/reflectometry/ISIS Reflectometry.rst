@@ -163,8 +163,9 @@ selected reduction, including the combined input for summed runs and the selecte
 period for workspace groups. Processed inputs, bank-summed TOF data and flattened slice members are
 collected in ``TOF_processed`` (or ``__TOF_processed`` when hidden) when
 ``GroupTOFWorkspaces`` is enabled. The initially loaded TOF workspaces remain unchanged
-for reuse. If the associated processed input is deleted, reduce the row again to
-recreate it; the plots do not substitute individual raw runs for a processed sum.
+for reuse. Plotting matches association IDs in that flat group; redundant processed group
+containers are removed. If the processed data is deleted, reduce the row again to
+recreate it.
 
 .. figure:: /images/ISISReflectometryInterface/workflow_plot.png
   :class: screenshot

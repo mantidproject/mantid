@@ -57,7 +57,7 @@ class Prop:
 class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
     _CALIBRATION_FILE_LOG = "reflectometry_calibration_file"
     _ADJUSTED_THETA_LOG = "reflectometry_adjusted_theta"
-    _PROCESSED_TOF_LOG = "reflectometry_processed_tof_workspace"
+    _PROCESSED_TOF_ID_LOG = "reflectometry_processed_tof_id"
     _POLREF = "POLREF"
     _POLREF_START_WS_INDEX = 4
     _INPUT_WS_INDEX = 0
@@ -145,6 +145,8 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             if isinstance(workspace, WorkspaceGroup):
                 for index, member in enumerate(workspace):
                     publish(member, f"{name}_{index + 1}")
+            else:
+                workspace.mutableRun().addProperty(self._PROCESSED_TOF_ID_LOG, workspace_name, True)
             AnalysisDataService.addOrReplace(name, workspace)
 
         publish(cloned_workspace, workspace_name)
@@ -153,7 +155,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
                 output_workspace = alg.getProperty(property_name).value
                 for member in output_workspace if isinstance(output_workspace, WorkspaceGroup) else [output_workspace]:
                     if member is not None:
-                        member.mutableRun().addProperty(self._PROCESSED_TOF_LOG, workspace_name, True)
+                        member.mutableRun().addProperty(self._PROCESSED_TOF_ID_LOG, workspace_name, True)
         return workspace_name
 
     def _load(self):
@@ -222,6 +224,10 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
                 processed_workspace_names.add(summed_workspace_name)
         group_name = "__TOF_processed" if self.getProperty(Prop.HIDE_INPUT).value else "TOF_processed"
         self._group_workspaces(processed_workspace_names, group_name)
+        # Only the flattened TOF members are needed after successful grouping.
+        for workspace_name in processed_workspace_names:
+            if isinstance(AnalysisDataService.retrieve(workspace_name), WorkspaceGroup):
+                AnalysisDataService.remove(workspace_name)
 
     def validateInputs(self):
         """Return a dictionary containing issues found in properties."""

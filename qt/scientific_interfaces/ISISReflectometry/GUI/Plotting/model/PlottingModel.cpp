@@ -55,17 +55,20 @@ Mantid::API::MatrixWorkspace_sptr findProcessedInputWorkspace(std::string const 
     return nullptr;
 
   for (auto const &output : getMembers(ads.retrieve(reducedWorkspaceName))) {
-    if (!output || !output->run().hasProperty("reflectometry_processed_tof_workspace"))
+    if (!output || !output->run().hasProperty("reflectometry_processed_tof_id"))
       continue;
-    auto const inputName = output->run().getProperty("reflectometry_processed_tof_workspace")->value();
-    if (!ads.doesExist(inputName))
-      return nullptr;
-    for (auto const &input : getMembers(ads.retrieve(inputName))) {
-      if (!input)
+    auto const inputId = output->run().getProperty("reflectometry_processed_tof_id")->value();
+    for (auto const &groupName : {"TOF_processed", "__TOF_processed"}) {
+      if (!ads.doesExist(groupName))
         continue;
-      if (!period || (input->run().hasProperty("current_period") &&
-                      parseNonNegativeInt(input->run().getProperty("current_period")->value()) == period))
-        return input;
+      for (auto const &input : getMembers(ads.retrieve(groupName))) {
+        if (!input || !input->run().hasProperty("reflectometry_processed_tof_id") ||
+            input->run().getProperty("reflectometry_processed_tof_id")->value() != inputId)
+          continue;
+        if (!period || (input->run().hasProperty("current_period") &&
+                        parseNonNegativeInt(input->run().getProperty("current_period")->value()) == period))
+          return input;
+      }
     }
   }
   return nullptr;

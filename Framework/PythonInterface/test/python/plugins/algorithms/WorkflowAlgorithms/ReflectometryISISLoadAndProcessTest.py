@@ -72,7 +72,6 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
             "IvsQ_binned_38415_sliced_2400_3600",
             "TOF_38415",
             "TOF_38415_monitors",
-            "TOF_38415_sliced",
             "TOF_38415_sliced_0_1200",
             "TOF_38415_sliced_1200_2400",
             "TOF_38415_sliced_2400_3600",
@@ -94,7 +93,6 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
             "IvsQ_binned_38415_sliced_420_610",
             "TOF_38415",
             "TOF_38415_monitors",
-            "TOF_38415_sliced",
             "TOF_38415_sliced_0_210",
             "TOF_38415_sliced_210_420",
             "TOF_38415_sliced_420_610",
@@ -107,10 +105,8 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
             "TOF_38426_2",
             "TOF_38426_2_monitors",
             "TOF_38426_1_monitors",
-            "TOF_38426_sliced_0_1800",
             "TOF_38426_1_TOF_38426_1_monitors_TOF_38426_sliced_0_0_1800",
             "TOF_38426_2_TOF_38426_2_monitors_TOF_38426_sliced_1_0_1800",
-            "TOF_38426_sliced_1800_3600",
             "TOF_38426_1_TOF_38426_1_monitors_TOF_38426_sliced_0_1800_3600",
             "TOF_38426_2_TOF_38426_2_monitors_TOF_38426_sliced_1_1800_3600",
             "IvsQ_TOF_38426_sliced_0_1800",
@@ -494,7 +490,6 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
             "IvsQ_binned_38415_3",
             "38415",
             "38415_monitors",
-            "38415_sliced",
             "38415_sliced_0_1200",
             "38415_sliced_1200_2400",
             "38415_sliced_2400_3600",
@@ -551,7 +546,6 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
             "IvsLam_38415_sliced_0_4200",
             "TOF_38415",
             "TOF_38415_monitors",
-            "TOF_38415_sliced",
             "TOF_38415_sliced_0_4200",
             "TOF",
         ]
@@ -598,7 +592,6 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
             "TOF",
             "TOF_38415",
             "TOF_38415_monitors",
-            "TOF_38415_sliced",
             "TOF_38415" + slice1,
             "TOF_38415" + slice2,
             "TOF_38415" + slice3,
@@ -625,7 +618,6 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
             "TOF",
             "TOF_38415",
             "TOF_38415_monitors",
-            "TOF_38415_sliced",
             "TOF_38415" + sliceName,
         ]
         self._assert_run_algorithm_succeeds(args, outputs)
@@ -642,13 +634,11 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         outputs = [*self._expected_time_sliced_group_outputs, "TOF_38426", "TOF_38426_monitors"]
         self._assert_run_algorithm_succeeds(args, outputs)
         processed_group = AnalysisDataService.retrieve("TOF_processed")
-        slice_members = {
-            name
-            for group_name in ("TOF_38426_sliced_0_1800", "TOF_38426_sliced_1800_3600")
-            for name in AnalysisDataService.retrieve(group_name).getNames()
-        }
+        slice_members = {name for name in self._expected_time_sliced_group_outputs if name.startswith("TOF_38426") and "_sliced_" in name}
         self.assertTrue(slice_members.issubset(set(processed_group.getNames())))
         self.assertTrue(all(not workspace.isGroup() for workspace in processed_group))
+        self.assertFalse(AnalysisDataService.doesExist("TOF_38426_sliced_0_1800"))
+        self.assertFalse(AnalysisDataService.doesExist("TOF_38426_sliced_1800_3600"))
         history = ["ReflectometryReductionOneAuto", "ReflectometryReductionOneAuto", "ReflectometryReductionOneAuto", "GroupWorkspaces"]
         self._check_history(
             AnalysisDataService.retrieve("IvsQ_binned_TOF_38426_sliced_0_1800_2_TOF_38426_2_monitors_TOF_38426_sliced_1_0_1800"),
@@ -1154,6 +1144,8 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
             (True, False, {}),
             (False, False, {"HideInputWorkspaces": True}),
             (False, False, {"GroupTOFWorkspaces": False}),
+            (True, False, {"HideInputWorkspaces": True}),
+            (True, False, {"GroupTOFWorkspaces": False}),
         )
         for grouped, summed, options in cases:
             with self.subTest(grouped=grouped, summed=summed, options=options):
@@ -1176,17 +1168,22 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
                 self.assertTrue(alg.execute())
                 output = AnalysisDataService.retrieve("testIvsQBin")
                 output = output[0] if grouped else output
-                processed_name = output.run().getProperty("reflectometry_processed_tof_workspace").value
-                processed = AnalysisDataService.retrieve(processed_name)
+                processed_id = output.run().getProperty("reflectometry_processed_tof_id").value
                 group_name = "__TOF_processed" if options.get("HideInputWorkspaces") else "TOF_processed"
                 if options.get("GroupTOFWorkspaces", True):
-                    expected_members = processed.getNames() if grouped else [processed_name]
-                    self.assertEqual(set(AnalysisDataService.retrieve(group_name).getNames()), set(expected_members))
+                    processed_members = [
+                        workspace
+                        for workspace in AnalysisDataService.retrieve(group_name)
+                        if workspace.run().getProperty("reflectometry_processed_tof_id").value == processed_id
+                    ]
+                    if grouped:
+                        self.assertFalse(AnalysisDataService.doesExist(processed_id))
                 else:
                     self.assertFalse(AnalysisDataService.doesExist(group_name))
-                if grouped:
-                    self.assertEqual(len(processed), 2)
-                    processed = processed[0]
+                    processed = AnalysisDataService.retrieve(processed_id)
+                    processed_members = list(processed) if grouped else [processed]
+                self.assertEqual(len(processed_members), 2 if grouped else 1)
+                processed = processed_members[0]
                 np.testing.assert_array_equal(original.extractY(), original_y)
                 np.testing.assert_allclose(processed.extractY(), original_y * (2 if summed else 1))
                 self.assertEqual(processed.getNumberHistograms(), original.getNumberHistograms())
@@ -1254,7 +1251,14 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
 
         with patch.object(ReflectometryISISLoadAndProcess, "_reduce", new=reduce):
             self._assert_run_algorithm_succeeds(args)
-        slice_members = set(AnalysisDataService.retrieve("TOF_38415_sliced").getNames())
+        slice_members = {name for name in self._expected_dummy_time_sliced_outputs if name.startswith("TOF_38415_sliced_")}
+        self.assertFalse(AnalysisDataService.doesExist("TOF_38415_sliced"))
+        diagnostic_members = [
+            workspace
+            for workspace in AnalysisDataService.retrieve("TOF_processed")
+            if workspace.run().hasProperty("reflectometry_processed_tof_id")
+        ]
+        self.assertEqual(len(diagnostic_members), 1)
         self.assertTrue(slice_members.issubset(set(AnalysisDataService.retrieve("TOF_processed").getNames())))
         self.assertEqual(cached.getNumberEvents(), event_count)
         self.assertFalse(cached.spectrumInfo().isMasked(1))

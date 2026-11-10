@@ -60,15 +60,18 @@ When ``GroupTOFWorkspaces`` is enabled, the retained processed input and any sli
 workspaces are collected into ``TOF_processed`` (or ``__TOF_processed`` when inputs
 are hidden). Bank-summed workspaces previously collected in ``TOF``/``__TOF`` are
 collected in the processed group instead, using the same end-of-workflow lookup. Grouped inputs and slices are flattened into TOF members in this
-parent group. Existing group containers remain available for their named
-references. The original ``TOF``/``__TOF`` group contains cached inputs and their
+parent group. Redundant processed group containers are removed after their members
+have been grouped; raw cache containers are retained. The original ``TOF``/``__TOF`` group contains cached inputs and their
 monitors; bank-summed workspaces belong to the processed group.
 
-Reduced outputs carry a ``reflectometry_processed_tof_workspace`` log identifying
-this diagnostic input. Detector-map and alignment plots use that association,
+Reduced outputs and their full-detector diagnostic inputs carry a matching
+``reflectometry_processed_tof_id`` log. Plotting finds the matching diagnostic
+members in ``TOF_processed`` or ``__TOF_processed`` without retaining the original
+processed group container. Detector-map and alignment plots use that association,
 including the selected period for grouped inputs. The Runs table reads the adjusted
 angle from the reduced output, independently of the diagnostic input's lifetime.
-Outputs without an association must be reduced again before detector-map or alignment plotting.
+Detector-map and alignment plotting requires ``GroupTOFWorkspaces`` to be enabled.
+When grouping is disabled, processed outputs and their group containers remain ungrouped.
 Reduced outputs and bank-summed outputs retain their existing names.
 
 If time slicing is enabled, the input run must be an event workspace and have monitors loaded; otherwise, it must be a histogram workspace. If the workspace already exists but is the incorrect type or is missing monitors, it will be reloaded.
@@ -166,7 +169,7 @@ Output:
 
 .. testoutput:: ExSliceRun
 
-   Workspaces in the ADS after reduction: ['IvsLam_38415', 'IvsLam_38415_sliced_0_210', 'IvsLam_38415_sliced_210_420', 'IvsLam_38415_sliced_420_610', 'IvsQ_38415', 'IvsQ_38415_sliced_0_210', 'IvsQ_38415_sliced_210_420', 'IvsQ_38415_sliced_420_610', 'IvsQ_binned_38415', 'IvsQ_binned_38415_processed_tof', 'IvsQ_binned_38415_sliced_0_210', 'IvsQ_binned_38415_sliced_210_420', 'IvsQ_binned_38415_sliced_420_610', 'TOF', 'TOF_38415', 'TOF_38415_monitors', 'TOF_38415_sliced', 'TOF_38415_sliced_0_210', 'TOF_38415_sliced_210_420', 'TOF_38415_sliced_420_610', 'TOF_processed']
+   Workspaces in the ADS after reduction: ['IvsLam_38415', 'IvsLam_38415_sliced_0_210', 'IvsLam_38415_sliced_210_420', 'IvsLam_38415_sliced_420_610', 'IvsQ_38415', 'IvsQ_38415_sliced_0_210', 'IvsQ_38415_sliced_210_420', 'IvsQ_38415_sliced_420_610', 'IvsQ_binned_38415', 'IvsQ_binned_38415_processed_tof', 'IvsQ_binned_38415_sliced_0_210', 'IvsQ_binned_38415_sliced_210_420', 'IvsQ_binned_38415_sliced_420_610', 'TOF', 'TOF_38415', 'TOF_38415_monitors', 'TOF_38415_sliced_0_210', 'TOF_38415_sliced_210_420', 'TOF_38415_sliced_420_610', 'TOF_processed']
 
 .. seealso :: Algorithm :ref:`algm-ReflectometrySliceEventWorkspace`, :ref:`algm-ReflectometryReductionOneAuto` and the ``ISIS Reflectometry`` interface.
 
