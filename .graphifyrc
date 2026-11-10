@@ -1,0 +1,5 @@
+# graphify project settings (https://github.com/Graphify-Labs/graphify)
+# Mantid template implementation files are C++
+language.hxx=.hpp
+# Skip the C/C++ sniff for .h: Mantid's headers are C++
+language.h=.hpp
