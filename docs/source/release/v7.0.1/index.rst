@@ -10,6 +10,8 @@ The changes are:
 - Remove workaround for qsettings location on nfs home area `#42716 <https://github.com/mantidproject/mantid/pull/42716>`_
 - Fix bug creating ReflectometryISISLoadAndProcess dialog `#42646 <https://github.com/mantidproject/mantid/pull/42646/>`_
 - Fixed the parameter line edits collapsing on macOS in the :ref:`QENS Fitting <interface-inelastic-qens-fitting>` interface, which made the parameter values difficult to edit `#42735 <https://github.com/mantidproject/mantid/pull/42735>`_
+- :class:`~mantid.api.MatrixWorkspace` in Python has a new method ``getXMinMax``, which returns the lowest and highest X values of all spectra or of the given workspace indices. Spectra with a non-finite first or last value are skipped unless ``includeNonFiniteSpectra`` is true, in which case they contribute their finite values. `#42675 <https://github.com/mantidproject/mantid/pull/42675>`_
+- Fixed a large temporary rise in memory use, and the long pause that came with it, in the new Instrument View for workspaces whose spectra do not all share the same bin edges, such as data in d-spacing. It occurred when changing the projection, masking detectors, or opening the view. `#42675 <https://github.com/mantidproject/mantid/pull/42675>`_
 
 Citation
 --------

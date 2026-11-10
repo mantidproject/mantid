@@ -1,1 +1,0 @@
-- :class:`~mantid.api.MatrixWorkspace` in Python has a new method ``getXMinMax``, which returns the lowest and highest X values of all spectra or of the given workspace indices. Spectra with a non-finite first or last value are skipped unless ``includeNonFiniteSpectra`` is true, in which case they contribute their finite values.
