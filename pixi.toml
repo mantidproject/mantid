@@ -144,6 +144,7 @@ myst-parser = ">=5.0.0,<6"
 sphinx = ">=9.0,<10"
 agent-skill-rattler-build = ">=0.0.2,<0.0.3"
 wcwidth = "<0.9"
+graphifyy = ">=0.9.105,<0.10"
 
 [target.linux-64.dependencies]
 gxx_linux-64 = "13.*"
