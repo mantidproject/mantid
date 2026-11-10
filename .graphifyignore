@@ -1,15 +1,17 @@
 # Code-only graphify run: every docs, paper, image and video file is ignored below,
 # so graphify extracts code with its local AST parser and makes no LLM calls.
 #
-# Scope: the source that ends up in the main `mantid` conda package
-# (conda/recipes/mantid). That recipe configures with MANTID_FRAMEWORK_LIB=BUILD,
-# MANTID_QT_LIB=OFF, ENABLE_WORKBENCH=OFF and ENABLE_DOCS=OFF, so only
-# Framework/ and scripts/ (installed whole, minus test/) are packaged.
+# Scope: the framework and GUI source.
+# - Framework/ and scripts/ (installed whole, minus test/) make up the `mantid`
+#   conda package (conda/recipes/mantid), which configures with
+#   MANTID_FRAMEWORK_LIB=BUILD, MANTID_QT_LIB=OFF, ENABLE_WORKBENCH=OFF and ENABLE_DOCS=OFF.
+# - qt/ is the GUI code, packaged as mantidqt and mantidworkbench.
 
-# Allowlist: ignore every top-level entry, then re-include the packaged ones
+# Allowlist: ignore every top-level entry, then re-include the ones in scope
 /*
 !/Framework/
 !/scripts/
+!/qt/
 
 # Framework parts that are not built by the recipe
 # (Framework/MPIAlgorithms/ is kept: it is built here and shipped as mantidmpi)
@@ -26,6 +28,14 @@
 
 # Vendored FlatBuffers library and flatc-generated Kafka schema headers
 /Framework/LiveData/src/Kafka/private/Schema/
+
+# Vendored Qt Solutions property browser, embedded image data,
+# generated Qt resources and icon font maps
+/qt/widgets/common/src/QtPropertyBrowser/
+/qt/widgets/common/inc/MantidQtWidgets/Common/QtPropertyBrowser/
+/qt/widgets/common/src/pixmaps.cpp
+/qt/python/mantidqt/mantidqt/dialogs/errorreports/resources.py
+/qt/icons/resources/
 
 # Tests
 test/
