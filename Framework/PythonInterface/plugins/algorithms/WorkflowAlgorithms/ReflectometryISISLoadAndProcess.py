@@ -202,11 +202,11 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         """Group cached inputs and monitors in TOF or __TOF."""
         if not self.getProperty(Prop.GROUP_TOF).value:
             return
-        tofWorkspaces = set(inputWorkspaces)
+        tofWorkspaces = list(inputWorkspaces)
         # If slicing, also group the monitor workspace (note that there is only one
         # input run when slicing)
         if self._slicingEnabled():
-            tofWorkspaces.add(_monitorWorkspace(inputWorkspaces[0]))
+            tofWorkspaces.append(_monitorWorkspace(inputWorkspaces[0]))
         # Create the group
         if self.getProperty(Prop.HIDE_INPUT).value:
             self._group_workspaces(tofWorkspaces, "__TOF")
@@ -217,11 +217,12 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         """Group processed inputs, collapsed slices and bank sums in TOF_processed or __TOF_processed."""
         if not self.getProperty(Prop.GROUP_TOF).value:
             return
-        processed_workspace_names = set(workspace_names)
+        processed_workspace_names = list(workspace_names)
         for input_workspace_name in input_workspace_names:
             summed_workspace_name = _summedSegmentWorkspace(input_workspace_name)
             if AnalysisDataService.doesExist(summed_workspace_name):
-                processed_workspace_names.add(summed_workspace_name)
+                processed_workspace_names.append(summed_workspace_name)
+        processed_workspace_names = list(dict.fromkeys(processed_workspace_names))
         group_name = "__TOF_processed" if self.getProperty(Prop.HIDE_INPUT).value else "TOF_processed"
         self._group_workspaces(processed_workspace_names, group_name)
         # Only the flattened TOF members are needed after successful grouping.
@@ -681,15 +682,15 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         return None
 
     def _collapse_workspace_groups(self, workspaces):
-        """Return TOF group members without removing the cached input groups."""
-        ungrouped_workspaces = set()
+        """Return unique TOF members in input order, retaining original group containers."""
+        ungrouped_workspaces = []
         for name in workspaces:
             workspace = AnalysisDataService.retrieve(name)
             if isinstance(workspace, WorkspaceGroup):
-                ungrouped_workspaces.update(self._collapse_workspace_groups(workspace.getNames()))
+                ungrouped_workspaces.extend(self._collapse_workspace_groups(workspace.getNames()))
             elif workspace.getAxis(0).getUnit().unitID() == "TOF":
-                ungrouped_workspaces.add(name)
-        return ungrouped_workspaces
+                ungrouped_workspaces.append(name)
+        return list(dict.fromkeys(ungrouped_workspaces))
 
     def _group_workspaces(self, workspaces, output_ws_name):
         """
@@ -714,7 +715,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
                         ws_group.add(ws)
         else:
             alg = self.createChildAlgorithm("GroupWorkspaces")
-            alg.setProperty("InputWorkspaces", list(workspaces))
+            alg.setProperty("InputWorkspaces", workspaces)
             alg.setProperty("OutputWorkspace", output_ws_name)
             alg.execute()
             ws_group = alg.getProperty("OutputWorkspace").value

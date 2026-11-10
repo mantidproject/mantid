@@ -679,13 +679,17 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
 
     def test_TOF_input_workspace_groups_collapsed(self):
         self._create_workspace_group(13460, 2, "TOF_")
+        GroupWorkspaces("TOF_13460_2,TOF_13460_1", OutputWorkspace="TOF_13460")
         self._create_workspace(13463, "TOF_")
         args = self._default_options
         args["InputRunList"] = "13460, 13463"
         outputs = ["IvsQ_13460+13463", "IvsQ_binned_13460+13463", "TOF", "TOF_13460_1", "TOF_13460_2", "TOF_13463"]
 
         outputs.append("TOF_13460")
-        self._assert_run_algorithm_succeeds(args, outputs)
+        for _ in range(2):
+            self._assert_run_algorithm_succeeds(args, outputs)
+            self.assertEqual(list(AnalysisDataService.retrieve("TOF").getNames()), ["TOF_13460_2", "TOF_13460_1", "TOF_13463"])
+            self.assertEqual(list(AnalysisDataService.retrieve("TOF_13460").getNames()), ["TOF_13460_2", "TOF_13460_1"])
 
     def test_fails_with_mixed_unit_input_workspace_group(self):
         self._create_workspace(13460, "TOF_")
@@ -1176,6 +1180,8 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
                         for workspace in AnalysisDataService.retrieve(group_name)
                         if workspace.run().getProperty("reflectometry_processed_tof_id").value == processed_id
                     ]
+                    expected_names = [f"{processed_id}_1", f"{processed_id}_2"] if grouped else [processed_id]
+                    self.assertEqual(list(AnalysisDataService.retrieve(group_name).getNames()), expected_names)
                     if grouped:
                         self.assertFalse(AnalysisDataService.doesExist(processed_id))
                 else:
