@@ -286,7 +286,7 @@ Raster PaalmanPingsAbsorptionCorrection::rasterize(const IObject *object) {
     integrationVolume = constructGaugeVolume();
   } else {
     try {
-      auto beamProfile = BeamProfileFactory::createBeamProfile(*m_inputWS->getInstrument(), Mantid::API::Sample());
+      auto beamProfile = BeamProfileFactory::createBeamProfile(m_inputWS->componentInfo(), Mantid::API::Sample());
       integrationVolume = beamProfile->getIntersectionWithSample(*object);
     } catch (const std::invalid_argument &) {
       // If createBeamProfile fails, the beam parameters are not defined

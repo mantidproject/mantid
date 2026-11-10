@@ -198,6 +198,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
     def _declareCalibrationProperties(self):
         """Declare properties controlling detector calibration."""
         self.copyProperties("ReflectometryISISCalibration", ["CalibrationFile", Prop.NOMINAL_SPECULAR_PIXEL])
+        self.getProperty(Prop.NOMINAL_SPECULAR_PIXEL).clearSettings()
         self.declareProperty(
             Prop.ACTUAL_SPECULAR_PIXEL,
             Property.EMPTY_DBL,

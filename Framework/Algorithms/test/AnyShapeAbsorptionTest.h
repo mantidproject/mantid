@@ -355,7 +355,7 @@ public:
     TS_ASSERT_EQUALS(cylws->run().hasProperty("GaugeVolume"), false);
 
     auto beamProfile =
-        Mantid::Algorithms::BeamProfileFactory::createBeamProfile(*cylws->getInstrument(), Mantid::API::Sample());
+        Mantid::Algorithms::BeamProfileFactory::createBeamProfile(cylws->componentInfo(), Mantid::API::Sample());
     // Verify getIntersectionWithSample() does not throw to confirm that algorithm will set volume with BeamProfile
     TS_ASSERT_THROWS_NOTHING(beamProfile->getIntersectionWithSample(cylws->mutableSample().getShape());)
 

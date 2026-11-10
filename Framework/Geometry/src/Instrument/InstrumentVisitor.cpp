@@ -21,6 +21,7 @@
 #include "MantidGeometry/Instrument/StructuredDetector.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/EigenConversionHelpers.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include <algorithm>
 #include <memory>
@@ -447,7 +448,7 @@ std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>> Instrum
 
   // Both wrappers must share the same parameter store and reference frame
   auto const parameterInfo = makeParameterInfo();
-  auto const referenceFrame = m_instrument->getReferenceFrame();
+  ALLOW_DEPRECATED(auto const referenceFrame = m_instrument->getReferenceFrame());
   auto compInfoWrapper = std::make_unique<ComponentInfo>(std::move(compInfo), componentIds(), componentIdToIndexMap(),
                                                          m_shapes, parameterInfo, referenceFrame);
   auto detInfoWrapper = std::make_unique<DetectorInfo>(std::move(detInfo), m_instrument, detectorIds(),

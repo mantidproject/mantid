@@ -199,6 +199,8 @@ public:
   /// Set reference Frame
   void setReferenceFrame(std::shared_ptr<ReferenceFrame> frame);
   /// Get refernce Frame
+  [[deprecated("Instrument::getReferenceFrame is deprecated in Mantid 7.1."
+               "Either use ExperimentInfo::getReferenceFrame or ComponentInfo::referenceFrame.")]]
   std::shared_ptr<const ReferenceFrame> getReferenceFrame() const;
 
   /// To determine whether the instrument contains elements of some type

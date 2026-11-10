@@ -12,6 +12,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include "MockObjects.h"
 #include <cxxtest/TestSuite.h>
@@ -494,7 +495,7 @@ public:
     auto extendedSpace = std::make_unique<ObjComponent>("extended-detector-space", extendedSpaceObj, sphereInst.get());
     extendedSpace->setPos(V3D(0.0, 0.0, 0.0));
     sphereInst->add(extendedSpace.release());
-    const auto refFrame = sphereInst->getReferenceFrame();
+    ALLOW_DEPRECATED(const auto refFrame = sphereInst->getReferenceFrame());
     const auto refBeamDir = refFrame->vecPointingAlongBeam();
 
     // test with & without extended detector space

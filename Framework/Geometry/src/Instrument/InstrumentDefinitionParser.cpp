@@ -23,6 +23,7 @@
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidTypes/Core/DateAndTime.h"
 #include "MantidTypes/Core/DateAndTimeHelpers.h"
 
@@ -1626,7 +1627,7 @@ void InstrumentDefinitionParser::createStructuredDetector(Geometry::ICompAssembl
   }
 
   V3D zVector(0, 0, 1); // Z aligned beam
-  bool isZBeam = m_instrument->getReferenceFrame()->isVectorPointingAlongBeam(zVector);
+  ALLOW_DEPRECATED(bool isZBeam = m_instrument->getReferenceFrame()->isVectorPointingAlongBeam(zVector));
   // Now, initialize all the pixels in the bank
   bank->initialize(xpixels, ypixels, std::move(xValues), std::move(yValues), isZBeam, idstart, idfillbyfirst_y,
                    idstepbyrow, idstep);

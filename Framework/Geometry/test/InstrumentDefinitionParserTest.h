@@ -132,7 +132,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(nullptr););
 
     // Extract the reference frame object
-    std::shared_ptr<const ReferenceFrame> frame = i->getReferenceFrame();
+    ALLOW_DEPRECATED(std::shared_ptr<const ReferenceFrame> frame = i->getReferenceFrame());
 
     // Test that values have been populated with expected values (those from
     // file).
@@ -153,7 +153,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(nullptr););
 
     // Extract the reference frame object
-    std::shared_ptr<const ReferenceFrame> frame = i->getReferenceFrame();
+    ALLOW_DEPRECATED(std::shared_ptr<const ReferenceFrame> frame = i->getReferenceFrame());
 
     // Test that values have been populated with expected values (those from
     // file).

@@ -394,11 +394,7 @@ void SpectrumInfo::setMasked(const size_t index, bool masked) {
 /// Return a const reference to the detector or detector group of the spectrum
 /// with given index.
 const Geometry::IDetector &SpectrumInfo::detector(const size_t index) const {
-  GNU_DIAG_OFF("deprecated-declarations")
-  MSVC_DIAG_OFF(4996)
-  return getDetector(index);
-  MSVC_DIAG_ON(4996)
-  GNU_DIAG_ON("deprecated-declarations")
+  ALLOW_DEPRECATED(return getDetector(index));
 }
 
 /// Returns the source position.
@@ -423,11 +419,7 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
   if (ndets == 1) {
     // If only 1 detector for the spectrum number, just return it
     const auto detIndex = specDef[0].first;
-    GNU_DIAG_OFF("deprecated-declarations")
-    MSVC_DIAG_OFF(4996)
-    m_lastDetector[thread] = m_detectorInfo.getDetectorPtr(detIndex);
-    MSVC_DIAG_ON(4996)
-    GNU_DIAG_ON("deprecated-declarations")
+    ALLOW_DEPRECATED(m_lastDetector[thread] = m_detectorInfo.getDetectorPtr(detIndex));
   } else if (ndets == 0) {
     throw Kernel::Exception::NotFoundError("MatrixWorkspace::getDetector(): No "
                                            "detectors for this workspace "
@@ -438,11 +430,7 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
     std::vector<std::shared_ptr<const Geometry::IDetector>> det_ptrs;
     for (const auto &specDefIndex : specDef) {
       const auto detIndex = specDefIndex.first;
-      GNU_DIAG_OFF("deprecated-declarations")
-      MSVC_DIAG_OFF(4996)
-      det_ptrs.emplace_back(m_detectorInfo.getDetectorPtr(detIndex));
-      MSVC_DIAG_ON(4996)
-      GNU_DIAG_ON("deprecated-declarations")
+      ALLOW_DEPRECATED(det_ptrs.emplace_back(m_detectorInfo.getDetectorPtr(detIndex)));
     }
     m_lastDetector[thread] = std::make_shared<Geometry::DetectorGroup>(det_ptrs);
   }

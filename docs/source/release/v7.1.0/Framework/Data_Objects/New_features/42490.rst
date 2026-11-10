@@ -1,0 +1,1 @@
+- `ReferenceFrame` objects can now be accessed through the workspace `getReferenceFrame()` method, instead of needing to get the instrument.

@@ -78,6 +78,7 @@ class Prop:
     TRANS_FILES_2 = "SecondTransmissionFileList"
     FLOOD_ENTRY = "FloodCorrectionSource"
     CALIB_FILE = "CalibrationFile"
+    POL_EFF_FILE = "PolarizationEfficienciesFile"
 
 
 class MetaDictKeys:
@@ -115,6 +116,7 @@ class ReflectometryDatasetBase:
         self._transmission_files: Tuple[List[str], List[str]] = None
         self._flood_entry: Optional[Tuple[str, str]] = None
         self._calibration_entry: Optional[str] = None
+        self._polarization_efficiencies_entry: Optional[str] = None
         self._resolution: Optional[float] = None
 
     def _read_only(self) -> bool:
@@ -190,6 +192,10 @@ class ReflectometryDatasetBase:
         return self._calibration_entry
 
     @property
+    def polarization_efficiencies_entry(self) -> Optional[str]:
+        return self._polarization_efficiencies_entry
+
+    @property
     def resolution(self) -> Optional[float]:
         return self._resolution
 
@@ -248,6 +254,11 @@ class ReflectometryDatasetBase:
     def calibration_entry(self, calibration_entry: Optional[str]) -> None:
         self._calibration_entry = calibration_entry
 
+    @polarization_efficiencies_entry.setter
+    @check_read_only
+    def polarization_efficiencies_entry(self, pol_eff_entry: Optional[str]) -> None:
+        self._polarization_efficiencies_entry = pol_eff_entry
+
     @resolution.setter
     @check_read_only
     def resolution(self, resolution: Optional[float]) -> None:
@@ -304,6 +315,7 @@ class ReflectometryDatasetHistory(ReflectometryDatasetBase):
         self._populate_transmission_files()
         self._populate_flood_entry()
         self._populate_calibration_entry()
+        self._populate_polarization_efficiencies_entry()
         self._populate_resolution()
 
     @property
@@ -322,25 +334,28 @@ class ReflectometryDatasetHistory(ReflectometryDatasetBase):
     def q_conversion_history(self):
         return self._q_conversion_history
 
-    def _populate_reduction_script(self):
+    def _populate_reduction_script(self) -> None:
         self._reduction_script = self._get_reduction_script()
 
-    def _populate_angle_files(self):
+    def _populate_angle_files(self) -> None:
         self._angle_files = self._get_individual_angle_files()
 
-    def _populate_transmission_files(self):
+    def _populate_transmission_files(self) -> None:
         self._transmission_files = self._get_transmission_files()
 
-    def _populate_flood_entry(self):
+    def _populate_flood_entry(self) -> None:
         self._flood_entry = self._get_flood_correction_entry()
 
-    def _populate_calibration_entry(self):
+    def _populate_calibration_entry(self) -> None:
         self._calibration_entry = self._get_calibration_file_entry()
 
-    def _populate_resolution(self):
+    def _populate_polarization_efficiencies_entry(self) -> None:
+        self._polarization_efficiencies_entry = self._get_polarization_efficiencies_entry()
+
+    def _populate_resolution(self) -> None:
         self._resolution = self._get_resolution()
 
-    def _populate_histories(self):
+    def _populate_histories(self) -> None:
         ws_history = self._ws.getHistory()
         if ws_history.empty():
             return
@@ -365,7 +380,7 @@ class ReflectometryDatasetHistory(ReflectometryDatasetBase):
                         self._reduction_history = child_history
                         return
 
-    def _populate_q_conversion_info(self):
+    def _populate_q_conversion_info(self) -> None:
         if self.stitch_history is not None or self._reduction_history is None:
             # Q conversion information isn't relevant for a stitched dataset
             return
@@ -546,6 +561,15 @@ class ReflectometryDatasetHistory(ReflectometryDatasetBase):
         calibration_file = self.reduction_workflow_histories[0].getPropertyValue("CalibrationFile")
         return Path(calibration_file).name if calibration_file else None
 
+    def _get_polarization_efficiencies_entry(self) -> Optional[str]:
+        """
+        Get the polarization efficiencies file name from the reduction history.
+        """
+        if not self.reduction_workflow_histories:
+            return None
+        pol_eff_file = self.reduction_workflow_histories[0].getPropertyValue("PolarizationEfficiencies")
+        return Path(pol_eff_file).name if pol_eff_file else None
+
     def _get_resolution(self) -> Optional[float]:
         # Attempt to get the resolution from the workspace history
         if self.stitch_history is not None:
@@ -601,6 +625,8 @@ class ReflectometryDatasetHybrid(ReflectometryDatasetHistory, ReflectometryDatas
             missing_metadata.append(Prop.FLOOD_ENTRY)
         if not self._calibration_entry:
             missing_metadata.append(Prop.CALIB_FILE)
+        if not self._polarization_efficiencies_entry:
+            missing_metadata.append(Prop.POL_EFF_FILE)
         return missing_metadata
 
 
@@ -701,6 +727,9 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
 
         self.declareProperty(Prop.CALIB_FILE, defaultValue=self._MANUAL_METADATA_NOT_SET, doc="Calibration file used.")
         self.setPropertySettings(Prop.CALIB_FILE, manual_metadata_condition)
+
+        self.declareProperty(Prop.POL_EFF_FILE, defaultValue=self._MANUAL_METADATA_NOT_SET, doc="Polarization efficiencies file used.")
+        self.setPropertySettings(Prop.POL_EFF_FILE, manual_metadata_condition)
 
         self.declareProperty(
             name=Prop.WRITE_RESOLUTION,
@@ -913,6 +942,9 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             "reduction_timestamp", get_manual_property_value(Prop.REDUCTION_TIMESTAMP, default_value=None), Prop.REDUCTION_TIMESTAMP
         )
         set_simple_dataset_value_from_property("calibration_entry", get_manual_property_value(Prop.CALIB_FILE), Prop.CALIB_FILE)
+        set_simple_dataset_value_from_property(
+            "polarization_efficiencies_entry", get_manual_property_value(Prop.POL_EFF_FILE), Prop.POL_EFF_FILE
+        )
 
         first_trans_files, second_trans_files = dataset.transmission_files or ([], [])
         if use_default or not self.getProperty(Prop.TRANS_FILES_1).isDefault:
@@ -1130,6 +1162,10 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         calib_file_entry = refl_dataset.calibration_entry
         if calib_file_entry:
             dataset.add_measurement_additional_file(calib_file_entry, comment="Calibration file")
+
+        pol_eff_entry = refl_dataset.polarization_efficiencies_entry
+        if pol_eff_entry:
+            dataset.add_measurement_additional_file(pol_eff_entry, comment="Polarization efficiencies file")
 
     def _get_rb_number_and_doi(self, run) -> Union[Tuple[str, str], Tuple[None, None]]:
         """

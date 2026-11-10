@@ -36,7 +36,7 @@ class ComponentInfoTest(unittest.TestCase):
     """
 
     def test_referenceFrame(self):
-        frame = self._ws.componentInfo().referenceFrame()
+        frame = self._ws.getReferenceFrame()
         self.assertIsInstance(frame, ReferenceFrame)
         self.assertEqual(frame.vecPointingUp(), V3D(0, 1, 0))
         self.assertEqual(frame.vecPointingAlongBeam(), V3D(0, 0, 1))
@@ -44,7 +44,7 @@ class ComponentInfoTest(unittest.TestCase):
     def test_referenceFrame_is_the_instruments_own(self):
         # POLREF's frame has Z up and X along the beam, unlike the default
         ws = LoadEmptyInstrument(InstrumentName="POLREF", StoreInADS=False)
-        frame = ws.componentInfo().referenceFrame()
+        frame = ws.getReferenceFrame()
         self.assertEqual(frame.pointingUpAxis(), "Z")
         self.assertEqual(frame.pointingAlongBeamAxis(), "X")
 

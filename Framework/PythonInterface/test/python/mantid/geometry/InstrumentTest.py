@@ -51,7 +51,8 @@ class InstrumentTest(unittest.TestCase):
         self.assertEqual(num_detectors, 1)
 
     def test_getReferenceFrame(self):
-        frame = self._instrument().getReferenceFrame()
+        with self.assertWarns(DeprecationWarning):
+            frame = self._instrument().getReferenceFrame()
         self.assertTrue(isinstance(frame, ReferenceFrame))
 
     def test_getFilename(self):
