@@ -17,7 +17,20 @@ import sys
 _GUARD = "_MANTID_TBBMALLOC_REEXEC"
 
 
+def _is_python_binary(path):
+    """Return True if ``path`` names a Python interpreter binary, such as ``python3.13``."""
+    name = os.path.basename(path)
+    version = name.removeprefix("python")
+    return version != name and (not version or version.replace(".", "").isdigit())
+
+
 def _reexec_with_tbbmalloc():
+    """Restart the interpreter with libtbbmalloc_proxy in LD_PRELOAD, unless that is unwanted or unsafe.
+
+    Returns without doing anything when tbbmalloc is disabled, already loaded, or unavailable, when a
+    sanitizer runtime is preloaded, or when Python is embedded in another program. If the restart
+    fails, the environment is put back as it was and Python carries on with the system allocator.
+    """
     if not sys.platform.startswith("linux"):
         return
     if os.environ.pop(_GUARD, None):
@@ -31,8 +44,10 @@ def _reexec_with_tbbmalloc():
         with open("/proc/self/maps") as maps:
             if "libtbbmalloc_proxy" in maps.read():
                 return  # already preloaded, e.g. by the Workbench launcher
-        # only restart a standalone interpreter, never a program that embeds Python
-        if os.path.realpath(sys.executable) != os.path.realpath("/proc/self/exe"):
+        # only restart a standalone interpreter, never a program that embeds Python. An embedding program
+        # can point sys.executable at itself, so the running binary must also be a python binary.
+        exe = os.path.realpath("/proc/self/exe")
+        if os.path.realpath(sys.executable) != exe or not _is_python_binary(exe):
             return
     except OSError:
         return
@@ -46,7 +61,15 @@ def _reexec_with_tbbmalloc():
     for stream in (sys.stdout, sys.stderr):
         if stream is not None:
             stream.flush()
-    os.execv(sys.executable, sys.orig_argv)  # noqa: S606 same interpreter, same flags and arguments
+    try:
+        os.execv(sys.executable, sys.orig_argv)  # noqa: S606 same interpreter, same flags and arguments
+    except OSError:
+        # carry on without tbbmalloc, and do not hand the changed environment to child processes
+        del os.environ[_GUARD]
+        if preload is None:
+            del os.environ["LD_PRELOAD"]
+        else:
+            os.environ["LD_PRELOAD"] = preload
 
 
 _reexec_with_tbbmalloc()
