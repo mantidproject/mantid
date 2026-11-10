@@ -160,7 +160,9 @@ plots the stitched output for the selected group(s)
 
 Detector-map and alignment plots use the processed TOF input associated with the
 selected reduction, including the combined input for summed runs and the selected
-period for workspace groups. The initially loaded TOF workspaces remain unchanged
+period for workspace groups. Processed inputs, bank-summed TOF data and flattened slice members are
+collected in ``TOF_processed`` (or ``__TOF_processed`` when hidden) when
+``GroupTOFWorkspaces`` is enabled. The initially loaded TOF workspaces remain unchanged
 for reuse. If the associated processed input is deleted, reduce the row again to
 recreate it; the plots do not substitute individual raw runs for a processed sum.
 

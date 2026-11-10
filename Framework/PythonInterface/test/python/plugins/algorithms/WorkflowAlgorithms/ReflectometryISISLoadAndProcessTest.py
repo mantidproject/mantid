@@ -641,6 +641,14 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args["ProcessingInstructions"] = "4"
         outputs = [*self._expected_time_sliced_group_outputs, "TOF_38426", "TOF_38426_monitors"]
         self._assert_run_algorithm_succeeds(args, outputs)
+        processed_group = AnalysisDataService.retrieve("TOF_processed")
+        slice_members = {
+            name
+            for group_name in ("TOF_38426_sliced_0_1800", "TOF_38426_sliced_1800_3600")
+            for name in AnalysisDataService.retrieve(group_name).getNames()
+        }
+        self.assertTrue(slice_members.issubset(set(processed_group.getNames())))
+        self.assertTrue(all(not workspace.isGroup() for workspace in processed_group))
         history = ["ReflectometryReductionOneAuto", "ReflectometryReductionOneAuto", "ReflectometryReductionOneAuto", "GroupWorkspaces"]
         self._check_history(
             AnalysisDataService.retrieve("IvsQ_binned_TOF_38426_sliced_0_1800_2_TOF_38426_2_monitors_TOF_38426_sliced_1_0_1800"),
@@ -763,6 +771,8 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         self._assert_run_algorithm_succeeds(args, outputs)
         self._check_sum_banks(AnalysisDataService.retrieve("IvsQ_binned_38415"), is_summed=True)
         _check_num_histograms_and_first_y_value("TOF_38415_summed_segment", 4, 0.6)
+        self.assertIn("TOF_38415_summed_segment", AnalysisDataService.retrieve("TOF_processed").getNames())
+        self.assertEqual(set(AnalysisDataService.retrieve("TOF").getNames()), {"TOF_38415"})
 
     def test_sum_banks_runs_for_each_2D_detector_workspace_group_member(self):
         self._create_workspace_group(38415, 2, "TOF_", self._create_2D_detector_workspace)
@@ -1138,21 +1148,29 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         self.assertFalse(workspace.run().hasProperty("reflectometry_adjusted_theta"))
 
     def test_processed_tof_retains_full_detector_data_for_single_summed_and_grouped_inputs(self):
-        for grouped, summed in ((False, False), (False, True), (True, False)):
-            with self.subTest(grouped=grouped, summed=summed):
+        cases = (
+            (False, False, {}),
+            (False, True, {}),
+            (True, False, {}),
+            (False, False, {"HideInputWorkspaces": True}),
+            (False, False, {"GroupTOFWorkspaces": False}),
+        )
+        for grouped, summed, options in cases:
+            with self.subTest(grouped=grouped, summed=summed, options=options):
                 AnalysisDataService.clear()
+                input_prefix = "__TOF_" if options.get("HideInputWorkspaces") else "TOF_"
                 if grouped:
-                    self._create_workspace_group(1, 2, "TOF_")
+                    self._create_workspace_group(1, 2, input_prefix)
                 else:
-                    self._create_workspace(1, "TOF_")
+                    self._create_workspace(1, input_prefix)
                 if summed:
-                    self._create_workspace(2, "TOF_")
-                input_workspace = AnalysisDataService.retrieve("TOF_1")
+                    self._create_workspace(2, input_prefix)
+                input_workspace = AnalysisDataService.retrieve(input_prefix + "1")
                 original = input_workspace[0] if grouped else input_workspace
                 original_y = original.extractY().copy()
                 alg = create_algorithm(
                     "ReflectometryISISLoadAndProcess",
-                    **dict(self._default_options, **self._mandatory_output_names, InputRunList="1,2" if summed else "1"),
+                    **dict(self._default_options, **self._mandatory_output_names, **options, InputRunList="1,2" if summed else "1"),
                 )
                 alg.setRethrows(True)
                 self.assertTrue(alg.execute())
@@ -1160,6 +1178,12 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
                 output = output[0] if grouped else output
                 processed_name = output.run().getProperty("reflectometry_processed_tof_workspace").value
                 processed = AnalysisDataService.retrieve(processed_name)
+                group_name = "__TOF_processed" if options.get("HideInputWorkspaces") else "TOF_processed"
+                if options.get("GroupTOFWorkspaces", True):
+                    expected_members = processed.getNames() if grouped else [processed_name]
+                    self.assertEqual(set(AnalysisDataService.retrieve(group_name).getNames()), set(expected_members))
+                else:
+                    self.assertFalse(AnalysisDataService.doesExist(group_name))
                 if grouped:
                     self.assertEqual(len(processed), 2)
                     processed = processed[0]
@@ -1230,6 +1254,8 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
 
         with patch.object(ReflectometryISISLoadAndProcess, "_reduce", new=reduce):
             self._assert_run_algorithm_succeeds(args)
+        slice_members = set(AnalysisDataService.retrieve("TOF_38415_sliced").getNames())
+        self.assertTrue(slice_members.issubset(set(AnalysisDataService.retrieve("TOF_processed").getNames())))
         self.assertEqual(cached.getNumberEvents(), event_count)
         self.assertFalse(cached.spectrumInfo().isMasked(1))
         np.testing.assert_array_equal(monitors.extractY(), monitor_y)
@@ -1564,7 +1590,10 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         actual = AnalysisDataService.getObjectNames()
         if expected is not None:
             # Processed diagnostic inputs are checked separately from the established reduction outputs.
-            self.assertEqual({name for name in actual if not name.startswith("__") and "_processed_tof" not in name}, set(expected))
+            self.assertEqual(
+                {name for name in actual if not name.startswith("__") and "_processed_tof" not in name and name != "TOF_processed"},
+                set(expected),
+            )
 
     def _assert_run_algorithm_fails(self, args, namesNotExpected=None):
         """Run the algorithm with the given args and check it fails to produce output"""
