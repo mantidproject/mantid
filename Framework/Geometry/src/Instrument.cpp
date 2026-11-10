@@ -1499,7 +1499,7 @@ std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>> Instrum
   compInfo->m_componentInfo->setDetectorInfo(detInfo->m_detectorInfo.get());
   compInfo->m_parameterInfo = std::make_shared<ParameterInfo>();
   detInfo->m_parameterInfo = compInfo->m_parameterInfo;
-  compInfo->m_referenceFrame = getReferenceFrame();
+  ALLOW_DEPRECATED(compInfo->m_referenceFrame = getReferenceFrame());
   detInfo->m_referenceFrame = compInfo->m_referenceFrame;
   return {std::move(compInfo), std::move(detInfo)};
 }
