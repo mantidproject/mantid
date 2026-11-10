@@ -158,6 +158,12 @@ and/or all rows in the selected group(s). The plot-groups |plotgroup| button
 plots the stitched output for the selected group(s)
 (i.e. ``IvsQ_13460_13462``).
 
+Detector-map and alignment plots use the processed TOF input associated with the
+selected reduction, including the combined input for summed runs and the selected
+period for workspace groups. The initially loaded TOF workspaces remain unchanged
+for reuse. If the associated processed input is deleted, reduce the row again to
+recreate it; the plots do not substitute individual raw runs for a processed sum.
+
 .. figure:: /images/ISISReflectometryInterface/workflow_plot.png
   :class: screenshot
   :width: 700px
@@ -329,10 +335,10 @@ The processing table contains the following columns:
 |                     |           |                                                                                 |
 |                     |           | Example: ``0.7``                                                                |
 +---------------------+-----------+---------------------------------------------------------------------------------+
-| Adjusted Angle      | No        | Read-only adjusted angle in degrees from the input workspace's                  |
+| Adjusted Angle      | No        | Read-only adjusted angle in degrees from the reduced workspace's                |
 |                     |           | ``reflectometry_adjusted_theta`` sample log. Visible only for POLREF.           |
 |                     |           | Refreshed after reduction; blank when the log or reduction output is absent.    |
-|                     |           | The input and output require non-empty ``run_number`` metadata.                 |
+|                     |           | The angle remains available if the processed TOF workspace is deleted.          |
 +---------------------+-----------+---------------------------------------------------------------------------------+
 | 1st Trans Run(s)    | No        | Contains the transmission run(s) used to                                        |
 |                     |           | normalise the sample runs. To specify two                                       |

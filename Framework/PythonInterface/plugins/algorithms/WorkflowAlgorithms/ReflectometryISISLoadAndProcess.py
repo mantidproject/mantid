@@ -57,6 +57,7 @@ class Prop:
 class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
     _CALIBRATION_FILE_LOG = "reflectometry_calibration_file"
     _ADJUSTED_THETA_LOG = "reflectometry_adjusted_theta"
+    _PROCESSED_TOF_LOG = "reflectometry_processed_tof_workspace"
     _POLREF = "POLREF"
     _POLREF_START_WS_INDEX = 4
     _INPUT_WS_INDEX = 0
@@ -130,7 +131,28 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             finished_algs.append(alg)
         # Set outputs and tidy TOF workspaces into a group
         self._finalize(finished_algs)
+        self._publish_processed_input(cloned_workspace_objects[self._INPUT_WS_INDEX], finished_algs)
         self._groupTOFWorkspaces(input_workspace_names)
+
+    def _publish_processed_input(self, cloned_workspace, finished_algs):
+        """Retain the full-detector working input for diagnostics without another copy."""
+        workspace_name = finished_algs[0].getPropertyValue(Prop.OUTPUT_WS_BINNED) + "_processed_tof"
+        if self.getProperty(Prop.HIDE_INPUT).value and not workspace_name.startswith("__"):
+            workspace_name = "__" + workspace_name
+
+        def publish(workspace, name):
+            if isinstance(workspace, WorkspaceGroup):
+                for index, member in enumerate(workspace):
+                    publish(member, f"{name}_{index + 1}")
+            AnalysisDataService.addOrReplace(name, workspace)
+
+        publish(cloned_workspace, workspace_name)
+        for alg in finished_algs:
+            for property_name in (Prop.OUTPUT_WS, Prop.OUTPUT_WS_BINNED, Prop.OUTPUT_WS_LAM):
+                output_workspace = alg.getProperty(property_name).value
+                for member in output_workspace if isinstance(output_workspace, WorkspaceGroup) else [output_workspace]:
+                    if member is not None:
+                        member.mutableRun().addProperty(self._PROCESSED_TOF_LOG, workspace_name, True)
 
     def _load(self):
         hide_inputs = self.getProperty(Prop.HIDE_INPUT).value

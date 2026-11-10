@@ -639,7 +639,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args["SliceWorkspace"] = True
         args["NumberOfSlices"] = 2
         args["ProcessingInstructions"] = "4"
-        outputs = self._expected_time_sliced_group_outputs
+        outputs = [*self._expected_time_sliced_group_outputs, "TOF_38426", "TOF_38426_monitors"]
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ["ReflectometryReductionOneAuto", "ReflectometryReductionOneAuto", "ReflectometryReductionOneAuto", "GroupWorkspaces"]
         self._check_history(
@@ -1137,6 +1137,36 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         self.assertTrue(workspace.run().hasProperty("reflectometry_calibration_file"))
         self.assertFalse(workspace.run().hasProperty("reflectometry_adjusted_theta"))
 
+    def test_processed_tof_retains_full_detector_data_for_single_summed_and_grouped_inputs(self):
+        for grouped, summed in ((False, False), (False, True), (True, False)):
+            with self.subTest(grouped=grouped, summed=summed):
+                AnalysisDataService.clear()
+                if grouped:
+                    self._create_workspace_group(1, 2, "TOF_")
+                else:
+                    self._create_workspace(1, "TOF_")
+                if summed:
+                    self._create_workspace(2, "TOF_")
+                input_workspace = AnalysisDataService.retrieve("TOF_1")
+                original = input_workspace[0] if grouped else input_workspace
+                original_y = original.extractY().copy()
+                alg = create_algorithm(
+                    "ReflectometryISISLoadAndProcess",
+                    **dict(self._default_options, **self._mandatory_output_names, InputRunList="1,2" if summed else "1"),
+                )
+                alg.setRethrows(True)
+                self.assertTrue(alg.execute())
+                output = AnalysisDataService.retrieve("testIvsQBin")
+                output = output[0] if grouped else output
+                processed_name = output.run().getProperty("reflectometry_processed_tof_workspace").value
+                processed = AnalysisDataService.retrieve(processed_name)
+                if grouped:
+                    self.assertEqual(len(processed), 2)
+                    processed = processed[0]
+                np.testing.assert_array_equal(original.extractY(), original_y)
+                np.testing.assert_allclose(processed.extractY(), original_y * (2 if summed else 1))
+                self.assertEqual(processed.getNumberHistograms(), original.getNumberHistograms())
+
     def test_single_input_working_copy_stays_out_of_ads(self):
         self._create_workspace(13460, "TOF_")
         original_reduce = ReflectometryISISLoadAndProcess._reduce
@@ -1533,7 +1563,8 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         assertRaisesNothing(self, alg.execute)
         actual = AnalysisDataService.getObjectNames()
         if expected is not None:
-            self.assertEqual({name for name in actual if not name.startswith("__")}, set(expected))
+            # Processed diagnostic inputs are checked separately from the established reduction outputs.
+            self.assertEqual({name for name in actual if not name.startswith("__") and "_processed_tof" not in name}, set(expected))
 
     def _assert_run_algorithm_fails(self, args, namesNotExpected=None):
         """Run the algorithm with the given args and check it fails to produce output"""
