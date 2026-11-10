@@ -131,8 +131,9 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             finished_algs.append(alg)
         # Set outputs and tidy TOF workspaces into a group
         self._finalize(finished_algs)
-        self._publish_processed_input(cloned_workspace_objects[self._INPUT_WS_INDEX], finished_algs)
+        processed_workspace_name = self._publish_processed_input(cloned_workspace_objects[self._INPUT_WS_INDEX], finished_algs)
         self._groupTOFWorkspaces(input_workspace_names)
+        self._groupProcessedTOFWorkspaces([processed_workspace_name, *(workspace.name() for workspace in to_reduce)], input_workspace_names)
 
     def _publish_processed_input(self, cloned_workspace, finished_algs):
         """Retain the full-detector working input for diagnostics without another copy."""
@@ -153,6 +154,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
                 for member in output_workspace if isinstance(output_workspace, WorkspaceGroup) else [output_workspace]:
                     if member is not None:
                         member.mutableRun().addProperty(self._PROCESSED_TOF_LOG, workspace_name, True)
+        return workspace_name
 
     def _load(self):
         hide_inputs = self.getProperty(Prop.HIDE_INPUT).value
@@ -195,8 +197,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         return adjusted_theta
 
     def _groupTOFWorkspaces(self, inputWorkspaces):
-        """Put all of the TOF workspaces into a group called 'TOF' to hide some noise
-        for the user."""
+        """Group cached inputs and monitors in TOF or __TOF."""
         if not self.getProperty(Prop.GROUP_TOF).value:
             return
         tofWorkspaces = set(inputWorkspaces)
@@ -204,16 +205,23 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         # input run when slicing)
         if self._slicingEnabled():
             tofWorkspaces.add(_monitorWorkspace(inputWorkspaces[0]))
-        # Add summed segment workspaces to TOF group
-        for workspace_name in inputWorkspaces:
-            summed_seg_name = _summedSegmentWorkspace(workspace_name)
-            if AnalysisDataService.doesExist(summed_seg_name):
-                tofWorkspaces.add(summed_seg_name)
         # Create the group
         if self.getProperty(Prop.HIDE_INPUT).value:
             self._group_workspaces(tofWorkspaces, "__TOF")
         else:
             self._group_workspaces(tofWorkspaces, "TOF")
+
+    def _groupProcessedTOFWorkspaces(self, workspace_names, input_workspace_names):
+        """Group processed inputs, collapsed slices and bank sums in TOF_processed or __TOF_processed."""
+        if not self.getProperty(Prop.GROUP_TOF).value:
+            return
+        processed_workspace_names = set(workspace_names)
+        for input_workspace_name in input_workspace_names:
+            summed_workspace_name = _summedSegmentWorkspace(input_workspace_name)
+            if AnalysisDataService.doesExist(summed_workspace_name):
+                processed_workspace_names.add(summed_workspace_name)
+        group_name = "__TOF_processed" if self.getProperty(Prop.HIDE_INPUT).value else "TOF_processed"
+        self._group_workspaces(processed_workspace_names, group_name)
 
     def validateInputs(self):
         """Return a dictionary containing issues found in properties."""
