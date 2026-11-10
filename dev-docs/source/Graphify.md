@@ -3,14 +3,15 @@
 # Graphify: code knowledge graph
 
 [Graphify](https://github.com/Graphify-Labs/graphify) builds a queryable graph of source code.
-Mantid's configuration limits the graph to the framework code only:
-the source that ends up in the `mantid` conda package, which is `Framework/` and `scripts/`.
-The GUI code (`qt/`), documentation and tests are not included.
+Mantid's configuration limits the graph to the framework and GUI code:
+`Framework/` and `scripts/`, which make up the `mantid` conda package,
+and `qt/`, which makes up the `mantidqt` and `mantidworkbench` packages.
+Documentation and tests are not included.
 
 The graph holds classes, functions, includes and imports, calls and references,
 grouped into communities of closely connected code.
 It is useful for questions such as "what is connected to `MatrixWorkspace`?"
-or "how does `scripts/` use the Python API in `Framework/`?".
+or "which parts of the GUI in `qt/` use the Python API in `Framework/`?".
 
 Mantid configures graphify for a **code-only** run.
 Code is parsed locally with tree-sitter,
@@ -29,9 +30,10 @@ Two files in the root of the repository control what goes into the graph.
 
 `.graphifyignore`
 : Uses [gitignore-style patterns](https://docs.graphify.com/open-source/configuration/ignoring-files).
-It limits the graph to the framework code (`Framework/` and `scripts/`).
+It limits the graph to `Framework/`, `scripts/` and `qt/`.
 Within those folders it also excludes tests, documentation, images,
-and generated or vendored code (gSOAP for ICat, FlatBuffers for LiveData).
+and generated or vendored code
+(gSOAP for ICat, FlatBuffers for LiveData, the Qt Solutions property browser and generated Qt resources).
 
 `.graphifyrc`
 : Holds [project settings](https://docs.graphify.com/open-source/configuration/graphifyrc).
@@ -57,7 +59,7 @@ The output goes into `graphify-out/`, which is ignored by git.
 
 Without `--no-label`, `graphify cluster-only` names the communities with an LLM.
 It uses an API key if one is set, and otherwise falls back to the `claude` command-line tool if it is installed.
-For about 2,500 communities this takes several minutes and uses LLM tokens.
+For Mantid's more than 3,000 communities this takes several minutes and uses LLM tokens.
 Pass `--no-label`, or set `GRAPHIFY_BACKEND=none`, to keep the whole run local.
 For graphs over 5,000 nodes, which includes Mantid's, `graph.html` shows one node per community, not one per symbol.
 
