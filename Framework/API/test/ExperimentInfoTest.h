@@ -767,7 +767,7 @@ public:
     // Test the single bank
     auto bank = inst->getComponentByName("bank1");
     auto bankID = bank->getComponentID();
-    auto allBankDetectorIndexes = compInfo.detectorsInSubtree(compInfo.indexOf(bankID));
+    auto allBankDetectorIndexes = compInfo.detectorsInSubtree(bankID->index());
 
     TSM_ASSERT_EQUALS("Should have all detectors under this bank", allBankDetectorIndexes.size(),
                       detInfo.size()); //
@@ -775,7 +775,7 @@ public:
     // Test one of the bank rows
     auto bankRowID =
         std::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(bank)->getChild(0)->getComponentID();
-    auto allRowDetectorIndexes = compInfo.detectorsInSubtree(compInfo.indexOf(bankRowID));
+    auto allRowDetectorIndexes = compInfo.detectorsInSubtree(bankRowID->index());
 
     TSM_ASSERT_EQUALS("Should have all detectors under this row", allRowDetectorIndexes.size(),
                       10); //
@@ -816,11 +816,11 @@ public:
     // Test non-detector, non-assembly components
     auto sampleId = inst->getComponentByName("sample")->getComponentID();
     TSM_ASSERT_EQUALS("Sample should not report any nested detector indexes",
-                      compInfo.detectorsInSubtree(compInfo.indexOf(sampleId)).size(), 0);
+                      compInfo.detectorsInSubtree(sampleId->index()).size(), 0);
 
     auto sourceId = inst->getComponentByName("source")->getComponentID();
     TSM_ASSERT_EQUALS("Source should not report any nested detector indexes",
-                      compInfo.detectorsInSubtree(compInfo.indexOf(sourceId)).size(), 0);
+                      compInfo.detectorsInSubtree(sourceId->index()).size(), 0);
   }
 
   void test_component_info_source_sample_l1() {
@@ -851,14 +851,14 @@ public:
 
     // Test non-detector, non-assembly components
     auto sampleId = inst->getComponentByName("sample")->getComponentID();
-    TS_ASSERT_EQUALS(compInfo.componentsInSubtree(compInfo.indexOf(sampleId)).size(), 1);
+    TS_ASSERT_EQUALS(compInfo.componentsInSubtree(sampleId->index()).size(), 1);
 
     auto sourceId = inst->getComponentByName("source")->getComponentID();
-    TS_ASSERT_EQUALS(compInfo.componentsInSubtree(compInfo.indexOf(sourceId)).size(), 1);
+    TS_ASSERT_EQUALS(compInfo.componentsInSubtree(sourceId->index()).size(), 1);
 
     auto bankId = inst->getComponentByName("bank1")->getComponentID();
     TSM_ASSERT_EQUALS("Bank should yield entire sub-tree of component indices",
-                      compInfo.componentsInSubtree(compInfo.indexOf(bankId)).size(), (nPixels * nPixels) + nPixels + 1);
+                      compInfo.componentsInSubtree(bankId->index()).size(), (nPixels * nPixels) + nPixels + 1);
 
     auto instrumentId = inst->getComponentID();
     size_t nComponents = nPixels * nPixels;
@@ -868,9 +868,9 @@ public:
     nComponents += 1;       // sample
     nComponents += 1;       // self
     TSM_ASSERT_EQUALS("Instrument should yield entire tree of component indices",
-                      compInfo.componentsInSubtree(compInfo.indexOf(instrumentId)).size(), nComponents);
+                      compInfo.componentsInSubtree(instrumentId->index()).size(), nComponents);
 
-    TS_ASSERT_EQUALS(inst->index(), compInfo.parent(compInfo.indexOf(bankId)));
+    TS_ASSERT_EQUALS(inst->index(), compInfo.parent(bankId->index()));
   }
 
   void test_readParameterMap_semicolons_in_value() {

@@ -89,8 +89,7 @@ public:
   void swap(ParameterMap &other) {
     // The index domain and staging tables must travel with the store: an index is meaningless without them.
     m_parameterInfo.swap(other.m_parameterInfo);
-    m_domainIds.swap(other.m_domainIds);
-    m_domainIndices.swap(other.m_domainIndices);
+    std::swap(m_domain, other.m_domain);
     m_stagedIndices.swap(other.m_stagedIndices);
     m_stagedIds.swap(other.m_stagedIds);
   }
@@ -311,7 +310,6 @@ public:
   const Geometry::ComponentInfo &componentInfo() const;
   Geometry::ComponentInfo &mutableComponentInfo();
   Geometry::InstrumentMetadata const &instrumentMetadata() const;
-  const std::vector<Geometry::ComponentID> &componentIds() const;
   void setInstrument(const Instrument *instrument);
 
   /** Rebuild the 2.0 layers for a map that was copy-constructed from `source`.
@@ -336,16 +334,11 @@ public:
   const std::shared_ptr<Geometry::InstrumentMetadata> &sharedInstrumentMetadata() const { return m_instrumentMetadata; }
   //@}
 
-  /// The components of one instrument, by index, as held by its ComponentInfo
-  using ComponentIDs = std::vector<Geometry::IComponent *>;
-  /// The reverse of ComponentIDs
-  using ComponentIndices = std::unordered_map<Geometry::IComponent const *, size_t>;
-
-  /** Attach this map to an instrument's component index domain, rekeying its parameters onto the
-   * instrument's component indices, and return the resulting store. Parameters of components outside
-   * the domain are dropped. A map already attached to this domain is left as it is. */
-  std::shared_ptr<ParameterInfo> rekey(std::shared_ptr<const ComponentIDs> componentIds,
-                                       std::shared_ptr<const ComponentIndices> componentIndices);
+  /** Attach this map to the component indices of an unparametrized instrument, rekeying its parameters
+   * onto them, and return the resulting store. Parameters of components outside the instrument are
+   * dropped. A map already attached to this instrument is left as it is. The instrument's beamline
+   * must have been cached, so that its components hold their indices. */
+  std::shared_ptr<ParameterInfo> rekey(const Instrument &domain);
 
 private:
   std::shared_ptr<Parameter> create(const std::string &className, const std::string &name,
@@ -360,8 +353,6 @@ private:
   /// calculate relative error for use in diff
   bool relErr(double x1, double x2, double errorVal) const;
 
-  /// The number of components in the index domain
-  size_t domainSize() const { return m_domainIds ? m_domainIds->size() : 0; }
   /// Index for a component, or ComponentInfo::invalidIndex if this map holds nothing for it.
   size_t indexOf(const IComponent *comp) const;
   /// As indexOf(), but allocating a staging index for a component of a detached map seen for the
@@ -378,11 +369,9 @@ private:
   /** The parameter store, owner of the parameter info*/
   std::shared_ptr<ParameterInfo> m_parameterInfo;
 
-  /** The index domain: the components of the instrument this map is attached to, shared with that
-   * instrument's ComponentInfo. Within it, a component's store index is its component index. Both
-   * null for a detached map. */
-  std::shared_ptr<const ComponentIDs> m_domainIds;
-  std::shared_ptr<const ComponentIndices> m_domainIndices;
+  /** The index domain: the unparametrized instrument this map is attached to. Within it, a component's
+   * store index is its component index. Null for a detached map. */
+  const Instrument *m_domain{nullptr};
 
   /** Staging indices, for the components of a detached map, which has no component indices yet.
    * Staging index i is m_stagedIds[i]. rekey() converts them to component indices and clears them. */

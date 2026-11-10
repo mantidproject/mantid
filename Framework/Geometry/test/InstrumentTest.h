@@ -549,7 +549,7 @@ public:
     auto const [componentInfo, detectorInfo] = instrument->makeBaseBeamline();
 
     auto const bank = instrument->getComponentByName("bank2");
-    TS_ASSERT_EQUALS(bank->index(), componentInfo->indexOf(bank->getComponentID()));
+    TS_ASSERT_EQUALS(componentInfo->name(bank->index()), "bank2");
     auto const detector = instrument->getDetector(detectorInfo->detectorIDs()[1]);
     TS_ASSERT_EQUALS(detector->index(), 1);
 

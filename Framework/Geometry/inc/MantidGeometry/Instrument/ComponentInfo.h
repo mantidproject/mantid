@@ -49,17 +49,12 @@ class Instrument;
 */
 class MANTID_GEOMETRY_DLL ComponentInfo {
 public:
-  /// Returned by indexOfOrInvalid() for a component ID that is not part of this instrument.
+  /// The index of no component, e.g. one that is not part of this instrument.
   static constexpr size_t invalidIndex = std::numeric_limits<size_t>::max();
 
 private:
   /// Pointer to the actual ComponentInfo object (non-wrapping part).
   std::unique_ptr<Beamline::ComponentInfo> m_componentInfo;
-  /// Collection of component ids
-  std::shared_ptr<const std::vector<Geometry::IComponent *>> m_componentIds;
-  /// Map of component ids to indexes
-  std::shared_ptr<const std::unordered_map<Geometry::IComponent const *, size_t>> m_compIDToIndex;
-
   /// Shapes for each component
   std::shared_ptr<std::vector<std::shared_ptr<const Geometry::IObject>>> m_shapes;
 
@@ -104,8 +99,6 @@ public:
   };
 
   ComponentInfo(std::unique_ptr<Beamline::ComponentInfo> componentInfo,
-                std::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>> componentIds,
-                std::shared_ptr<const std::unordered_map<Geometry::IComponent const *, size_t>> componentIdToIndexMap,
                 std::shared_ptr<std::vector<std::shared_ptr<const Geometry::IObject>>> shapes,
                 std::shared_ptr<ParameterInfo> parameterInfo = nullptr,
                 std::shared_ptr<const ReferenceFrame> referenceFrame = nullptr);
@@ -119,9 +112,6 @@ public:
   size_t size() const;
   size_t getMemorySize() const;
   QuadrilateralComponent quadrilateralComponent(const size_t componentIndex) const;
-  size_t indexOf(Geometry::IComponent const *id) const;
-  /// The index for a component ID, or invalidIndex if it is not part of this instrument.
-  size_t indexOfOrInvalid(Geometry::IComponent const *id) const;
   /// The first component with this name in a breadth-first search, as Instrument::getComponentByName() finds it.
   /// Throws std::invalid_argument if there is none.
   size_t indexOfAny(const std::string &name) const;
@@ -169,7 +159,6 @@ public:
   /// A default frame (Y up, Z along the beam, right-handed) if this ComponentInfo was built without one.
   std::shared_ptr<const ReferenceFrame> referenceFrame() const;
 
-  const IComponent *componentID(const size_t componentIndex) const { return (*m_componentIds)[componentIndex]; }
   bool hasValidShape(const size_t componentIndex) const;
 
   const Geometry::IObject &shape(const size_t componentIndex) const;

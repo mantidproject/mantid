@@ -129,8 +129,7 @@ void MoveInstrumentComponent::exec() {
   if (relativePosition)
     position += comp->getPos();
 
-  const auto componentId = comp->getComponentID();
-  componentInfo.setPosition(componentInfo.indexOf(componentId), position);
+  componentInfo.setPosition(compIndex, position);
 }
 
 } // namespace Mantid::DataHandling

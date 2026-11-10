@@ -108,14 +108,12 @@ Beamline::StructuredGridComponent makeStructuredGridComponent(const StructuredDe
 InstrumentVisitor::InstrumentVisitor(std::shared_ptr<const Instrument> instrument)
     : m_orderedDetectorIds(
           std::make_shared<std::vector<detid_t>>(instrument->getDetectorIDs(false /*Do not skip monitors*/))),
-      m_componentIds(std::make_shared<std::vector<ComponentID>>(m_orderedDetectorIds->size(), nullptr)),
       m_assemblySortedDetectorIndices(std::make_shared<std::vector<size_t>>()),
       m_assemblySortedComponentIndices(std::make_shared<std::vector<size_t>>()),
       m_parentComponentIndices(std::make_shared<std::vector<size_t>>(m_orderedDetectorIds->size(), 0)),
       m_children(std::make_shared<std::vector<std::vector<size_t>>>()),
       m_detectorRanges(std::make_shared<std::vector<std::pair<size_t, size_t>>>()),
       m_componentRanges(std::make_shared<std::vector<std::pair<size_t, size_t>>>()),
-      m_componentIdToIndexMap(std::make_shared<std::unordered_map<Mantid::Geometry::IComponent const *, size_t>>()),
       m_detectorIdToIndexMap(makeDetIdToIndexMap(*m_orderedDetectorIds)),
       m_positions(std::make_shared<std::vector<Eigen::Vector3d>>()),
       m_detectorPositions(std::make_shared<std::vector<Eigen::Vector3d>>(m_orderedDetectorIds->size())),
@@ -151,7 +149,6 @@ InstrumentVisitor::InstrumentVisitor(std::shared_ptr<const Instrument> instrumen
 
   const auto nDetectors = m_orderedDetectorIds->size();
   m_assemblySortedDetectorIndices->reserve(nDetectors); // Exact
-  m_componentIdToIndexMap->reserve(nDetectors);         // Approximation
 }
 
 void InstrumentVisitor::walkInstrument() {
@@ -164,13 +161,9 @@ void InstrumentVisitor::walkInstrument() {
 }
 
 size_t InstrumentVisitor::commonRegistration(const IComponent &component) {
-  const size_t componentIndex = m_componentIds->size();
-  const ComponentID componentId = component.getComponentID();
-  markAsSourceOrSample(componentId, componentIndex);
-  // Record the ID -> index mapping
-  (*m_componentIdToIndexMap)[componentId] = componentIndex;
-  // For any non-detector we extend the m_componentIds from the back
-  m_componentIds->emplace_back(componentId);
+  // Detectors occupy the leading indices, so any non-detector extends the arrays from the back
+  const size_t componentIndex = m_names->size();
+  markAsSourceOrSample(component.getComponentID(), componentIndex);
   m_positions->emplace_back(Kernel::toVector3d(component.getPos()));
   m_rotations->emplace_back(Kernel::toQuaterniond(component.getRotation()));
   m_shapes->emplace_back(m_nullShape);
@@ -373,9 +366,6 @@ size_t InstrumentVisitor::registerDetector(const IDetector &detector) {
    * 2. Guarantee on ordering such that the
    * detectorIndex == componentIndex for all detectors.
    */
-  // Record the ID -> component index mapping
-  (*m_componentIdToIndexMap)[detector.getComponentID()] = detectorIndex;
-  (*m_componentIds)[detectorIndex] = detector.getComponentID();
   recordIndex(detector, detectorIndex);
   m_assemblySortedDetectorIndices->emplace_back(detectorIndex);
   (*m_detectorPositions)[detectorIndex] = Kernel::toVector3d(detector.getPos());
@@ -405,29 +395,12 @@ size_t InstrumentVisitor::registerDetector(const IDetector &detector) {
 }
 
 /**
- * @brief InstrumentVisitor::componentIds
- * @return  component ids in the order in which they have been visited.
- * Note that the number of component ids will be >= the number of detector
- * indices
- * since all detectors are components but not all components are detectors
- */
-std::shared_ptr<const std::vector<Mantid::Geometry::ComponentID>> InstrumentVisitor::componentIds() const {
-  return m_componentIds;
-}
-
-/**
  * @brief InstrumentVisitor::size
  * @return The total size of the components visited.
- * This will be the same as the number of IDs.
  */
-size_t InstrumentVisitor::size() const { return m_componentIds->size(); }
+size_t InstrumentVisitor::size() const { return m_names->size(); }
 
 bool InstrumentVisitor::isEmpty() const { return size() == 0; }
-
-std::shared_ptr<const std::unordered_map<Mantid::Geometry::IComponent const *, size_t>>
-InstrumentVisitor::componentIdToIndexMap() const {
-  return m_componentIdToIndexMap;
-}
 
 std::shared_ptr<const std::unordered_map<detid_t, size_t>> InstrumentVisitor::detectorIdToIndexMap() const {
   return m_detectorIdToIndexMap;
@@ -450,7 +423,7 @@ std::shared_ptr<std::vector<detid_t>> InstrumentVisitor::detectorIds() const { r
 /// Rekey the ParameterMap's parameters from legacy component pointers to component indices.
 std::shared_ptr<ParameterInfo> InstrumentVisitor::makeParameterInfo() const {
   // The ParameterMap does the rekeying itself
-  return m_pmap ? m_pmap->rekey(m_componentIds, m_componentIdToIndexMap) : std::make_shared<ParameterInfo>();
+  return m_pmap ? m_pmap->rekey(*m_instrument->baseInstrument()) : std::make_shared<ParameterInfo>();
 }
 
 std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>> InstrumentVisitor::makeWrappers() const {
@@ -462,22 +435,21 @@ std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>> Instrum
   // Both wrappers must share the same parameter store and reference frame
   auto const parameterInfo = makeParameterInfo();
   ALLOW_DEPRECATED(auto const referenceFrame = m_instrument->getReferenceFrame());
-  auto compInfoWrapper = std::make_unique<ComponentInfo>(std::move(compInfo), componentIds(), componentIdToIndexMap(),
-                                                         m_shapes, parameterInfo, referenceFrame);
-  auto detInfoWrapper = std::make_unique<DetectorInfo>(std::move(detInfo), detectorIds(), detectorIdToIndexMap(),
-                                                       parameterInfo, referenceFrame);
+  auto compInfoWrapper = std::make_unique<ComponentInfo>(std::move(compInfo), m_shapes, parameterInfo, referenceFrame);
+  auto detInfoWrapper = std::make_unique<DetectorInfo>(std::move(detInfo), m_instrument, detectorIds(),
+                                                       detectorIdToIndexMap(), parameterInfo, referenceFrame);
 
   return {std::move(compInfoWrapper), std::move(detInfoWrapper)};
 }
 
 std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
 InstrumentVisitor::makeWrappers(const Instrument &instrument, ParameterMap *pmap) {
-  std::shared_ptr<const Instrument> visiteeInstrument;
   if (pmap) {
-    visiteeInstrument =
-        ParComponentFactory::createInstrument(std::shared_ptr<const Instrument>(&instrument, NoDeleting()),
-                                              std::shared_ptr<ParameterMap>(pmap, NoDeleting()));
-  } else if (instrument.isParametrized()) {
+    // Rekeying the map needs the component indices, which the instrument sets by caching its beamline first
+    return instrument.makeBeamline(*pmap);
+  }
+  std::shared_ptr<const Instrument> visiteeInstrument;
+  if (instrument.isParametrized()) {
     // Walk a copy of the instrument's map. The visitor rekeys the map it walks and strips the legacy
     // position parameters from it, which must not happen to a map the caller has only lent with the
     // instrument, e.g. a workspace's map lent with its physical instrument.
@@ -487,6 +459,17 @@ InstrumentVisitor::makeWrappers(const Instrument &instrument, ParameterMap *pmap
     visiteeInstrument = std::shared_ptr<const Instrument>(&instrument, NoDeleting());
   }
   InstrumentVisitor visitor(visiteeInstrument);
+  visitor.walkInstrument();
+  return visitor.makeWrappers();
+}
+
+/// Walk an unparametrized instrument with a detached map, applying and rekeying the map's parameters. The
+/// instrument's beamline must have been cached, so that its components hold their indices.
+std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
+InstrumentVisitor::makeWrappersWithMap(const Instrument &instrument, ParameterMap &pmap) {
+  InstrumentVisitor visitor(
+      ParComponentFactory::createInstrument(std::shared_ptr<const Instrument>(&instrument, NoDeleting()),
+                                            std::shared_ptr<ParameterMap>(&pmap, NoDeleting())));
   visitor.walkInstrument();
   return visitor.makeWrappers();
 }

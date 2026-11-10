@@ -1487,7 +1487,7 @@ Instrument::makeBeamline(ParameterMap &pmap, const ParameterMap *source) const {
   }
   // Caching the beamline sets the component indices the detached map's walk relies on
   cachedBeamline();
-  return InstrumentVisitor::makeWrappers(*this, &pmap);
+  return InstrumentVisitor::makeWrappersWithMap(*this, pmap);
 }
 
 /// Return ComponentInfo and DetectorInfo for the unparametrized instrument, cloned from the cached base beamline,
@@ -1513,7 +1513,7 @@ Instrument::makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo,
   compInfo->m_componentInfo->setDetectorInfo(detInfo->m_detectorInfo.get());
   // Point the clone at THIS map's parameter store, attaching the map to the clone's index domain if
   // it is not already: the map is either empty or a copy of one attached to that domain.
-  compInfo->m_parameterInfo = pmap.rekey(compInfo->m_componentIds, compInfo->m_compIDToIndex);
+  compInfo->m_parameterInfo = pmap.rekey(*this);
   detInfo->m_parameterInfo = compInfo->m_parameterInfo;
   // Take the frame from the instrument rather than the cached copy, in case it was set after the cache was built.
   ALLOW_DEPRECATED(compInfo->m_referenceFrame = getReferenceFrame());
