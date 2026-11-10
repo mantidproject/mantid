@@ -169,11 +169,11 @@ void VesuvioCalculateMS::cacheInputs() {
   m_nevents = static_cast<size_t>(nevents);
 
   // -- Geometry --
-  const auto instrument = m_inputWS->getInstrument();
-  m_beamDir = instrument->getSample()->getPos() - instrument->getSource()->getPos();
+  auto const &compInfo = m_inputWS->componentInfo();
+  m_beamDir = compInfo.samplePosition() - compInfo.sourcePosition();
   m_beamDir.normalize();
 
-  const auto rframe = instrument->getReferenceFrame();
+  const auto rframe = compInfo.referenceFrame();
   m_acrossIdx = rframe->pointingHorizontal();
   m_upIdx = rframe->pointingUp();
   m_beamIdx = rframe->pointingAlongBeam();

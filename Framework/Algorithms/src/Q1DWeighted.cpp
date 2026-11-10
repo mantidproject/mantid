@@ -358,7 +358,7 @@ void Q1DWeighted::calculate(const MatrixWorkspace_const_sptr &inputWS) {
   // Beam line axis, to compute scattering angle
   const V3D beamLine = samplePos - sourcePos;
 
-  const auto up = inputWS->getInstrument()->getReferenceFrame()->vecPointingUp();
+  const auto up = inputWS->getReferenceFrame()->vecPointingUp();
   double monoWavelength = 0;
   if (m_isMonochromatic) {
     if (inputWS->run().hasProperty("wavelength")) {

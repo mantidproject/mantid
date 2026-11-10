@@ -215,8 +215,7 @@ DetectorAngularCache initAngularCaches(const MatrixWorkspace *const workspace) {
   std::vector<double> twoThetaWidths(nhist);
   std::vector<double> detectorHeights(nhist);
 
-  auto inst = workspace->getInstrument();
-  const V3D upDirVec = inst->getReferenceFrame()->vecPointingUp();
+  const V3D upDirVec = workspace->getReferenceFrame()->vecPointingUp();
 
   const auto &spectrumInfo = workspace->spectrumInfo();
   const auto &detectorInfo = workspace->detectorInfo();

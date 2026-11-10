@@ -516,11 +516,7 @@ void DetectorInfo::setRotation(const std::pair<size_t, size_t> &index, const Ker
 
 /// Return a const reference to the detector with given index.
 const Geometry::IDetector &DetectorInfo::detector(const size_t index) const {
-  GNU_DIAG_OFF("deprecated-declarations")
-  MSVC_DIAG_OFF(4996)
-  return getDetector(index);
-  MSVC_DIAG_ON(4996)
-  GNU_DIAG_ON("deprecated-declarations")
+  ALLOW_DEPRECATED(return getDetector(index));
 }
 
 /// Returns the source position.
@@ -587,11 +583,7 @@ const Geometry::IDetector &DetectorInfo::getDetector(const size_t index) const {
 /// Helper used by SpectrumInfo.
 std::shared_ptr<const Geometry::IDetector> DetectorInfo::getDetectorPtr(const size_t index) const {
   auto thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
-  GNU_DIAG_OFF("deprecated-declarations")
-  MSVC_DIAG_OFF(4996)
-  static_cast<void>(getDetector(index));
-  MSVC_DIAG_ON(4996)
-  GNU_DIAG_ON("deprecated-declarations")
+  ALLOW_DEPRECATED(static_cast<void>(getDetector(index)));
   return m_lastDetector[thread];
 }
 
