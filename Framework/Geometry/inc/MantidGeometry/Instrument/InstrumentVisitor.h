@@ -142,9 +142,6 @@ private:
   /// Rekey the ParameterMap's parameters from legacy component pointers to component indices.
   std::shared_ptr<ParameterInfo> makeParameterInfo() const;
 
-  /// Rekey the ParameterMap's parameters from legacy component pointers to component indices.
-  std::shared_ptr<ParameterInfo> makeParameterInfo() const;
-
   /// Extract the common aspects relevant to all component types
   size_t commonRegistration(const Mantid::Geometry::IComponent &component);
 
