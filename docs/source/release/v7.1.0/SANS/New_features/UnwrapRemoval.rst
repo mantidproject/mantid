@@ -1,1 +1,0 @@
-- The legacy ISIS SANS reduction no longer supports the ``UNWRAP`` user file command, following the removal of UnwrapMonitorsInTOF. ``UNWRAP ON`` is now ignored with a warning.
