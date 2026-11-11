@@ -4,7 +4,8 @@ build_prefix=$1
 prefix=$2
 package_name=$3
 
-log_directory=../../../env_logs/$target_platform
+# Use build_platform rather than target_platform as the latter is 'noarch' for noarch packages
+log_directory=../../../env_logs/$build_platform
 mkdir -p $log_directory
 
 #Just for first package (mantid), archive the base environment

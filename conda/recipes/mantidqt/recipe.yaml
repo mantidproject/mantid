@@ -58,7 +58,12 @@ requirements:
     - ${{ pin_compatible("qt6-main", upper_bound="x.x") }}
     - if: linux
       then:
+        - lz4
+        - pystack
         - qt6-gtk-platformtheme
+    - if: osx
+      then:
+        - python.app
   run_exports:
     - ${{ pin_subpackage('mantidqt', exact=True) }}
 

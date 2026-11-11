@@ -13,6 +13,7 @@ source:
 
 build:
   number: 0
+  noarch: python
   python:
     entry_points:
       - workbench = workbench.app.mantidworkbench_launch_wrapper:launch
@@ -48,13 +49,6 @@ requirements:
     - superqt
     # qtconsole-base avoids pulling in PyQt5 on the Qt6 build
     - qtconsole-base ${{ qtconsole }}
-    - if: linux
-      then:
-        - pystack
-        - lz4
-    - if: osx
-      then:
-        - python.app
   run_constraints:
     - mslice ${{ mslice }}
     - mantiddocs == ${{ version }}
