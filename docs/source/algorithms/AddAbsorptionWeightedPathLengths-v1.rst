@@ -71,6 +71,11 @@ The algorithm for calculating the attenuation factor A proceeds as follows. For 
    this :math:`\lambda`.
 
 
+Sample Orientation
+##################
+
+With ``UseSinglePath``, the sample is turned by each peak's goniometer rotation, unless the shape already carries it, for example from :ref:`algm-CopySample`. The Monte Carlo calculation builds the sample once for all peaks, so it ignores the rotation and logs a warning when a peak has one.
+
 Usage
 -----
 
