@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/MonteCarloAbsorption.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/LabFrameSample.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -18,11 +19,9 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidGeometry/Objects/ShapeRotation.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/DeltaEMode.h"
@@ -297,9 +296,7 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(const MatrixWorkspace &i
   EFixedProvider efixed(instrumentWS);
 
   // The gauge volume, beam and detectors are in the lab frame, so everything below uses this copy.
-  API::Sample labFrameSample(inputWS.sample());
-  labFrameSample.setShape(
-      Geometry::getLabFrameShape(inputWS.sample().getShape(), inputWS.run().getGoniometer().getR()));
+  auto labFrameSample = API::labFrameSample(inputWS);
 
   auto beamProfile = BeamProfileFactory::createBeamProfile(instrumentWS.componentInfo(), labFrameSample);
 

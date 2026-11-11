@@ -173,8 +173,8 @@ public:
     return {ass->y(0)[0], ass->y(1)[0], ass->y(2)[0], ass->y(3)[0]};
   }
 
-  void test_both_ways_of_orienting_the_sample_agree() {
-    SampleFrameEquivalence::assertFramesAgree(
+  void test_goniometer_does_not_rotate_a_sample_in_its_container() {
+    SampleFrameEquivalence::assertGoniometerHeldBack(
         SampleFrameEquivalence::rotationY(30.0),
         [this](const auto &r, bool baked) { return runPlateCorrection("pp_frames", r, baked); });
   }

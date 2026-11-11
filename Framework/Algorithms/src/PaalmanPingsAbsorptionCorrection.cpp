@@ -7,6 +7,7 @@
 #include "MantidAlgorithms/PaalmanPingsAbsorptionCorrection.h"
 #include "MantidAPI/HistoWorkspace.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/LabFrameSample.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -16,10 +17,8 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidGeometry/Objects/ShapeRotation.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rasterize.h"
 #include "MantidHistogramData/Interpolate.h"
@@ -393,9 +392,8 @@ void PaalmanPingsAbsorptionCorrection::constructSample(const API::Sample &sample
     throw std::invalid_argument(mess);
   }
 
-  // The quadrature intersects a lab-frame region. The container is never goniometer-rotated, so
-  // only the sample moves.
-  m_labFrameSampleShape = Geometry::getLabFrameShape(sample.getShape(), m_inputWS->run().getGoniometer().getR());
+  // The quadrature intersects a lab-frame region.
+  m_labFrameSampleShape = API::labFrameSampleShape(*m_inputWS);
   m_sampleObject = m_labFrameSampleShape.get();
   // Check there is one, and fail if not
   if (!m_containerObject->hasValidShape()) {

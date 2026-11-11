@@ -9,8 +9,8 @@
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/LabFrameSample.h"
 #include "MantidAPI/NumericAxis.h"
-#include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -22,11 +22,9 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidGeometry/Objects/ShapeRotation.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -2186,9 +2184,7 @@ DiscusMultipleScatteringCorrection::findMatchingComponent(const ComponentWorkspa
 void DiscusMultipleScatteringCorrection::prepareSampleBeamGeometry(const API::MatrixWorkspace_sptr &inputWS) {
   // The beam profile below is built from this lab-frame sample too: an unspecified beam is sized
   // from the sample's bounding box, so the unrotated one would illuminate the wrong region.
-  API::Sample labFrameSample(inputWS->sample());
-  labFrameSample.setShape(
-      Geometry::getLabFrameShape(inputWS->sample().getShape(), inputWS->run().getGoniometer().getR()));
+  auto labFrameSample = API::labFrameSample(*inputWS);
   m_sampleShape = labFrameSample.getShapePtr();
   try {
     m_env = &inputWS->sample().getEnvironment();

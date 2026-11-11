@@ -86,8 +86,8 @@ public:
         [this](const auto &r, bool baked) { return runPlateCorrection("ms_frames", r, baked); });
   }
 
-  void test_both_ways_of_orienting_the_sample_agree_with_a_container() {
-    SampleFrameEquivalence::assertFramesAgree(
+  void test_goniometer_does_not_rotate_a_sample_in_its_container() {
+    SampleFrameEquivalence::assertGoniometerHeldBack(
         SampleFrameEquivalence::rotationX(60.0),
         [this](const auto &r, bool baked) { return runSampleAndContainerCorrection("msc_frames", r, baked); });
   }

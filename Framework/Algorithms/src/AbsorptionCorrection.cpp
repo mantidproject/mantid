@@ -7,7 +7,7 @@
 #include "MantidAlgorithms/AbsorptionCorrection.h"
 #include "MantidAPI/HistoWorkspace.h"
 #include "MantidAPI/InstrumentValidator.h"
-#include "MantidAPI/Run.h"
+#include "MantidAPI/LabFrameSample.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -15,10 +15,8 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidGeometry/Objects/ShapeRotation.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidHistogramData/Interpolate.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -382,8 +380,8 @@ void AbsorptionCorrection::constructSample(API::Sample &sample) {
     }
 
     if (scatterFrom == CALC_SAMPLE) {
-      // The container and environment are never goniometer-rotated, so they stay as they are.
-      m_labFrameShape = Geometry::getLabFrameShape(*m_sampleObject, m_inputWS->run().getGoniometer().getR());
+      // The container and environment are not currently goniometer-rotated, so they stay as they are.
+      m_labFrameShape = API::labFrameSampleShape(*m_inputWS);
       m_sampleObject = m_labFrameShape.get();
     }
   } else if (scatterFrom != CALC_SAMPLE) { // should never be in this case

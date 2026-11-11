@@ -117,25 +117,40 @@ inline void bakeWithCopySample(const Mantid::API::MatrixWorkspace_sptr &source,
   TS_ASSERT_THROWS_NOTHING(copyAlg->execute());
 }
 
-/// Assert that correct(rotation, baked) answers the same with the sample in its own frame and in the
-/// lab frame, and differently unrotated - without which the agreement would prove nothing. correct
-/// may return a number or a sequence of them.
-template <typename Correct> void assertFramesAgree(const Mantid::Kernel::Matrix<double> &rotation, Correct correct) {
-  const auto values = [&correct](const Mantid::Kernel::Matrix<double> &r, const bool baked) {
-    const auto result = correct(r, baked);
-    if constexpr (std::is_arithmetic_v<std::decay_t<decltype(result)>>) {
-      return std::vector<double>{result};
-    } else {
-      return std::vector<double>(std::begin(result), std::end(result));
-    }
-  };
-  const auto ownFrame = values(rotation, false);
-  const auto labFrame = values(rotation, true);
-  TS_ASSERT_EQUALS(ownFrame.size(), labFrame.size());
-  for (size_t i = 0; i < std::min(ownFrame.size(), labFrame.size()); ++i) {
-    TS_ASSERT_DELTA(ownFrame[i], labFrame[i], 1e-9);
+/// correct(rotation, baked) as a sequence, whether it returns a number or a sequence of them.
+template <typename Correct>
+std::vector<double> values(Correct &correct, const Mantid::Kernel::Matrix<double> &rotation, const bool baked) {
+  const auto result = correct(rotation, baked);
+  if constexpr (std::is_arithmetic_v<std::decay_t<decltype(result)>>) {
+    return std::vector<double>{result};
+  } else {
+    return std::vector<double>(std::begin(result), std::end(result));
   }
-  TS_ASSERT(std::abs(ownFrame.front() - values(unrotated(), false).front()) > 1e-6);
+}
+
+inline void assertValuesEqual(const std::vector<double> &lhs, const std::vector<double> &rhs) {
+  TS_ASSERT_EQUALS(lhs.size(), rhs.size());
+  for (size_t i = 0; i < std::min(lhs.size(), rhs.size()); ++i) {
+    TS_ASSERT_DELTA(lhs[i], rhs[i], 1e-9);
+  }
+}
+
+/// Assert that correct(rotation, baked) answers the same with the sample in its own frame and in the
+/// lab frame, and differently unrotated - without which the agreement would prove nothing.
+template <typename Correct> void assertFramesAgree(const Mantid::Kernel::Matrix<double> &rotation, Correct correct) {
+  const auto ownFrame = values(correct, rotation, false);
+  assertValuesEqual(ownFrame, values(correct, rotation, true));
+  TS_ASSERT(std::abs(ownFrame.front() - values(correct, unrotated(), false).front()) > 1e-6);
+}
+
+/// Assert that correct(rotation, baked) leaves a sample in its own frame unrotated, as it must when
+/// the sample sits in an environment, which the goniometer does not currently rotate. The lab-frame
+/// answer must differ, or the rotation would have been invisible anyway.
+template <typename Correct>
+void assertGoniometerHeldBack(const Mantid::Kernel::Matrix<double> &rotation, Correct correct) {
+  const auto unrotatedValues = values(correct, unrotated(), false);
+  assertValuesEqual(values(correct, rotation, false), unrotatedValues);
+  TS_ASSERT(std::abs(values(correct, rotation, true).front() - unrotatedValues.front()) > 1e-6);
 }
 
 } // namespace SampleFrameEquivalence

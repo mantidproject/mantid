@@ -8,8 +8,8 @@
 #include "MantidAlgorithms/MultipleScatteringCorrection.h"
 #include "MantidAPI/HistoWorkspace.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/LabFrameSample.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SampleValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -19,9 +19,7 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
-#include "MantidGeometry/Objects/ShapeRotation.h"
 #include "MantidHistogramData/Interpolate.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -158,9 +156,7 @@ void MultipleScatteringCorrection::exec() {
     ws_sampleOnly->setDistribution(true); // The output of this is a distribution
     ws_sampleOnly->setYUnitLabel("Multiple Scattering Correction factor");
     //-- Fill the workspace with sample only correction factors
-    const auto labFrameSampleShape =
-        Geometry::getLabFrameShape(m_inputWS->sample().getShape(), m_inputWS->run().getGoniometer().getR());
-    calculateSingleComponent(ws_sampleOnly, *labFrameSampleShape, m_sampleElementSize);
+    calculateSingleComponent(ws_sampleOnly, *API::labFrameSampleShape(*m_inputWS), m_sampleElementSize);
     //-- Package output to workspace group
     const std::string outWSName = getProperty("OutputWorkspace");
     std::vector<std::string> names;
@@ -377,10 +373,8 @@ void MultipleScatteringCorrection::calculateSampleAndContainer(const API::Matrix
   const auto &sampleMaterial = sample.getShape().material();
   const auto &containerMaterial = sample.getEnvironment().getContainer().material();
 
-  // get the sample and container shapes. The container is never goniometer-rotated, so only the
-  // sample moves into the lab frame.
-  const auto labFrameSampleShape =
-      Geometry::getLabFrameShape(sample.getShape(), m_inputWS->run().getGoniometer().getR());
+  // get the sample and container shapes
+  const auto labFrameSampleShape = API::labFrameSampleShape(*m_inputWS);
   const auto &sampleShape = *labFrameSampleShape;
   const auto &containerShape = sample.getEnvironment().getContainer();
 

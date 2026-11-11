@@ -5,12 +5,10 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/XrayAbsorptionCorrection.h"
-#include "MantidAPI/Run.h"
+#include "MantidAPI/LabFrameSample.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidGeometry/Instrument/Goniometer.h"
-#include "MantidGeometry/Objects/ShapeRotation.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/Material.h"
@@ -144,7 +142,7 @@ std::vector<Kernel::V3D> XrayAbsorptionCorrection::calculateMuonPos(API::MatrixW
   Mantid::HistogramData::HistogramX const &muonDepth = muonProfile->x(0);
   Kernel::V3D const muonPoint = {0.0, 0.0, detectorDistance};
   Kernel::V3D toStart = {0.0, 0.0, -1.0};
-  const auto shape = Geometry::getLabFrameShape(inputWS->sample().getShape(), inputWS->run().getGoniometer().getR());
+  const auto shape = API::labFrameSampleShape(*inputWS);
   Geometry::Track muonPath = Geometry::Track(muonPoint, toStart);
   shape->interceptSurface(muonPath);
   if (muonPath.count() == 0) {
@@ -183,8 +181,7 @@ void XrayAbsorptionCorrection::exec() {
   std::vector<Kernel::V3D> muonPos = calculateMuonPos(muonProfile, inputWS, detectorDistance);
 
   // The muon implantation positions and the detector are in the lab frame.
-  const auto sampleShape =
-      Geometry::getLabFrameShape(inputWS->sample().getShape(), inputWS->run().getGoniometer().getR());
+  const auto sampleShape = API::labFrameSampleShape(*inputWS);
 
   for (size_t j = 0; j < inputWS->getNumberHistograms(); j++) {
     auto &yData = outputWS->mutableY(j);
