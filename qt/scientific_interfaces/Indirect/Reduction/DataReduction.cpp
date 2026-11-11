@@ -344,11 +344,11 @@ QString DataReduction::getInstrumentParameterFrom(const Mantid::Geometry::ICompo
 }
 
 /**
- * Tasks to be carried out after an empty instument has finished loading
+ * Tasks to be carried out after an empty instrument has finished loading
  */
 void DataReduction::instrumentLoadingDone(bool error) {
   if (error) {
-    g_log.warning("Instument loading failed! This instrument (or "
+    g_log.warning("Instrument loading failed! This instrument (or "
                   "analyser/reflection configuration) may not be supported by "
                   "the interface.");
     return;

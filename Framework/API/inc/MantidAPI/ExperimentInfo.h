@@ -214,7 +214,7 @@ private:
   void loadEmbeddedInstrumentInfoNexus(Nexus::File *file, std::string &instrumentName, std::string &instrumentXml);
 
   /// Set the instrument given the name and XML leading from IDF file if XML string is empty
-  void setInstumentFromXML(const std::string &nxFilename, std::string &instrumentName, std::string &instrumentXml);
+  void setInstrumentFromXML(const std::string &nxFilename, std::string &instrumentName, std::string &instrumentXml);
 
   // Loads the xml from an instrument file with some basic error handling
   std::string loadInstrumentXML(const std::string &filename);
