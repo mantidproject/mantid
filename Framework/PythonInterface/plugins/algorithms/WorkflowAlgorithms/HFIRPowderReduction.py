@@ -952,7 +952,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         )
 
         # A user-supplied IDF overrides the geometry embedded in the sample file.
-        self._load_IDF_if_supplied(wsname, rewrite_spectra_map=True)
+        self._load_IDF_if_supplied(wsname, rewrite_spectra_map=False)
         # Masking is not used yet, but will be added back later
         # if self.getProperty("ApplyMask").value:
         #     MaskBTP(wsname, Pixel="1,2,511,512", EnableLogging=False)
@@ -1143,7 +1143,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         """
         Load(Filename=filename, OutputWorkspace=wsname, EnableLogging=False)
         # A user-supplied IDF overrides the geometry that came from the loaded sample file.
-        self._load_IDF_if_supplied(wsname, rewrite_spectra_map=True)
+        self._load_IDF_if_supplied(wsname, rewrite_spectra_map=False)
 
     def _load_WAND_Data(self, filename, wsname):
         grouping = self.getProperty("Grouping").value
