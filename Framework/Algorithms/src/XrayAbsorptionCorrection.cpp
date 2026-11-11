@@ -131,20 +131,19 @@ std::vector<double> XrayAbsorptionCorrection::normaliseMuonIntensity(std::span<d
 /**
  * Calculate the muon implantation position in the sample.
  * @param muonProfile A reference to the muon profile workspace
- * @param inputWS A reference to the input workspace
+ * @param sampleShape The sample shape in the lab frame
  * @param detectorDistance a double representing the distance from the sample to
  * detector
  * @return A vector of V3D objects that represent the position of muons
  */
 std::vector<Kernel::V3D> XrayAbsorptionCorrection::calculateMuonPos(API::MatrixWorkspace_sptr &muonProfile,
-                                                                    const API::MatrixWorkspace_sptr &inputWS,
+                                                                    const Geometry::IObject &sampleShape,
                                                                     double detectorDistance) {
   Mantid::HistogramData::HistogramX const &muonDepth = muonProfile->x(0);
   Kernel::V3D const muonPoint = {0.0, 0.0, detectorDistance};
   Kernel::V3D toStart = {0.0, 0.0, -1.0};
-  const auto shape = API::labFrameSampleShape(*inputWS);
   Geometry::Track muonPath = Geometry::Track(muonPoint, toStart);
-  shape->interceptSurface(muonPath);
+  sampleShape.interceptSurface(muonPath);
   if (muonPath.count() == 0) {
     throw std::runtime_error("No valid solution, check shape parameters, Muon "
                              "depth profile and detector distance");
@@ -178,10 +177,9 @@ void XrayAbsorptionCorrection::exec() {
   double detectorAngle = getProperty("DetectorAngle");
   double detectorDistance = getProperty("DetectorDistance");
   Kernel::V3D detectorPos = calculateDetectorPos(detectorAngle, detectorDistance);
-  std::vector<Kernel::V3D> muonPos = calculateMuonPos(muonProfile, inputWS, detectorDistance);
-
   // The muon implantation positions and the detector are in the lab frame.
   const auto sampleShape = API::labFrameSampleShape(*inputWS);
+  std::vector<Kernel::V3D> muonPos = calculateMuonPos(muonProfile, *sampleShape, detectorDistance);
 
   for (size_t j = 0; j < inputWS->getNumberHistograms(); j++) {
     auto &yData = outputWS->mutableY(j);

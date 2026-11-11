@@ -9,7 +9,6 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Objects/IObject.h"
-#include "MantidKernel/Matrix.h"
 
 /* The sample as an experiment's goniometer places it in the lab frame, for algorithms that combine
  * it with lab-frame beams, detectors or gauge volumes. Built on Geometry::getLabFrameShape.
@@ -22,10 +21,7 @@
 namespace Mantid::API {
 class ExperimentInfo;
 
-/// The rotation still to apply to the sample shape to put it in the lab frame.
-MANTID_API_DLL Kernel::Matrix<double> labFrameSampleRotation(const ExperimentInfo &experiment);
-
-/// The sample shape in the lab frame.
+/// The sample shape in the lab frame: the sample's own shape, uncopied, when there is nothing to rotate.
 MANTID_API_DLL Geometry::IObject_sptr labFrameSampleShape(const ExperimentInfo &experiment);
 
 /// A copy of the sample carrying labFrameSampleShape, for code that takes a whole Sample.

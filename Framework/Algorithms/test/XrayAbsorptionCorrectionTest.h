@@ -41,7 +41,7 @@ public:
     TestableXrayAbsorptionCorrection alg;
     API::MatrixWorkspace_sptr muonProfile = createWorkspace(1.0);
     API::MatrixWorkspace_sptr inputWS = createWorkspaceWithDummyShape(20.0);
-    std::vector<Kernel::V3D> muonPos = alg.calculateMuonPos(muonProfile, inputWS, 100.0);
+    std::vector<Kernel::V3D> muonPos = alg.calculateMuonPos(muonProfile, inputWS->sample().getShape(), 100.0);
     double z = 1.0;
     for (auto x : muonPos) {
       z -= 0.01;

@@ -24,7 +24,8 @@ class Sample;
 }
 namespace Geometry {
 class Instrument;
-}
+class IObject;
+} // namespace Geometry
 
 namespace Algorithms {
 class DetectorGridDefinition;
@@ -55,7 +56,7 @@ protected:
   Kernel::V3D calculateDetectorPos(double const detectorAngle, double detectorDistance);
 
   std::vector<Kernel::V3D> calculateMuonPos(API::MatrixWorkspace_sptr &muonProfile,
-                                            const API::MatrixWorkspace_sptr &inputWS, double detectorDistance);
+                                            const Geometry::IObject &sampleShape, double detectorDistance);
 
   std::vector<double> normaliseMuonIntensity(std::span<double const> muonIntensity);
 

@@ -34,7 +34,6 @@ const std::string PLATE_XML = "<cuboid id=\"plate\">"
                               "<right-front-bottom-point x=\"0.02\" y=\"-0.02\" z=\"-0.002\"/>"
                               "</cuboid>";
 const Matrix<double> QUARTER_TURN_ABOUT_Y(Quat(90.0, V3D(0, 1, 0)).getRotation());
-const Matrix<double> IDENTITY(3, 3, true);
 
 double xWidth(const IObject &shape) { return shape.getBoundingBox().width().X(); }
 } // namespace
@@ -44,20 +43,19 @@ public:
   void test_shape_in_its_own_frame_is_rotated_by_the_goniometer() {
     ExperimentInfo expt = experiment(PLATE_XML);
     TS_ASSERT_DELTA(xWidth(*labFrameSampleShape(expt)), 0.004, 1e-9);
-    TS_ASSERT_EQUALS(labFrameSampleRotation(expt), QUARTER_TURN_ABOUT_Y);
   }
 
   void test_shape_already_in_the_lab_frame_is_not_rotated_again() {
     ExperimentInfo expt = experiment(ShapeFactory().addGoniometerTag(QUARTER_TURN_ABOUT_Y, PLATE_XML));
+    TS_ASSERT_EQUALS(labFrameSampleShape(expt), expt.sample().getShapePtr());
     TS_ASSERT_DELTA(xWidth(*labFrameSampleShape(expt)), 0.004, 1e-9);
-    TS_ASSERT_EQUALS(labFrameSampleRotation(expt), IDENTITY);
   }
 
   void test_sample_in_an_environment_is_used_as_defined() {
     ExperimentInfo expt = experiment(PLATE_XML);
     addEnvironment(expt);
     TS_ASSERT_EQUALS(labFrameSampleShape(expt), expt.sample().getShapePtr());
-    TS_ASSERT_EQUALS(labFrameSampleRotation(expt), IDENTITY);
+    TS_ASSERT_DELTA(xWidth(*labFrameSampleShape(expt)), 0.04, 1e-9);
   }
 
   void test_lab_frame_sample_keeps_everything_but_the_shape() {
