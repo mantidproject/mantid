@@ -191,7 +191,8 @@ To remove it by hand:
 
 .. code-block:: sh
 
-  rm "$(python -S -c 'import sysconfig; print(sysconfig.get_path("purelib"))')"/{mantid-tbbmalloc.pth,_mantid_tbbmalloc_preload.py}
+  site_packages=$(python -S -c 'import sysconfig; print(sysconfig.get_path("purelib"))')
+  rm "${site_packages}/mantid-tbbmalloc.pth" "${site_packages}/_mantid_tbbmalloc_preload.py"
 
 Set ``MANTID_DISABLE_TBBMALLOC=1`` when running Python under a tool that replaces or tracks ``malloc``,
 such as ``valgrind``, ``heaptrack`` or a preloaded ``jemalloc``.
