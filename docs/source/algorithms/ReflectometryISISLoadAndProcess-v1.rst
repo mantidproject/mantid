@@ -60,8 +60,11 @@ When ``GroupTOFWorkspaces`` is enabled, the retained processed input and any sli
 workspaces are collected into ``TOF_processed`` (or ``__TOF_processed`` when inputs
 are hidden). Bank-summed workspaces previously collected in ``TOF``/``__TOF`` are
 collected in the processed group instead, using the same end-of-workflow lookup. Grouped inputs and slices are flattened into TOF members in this
-parent group. Redundant processed group containers are removed after their members
-have been grouped; raw cache containers are retained. The original ``TOF``/``__TOF`` group contains cached inputs and their
+parent group. Redundant raw and processed group containers are removed after their
+members have been grouped. Raw members carry a ``reflectometry_cached_group_name``
+log recorded when inputs are acquired, including when grouping is disabled. It identifies
+their original group, allowing subsequent reductions to reuse the
+ordered members without retaining that container. The original ``TOF``/``__TOF`` group contains cached inputs and their
 monitors; bank-summed workspaces belong to the processed group. Flattening preserves
 input and period-member order, and repeated grouping does not reorder existing members.
 

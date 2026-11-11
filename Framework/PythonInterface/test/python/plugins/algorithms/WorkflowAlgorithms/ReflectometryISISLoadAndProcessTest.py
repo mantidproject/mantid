@@ -238,7 +238,6 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
             "TOF_14966_2",
             "TOF",
         ]
-        outputs.append("TOF_14966")
         self._assert_run_algorithm_succeeds(args, outputs)
         # RROA is called for each member of the group and then they are grouped together to form the output group
         history = ["ReflectometryReductionOneAuto", "ReflectometryReductionOneAuto", "GroupWorkspaces"]
@@ -510,15 +509,26 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         self._check_history(AnalysisDataService.retrieve("IvsQ_binned_38415_sliced_0_210"), history, False)
 
     def test_slicing_reloads_input_run_if_workspace_is_incorrect_type(self):
-        self._create_workspace(38415, "TOF_")
-        args = self._default_options
-        args.update(self._default_slice_options_real_run)
-        args["InputRunList"] = "38415"
-        args["ProcessingInstructions"] = "4"
-        outputs = self._expected_real_time_sliced_outputs
-        self._assert_run_algorithm_succeeds(args, outputs)
-        history = ["ReflectometryReductionOneAuto", "ReflectometryReductionOneAuto", "ReflectometryReductionOneAuto", "GroupWorkspaces"]
-        self._check_history(AnalysisDataService.retrieve("IvsQ_binned_38415_sliced_0_210"), history, False)
+        for grouped in (False, True):
+            with self.subTest(grouped=grouped):
+                AnalysisDataService.clear()
+                if grouped:
+                    self._create_workspace_group(38415, 2, "TOF_")
+                    alg = ReflectometryISISLoadAndProcess()
+                    alg.initialize()
+                    alg._getInputWorkspaces(["38415"], False)
+                    alg._groupTOFWorkspaces(["TOF_38415"])
+                else:
+                    self._create_workspace(38415, "TOF_")
+                args = dict(self._default_options, **self._default_slice_options_real_run, InputRunList="38415", ProcessingInstructions="4")
+                self._assert_run_algorithm_succeeds(args, self._expected_real_time_sliced_outputs)
+                history = [
+                    "ReflectometryReductionOneAuto",
+                    "ReflectometryReductionOneAuto",
+                    "ReflectometryReductionOneAuto",
+                    "GroupWorkspaces",
+                ]
+                self._check_history(AnalysisDataService.retrieve("IvsQ_binned_38415_sliced_0_210"), history, False)
 
     def test_slicing_loads_input_run_if_monitor_ws_not_in_ADS(self):
         self._create_event_workspace(38415, "TOF_", includeMonitors=False)
@@ -631,8 +641,13 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args["SliceWorkspace"] = True
         args["NumberOfSlices"] = 2
         args["ProcessingInstructions"] = "4"
-        outputs = [*self._expected_time_sliced_group_outputs, "TOF_38426", "TOF_38426_monitors"]
-        self._assert_run_algorithm_succeeds(args, outputs)
+        with patch.object(ReflectometryISISLoadAndProcess, "_loadRun", side_effect=AssertionError("Cache should be reused")):
+            for _ in range(2):
+                self._assert_run_algorithm_succeeds(args, self._expected_time_sliced_group_outputs)
+        self.assertEqual(
+            list(AnalysisDataService.retrieve("TOF").getNames()),
+            ["TOF_38426_1", "TOF_38426_2", "TOF_38426_1_monitors", "TOF_38426_2_monitors"],
+        )
         processed_group = AnalysisDataService.retrieve("TOF_processed")
         slice_members = {name for name in self._expected_time_sliced_group_outputs if name.startswith("TOF_38426") and "_sliced_" in name}
         self.assertTrue(slice_members.issubset(set(processed_group.getNames())))
@@ -664,7 +679,6 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
             "TOF_12345_1",
             "TOF_12345_2",
         ]
-        outputs.append("TOF_12345")
         self._assert_run_algorithm_succeeds(args, outputs)
         history = [
             "CreateSampleWorkspace",
@@ -685,11 +699,15 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args["InputRunList"] = "13460, 13463"
         outputs = ["IvsQ_13460+13463", "IvsQ_binned_13460+13463", "TOF", "TOF_13460_1", "TOF_13460_2", "TOF_13463"]
 
-        outputs.append("TOF_13460")
-        for _ in range(2):
-            self._assert_run_algorithm_succeeds(args, outputs)
-            self.assertEqual(list(AnalysisDataService.retrieve("TOF").getNames()), ["TOF_13460_2", "TOF_13460_1", "TOF_13463"])
-            self.assertEqual(list(AnalysisDataService.retrieve("TOF_13460").getNames()), ["TOF_13460_2", "TOF_13460_1"])
+        with patch.object(ReflectometryISISLoadAndProcess, "_loadRun", side_effect=AssertionError("Cache should be reused")):
+            for _ in range(2):
+                self._assert_run_algorithm_succeeds(args, outputs)
+                self.assertEqual(list(AnalysisDataService.retrieve("TOF").getNames()), ["TOF_13460_2", "TOF_13460_1", "TOF_13463"])
+                for name in ("TOF_13460_2", "TOF_13460_1"):
+                    self.assertEqual(
+                        AnalysisDataService.retrieve(name).run().getProperty("reflectometry_cached_group_name").value, "TOF_13460"
+                    )
+                self.assertFalse(any("_refl_work_" in name for name in AnalysisDataService.getObjectNames()))
 
     def test_fails_with_mixed_unit_input_workspace_group(self):
         self._create_workspace(13460, "TOF_")
@@ -725,7 +743,6 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args["InputRunList"] = "13460, 13463"
         args["GroupTOFWorkspaces"] = True
         outputs = ["IvsQ_13460+13463", "IvsQ_binned_13460+13463", "TOF", "TOF_13460_1", "TOF_13460_2", "TOF_13463"]
-        outputs.append("TOF_13460")
         self._assert_run_algorithm_succeeds(args, outputs)
 
     def test_group_TOF_workspaces_fails_with_mixed_unit_workspace_group(self):
@@ -791,7 +808,6 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
             "TOF_summed_segment",
         ]
 
-        outputs.append("TOF_38415")
         self._assert_run_algorithm_succeeds(args, outputs)
 
         self.assertEqual(list(AnalysisDataService.retrieve("IvsQ_38415").getNames()), ["IvsQ_38415_1", "IvsQ_38415_2"])
@@ -1170,6 +1186,9 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
                 )
                 alg.setRethrows(True)
                 self.assertTrue(alg.execute())
+                if grouped:
+                    for member in input_workspace:
+                        self.assertEqual(member.run().getProperty("reflectometry_cached_group_name").value, input_prefix + "1")
                 output = AnalysisDataService.retrieve("testIvsQBin")
                 output = output[0] if grouped else output
                 processed_id = output.run().getProperty("reflectometry_processed_tof_id").value
@@ -1193,6 +1212,14 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
                 np.testing.assert_array_equal(original.extractY(), original_y)
                 np.testing.assert_allclose(processed.extractY(), original_y * (2 if summed else 1))
                 self.assertEqual(processed.getNumberHistograms(), original.getNumberHistograms())
+                with patch.object(ReflectometryISISLoadAndProcess, "_loadRun", side_effect=AssertionError("Cache should be reused")):
+                    self.assertTrue(alg.execute())
+                output = AnalysisDataService.retrieve("testIvsQBin")
+                if grouped:
+                    self.assertEqual(len(output), 2)
+                else:
+                    self.assertFalse(output.isGroup())
+                np.testing.assert_array_equal(original.extractY(), original_y)
 
     def test_single_input_working_copy_stays_out_of_ads(self):
         self._create_workspace(13460, "TOF_")
@@ -1326,7 +1353,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         ):
             for _ in range(2):
                 assertRaisesNothing(self, alg.execute)
-        self.assertTrue(AnalysisDataService.doesExist("__TOF_38415"))
+        self.assertEqual(list(AnalysisDataService.retrieve("__TOF").getNames()), ["__TOF_38415_1", "__TOF_38415_2"])
         self.assertTrue(AnalysisDataService.doesExist("__TOF_38415_1_summed_segment"))
         self.assertFalse(any("_refl_work_" in name for name in AnalysisDataService.getObjectNames()))
 
@@ -1469,7 +1496,6 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
             "TOF",
         ]
 
-        outputs.append("TOF_14966")
         self._assert_run_algorithm_succeeds(args, outputs)
 
         self._check_polarized_group_history(AnalysisDataService.retrieve("IvsQ_binned_14966_1"))

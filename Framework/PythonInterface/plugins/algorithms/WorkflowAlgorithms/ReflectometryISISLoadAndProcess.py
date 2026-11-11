@@ -58,6 +58,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
     _CALIBRATION_FILE_LOG = "reflectometry_calibration_file"
     _ADJUSTED_THETA_LOG = "reflectometry_adjusted_theta"
     _PROCESSED_TOF_ID_LOG = "reflectometry_processed_tof_id"
+    _CACHED_GROUP_NAME_LOG = "reflectometry_cached_group_name"
     _POLREF = "POLREF"
     _POLREF_START_WS_INDEX = 4
     _INPUT_WS_INDEX = 0
@@ -212,6 +213,15 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             self._group_workspaces(tofWorkspaces, "__TOF")
         else:
             self._group_workspaces(tofWorkspaces, "TOF")
+
+        # Remove group workspaces whose members have now been flattened into TOF
+        cached_group_names = [
+            workspace_name
+            for workspace_name in dict.fromkeys(tofWorkspaces)
+            if AnalysisDataService.doesExist(workspace_name) and isinstance(AnalysisDataService.retrieve(workspace_name), WorkspaceGroup)
+        ]
+        for workspace_name in cached_group_names:
+            AnalysisDataService.remove(workspace_name)
 
     def _groupProcessedTOFWorkspaces(self, workspace_names, input_workspace_names):
         """Group processed inputs, collapsed slices and bank sums in TOF_processed or __TOF_processed."""
@@ -414,8 +424,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         )
 
     def _getInputWorkspaces(self, runs, isTrans):
-        """Convert the given run numbers into real workspace names. Uses workspaces from
-        the ADS if they exist, or loads them otherwise."""
+        """Resolve run numbers to logical input names, reusing cached workspaces or loading them."""
         workspaces = []
         for run in runs:
             ws = self._getRunFromADSOrNone(run, isTrans)
@@ -423,6 +432,13 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
                 ws = self._loadRun(run, isTrans)
             if not ws:
                 raise RuntimeError("Error loading run " + run)
+
+            # Stamp group workspace members so their original group name can be identified when ungrouped.
+            for workspace_name in (ws, _monitorWorkspace(ws)):
+                workspace = self._get_cached_workspace(workspace_name)
+                if isinstance(workspace, WorkspaceGroup):
+                    for member in workspace:
+                        member.mutableRun().addProperty(self._CACHED_GROUP_NAME_LOG, workspace_name, True)
             workspaces.append(ws)
         return workspaces
 
@@ -453,9 +469,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             return cloned_workspace_name
 
         def map_cloned_group_member_to_input_name(cloned_workspace, input_workspace_name):
-            cached_input_group = (
-                AnalysisDataService.retrieve(input_workspace_name) if AnalysisDataService.doesExist(input_workspace_name) else None
-            )
+            cached_input_group = self._get_cached_workspace(input_workspace_name)
             member_to_name_list = []
             for index, cloned_member_workspace in enumerate(cloned_workspace):
                 # Preserve cached member names; merged groups have no cached group, so generate names.
@@ -629,10 +643,15 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
                     raise RuntimeError(message)
             return True
 
-        if not _hasWorkspaceID(workspace_name, workspace_id):
+        workspace = self._get_cached_workspace(workspace_name)
+
+        if self._representative_workspace(workspace).id() != workspace_id:
             message = "Workspace " + workspace_name + " exists but is not a " + workspace_id
             if self._reload:
                 self.log().information(message)
+                if isinstance(workspace, WorkspaceGroup):
+                    for member in list(workspace):
+                        _removeWorkspace(member.name())
                 _removeWorkspace(workspace_name)
                 return False
             else:
@@ -640,7 +659,6 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
         # For event workspaces, the monitors workspace must also exist, otherwise it's not valid
         if workspace_id == "EventWorkspace":
-            workspace = AnalysisDataService.retrieve(workspace_name)
             if workspace.isGroup():
                 return all([check_for_monitors(member.name()) for member in workspace])
             return check_for_monitors(workspace_name)
@@ -648,7 +666,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
     def _workspaceExistsAndIsValid(self, workspace_name, isTrans):
         """Return true, if the given workspace exists in the ADS and is valid"""
-        if not AnalysisDataService.doesExist(workspace_name):
+        if self._get_cached_workspace(workspace_name) is None:
             self.log().information("Workspace " + workspace_name + " does not exist")
             return False
         self.log().information("Workspace " + workspace_name + " exists")
@@ -666,10 +684,25 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
     def _representative_workspace(workspace):
         return workspace[0] if isinstance(workspace, WorkspaceGroup) else workspace
 
+    def _get_cached_workspace(self, workspace_name):
+        """Resolve an ADS input or its ordered members in a flattened TOF cache."""
+        if AnalysisDataService.doesExist(workspace_name):
+            return AnalysisDataService.retrieve(workspace_name)
+        for group_name in ("TOF", "__TOF"):
+            if not AnalysisDataService.doesExist(group_name):
+                continue
+            members = [
+                member
+                for member in AnalysisDataService.retrieve(group_name)
+                if member.run().hasProperty(self._CACHED_GROUP_NAME_LOG)
+                and member.run().getProperty(self._CACHED_GROUP_NAME_LOG).value == workspace_name
+            ]
+            if members:
+                return self._create_workspace_group_from_members(members)
+        return None
+
     def _getRunFromADSOrNone(self, run, isTrans):
-        """Given a run name, return the name of the equivalent workspace in the ADS (
-        which may or may not have a prefix applied). Returns None if the workspace does
-        not exist or is not valid for the requested reflectometry reduction."""
+        """Return the logical name of a valid cached input, with or without its prefix."""
         # Try given run number
         workspace_name = run
         if self._workspaceExistsAndIsValid(workspace_name, isTrans):
@@ -682,10 +715,10 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         return None
 
     def _collapse_workspace_groups(self, workspaces):
-        """Return unique TOF members in input order, retaining original group containers."""
+        """Return unique TOF members in input order."""
         ungrouped_workspaces = []
         for name in workspaces:
-            workspace = AnalysisDataService.retrieve(name)
+            workspace = self._get_cached_workspace(name)
             if isinstance(workspace, WorkspaceGroup):
                 ungrouped_workspaces.extend(self._collapse_workspace_groups(workspace.getNames()))
             elif workspace.getAxis(0).getUnit().unitID() == "TOF":
@@ -856,11 +889,13 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         if not input_workspace_names:
             return None, ""
         if len(input_workspace_names) == 1:
-            return self._clone_workspace(AnalysisDataService.retrieve(input_workspace_names[0])), input_workspace_names[0]
+            return self._clone_workspace(self._get_cached_workspace(input_workspace_names[0])), input_workspace_names[0]
         run_numbers = "+".join(self._removePrefix(input_workspace_name, isTrans) for input_workspace_name in input_workspace_names)
-        alg = self.createChildAlgorithm("MergeRuns", InputWorkspaces=input_workspace_names)
-        alg.execute()
-        summed_workspace = alg.getProperty("OutputWorkspace").value
+        workspace_inputs = [(str(index), name, self._get_cached_workspace(name)) for index, name in enumerate(input_workspace_names)]
+        with self._temporary_ads_workspaces(workspace_inputs, require_names=True) as (input_properties, _):
+            alg = self.createChildAlgorithm("MergeRuns", InputWorkspaces=list(input_properties.values()))
+            alg.execute()
+            summed_workspace = alg.getProperty("OutputWorkspace").value
         for member in summed_workspace if isinstance(summed_workspace, WorkspaceGroup) else [summed_workspace]:
             member.mutableRun().addProperty("run_number", run_numbers, True)
         return summed_workspace, self._prefixedName(run_numbers, isTrans)
@@ -914,7 +949,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
     # Clone the cached monitors before slicing; the supplied sample is already a working copy.
     def _sliceWorkspace(self, cloned_workspace, input_workspace_name):
         input_monitor_workspace_name = _monitorWorkspace(input_workspace_name)
-        cloned_monitor_workspace = self._clone_workspace(AnalysisDataService.retrieve(input_monitor_workspace_name))
+        cloned_monitor_workspace = self._clone_workspace(self._get_cached_workspace(input_monitor_workspace_name))
         workspace_inputs = [
             ("InputWorkspaceName", input_workspace_name, cloned_workspace),
             ("MonitorWorkspaceName", input_monitor_workspace_name, cloned_monitor_workspace),
@@ -1085,15 +1120,6 @@ def _getRunNumberAsString(workspace):
         return str(workspace[0].getRunNumber())
     except:
         raise RuntimeError("Could not find run number for workspace " + workspace.getName())
-
-
-def _hasWorkspaceID(workspace_name, workspace_id):
-    """Check that a workspace has the given type"""
-    workspace = AnalysisDataService.retrieve(workspace_name)
-    if isinstance(workspace, WorkspaceGroup):
-        return workspace[0].id() == workspace_id
-    else:
-        return workspace.id() == workspace_id
 
 
 def _removeWorkspace(workspace_name):
