@@ -394,7 +394,7 @@ void SpectrumInfo::setMasked(const size_t index, bool masked) {
 /// Return a const reference to the detector or detector group of the spectrum
 /// with given index.
 const Geometry::IDetector &SpectrumInfo::detector(const size_t index) const {
-  ALLOW_DEPRECATED(return getDetector(index));
+  throw std::runtime_error("This has been deleted");
 }
 
 /// Returns the source position.
@@ -405,38 +405,6 @@ Kernel::V3D SpectrumInfo::samplePosition() const { return m_detectorInfo.sampleP
 
 /// Returns L1 (distance from source to sample).
 double SpectrumInfo::l1() const { return m_detectorInfo.l1(); }
-
-const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
-  auto thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
-  if (m_lastIndex[thread] == index)
-    return *m_lastDetector[thread];
-
-  // Note: This function body has big overlap with the method
-  // MatrixWorkspace::getDetector(). The plan is to eventually remove the
-  // latter, once SpectrumInfo is in widespread use.
-  const auto &specDef = spectrumDefinition(index);
-  const size_t ndets = specDef.size();
-  if (ndets == 1) {
-    // If only 1 detector for the spectrum number, just return it
-    const auto detIndex = specDef[0].first;
-    ALLOW_DEPRECATED(m_lastDetector[thread] = m_detectorInfo.getDetectorPtr(detIndex));
-  } else if (ndets == 0) {
-    throw Kernel::Exception::NotFoundError("MatrixWorkspace::getDetector(): No "
-                                           "detectors for this workspace "
-                                           "index.",
-                                           std::to_string(index));
-  } else {
-    // Else need to construct a DetectorGroup and use that
-    std::vector<std::shared_ptr<const Geometry::IDetector>> det_ptrs;
-    for (const auto &specDefIndex : specDef) {
-      const auto detIndex = specDefIndex.first;
-      ALLOW_DEPRECATED(det_ptrs.emplace_back(m_detectorInfo.getDetectorPtr(detIndex)));
-    }
-    m_lastDetector[thread] = std::make_shared<Geometry::DetectorGroup>(det_ptrs);
-  }
-  m_lastIndex[thread] = index;
-  return *m_lastDetector[thread];
-}
 
 /** Returns the detector ID of the first detector of the spectrum with given index.
  *

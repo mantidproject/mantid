@@ -1492,7 +1492,7 @@ Instrument::makeBeamlineNew(ParameterMap &pmap) const {
   return InstrumentVisitor::makeWrappers(*this, &pmap);
 }
 
-/// Sets up links between m_detectorInfo, m_componentInfo, and m_instrument.
+/// Sets up links between m_detectorInfo and m_componentInfo.
 std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
 Instrument::makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo,
                          const DetectorInfo &detectorInfo) const {
@@ -1506,9 +1506,6 @@ Instrument::makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo,
   // Take the frame from the instrument rather than the cached copy, in case it was set after the cache was built.
   ALLOW_DEPRECATED(compInfo->m_referenceFrame = getReferenceFrame());
   detInfo->m_referenceFrame = compInfo->m_referenceFrame;
-  const auto parInstrument = ParComponentFactory::createInstrument(
-      std::shared_ptr<const Instrument>(this, NoDeleting()), std::shared_ptr<ParameterMap>(&pmap, NoDeleting()));
-  detInfo->m_instrument = parInstrument;
   return {std::move(compInfo), std::move(detInfo)};
 }
 
