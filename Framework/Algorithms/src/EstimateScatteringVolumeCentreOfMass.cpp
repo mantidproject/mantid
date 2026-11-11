@@ -6,12 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/EstimateScatteringVolumeCentreOfMass.h"
 #include "MantidAPI/InstrumentValidator.h"
-#include "MantidAPI/LabFrameSample.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidGeometry/Objects/ShapeRotation.h"
 #include "MantidGeometry/Rasterize.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -73,20 +74,23 @@ void EstimateScatteringVolumeCentreOfMass::exec() {
   m_cubeSide *= it->second; // now in m
 
   // The gauge volume, if any, is always in the lab frame; the sample may be in either - see
-  // API::labFrameSampleShape. The two branches reconcile that differently, on purpose.
+  // Geometry::getLabFrameShape. The two branches reconcile that differently, on purpose. Unlike
+  // API::labFrameSampleShape, a sample in an environment is still rotated: the environment plays no
+  // part here, so there is nothing for the sample to overlap.
   const Geometry::IObject_sptr sampleObject = extractValidSampleObject(m_inputWS->mutableSample());
+  const Kernel::Matrix<double> runGonioR = m_inputWS->run().getGoniometer().getR();
 
   V3D averagePosInLabFrame;
   if (m_inputWS->run().hasProperty("GaugeVolume")) {
     // Intersected in the lab frame. Rasterising the gauge where it was defined keeps its
     // axis-aligned bounding box tight; rotating it into the sample frame would inflate that box and
     // silently admit voxels outside the gauge.
-    const auto labSampleShape = API::labFrameSampleShape(*m_inputWS);
+    const auto labSampleShape = Geometry::getLabFrameShape(*sampleObject, runGonioR);
     averagePosInLabFrame = rasterizeLabGaugeAndCalculateMeanElementPosition(*labSampleShape);
   } else {
     // The illumination volume is the sample, so rasterise in its own frame, where the voxel grid is
     // tight, and rotate the mean position afterwards - hence the matrix rather than the shape.
-    const Kernel::Matrix<double> gonioR = API::labFrameSampleRotation(*m_inputWS);
+    const Kernel::Matrix<double> gonioR = Geometry::outstandingGoniometerRotation(*sampleObject, runGonioR);
     const V3D averagePosInShapeFrame =
         rasterizeGaugeVolumeAndCalculateMeanElementPosition(beamDirection, sampleObject, sampleObject);
     averagePosInLabFrame = gonioR * averagePosInShapeFrame;

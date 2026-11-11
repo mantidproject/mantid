@@ -11,7 +11,9 @@
 #include "MantidAlgorithms/EstimateScatteringVolumeCentreOfMass.h"
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/Instrument/Container.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Matrix.h"
@@ -240,6 +242,27 @@ public:
     TS_ASSERT_DELTA(result.X(), 0.0, 0.0001);
     TS_ASSERT_DELTA(result.Y(), 0.01 / 3.0, 0.0002);
     TS_ASSERT_DELTA(result.Z(), 0.01 / 3.0, 0.0002);
+  }
+
+  void testSampleInAnEnvironmentIsStillRotated() {
+    // The environment takes no part in the centre of mass, so the goniometer turns the sample as
+    // usual: 90 degrees about x carries a sample centred on +y onto +z.
+    MatrixWorkspace_sptr testWS = createWorkspaceWithAnyOffsetCylinderSample(V3D(0.0, 0.02, 0.0));
+    auto can = std::make_shared<Mantid::Geometry::Container>(
+        ComponentCreationHelper::createSphere(0.2, V3D(0.0, 0.0, 0.0), "can"));
+    testWS->mutableSample().setEnvironment(std::make_unique<Mantid::Geometry::SampleEnvironment>("kit", can));
+    Mantid::Geometry::Goniometer gonio;
+    gonio.pushAxis("phi", 1.0, 0.0, 0.0, 90.0, 1);
+    testWS->mutableRun().setGoniometer(gonio, false);
+
+    Mantid::Algorithms::EstimateScatteringVolumeCentreOfMass centerOfMass;
+    centerOfMass.initialize();
+    centerOfMass.setProperty("InputWorkspace", testWS);
+    centerOfMass.setProperty("ElementSize", 2.0);
+    TS_ASSERT_THROWS_NOTHING(centerOfMass.execute());
+    const std::vector<double> result = centerOfMass.getProperty("CentreOfMass");
+    TS_ASSERT_DELTA(result[1], 0.0, 0.001);
+    TS_ASSERT(result[2] > 0.01);
   }
 
   void testBadElementUnitsThrowsError() {
