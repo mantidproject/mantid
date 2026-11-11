@@ -141,13 +141,13 @@ class ReflectometryISISSumBanksTest(unittest.TestCase):
     def test_mask_detectors_can_reuse_owned_data_and_preserves_monitors(self):
         workspace = CreateSampleWorkspace(StoreInADS=False, NumMonitors=2)
         monitors = [i for i in range(workspace.getNumberHistograms()) if workspace.spectrumInfo().isMonitor(i)]
-        original = [workspace.readY(i).copy() for i in monitors]
+        original = [workspace.y(i).copy() for i in monitors]
         result = ReflectometryISISSumBanks().mask_detectors(workspace, "200", preserve_input=False)
         self.assertIs(result, workspace)
         self.assertFalse(result.detectorInfo().isMasked(result.detectorInfo().indexOf(200)))
         self.assertTrue(result.detectorInfo().isMasked(result.detectorInfo().indexOf(201)))
         for index, values in zip(monitors, original):
-            numpy.testing.assert_array_equal(result.readY(index), values)
+            numpy.testing.assert_array_equal(result.y(index), values)
 
     def test_sum_banks(self):
         num_banks = 3
