@@ -25,8 +25,12 @@ QtRunsTableView::QtRunsTableView(std::vector<std::string> instruments)
   m_jobs = std::make_unique<MantidQt::MantidWidgets::Batch::JobTreeView>(
       QStringList({"Run(s)", "Angle", "1st Trans Run(s)", "2nd Trans Run(s)", "Q min", "Q max", "dQ/Q", "Scale",
                    "Options", "Lookup Index", "Adjusted Angle", "Nominal Specular Pixel No.",
-                   "Actual Specular Pixel No."}),
+                   "Actual Specular Pixel No.", "Additional Detector Mask"}),
       MantidQt::MantidWidgets::Batch::Cell(""), this);
+  m_jobs->header()->model()->setHeaderData(13, Qt::Horizontal,
+                                           "Detectors specified are masked in addition to those specified in the base "
+                                           "mask. Specify detector IDs as individual values or ranges, e.g. 1,2,5-10.",
+                                           Qt::ToolTipRole);
   // Keep logical column indices stable for validation and row data. Only the
   // visual order changes: Adjusted Angle appears immediately after Angle.
   m_jobs->header()->moveSection(adjustedAngleColumn, 2);

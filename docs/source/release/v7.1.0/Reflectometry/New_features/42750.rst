@@ -1,0 +1,1 @@
+- The :ref:`ISIS Reflectometry interface <interface-isis-refl>` now supports base and additional detector masks. Masks use detector IDs and ranges and are applied through :ref:`algm-ReflectometryISISLoadAndProcess` without modifying cached TOF inputs.

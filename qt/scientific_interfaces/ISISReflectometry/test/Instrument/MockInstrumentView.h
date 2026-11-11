@@ -54,6 +54,10 @@ public:
   MOCK_METHOD1(setDetectorCorrectionType, void(std::string const &));
   MOCK_CONST_METHOD0(getCalibrationFilePath, std::string());
   MOCK_METHOD1(setCalibrationFilePath, void(std::string const &));
+  MOCK_CONST_METHOD0(getBaseDetectorMask, std::string());
+  MOCK_METHOD1(setBaseDetectorMask, void(std::string const &));
+  MOCK_METHOD0(showBaseDetectorMaskValid, void());
+  MOCK_METHOD0(showBaseDetectorMaskInvalid, void());
   MOCK_CONST_METHOD0(getSpecularPixel, std::string());
   MOCK_METHOD1(setSpecularPixel, void(std::optional<double>));
   MOCK_METHOD0(showSpecularPixelInvalid, void());

@@ -71,6 +71,8 @@ void updateRowProperties(AlgorithmRuntimeProps &properties, Row const &row) {
   AlgorithmProperties::update("ThetaIn", row.theta(), properties);
   AlgorithmProperties::update("ScaleFactor", row.scaleFactor(), properties);
   AlgorithmProperties::updateFromMap(properties, row.reductionOptions());
+  if (!row.additionalDetectorMask().empty())
+    properties.setPropertyValue("DetectorMask", row.additionalDetectorMask());
   AlgorithmProperties::update("NominalSpecularPixelSpectrumNo", row.nominalSpecularPixel(), properties);
   AlgorithmProperties::update("ActualSpecularPixelSpectrumNo", row.actualSpecularPixel(), properties);
 }
@@ -144,6 +146,8 @@ void updateExperimentProperties(AlgorithmRuntimeProps &properties, Experiment co
 }
 
 void updateLookupRowProperties(AlgorithmRuntimeProps &properties, LookupRow const &lookupRow) {
+  if (!lookupRow.additionalDetectorMask().empty())
+    properties.setPropertyValue("DetectorMask", lookupRow.additionalDetectorMask());
   updateTransmissionWorkspaceProperties(properties, lookupRow.transmissionWorkspaceNames());
   AlgorithmProperties::update("TransmissionProcessingInstructions", lookupRow.transmissionProcessingInstructions(),
                               properties);
@@ -196,6 +200,18 @@ void updateInstrumentProperties(AlgorithmRuntimeProps &properties, Instrument co
   updatePreviewInstrumentProperties(properties, instrument);
   AlgorithmProperties::update("CalibrationFile", instrument.calibrationFilePath(), properties);
   AlgorithmProperties::update("NominalSpecularPixelSpectrumNo", instrument.specularPixel(), properties);
+}
+
+void appendBaseDetectorMask(AlgorithmRuntimeProps &properties, Instrument const &instrument) {
+  auto mask = instrument.baseDetectorMask();
+  if (properties.existsProperty("DetectorMask")) {
+    auto const additional = properties.getPropertyValue("DetectorMask");
+    if (!mask.empty() && !additional.empty())
+      mask += ",";
+    mask += additional;
+  }
+  if (!mask.empty())
+    properties.setPropertyValue("DetectorMask", mask);
 }
 
 class UpdateEventPropertiesVisitor {
@@ -375,6 +391,7 @@ std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps
   if (std::dynamic_pointer_cast<WorkspaceGroup>(previewRow.getLoadedWs())) {
     properties->setProperty("GroupTOFWorkspaces", false);
   }
+  appendBaseDetectorMask(*properties, model.instrument());
   return properties;
 }
 
@@ -429,6 +446,7 @@ createAlgorithmRuntimeProps(IBatch const &model, std::optional<std::reference_wr
   if (row) {
     updateRowProperties(*properties, *row);
   }
+  appendBaseDetectorMask(*properties, model.instrument());
   return properties;
 }
 
@@ -441,6 +459,7 @@ std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps
   auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   // Update properties from settings in the event, experiment and instrument tabs
   updatePropertiesFromBatchModel(*properties, model);
+  appendBaseDetectorMask(*properties, model.instrument());
   return properties;
 }
 

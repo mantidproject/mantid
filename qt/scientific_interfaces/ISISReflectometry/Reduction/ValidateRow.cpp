@@ -26,7 +26,8 @@ enum ColumnNumber {
   SCALE_COLUMN = 7,
   OPTIONS_COLUMN = 8,
   NOMINAL_SPECULAR_PIXEL_COLUMN = 11,
-  ACTUAL_SPECULAR_PIXEL_COLUMN = 12
+  ACTUAL_SPECULAR_PIXEL_COLUMN = 12,
+  ADDITIONAL_DETECTOR_MASK_COLUMN = 13
 };
 }
 
@@ -118,13 +119,18 @@ ValidationResult<Row, std::vector<int>> RowValidator::operator()(std::vector<std
   auto nominalPixel = parsePixel(cellText, NOMINAL_SPECULAR_PIXEL_COLUMN);
   auto actualPixel = parsePixel(cellText, ACTUAL_SPECULAR_PIXEL_COLUMN);
 
+  auto [mask, validMask] = parseDetectorMask(
+      cellText.size() > ADDITIONAL_DETECTOR_MASK_COLUMN ? cellText[ADDITIONAL_DETECTOR_MASK_COLUMN] : "");
+  if (!validMask)
+    m_invalidColumns.emplace_back(ADDITIONAL_DETECTOR_MASK_COLUMN);
+
   if (!m_invalidColumns.empty()) {
     return RowValidationResult(m_invalidColumns);
   }
   auto wsNames = workspaceNames(optionalRunNumbers.value(), optionalTransmissionRuns.value());
   auto optionalRow = Row(optionalRunNumbers.value(), optionalTheta.value(), optionalTransmissionRuns.value(),
                          optionalQRange.value(), optionalScaleFactor, optionalOptions.value(),
-                         ReductionWorkspaces(std::move(wsNames)), nominalPixel, actualPixel);
+                         ReductionWorkspaces(std::move(wsNames)), nominalPixel, actualPixel, mask.value_or(""));
   return RowValidationResult(optionalRow);
 }
 

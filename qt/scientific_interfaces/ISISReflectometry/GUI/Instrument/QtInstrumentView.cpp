@@ -138,6 +138,9 @@ void QtInstrumentView::registerInstrumentSettingsWidgets(const Mantid::API::IAlg
   registerSettingWidget(*m_ui.I0MonitorIndex, "I0MonitorIndex", alg);
   registerSettingWidget(*m_ui.detectorCorrectionTypeComboBox, "DetectorCorrectionType", alg);
   registerSettingWidget(*m_ui.correctDetectorsCheckBox, "CorrectDetectors", alg);
+  registerSettingWidget(*m_ui.baseDetectorMaskEdit, "DetectorMask", alg);
+  m_ui.baseDetectorMaskEdit->setToolTip("Detectors specified are always masked for relevant workspaces. Specify "
+                                        "detector IDs as individual values or ranges, e.g. 1,2,5-10.");
   registerSettingWidget(*m_ui.calibrationPathEdit, "CalibrationFile", alg);
   registerSettingWidget(*m_ui.specularPixelEdit, "NominalSpecularPixelSpectrumNo", alg);
 }
@@ -153,6 +156,7 @@ void QtInstrumentView::connectInstrumentSettingsWidgets() {
   connectSettingsChange(*m_ui.I0MonitorIndex);
   connectSettingsChange(*m_ui.detectorCorrectionTypeComboBox);
   connectSettingsChange(*m_ui.correctDetectorsCheckBox);
+  connectSettingsChange(*m_ui.baseDetectorMaskEdit);
   connectSettingsChange(*m_ui.calibrationPathEdit);
   connectSettingsChange(*m_ui.specularPixelEdit);
 }
@@ -168,6 +172,7 @@ void QtInstrumentView::disconnectInstrumentSettingsWidgets() {
   disconnectSettingsChange(*m_ui.I0MonitorIndex);
   disconnectSettingsChange(*m_ui.detectorCorrectionTypeComboBox);
   disconnectSettingsChange(*m_ui.correctDetectorsCheckBox);
+  disconnectSettingsChange(*m_ui.baseDetectorMaskEdit);
   disconnectSettingsChange(*m_ui.calibrationPathEdit);
   disconnectSettingsChange(*m_ui.specularPixelEdit);
 }
@@ -302,6 +307,16 @@ std::string QtInstrumentView::getDetectorCorrectionType() const {
 void QtInstrumentView::setDetectorCorrectionType(std::string const &value) {
   setSelected(*m_ui.detectorCorrectionTypeComboBox, value);
 }
+
+std::string QtInstrumentView::getBaseDetectorMask() const { return m_ui.baseDetectorMaskEdit->text().toStdString(); }
+
+void QtInstrumentView::setBaseDetectorMask(std::string const &value) {
+  m_ui.baseDetectorMaskEdit->setText(QString::fromStdString(value));
+}
+
+void QtInstrumentView::showBaseDetectorMaskValid() { showAsValid(*m_ui.baseDetectorMaskEdit); }
+
+void QtInstrumentView::showBaseDetectorMaskInvalid() { showAsInvalid(*m_ui.baseDetectorMaskEdit); }
 
 std::string QtInstrumentView::getCalibrationFilePath() const { return m_ui.calibrationPathEdit->text().toStdString(); }
 

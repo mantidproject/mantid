@@ -13,6 +13,16 @@ using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 
 class ValidateLookupRowTest : public CxxTest::TestSuite {
 public:
+  void testDetectorMask() {
+    auto cells = LookupRow::ValueArray{};
+    cells[LookupRow::ADDITIONAL_DETECTOR_MASK] = "1,2,3,5-10,11,12";
+    auto row = LookupRowValidator{}(cells).assertValid();
+    TS_ASSERT_EQUALS(row.additionalDetectorMask(), cells[LookupRow::ADDITIONAL_DETECTOR_MASK]);
+    cells[LookupRow::ADDITIONAL_DETECTOR_MASK] = "1+2";
+    TS_ASSERT_EQUALS(LookupRowValidator{}(cells).assertError(),
+                     std::unordered_set<int>{LookupRow::ADDITIONAL_DETECTOR_MASK});
+  }
+
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static ValidateLookupRowTest *createSuite() { return new ValidateLookupRowTest(); }

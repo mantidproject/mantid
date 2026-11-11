@@ -305,6 +305,7 @@ public:
     roundedCells.emplace_back(adjustedAngleCell(makeSimpleRow("12345"), precision));
     roundedCells.emplace_back("");
     roundedCells.emplace_back("");
+    roundedCells.emplace_back("");
     EXPECT_CALL(m_jobs, setCellsAt(rowLocation, roundedCells)).Times(1);
     presenter.notifyRowModelChanged();
 

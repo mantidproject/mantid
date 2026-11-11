@@ -17,6 +17,7 @@ The steps this algorithm performs are:
 - Ensure workspaces are loaded and are of the correct type.
 - Sum multiple input runs into a single workspace, if there is more than one.
 - Sum multiple transmission runs into a single workspace, if there is more than one.
+- Mask specified detectors on the working input and transmission workspaces, if requested.
 - Apply detector calibration to each summed workspace, if requested.
 - Perform background subtraction, if requested.
 - Perform time-slicing of the input run, if requested.
@@ -24,6 +25,10 @@ The steps this algorithm performs are:
 - Clean up the TOF workspaces into a group.
 
 Input runs and transmission runs are loaded if required, or existing workspaces are used if they are already loaded. When runs are loaded, they are named based on the run number with a ``TOF_`` or ``TRANS_`` prefix. To determine whether workspaces are already loaded, workspace names are matched based on the run number with or without this prefix. Other naming formats are not considered to match.
+
+``DetectorMask`` accepts comma-separated detector IDs and ranges, for example ``1,2,5-10``.
+Masking is applied after cloning or summing, before slicing and reduction. Cached TOF inputs
+remain unmasked, so changing the mask does not require reloading data.
 
 If a value is provided for the ``CalibrationFile`` property, input runs are summed before the resulting workspace is calibrated using :ref:`algm-ReflectometryISISCalibration`. Cached inputs remain unmodified; calibration and detector corrections are applied to a working copy or the summed workspace. Changing calibration settings does not require reloading the input data.
 

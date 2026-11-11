@@ -16,6 +16,22 @@ using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 
 class ValidateRowTest : public CxxTest::TestSuite {
 public:
+  void testDetectorMask() {
+    auto cells = std::vector<std::string>(14);
+    cells[0] = "12345";
+    cells[1] = "0.5";
+    for (auto const &mask : {"", "  ", "1,2,3,5-10,11,12", "1,1,2-3"}) {
+      cells[13] = mask;
+      auto row = RowValidator{}(cells).assertValid();
+      TS_ASSERT_EQUALS(row.additionalDetectorMask(), isEntirelyWhitespace(mask) ? "" : mask);
+      TS_ASSERT_EQUALS(row.withExtraRunNumbers({"12346"}).additionalDetectorMask(), row.additionalDetectorMask());
+    }
+    for (auto const &mask : {"abc", "1.5", "1-foo", "1+2"}) {
+      cells[13] = mask;
+      TS_ASSERT_EQUALS(RowValidator{}(cells).assertError(), std::vector<int>{13});
+    }
+  }
+
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static ValidateRowTest *createSuite() { return new ValidateRowTest(); }

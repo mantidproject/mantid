@@ -15,10 +15,10 @@ Instrument::Instrument()
 
 Instrument::Instrument(std::optional<RangeInLambda> wavelengthRange, MonitorCorrections monitorCorrections,
                        DetectorCorrections detectorCorrections, std::string calibrationFilePath,
-                       std::optional<double> specularPixel)
+                       std::optional<double> specularPixel, std::string baseDetectorMask)
     : m_wavelengthRange(std::move(wavelengthRange)), m_monitorCorrections(std::move(monitorCorrections)),
       m_detectorCorrections(detectorCorrections), m_calibrationFilePath(std::move(calibrationFilePath)),
-      m_specularPixel(specularPixel) {}
+      m_specularPixel(specularPixel), m_baseDetectorMask(std::move(baseDetectorMask)) {}
 
 const std::optional<RangeInLambda> &Instrument::wavelengthRange() const { return m_wavelengthRange; }
 
@@ -29,6 +29,8 @@ DetectorCorrections const &Instrument::detectorCorrections() const { return m_de
 std::string const &Instrument::calibrationFilePath() const { return m_calibrationFilePath; }
 
 std::optional<double> Instrument::specularPixel() const { return m_specularPixel; }
+
+std::string const &Instrument::baseDetectorMask() const { return m_baseDetectorMask; }
 
 size_t Instrument::monitorIndex() const { return m_monitorCorrections.monitorIndex(); }
 

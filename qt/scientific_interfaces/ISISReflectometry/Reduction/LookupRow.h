@@ -27,7 +27,7 @@ namespace ISISReflectometry {
  */
 class MANTIDQT_ISISREFLECTOMETRY_DLL LookupRow {
 public:
-  static auto constexpr OPTIONS_TABLE_COLUMN_COUNT = 14;
+  static auto constexpr OPTIONS_TABLE_COLUMN_COUNT = 15;
   using ValueArray = std::array<std::string, OPTIONS_TABLE_COLUMN_COUNT>;
 
   enum Column {
@@ -46,7 +46,8 @@ public:
     BACKGROUND_SPECTRA = 10,
     ROI_DETECTOR_IDS = 11,
     NOMINAL_SPECULAR_PIXEL = 12,
-    ACTUAL_SPECULAR_PIXEL = 13
+    ACTUAL_SPECULAR_PIXEL = 13,
+    ADDITIONAL_DETECTOR_MASK = 14
   };
 
   LookupRow(std::optional<double> theta, std::optional<boost::regex> titleMatcher, TransmissionRunPair tranmissionRuns,
@@ -55,7 +56,7 @@ public:
             std::optional<ProcessingInstructions> backgroundProcessingInstructions,
             std::optional<ProcessingInstructions> roiDetectorIDs,
             std::optional<double> nominalSpecularPixel = std::nullopt,
-            std::optional<double> actualSpecularPixel = std::nullopt);
+            std::optional<double> actualSpecularPixel = std::nullopt, std::string additionalDetectorMask = "");
 
   TransmissionRunPair const &transmissionWorkspaceNames() const;
   bool isWildcard() const;
@@ -65,6 +66,7 @@ public:
   std::optional<double> scaleFactor() const;
   std::optional<double> nominalSpecularPixel() const;
   std::optional<double> actualSpecularPixel() const;
+  std::string const &additionalDetectorMask() const;
   std::optional<ProcessingInstructions> transmissionProcessingInstructions() const;
   std::optional<ProcessingInstructions> processingInstructions() const;
   std::optional<ProcessingInstructions> backgroundProcessingInstructions() const;
@@ -84,6 +86,7 @@ private:
   std::optional<double> m_scaleFactor;
   std::optional<double> m_nominalSpecularPixel;
   std::optional<double> m_actualSpecularPixel;
+  std::string m_additionalDetectorMask;
   std::optional<ProcessingInstructions> m_transmissionProcessingInstructions;
   std::optional<ProcessingInstructions> m_processingInstructions;
   std::optional<ProcessingInstructions> m_backgroundProcessingInstructions;

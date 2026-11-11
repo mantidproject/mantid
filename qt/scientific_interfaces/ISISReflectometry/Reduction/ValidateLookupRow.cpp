@@ -152,6 +152,9 @@ ValidationResult<LookupRow, std::unordered_set<int>> LookupRowValidator::operato
   auto optionalROIDetectorIDs = parseROIDetectorIDs(cellText);
   auto nominalPixel = parsePixel(cellText, LookupRow::NOMINAL_SPECULAR_PIXEL);
   auto actualPixel = parsePixel(cellText, LookupRow::ACTUAL_SPECULAR_PIXEL);
+  auto [mask, validMask] = parseDetectorMask(cellText[LookupRow::ADDITIONAL_DETECTOR_MASK]);
+  if (!validMask)
+    m_invalidColumns.insert(LookupRow::ADDITIONAL_DETECTOR_MASK);
   if (!m_invalidColumns.empty()) {
     return ValidationResult<LookupRow, std::unordered_set<int>>(m_invalidColumns);
   }
@@ -162,7 +165,7 @@ ValidationResult<LookupRow, std::unordered_set<int>> LookupRowValidator::operato
       LookupRow(m_thetaOrInvalid, m_titleMatcherOrInvalid, optionalTransmissionRuns.value(),
                 std::move(optionalTransmissionProcessingInstructions), optionalQRange.value(), optionalScaleFactor,
                 std::move(optionalProcessingInstructions), std::move(optionalBackgroundProcessingInstructions),
-                std::move(optionalROIDetectorIDs), nominalPixel, actualPixel);
+                std::move(optionalROIDetectorIDs), nominalPixel, actualPixel, mask.value_or(""));
 
   return ValidationResult<LookupRow, std::unordered_set<int>>(std::move(lookupRow));
 }

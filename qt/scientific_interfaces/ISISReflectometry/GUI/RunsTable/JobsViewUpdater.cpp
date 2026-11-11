@@ -63,7 +63,8 @@ std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, s
        MantidQt::MantidWidgets::Batch::Cell(optionalToString(lookupIndex, precision)),
        adjustedAngleCell(row, precision),
        MantidWidgets::Batch::Cell(optionalToString(row.nominalSpecularPixel(), precision)),
-       MantidWidgets::Batch::Cell(optionalToString(row.actualSpecularPixel(), precision))});
+       MantidWidgets::Batch::Cell(optionalToString(row.actualSpecularPixel(), precision)),
+       MantidWidgets::Batch::Cell(row.additionalDetectorMask())});
 }
 
 MantidWidgets::Batch::Cell adjustedAngleCell(Row const &row, std::optional<int> precision) {

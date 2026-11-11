@@ -31,7 +31,7 @@ public:
   Row(std::vector<std::string> number, double theta, TransmissionRunPair tranmissionRuns, RangeInQ qRange,
       std::optional<double> scaleFactor, ReductionOptionsMap reductionOptions,
       ReductionWorkspaces reducedWorkspaceNames, std::optional<double> nominalSpecularPixel = std::nullopt,
-      std::optional<double> actualSpecularPixel = std::nullopt);
+      std::optional<double> actualSpecularPixel = std::nullopt, std::string additionalDetectorMask = "");
 
   bool isGroup() const override;
   bool isPreview() const override;
@@ -43,6 +43,7 @@ public:
   std::optional<double> scaleFactor() const;
   std::optional<double> nominalSpecularPixel() const;
   std::optional<double> actualSpecularPixel() const;
+  std::string const &additionalDetectorMask() const;
   ReductionOptionsMap const &reductionOptions() const;
   ReductionWorkspaces const &reducedWorkspaceNames() const;
   std::optional<size_t> const &lookupIndex() const;
@@ -76,6 +77,7 @@ private:
   std::optional<double> m_scaleFactor;
   std::optional<double> m_nominalSpecularPixel;
   std::optional<double> m_actualSpecularPixel;
+  std::string m_additionalDetectorMask;
   TransmissionRunPair m_transmissionRuns;
   ReductionWorkspaces m_reducedWorkspaceNames;
   ReductionOptionsMap m_reductionOptions;

@@ -384,7 +384,7 @@
         <number>3</number>
        </property>
        <property name="columnCount">
-        <number>14</number>
+        <number>15</number>
        </property>
        <attribute name="horizontalHeaderVisible">
         <bool>true</bool>
@@ -485,6 +485,9 @@
         <property name="text">
          <string>Actual Specular Pixel No.</string>
         </property>
+       </column>
+       <column>
+        <property name="text"><string>Additional Detector Mask</string></property>
        </column>
       </widget>
      </item>

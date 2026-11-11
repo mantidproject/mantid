@@ -27,7 +27,7 @@ public:
   Instrument();
   Instrument(std::optional<RangeInLambda> wavelengthRange, MonitorCorrections monitorCorrections,
              DetectorCorrections detectorCorrections, std::string calibrationFilePath,
-             std::optional<double> specularPixel = std::nullopt);
+             std::optional<double> specularPixel = std::nullopt, std::string baseDetectorMask = "");
 
   std::optional<RangeInLambda> const &wavelengthRange() const;
   bool integratedMonitors() const;
@@ -35,6 +35,7 @@ public:
   DetectorCorrections const &detectorCorrections() const;
   std::string const &calibrationFilePath() const;
   std::optional<double> specularPixel() const;
+  std::string const &baseDetectorMask() const;
 
   size_t monitorIndex() const;
   std::optional<RangeInLambda> monitorIntegralRange() const;
@@ -48,6 +49,7 @@ private:
   DetectorCorrections m_detectorCorrections;
   std::string m_calibrationFilePath;
   std::optional<double> m_specularPixel;
+  std::string m_baseDetectorMask;
 };
 
 } // namespace ISISReflectometry
