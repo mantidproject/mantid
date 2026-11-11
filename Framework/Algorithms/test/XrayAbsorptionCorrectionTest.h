@@ -103,21 +103,9 @@ public:
   }
 
   void test_both_ways_of_orienting_the_sample_agree() {
-    const auto rotation = SampleFrameEquivalence::rotationY(30.0);
-    const auto ownFrame = createWorkspaceWithPlate(rotation, false);
-    const auto labFrame = createWorkspaceWithPlate(rotation, true);
-
-    const auto ownY = runXrayCorrection(ownFrame)->y(0);
-    const auto labY = runXrayCorrection(labFrame)->y(0);
-
-    TS_ASSERT_EQUALS(ownY.size(), labY.size());
-    for (size_t i = 0; i < ownY.size(); ++i) {
-      TS_ASSERT_DELTA(ownY[i], labY[i], 1.0e-10);
-    }
-    // and the rotation actually mattered - otherwise the assertion above proves nothing
-    const auto unrotatedY =
-        runXrayCorrection(createWorkspaceWithPlate(SampleFrameEquivalence::unrotated(), false))->y(0);
-    TS_ASSERT(std::abs(ownY[0] - unrotatedY[0]) > 1.0e-6);
+    SampleFrameEquivalence::assertFramesAgree(
+        SampleFrameEquivalence::rotationY(30.0),
+        [this](const auto &r, bool baked) { return runXrayCorrection(createWorkspaceWithPlate(r, baked))->y(0); });
   }
 
   void test_exec_with_non_valid_shape() {

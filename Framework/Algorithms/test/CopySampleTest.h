@@ -59,10 +59,6 @@ public:
   }
 
   // ~~~~ Baking the destination's goniometer into the copied shape ~~~~
-  //
-  // The copy is left baked to exactly the destination's goniometer, and only the part not already
-  // present is applied - so the source's own state matters. These cover a shape in its own frame,
-  // one already baked to the same rotation, and one carrying a definition-frame rotation.
 
   static Matrix<double> ninetyAboutZ() { return Matrix<double>(std::vector<double>{0, -1, 0, 1, 0, 0, 0, 0, 1}); }
 
@@ -142,7 +138,6 @@ public:
   }
 
   void test_mesh_shape_already_baked_to_the_destination_is_not_rotated_twice() {
-    // the mesh branch composed unconditionally, so this case used to turn the cube twice
     auto cube = createOffsetCube();
     cube->bakeGoniometerRotation(ninetyAboutZ());
     TS_ASSERT_DELTA(cube->getBoundingBox().yMin(), 4.0, 1e-8);

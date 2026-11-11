@@ -456,8 +456,7 @@ public:
   }
 
   void test_translating_a_mesh_does_not_disturb_a_workspace_sharing_it() {
-    // Sample's copy constructor shares the shape pointer, so a copied workspace holds the very same
-    // mesh - and the mesh branch used to shift the vertices where they lay.
+    // Sample's copy constructor shares the shape pointer, so a copied workspace holds the same mesh
     auto ws = getWorkspaceWithMeshShape(makeUnitCubeMesh(V3D(0, 0, 0)));
     Workspace2D_sptr sharer = WorkspaceCreationHelper::create2DWorkspace(3, 3);
     sharer->mutableSample() = ws->sample();

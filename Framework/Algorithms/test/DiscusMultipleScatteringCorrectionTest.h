@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Run.h"
@@ -275,14 +274,9 @@ public:
   }
 
   void test_both_ways_of_orienting_the_sample_agree() {
-    const auto rotation = SampleFrameEquivalence::rotationY(30.0);
-    const double ownFrame = singleScatterOverTiltedPlate(rotation, false);
-    const double labFrame = singleScatterOverTiltedPlate(rotation, true);
-
-    TS_ASSERT_DELTA(ownFrame, labFrame, 1e-9);
-    // and the rotation actually mattered - otherwise the assertion above proves nothing
-    const double unrotated = singleScatterOverTiltedPlate(SampleFrameEquivalence::unrotated(), false);
-    TS_ASSERT(std::abs(ownFrame - unrotated) > 1e-6);
+    SampleFrameEquivalence::assertFramesAgree(
+        SampleFrameEquivalence::rotationY(30.0),
+        [this](const auto &r, bool baked) { return singleScatterOverTiltedPlate(r, baked); });
   }
 
   /// Single-scatter result for the flat plate held in the given frame.
@@ -292,20 +286,8 @@ public:
     inputWorkspace->mutableRun().mutableGoniometer().setR(rotation);
 
     if (baked) {
-      // Copying from an untouched twin leaves the shape rotated by this run's goniometer - the
-      // state CopySample gives a user. See PaalmanPingsAbsorptionCorrectionTest for why the real
-      // algorithm rather than the helper.
-      auto source = SetupFlatPlateWorkspace(46, 1, 1.0, 1, 0.5, 1.0, 10 * THICKNESS, 10 * THICKNESS, THICKNESS);
-      auto copyAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("CopySample");
-      copyAlg->setRethrows(true);
-      copyAlg->initialize();
-      copyAlg->setChild(true);
-      copyAlg->setProperty("InputWorkspace", source);
-      copyAlg->setProperty("OutputWorkspace", inputWorkspace);
-      copyAlg->setProperty("CopyName", false);
-      copyAlg->setProperty("CopyEnvironment", false);
-      copyAlg->setProperty("CopyLattice", false);
-      TS_ASSERT_THROWS_NOTHING(copyAlg->execute());
+      SampleFrameEquivalence::bakeWithCopySample(
+          SetupFlatPlateWorkspace(46, 1, 1.0, 1, 0.5, 1.0, 10 * THICKNESS, 10 * THICKNESS, THICKNESS), inputWorkspace);
     }
 
     auto alg = createAlgorithm();

@@ -393,11 +393,8 @@ void PaalmanPingsAbsorptionCorrection::constructSample(const API::Sample &sample
     throw std::invalid_argument(mess);
   }
 
-  // The quadrature intersects a lab-frame region, so the sample has to be in the lab frame too -
-  // see Geometry::getLabFrameShape.
-  //
-  // The container is deliberately left alone: it is never goniometer-rotated anywhere in Mantid, so
-  // rotating the sample inside a fixed can is what the assembly is meant to describe.
+  // The quadrature intersects a lab-frame region. The container is never goniometer-rotated, so
+  // only the sample moves.
   m_labFrameSampleShape = Geometry::getLabFrameShape(sample.getShape(), m_inputWS->run().getGoniometer().getR());
   m_sampleObject = m_labFrameSampleShape.get();
   // Check there is one, and fail if not

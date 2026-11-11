@@ -125,9 +125,8 @@ void AddAbsorptionWeightedPathLengths::exec() {
   bool applyCorrection = getProperty("ApplyCorrection");
   const auto npeaks = inputWS->getNumberPeaks();
 
-  // The Monte Carlo path builds its interaction volume and beam profile once, before the loop,
-  // while the goniometer varies peak to peak - so there is no one orientation to build them in.
-  // Warn rather than silently return numbers computed with the sample in the wrong place.
+  // The Monte Carlo path builds its interaction volume and beam profile once, but the goniometer
+  // varies peak to peak, so there is no single orientation to build them in.
   if (!useSinglePath) {
     const Kernel::Matrix<double> identity(3, 3, true);
     const auto &shape = inputWS->sample().getShape();
@@ -162,9 +161,8 @@ void AddAbsorptionWeightedPathLengths::exec() {
     const auto samplePos = peak.getSamplePos();
 
     if (useSinglePath) {
-      // Carry the ray into the shape's frame rather than rebuild a rotated shape for every peak -
-      // R varies peak to peak and this loop is parallel. Rotation leaves path lengths unchanged, so
-      // the attenuation is the same either way.
+      // Rotate the ray into the shape's frame rather than build a rotated shape per peak: R varies
+      // peak to peak and this loop is parallel. Path lengths are unchanged by rotation.
       const auto labToShape = Geometry::outstandingGoniometerRotation(inputWS->sample().getShape(), R).Tprime();
       const IObject *sampleShape = &(inputWS->sample().getShape());
 

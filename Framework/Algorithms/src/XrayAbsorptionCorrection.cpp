@@ -182,9 +182,7 @@ void XrayAbsorptionCorrection::exec() {
   Kernel::V3D detectorPos = calculateDetectorPos(detectorAngle, detectorDistance);
   std::vector<Kernel::V3D> muonPos = calculateMuonPos(muonProfile, inputWS, detectorDistance);
 
-  // The muon implantation positions and the detector are in the lab frame, so the sample has to be
-  // too - see Geometry::getLabFrameShape. Done once here rather than for every muon of every bin of
-  // every spectrum, which is what the loop below used to do.
+  // The muon implantation positions and the detector are in the lab frame.
   const auto sampleShape =
       Geometry::getLabFrameShape(inputWS->sample().getShape(), inputWS->run().getGoniometer().getR());
 

@@ -296,9 +296,7 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(const MatrixWorkspace &i
 
   EFixedProvider efixed(instrumentWS);
 
-  // The gauge volume, the beam and the detectors are all in the lab frame, so the sample has to be
-  // too - see Geometry::getLabFrameShape. Everything below works from this copy rather than the
-  // workspace's own sample.
+  // The gauge volume, beam and detectors are in the lab frame, so everything below uses this copy.
   API::Sample labFrameSample(inputWS.sample());
   labFrameSample.setShape(
       Geometry::getLabFrameShape(inputWS.sample().getShape(), inputWS.run().getGoniometer().getR()));

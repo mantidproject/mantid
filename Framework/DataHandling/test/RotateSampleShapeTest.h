@@ -153,8 +153,7 @@ public:
   }
 
   void test_rotating_a_mesh_does_not_disturb_a_workspace_sharing_it() {
-    // Sample's copy constructor shares the shape pointer, so a copied workspace holds the very same
-    // mesh - and the mesh branch used to turn the vertices where they lay.
+    // Sample's copy constructor shares the shape pointer, so a copied workspace holds the same mesh
     auto cube = createCube(2.0, V3D(0.0, 0.0, 0.0));
     Workspace2D_sptr ws = getWsWithMeshSampleShape(cube, "RotSampleShapeTest_ws");
     Workspace2D_sptr sharer = WorkspaceCreationHelper::create2DWorkspace(10, 10);
@@ -234,9 +233,6 @@ public:
   }
 
   // ~~~~ What the algorithm actually does to the geometry ~~~~
-  //
-  // Everything above asserts only that the algorithm ran and left a tag, so a sign error or a
-  // swapped axis order would pass the whole suite. These pin the geometry.
 
   static Mantid::Kernel::Matrix<double> ninetyAboutZ() {
     return Mantid::Kernel::Matrix<double>(std::vector<double>{0, -1, 0, 1, 0, 0, 0, 0, 1});
@@ -283,8 +279,7 @@ public:
   }
 
   void test_two_calls_compose() {
-    // Two 90 degree turns leave the sphere on -x. The CSG branch used to replace the tag, discarding
-    // the first call; it now composes, which is all a mesh has ever been able to do.
+    // two 90 degree turns leave the sphere on -x
     auto ws = rotateSphere("RotSampleShapeTest_twice", "90,0,0,1,1", Mantid::Kernel::Matrix<double>(3, 3, true));
     runRotateSampleShape("RotSampleShapeTest_twice", "90,0,0,1,1");
 

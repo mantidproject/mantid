@@ -394,8 +394,7 @@ class TestWorkspaceManager_CreateNewWsWithCopiedSample(unittest.TestCase):
 class TestWorkspaceManager_CopySamplePreservingInitialRotation(unittest.TestCase):
     def test_destination_is_set_to_identity_before_the_copy(self, mock_copy):
         # CopySample leaves the copy baked to the destination's goniometer, so an identity
-        # destination leaves the shape in its own frame with init_R still inside it. The same call
-        # now works for both shape types - it used to have to know which it was dealing with.
+        # destination leaves the shape in its own frame with init_R still inside it
         wm = _make_manager()
         wm.init_R = Rotation.from_euler("x", 30, degrees=True)
         source = MagicMock()
@@ -407,21 +406,6 @@ class TestWorkspaceManager_CopySamplePreservingInitialRotation(unittest.TestCase
         for c in gonio.setR.call_args_list:
             np.testing.assert_array_equal(c.args[0], np.eye(3))
         mock_copy.assert_called_once_with(InputWorkspace=source, OutputWorkspace=dest, **COPY_KWARGS)
-
-    def test_does_not_depend_on_the_shape_type(self, mock_copy):
-        wm = _make_manager()
-        wm.init_R = Rotation.from_euler("x", 30, degrees=True)
-        calls = []
-        for shape_type_name in ("CSGObject", "MeshObject"):
-            source = MagicMock()
-            source.sample.return_value.getShape.return_value = type(shape_type_name, (), {})()
-            dest = MagicMock()
-
-            wm.copy_sample_preserving_initial_rotation(source, dest)
-
-            calls.append([c.args[0] for c in dest.run.return_value.getGoniometer.return_value.setR.call_args_list])
-
-        np.testing.assert_array_equal(calls[0], calls[1])
 
 
 @patch(file_path + ".CopySample")

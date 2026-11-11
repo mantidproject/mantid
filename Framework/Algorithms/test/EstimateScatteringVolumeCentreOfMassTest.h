@@ -201,10 +201,8 @@ public:
     TS_ASSERT_DELTA(result.Z(), 0.01 / 3.0, 0.0002);
   }
   void testPreRotatedShapeIsNotRotatedTwice() {
-    // Same experiment as testGoniometerRotatedGaugeClipsSampleCorrectly, but with the shape already
-    // baked into the lab frame the way CopySample leaves it. The run reports the same goniometer
-    // either way, so a shape not asked what it carries is turned twice: (0, 0, 0.005) rather than
-    // (0, 0.01/3, 0.01/3), several millimetres out on a 20 mm gauge.
+    // As testGoniometerRotatedGaugeClipsSampleCorrectly, but with the shape already baked the way
+    // CopySample leaves it. Turned twice, the centre would land at (0, 0, 0.005).
     Mantid::Geometry::Goniometer gonio;
     gonio.pushAxis("phi", 1.0, 0.0, 0.0, 45.0, 1);
     const auto rotation = gonio.getR();

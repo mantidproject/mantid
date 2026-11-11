@@ -154,19 +154,10 @@ public:
     ws->mutableRun().mutableGoniometer().setR(rotation);
 
     if (baked) {
-      // Bake through the real CopySample, so this test cannot pass by agreeing with the helper it
-      // is checking.
       const std::string srcName = wsName + "_src";
       createPlateWorkspace(srcName);
-      auto copyAlg = AlgorithmManager::Instance().createUnmanaged("CopySample");
-      copyAlg->setRethrows(true);
-      copyAlg->initialize();
-      copyAlg->setPropertyValue("InputWorkspace", srcName);
-      copyAlg->setPropertyValue("OutputWorkspace", wsName);
-      copyAlg->setProperty("CopyName", false);
-      copyAlg->setProperty("CopyEnvironment", false);
-      copyAlg->setProperty("CopyLattice", false);
-      TS_ASSERT_THROWS_NOTHING(copyAlg->execute());
+      SampleFrameEquivalence::bakeWithCopySample(
+          AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(srcName), ws);
     }
 
     auto alg = AlgorithmManager::Instance().createUnmanaged("PaalmanPingsAbsorptionCorrection");
@@ -183,16 +174,9 @@ public:
   }
 
   void test_both_ways_of_orienting_the_sample_agree() {
-    const auto rotation = SampleFrameEquivalence::rotationY(30.0);
-    const auto ownFrame = runPlateCorrection("pp_own", rotation, false);
-    const auto labFrame = runPlateCorrection("pp_lab", rotation, true);
-
-    for (size_t i = 0; i < 4; ++i) {
-      TS_ASSERT_DELTA(ownFrame[i], labFrame[i], 1e-9);
-    }
-    // and the rotation actually mattered - otherwise the assertions above prove nothing
-    const auto unrotated = runPlateCorrection("pp_flat", SampleFrameEquivalence::unrotated(), false);
-    TS_ASSERT(std::abs(ownFrame[0] - unrotated[0]) > 1e-6);
+    SampleFrameEquivalence::assertFramesAgree(
+        SampleFrameEquivalence::rotationY(30.0),
+        [this](const auto &r, bool baked) { return runPlateCorrection("pp_frames", r, baked); });
   }
 
   void test_missing_container() {

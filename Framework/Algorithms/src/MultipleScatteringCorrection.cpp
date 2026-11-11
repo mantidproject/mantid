@@ -158,7 +158,6 @@ void MultipleScatteringCorrection::exec() {
     ws_sampleOnly->setDistribution(true); // The output of this is a distribution
     ws_sampleOnly->setYUnitLabel("Multiple Scattering Correction factor");
     //-- Fill the workspace with sample only correction factors
-    // Correct the sample where the experiment puts it - see Geometry::getLabFrameShape.
     const auto labFrameSampleShape =
         Geometry::getLabFrameShape(m_inputWS->sample().getShape(), m_inputWS->run().getGoniometer().getR());
     calculateSingleComponent(ws_sampleOnly, *labFrameSampleShape, m_sampleElementSize);
@@ -378,13 +377,8 @@ void MultipleScatteringCorrection::calculateSampleAndContainer(const API::Matrix
   const auto &sampleMaterial = sample.getShape().material();
   const auto &containerMaterial = sample.getEnvironment().getContainer().material();
 
-  // get the sample and container shapes
-  // As the SampleOnly branch does, so the two methods agree about where the sample is - see
-  // Geometry::getLabFrameShape. Held in a local because the shape is borrowed by reference for the
-  // rest of this function.
-  //
-  // The container is deliberately left as it stands: it is never goniometer-rotated anywhere in
-  // Mantid, so rotating the sample inside a fixed can is what the assembly is meant to describe.
+  // get the sample and container shapes. The container is never goniometer-rotated, so only the
+  // sample moves into the lab frame.
   const auto labFrameSampleShape =
       Geometry::getLabFrameShape(sample.getShape(), m_inputWS->run().getGoniometer().getR());
   const auto &sampleShape = *labFrameSampleShape;

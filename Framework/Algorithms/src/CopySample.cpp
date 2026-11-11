@@ -159,9 +159,8 @@ void CopySample::copyParameters(Sample &from, Sample &to, bool nameFlag, bool ma
     }
     auto rhsObject = std::shared_ptr<IObject>(from.getShape().cloneWithMaterial(rhsMaterial));
 
-    // Leave the copy baked to exactly the destination's goniometer, whatever frame the source was
-    // in. Only the part not already present is applied, so a baked shape is not turned twice and a
-    // definition-frame rotation survives.
+    // Bake the destination's goniometer in place of any existing bake, so a baked shape is not
+    // turned twice and a rotation within the shape's own frame survives.
     const auto currentBake = rhsObject->getAppliedRotation();
 
     if (auto csgObj = std::dynamic_pointer_cast<Geometry::CSGObject>(rhsObject)) {

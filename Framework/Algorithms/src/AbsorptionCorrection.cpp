@@ -382,12 +382,7 @@ void AbsorptionCorrection::constructSample(API::Sample &sample) {
     }
 
     if (scatterFrom == CALC_SAMPLE) {
-      // Trace through the sample where the experiment puts it - see Geometry::getLabFrameShape.
-      // Held in a member because m_sampleObject only borrows it.
-      //
-      // The container and environment are deliberately left as they stand: neither is ever
-      // goniometer-rotated anywhere in Mantid, which is the same reason SetSample declines to bake
-      // the run's goniometer when a sample environment is present.
+      // The container and environment are never goniometer-rotated, so they stay as they are.
       m_labFrameShape = Geometry::getLabFrameShape(*m_sampleObject, m_inputWS->run().getGoniometer().getR());
       m_sampleObject = m_labFrameShape.get();
     }

@@ -86,9 +86,8 @@ void EstimateScatteringVolumeCentreOfMass::exec() {
     const auto labSampleShape = Geometry::getLabFrameShape(*sampleObject, runGonioR);
     averagePosInLabFrame = rasterizeLabGaugeAndCalculateMeanElementPosition(*labSampleShape);
   } else {
-    // The illumination volume is the sample, so rasterise in its own frame - where the voxel grid is
-    // tight - and rotate the mean position afterwards. A lab-frame shape would inflate the bounding
-    // box and change the discretisation, which is why this branch wants the matrix, not the shape.
+    // The illumination volume is the sample, so rasterise in its own frame, where the voxel grid is
+    // tight, and rotate the mean position afterwards - hence the matrix rather than the shape.
     const Kernel::Matrix<double> gonioR = Geometry::outstandingGoniometerRotation(*sampleObject, runGonioR);
     const V3D averagePosInShapeFrame =
         rasterizeGaugeVolumeAndCalculateMeanElementPosition(beamDirection, sampleObject, sampleObject);
@@ -166,7 +165,6 @@ const V3D EstimateScatteringVolumeCentreOfMass::rasterizeLabGaugeAndCalculateMea
         if (!gauge->isValid(pLab)) {
           continue;
         }
-        // Both shapes are in the lab frame, so the voxel can be tested against the sample directly.
         if (!labSampleShape.isValid(pLab)) {
           continue;
         }

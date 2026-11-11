@@ -307,17 +307,8 @@ public:
   }
 
   void test_Both_Ways_Of_Orienting_The_Sample_Agree() {
-    const auto rotation = SampleFrameEquivalence::rotationY(30.0);
-    const auto ownFrameY = runOverPlate(rotation, false);
-    const auto labFrameY = runOverPlate(rotation, true);
-
-    TS_ASSERT_EQUALS(ownFrameY.size(), labFrameY.size());
-    for (size_t i = 0; i < ownFrameY.size(); ++i) {
-      TS_ASSERT_DELTA(ownFrameY[i], labFrameY[i], 1.0e-10);
-    }
-    // and the rotation actually mattered - otherwise the assertion above proves nothing
-    const auto unrotatedY = runOverPlate(SampleFrameEquivalence::unrotated(), false);
-    TS_ASSERT(std::abs(ownFrameY[0] - unrotatedY[0]) > 1.0e-6);
+    SampleFrameEquivalence::assertFramesAgree(SampleFrameEquivalence::rotationY(30.0),
+                                              [this](const auto &r, bool baked) { return runOverPlate(r, baked); });
   }
 
   void test_Workspace_With_Just_Sample_For_Direct() {

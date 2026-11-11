@@ -732,14 +732,11 @@ void SetSample::setSampleShape(API::ExperimentInfo &experiment, const Kernel::Pr
     auto xml = tryCreateXMLFromArgsOnly(*args, *refFrame);
     if (!xml.empty()) {
       const Kernel::Matrix<double> rotationMatrix = experiment.run().getGoniometer().getR();
-      // Only when there is no sample environment. The container is never goniometer-rotated, so
-      // turning the sample while the can stays put would describe an assembly that cannot exist -
-      // the sample poking out through its container. Both environment paths below decline likewise.
-      const bool bakeRunGoniometer = rotationMatrix != Kernel::Matrix<double>(3, 3, true) && !sampleEnv;
-      if (bakeRunGoniometer) {
-        // A user-supplied CSG string can already carry a bake - XML read back off a sample
-        // CopySample rotated, say - and rebaking replaces it, where identity would compose the two
-        // and turn the shape twice. Identity anyway for the shapes generated above.
+      // Not with a sample environment: the container is never goniometer-rotated, so the sample
+      // would poke out through it. The environment paths below don't bake either.
+      if (rotationMatrix != Kernel::Matrix<double>(3, 3, true) && !sampleEnv) {
+        // A CSG string can already carry a bake, e.g. XML read off a CopySample'd sample. Rebaking
+        // replaces it rather than turning the shape twice.
         const auto currentBake = Geometry::ShapeFactory::appliedGoniometerFromXML(xml);
         xml = Geometry::ShapeFactory().rebakeGoniometer(rotationMatrix, xml, currentBake);
       }
@@ -776,9 +773,8 @@ void SetSample::setSampleShape(API::ExperimentInfo &experiment, const Kernel::Pr
         throw std::runtime_error("The can has a fixed sample shape that cannot "
                                  "be adjusted using the Geometry parameter.");
       }
-      // The <samplestlfile> form, a MeshObject; the same feature as the branch above, and likewise
-      // not baked. Copy rather than use the container's shape directly: getSampleShape hands back its
-      // own pointer out of a process-wide cache, so setting the material would leak into later calls.
+      // The <samplestlfile> form, a MeshObject; likewise not baked. Clone it: getSampleShape returns
+      // a pointer from a process-wide cache, so setting its material would leak into later calls.
       const auto mat = experiment.sample().getMaterial();
       auto shapeObject = std::shared_ptr<Geometry::IObject>(can.getSampleShape()->cloneWithMaterial(mat));
 

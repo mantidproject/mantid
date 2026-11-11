@@ -81,30 +81,15 @@ public:
   }
 
   void test_both_ways_of_orienting_the_sample_agree() {
-    const auto rotation = SampleFrameEquivalence::rotationY(30.0);
-    const auto ownFrame = runPlateCorrection("ms_own", rotation, false);
-    const auto labFrame = runPlateCorrection("ms_lab", rotation, true);
-
-    TS_ASSERT_DELTA(ownFrame[0], labFrame[0], 1e-9);
-    TS_ASSERT_DELTA(ownFrame[1], labFrame[1], 1e-9);
-    // and the rotation actually mattered - otherwise the assertions above prove nothing
-    const auto unrotated = runPlateCorrection("ms_flat", SampleFrameEquivalence::unrotated(), false);
-    TS_ASSERT(std::abs(ownFrame[0] - unrotated[0]) > 1e-6);
+    SampleFrameEquivalence::assertFramesAgree(
+        SampleFrameEquivalence::rotationY(30.0),
+        [this](const auto &r, bool baked) { return runPlateCorrection("ms_frames", r, baked); });
   }
 
   void test_both_ways_of_orienting_the_sample_agree_with_a_container() {
-    // Same invariant, for the other Method. The container is not goniometer-rotated by anything in
-    // Mantid, so only the sample moves - but it must move, and by the same amount whichever frame
-    // it arrived in.
-    const auto rotation = SampleFrameEquivalence::rotationX(60.0);
-    const auto ownFrame = runSampleAndContainerCorrection("msc_own", rotation, false);
-    const auto labFrame = runSampleAndContainerCorrection("msc_lab", rotation, true);
-
-    TS_ASSERT_DELTA(ownFrame[0], labFrame[0], 1e-9);
-    TS_ASSERT_DELTA(ownFrame[1], labFrame[1], 1e-9);
-    // and the rotation actually mattered - otherwise the assertions above prove nothing
-    const auto unrotated = runSampleAndContainerCorrection("msc_flat", SampleFrameEquivalence::unrotated(), false);
-    TS_ASSERT(std::abs(ownFrame[0] - unrotated[0]) > 1e-6);
+    SampleFrameEquivalence::assertFramesAgree(
+        SampleFrameEquivalence::rotationX(60.0),
+        [this](const auto &r, bool baked) { return runSampleAndContainerCorrection("msc_frames", r, baked); });
   }
 
   void test_sampleAndContainer() {

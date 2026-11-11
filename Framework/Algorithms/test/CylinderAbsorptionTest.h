@@ -18,8 +18,6 @@
 #include "MantidKernel/UnitFactory.h"
 #include "SampleFrameEquivalence.h"
 
-#include <cmath>
-
 using Mantid::API::MatrixWorkspace_sptr;
 
 class CylinderAbsorptionTest : public CxxTest::TestSuite {
@@ -272,17 +270,9 @@ public:
   }
 
   void test_both_ways_of_orienting_the_sample_agree() {
-    // This exercises the branch that takes its shape from the sample rather than building its own
-    // cylinder, and the rasterisation follows the cylinder's own axis, so the tilted shape dices
-    // correctly.
-    const auto rotation = SampleFrameEquivalence::rotationX(30.0);
-    const double ownFrame = runSampleShapeCorrection("cylabs_own", rotation, false);
-    const double labFrame = runSampleShapeCorrection("cylabs_lab", rotation, true);
-
-    TS_ASSERT_DELTA(ownFrame, labFrame, 1e-9);
-    // and the rotation actually mattered - otherwise the assertion above proves nothing
-    const double unrotated = runSampleShapeCorrection("cylabs_flat", SampleFrameEquivalence::unrotated(), false);
-    TS_ASSERT(std::abs(ownFrame - unrotated) > 1e-6);
+    SampleFrameEquivalence::assertFramesAgree(
+        SampleFrameEquivalence::rotationX(30.0),
+        [this](const auto &r, bool baked) { return runSampleShapeCorrection("cylabs_frames", r, baked); });
   }
 
 private:

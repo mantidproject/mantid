@@ -181,14 +181,9 @@ public:
 
   void test_single_path_both_ways_of_orienting_the_sample_agree() {
     // Here the rotation comes from the peak, not the run, and it varies peak to peak.
-    const auto rotation = SampleFrameEquivalence::rotationY(30.0);
-    const double ownFrame = singlePathThroughPlate(rotation, false);
-    const double labFrame = singlePathThroughPlate(rotation, true);
-
-    TS_ASSERT_DELTA(ownFrame, labFrame, 1e-9);
-    // and the rotation actually mattered - otherwise the assertion above proves nothing
-    const double unrotated = singlePathThroughPlate(SampleFrameEquivalence::unrotated(), false);
-    TS_ASSERT(std::abs(ownFrame - unrotated) > 1e-6);
+    SampleFrameEquivalence::assertFramesAgree(
+        SampleFrameEquivalence::rotationY(30.0),
+        [this](const auto &r, bool baked) { return singlePathThroughPlate(r, baked); });
   }
 
 private:

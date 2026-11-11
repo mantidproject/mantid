@@ -299,10 +299,6 @@ public:
   }
 
   // ~~~~ Baking the run's goniometer into the sample shape ~~~~
-  //
-  // Baked in only when there is no sample environment, because the container is never rotated, so a
-  // sample turned inside a stationary can cannot arise. Neither environment path bakes - the two are
-  // the same feature for the two shape types. The suite previously had no goniometer in it at all.
 
   static Mantid::Kernel::Matrix<double> ninetyAboutZ() {
     return Mantid::Kernel::Matrix<double>(std::vector<double>{0, -1, 0, 1, 0, 0, 0, 0, 1});

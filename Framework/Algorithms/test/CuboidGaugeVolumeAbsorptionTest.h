@@ -16,8 +16,6 @@
 #include "MantidKernel/UnitFactory.h"
 #include "SampleFrameEquivalence.h"
 
-#include <cmath>
-
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::DataObjects::Workspace2D_sptr;
 
@@ -125,17 +123,11 @@ public:
   }
 
   void test_both_ways_of_orienting_the_sample_agree() {
-    // This algorithm dices the gauge volume, which is always in the lab frame, and requires every
-    // element to lie inside the sample - so it is where a sample in the wrong frame shows up most
-    // directly.
-    const auto rotation = SampleFrameEquivalence::rotationY(30.0);
-    const double ownFrame = runGaugeCorrection("cuboidgauge_own", rotation, false);
-    const double labFrame = runGaugeCorrection("cuboidgauge_lab", rotation, true);
-
-    TS_ASSERT_DELTA(ownFrame, labFrame, 1e-9);
-    // and the rotation actually mattered - otherwise the assertion above proves nothing
-    const double unrotated = runGaugeCorrection("cuboidgauge_flat", SampleFrameEquivalence::unrotated(), false);
-    TS_ASSERT(std::abs(ownFrame - unrotated) > 1e-6);
+    // This algorithm dices the lab-frame gauge volume and requires every element to lie inside the
+    // sample, so a sample in the wrong frame shows up most directly here.
+    SampleFrameEquivalence::assertFramesAgree(
+        SampleFrameEquivalence::rotationY(30.0),
+        [this](const auto &r, bool baked) { return runGaugeCorrection("cuboidgauge_frames", r, baked); });
   }
 
 private:

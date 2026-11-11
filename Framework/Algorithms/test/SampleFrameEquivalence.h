@@ -18,6 +18,7 @@
  * pass by agreeing with the code they check.
  */
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
@@ -30,10 +31,17 @@
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
 
+#include <cxxtest/TestSuite.h>
+
+#include <algorithm>
+#include <cmath>
 #include <iomanip>
+#include <iterator>
 #include <limits>
 #include <sstream>
 #include <string>
+#include <type_traits>
+#include <vector>
 
 namespace SampleFrameEquivalence {
 
@@ -91,6 +99,43 @@ inline void setSample(Mantid::API::ExperimentInfo &expt, const Mantid::Kernel::M
   shape->setMaterial(material);
   expt.mutableSample().setShape(shape);
   expt.mutableRun().mutableGoniometer().setR(rotation);
+}
+
+/// Bake dest's goniometer into a copy of source's sample through the real CopySample, for a sample
+/// setSample cannot build - one SetSample made along with its container, say.
+inline void bakeWithCopySample(const Mantid::API::MatrixWorkspace_sptr &source,
+                               const Mantid::API::MatrixWorkspace_sptr &dest) {
+  auto copyAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("CopySample");
+  copyAlg->setRethrows(true);
+  copyAlg->initialize();
+  copyAlg->setChild(true);
+  copyAlg->setProperty("InputWorkspace", source);
+  copyAlg->setProperty("OutputWorkspace", dest);
+  copyAlg->setProperty("CopyName", false);
+  copyAlg->setProperty("CopyEnvironment", false);
+  copyAlg->setProperty("CopyLattice", false);
+  TS_ASSERT_THROWS_NOTHING(copyAlg->execute());
+}
+
+/// Assert that correct(rotation, baked) answers the same with the sample in its own frame and in the
+/// lab frame, and differently unrotated - without which the agreement would prove nothing. correct
+/// may return a number or a sequence of them.
+template <typename Correct> void assertFramesAgree(const Mantid::Kernel::Matrix<double> &rotation, Correct correct) {
+  const auto values = [&correct](const Mantid::Kernel::Matrix<double> &r, const bool baked) {
+    const auto result = correct(r, baked);
+    if constexpr (std::is_arithmetic_v<std::decay_t<decltype(result)>>) {
+      return std::vector<double>{result};
+    } else {
+      return std::vector<double>(std::begin(result), std::end(result));
+    }
+  };
+  const auto ownFrame = values(rotation, false);
+  const auto labFrame = values(rotation, true);
+  TS_ASSERT_EQUALS(ownFrame.size(), labFrame.size());
+  for (size_t i = 0; i < std::min(ownFrame.size(), labFrame.size()); ++i) {
+    TS_ASSERT_DELTA(ownFrame[i], labFrame[i], 1e-9);
+  }
+  TS_ASSERT(std::abs(ownFrame.front() - values(unrotated(), false).front()) > 1e-6);
 }
 
 } // namespace SampleFrameEquivalence
