@@ -725,6 +725,7 @@ set(QT${MANTID_QT_VERSION}_TEST_FILES
     test/LogValueFinderTest.h
     test/ManageUserDirectoriesTest.h
     test/MuonPeriodInfoTest.h
+    test/OptionsPropertyWidgetTest.h
     test/QtJSONUtilsTest.h
     test/RepoModelTest.h
     test/ParseKeyValueStringTest.h

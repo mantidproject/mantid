@@ -13,6 +13,8 @@
 #include <QLabel>
 #include <QLineEdit>
 
+#include <memory>
+
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
@@ -75,6 +77,12 @@ void OptionsPropertyWidget::setValueImpl(const QString &value) {
   const QString temp = value.isEmpty() ? QString::fromStdString(m_prop->getDefault()) : value;
 
   int index = m_combo->findText(temp);
+  // A valid workspace missing from the list is hidden; add it rather than silently keeping the first listed workspace
+  if (index < 0 && m_combo->isEditable() && !temp.isEmpty() &&
+      std::unique_ptr<Property>(m_prop->clone())->setValue(temp.toStdString()).empty()) {
+    m_combo->addItem(temp);
+    index = m_combo->count() - 1;
+  }
   if (index >= 0)
     m_combo->setCurrentIndex(index);
 }
