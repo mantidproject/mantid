@@ -174,7 +174,12 @@ bool ISISRAW2::readData(FILE *file, int i) {
     return false;
   if (m_uncompressed) {
     // one plain 32 bit integer per time channel, no expansion needed
-    return ISISRAW::ioRAW(file, reinterpret_cast<int *>(dat1), t_ntc1 + 1, true) == 0;
+    if (ISISRAW::ioRAW(file, reinterpret_cast<int *>(dat1), t_ntc1 + 1, true) != 0) {
+      g_log.error() << "RAW file is truncated: it ends before the " << t_ntc1 + 1 << " time channels of spectrum index "
+                    << i << " of " << ndes << " declared in its header could be read.\n";
+      return false;
+    }
+    return true;
   }
   if (ddes[i].nwords <= 0) {
     throw std::runtime_error("Invalid spectrum descriptor in RAW file for spectrum " + std::to_string(i));

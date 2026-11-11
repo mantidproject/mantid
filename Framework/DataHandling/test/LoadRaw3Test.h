@@ -19,6 +19,7 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FileDescriptor.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Unit.h"
 #include <boost/algorithm/string/classification.hpp>
@@ -29,6 +30,7 @@
 #include <cstring>
 #include <cxxtest/TestSuite.h>
 #include <filesystem>
+#include <fstream>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -1340,6 +1342,68 @@ public:
     AnalysisDataService::Instance().remove("uncompressed_cropped");
   }
 
+  /// The header, titles, section addresses and run number that open a RAW file
+  /// can all be 7 bit values, as they are for some of the archived TFXA runs.
+  /// Such a file must not be mistaken for a text file.
+  void test_a_raw_file_whose_first_bytes_are_all_ascii_is_read() {
+    // 17 spectra of 2 channels puts every section address in the file below
+    // 0x80 in each of its bytes
+    RawCounts counts(18, std::vector<int>{0, 0});
+    for (size_t i = 1; i < counts.size(); ++i)
+      counts[i][1] = static_cast<int>(i);
+    ScopedRawFile file("ascii_start.raw", 1, counts);
+    TSM_ASSERT("The test file no longer starts with 256 ascii bytes, so does not cover this case",
+               Mantid::Kernel::FileDescriptor::isAscii(file.path()));
+
+    LoadRaw3 alg;
+    alg.initialize();
+    alg.setPropertyValue("Filename", file.path());
+    alg.setPropertyValue("OutputWorkspace", "ascii_start");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    checkUncompressedWorkspace("ascii_start", counts);
+    AnalysisDataService::Instance().remove("ascii_start");
+  }
+
+  void test_a_text_file_is_rejected() {
+    const auto path = std::filesystem::temp_directory_path() / "not_a_raw_file.raw";
+    {
+      std::ofstream text(path);
+      for (int i = 0; i < 40; ++i)
+        text << "This is a line of plain text and not an ISIS RAW file\n";
+    }
+
+    LoadRaw3 alg;
+    alg.initialize();
+    alg.setRethrows(true);
+    alg.setPropertyValue("Filename", path.string());
+    alg.setPropertyValue("OutputWorkspace", "not_a_raw_file");
+    TS_ASSERT_THROWS(alg.execute(), const std::invalid_argument &);
+    TS_ASSERT(!alg.isExecuted());
+
+    std::error_code ignored;
+    std::filesystem::remove(path, ignored);
+  }
+
+  /// A file that ends part way through its spectra must fail to load rather
+  /// than return whatever was left in the read buffer.
+  void test_a_truncated_uncompressed_file_fails_to_load() {
+    const auto counts = uncompressedTestCounts();
+    ScopedRawFile file("uncompressed_v1_truncated.raw", 1, counts);
+    // drop the two word log section and the last one and a half spectra
+    const auto wordsToDrop = 2 + counts[0].size() + counts[0].size() / 2;
+    std::filesystem::resize_file(file.path(), std::filesystem::file_size(file.path()) - wordsToDrop * sizeof(int));
+
+    LoadRaw3 alg;
+    alg.initialize();
+    alg.setPropertyValue("Filename", file.path());
+    alg.setPropertyValue("OutputWorkspace", "uncompressed_truncated");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(!alg.isExecuted());
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("uncompressed_truncated"));
+  }
+
 private:
   //----------------------------------------------------------------------------
   // Helpers for the uncompressed (not byte-relative compressed) RAW file tests
@@ -1366,6 +1430,7 @@ private:
       TSM_ASSERT_EQUALS("spectrum " + std::to_string(i), ws->y(i - 1).rawData(), expectedY(counts[i]));
       TS_ASSERT_EQUALS(ws->getSpectrum(i - 1).getSpectrumNo(), static_cast<specnum_t>(i));
     }
+    TS_ASSERT_DELTA(ws->run().getProtonCharge(), 10.0, 1e-6);
   }
 
   /// Writes a minimal ISIS RAW file whose data section is uncompressed, and
@@ -1390,6 +1455,21 @@ private:
   private:
     std::filesystem::path m_path;
 
+    /// RAW files hold their reals in VAX F format, which the reader converts on
+    /// the way in: the exponent is two larger than the IEEE one and the two 16
+    /// bit halves of the word are swapped.
+    static int vaxFloatBits(float value) {
+      if (value == 0.0f)
+        return 0;
+      const float scaled = 4.0f * value;
+      uint32_t bits;
+      std::memcpy(&bits, &scaled, sizeof(bits));
+      bits = (bits << 16) | (bits >> 16);
+      int word;
+      std::memcpy(&word, &bits, sizeof(word));
+      return word;
+    }
+
     /// Fields are written in exactly the order ISISRAW2::ioRAW reads them.
     static void write(const std::string &path, int dataSectionVersion, const RawCounts &counts) {
       const auto nspec = static_cast<int>(counts.size()) - 1; // t_nsp1
@@ -1403,11 +1483,7 @@ private:
       std::vector<int> w;
       auto push = [&w](int v) { w.emplace_back(v); };
       auto pushN = [&w](size_t n, int v) { w.insert(w.end(), n, v); };
-      auto pushFloat = [&w](float v) {
-        int bits;
-        std::memcpy(&bits, &v, sizeof(bits));
-        w.emplace_back(bits);
-      };
+      auto pushFloat = [&w](float v) { w.emplace_back(vaxFloatBits(v)); };
       // text is space padded to len, which must be a whole number of words
       auto pushChars = [&w](const std::string &text, size_t len) {
         std::string padded(text);
@@ -1451,7 +1527,7 @@ private:
 
       // run parameter block, with the end date and proton charge filled in
       std::vector<char> rpb(sizeof(RPB_STRUCT), 0);
-      const float charge = 10.0f;
+      const int charge = vaxFloatBits(10.0f);
       std::memcpy(rpb.data() + 7 * sizeof(int), &charge, sizeof(charge)); // r_gd_prtn_chrg
       std::memcpy(rpb.data() + 8 * sizeof(int), &charge, sizeof(charge)); // r_tot_prtn_chrg
       std::memcpy(rpb.data() + 16 * sizeof(int), "31-JUL-1989 ", 12);     // r_enddate
