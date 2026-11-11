@@ -133,15 +133,32 @@ The simplest way to configure the logger is:
 
     import logging
     from mantid.utils.logging import log_to_python
-    from mantid.kernel import logger
+
     # Configure Mantid to send messages to Python
     log_to_python()
 
     log = logging.getLogger('Mantid')
-    logger.information('This message is send to `log` defined above.')
+    log.information('This message is send to `log` defined above.')
+
+See the `log_to_python API documentation <https://docs.mantidproject.org/nightly/api/python/mantid/utils/logging.html>`_
+for the available arguments and more examples.
 
 Note that :code:`log_to_python` overwrites the existing setup.
-If you need more control, you can use :code:`'PythonLoggingChannel'` as a channel class in the config as described above.
+If you need more control, set the channel class yourself and keep the rest of your logging configuration,
+either in :code:`Mantid.user.properties`:
+
+.. code-block:: text
+
+  logging.channels.consoleChannel.class = PythonLoggingChannel
+
+or from Python:
+
+.. code-block:: python
+
+    from mantid.kernel import ConfigService
+    ConfigService["logging.channels.consoleChannel.class"] = "PythonLoggingChannel"
+
+The available channel classes are listed in the :ref:`properties file <mantid:Properties File>` documentation.
 
 Messages sent through :code:`PythonLoggingChannel` are queued so that C++ threads do not block waiting for the Python
 interpreter. Delivery to Python therefore happens shortly after the C++ logging call returns. The queue holds up to

@@ -204,6 +204,9 @@ The logging priority levels for the file logging and console logging can also be
   # Set the log to information and do not log that it was changed
   ConfigService.setLogLevel("information", True)
 
+To forward Mantid's log messages to Python's ``logging`` framework from a script, use
+:ref:`log_to_python <mantid.utils.logging>`.
+
 More details on logging can be found in the :ref:`developer docs <mantid-dev:Logging>` .
 
 
