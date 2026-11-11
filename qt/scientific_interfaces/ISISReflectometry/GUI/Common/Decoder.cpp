@@ -204,6 +204,7 @@ void Decoder::decodeInstrument(const QtInstrumentView *gui, const QMap<QString, 
   gui->m_ui.correctDetectorsCheckBox->setChecked(map[QString("correctDetectorsCheckBox")].toBool());
   gui->m_ui.detectorCorrectionTypeComboBox->setCurrentIndex(map[QString("detectorCorrectionTypeComboBox")].toInt());
   gui->m_ui.calibrationPathEdit->setText(map[QString("calibrationPathEdit")].toString());
+  gui->m_ui.baseDetectorMaskEdit->setText(map["baseDetectorMaskEdit"].toString());
   gui->m_ui.specularPixelEdit->setText(map[QString("specularPixelEdit")].toString());
 }
 
@@ -345,8 +346,8 @@ Decoder::decodeRow(const QMap<QString, QVariant> &map) {
       decodeReductionWorkspace(map[QString("reductionWorkspaces")].toMap()),
       map.contains("nominalSpecularPixel") ? std::optional<double>(map["nominalSpecularPixel"].toDouble())
                                            : std::nullopt,
-      map.contains("actualSpecularPixel") ? std::optional<double>(map["actualSpecularPixel"].toDouble())
-                                          : std::nullopt);
+      map.contains("actualSpecularPixel") ? std::optional<double>(map["actualSpecularPixel"].toDouble()) : std::nullopt,
+      map["additionalDetectorMask"].toString().toStdString());
   if (m_projectSave) {
     auto itemState = map[QString("itemState")].toInt();
     row.setState(State(itemState));

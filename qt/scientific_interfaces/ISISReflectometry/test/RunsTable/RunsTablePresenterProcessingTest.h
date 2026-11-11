@@ -277,6 +277,7 @@ private:
     cells.emplace_back(adjustedAngleCell(makeSimpleRow("12345"), std::nullopt));
     cells.emplace_back("");
     cells.emplace_back("");
+    cells.emplace_back("");
     for (auto &cell : cells)
       cell.setBackgroundColor(colour);
     return cells;
@@ -294,6 +295,7 @@ private:
                              Cell(""),
                              Cell(""),
                              adjustedAngleCell(makeSimpleRow("12345"), std::nullopt),
+                             Cell(""),
                              Cell(""),
                              Cell("")};
   }

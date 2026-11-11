@@ -10,6 +10,7 @@
 #include "InstrumentOptionDefaults.h"
 #include "InstrumentSettingsViewState.h"
 #include "MantidGeometry/Instrument_fwd.h"
+#include "Reduction/ParseReflectometryStrings.h"
 #include <ostream>
 #include <stdexcept>
 
@@ -105,6 +106,10 @@ void InstrumentPresenter::updateWidgetValidState() {
     m_view->showMonitorIntegralRangeInvalid();
 
   updateCalibrationFileValidState(m_model.calibrationFilePath());
+  if (parseDetectorMask(m_model.baseDetectorMask()).second)
+    m_view->showBaseDetectorMaskValid();
+  else
+    m_view->showBaseDetectorMaskInvalid();
 }
 
 void InstrumentPresenter::updateCalibrationFileValidState(const std::string &calibrationFilePath) {
@@ -229,7 +234,15 @@ void InstrumentPresenter::updateModelFromView() {
   auto const detectorCorrections = detectorCorrectionsFromView();
   auto const calibrationFilePath = calibrationFilePathFromView();
   auto const specularPixel = specularPixelFromView();
-  m_model = Instrument(wavelengthRange, monitorCorrections, detectorCorrections, calibrationFilePath, specularPixel);
+  auto mask = m_view->getBaseDetectorMask();
+  if (isEntirelyWhitespace(mask))
+    mask.clear();
+  if (parseDetectorMask(mask).second)
+    m_view->showBaseDetectorMaskValid();
+  else
+    m_view->showBaseDetectorMaskInvalid();
+  m_model =
+      Instrument(wavelengthRange, monitorCorrections, detectorCorrections, calibrationFilePath, specularPixel, mask);
 }
 
 void InstrumentPresenter::updateViewFromModel() {
@@ -253,6 +266,7 @@ void InstrumentPresenter::updateViewFromModel() {
   }
   m_view->setCorrectDetectors(m_model.correctDetectors());
   m_view->setDetectorCorrectionType(detectorCorrectionTypeToString(m_model.detectorCorrectionType()));
+  m_view->setBaseDetectorMask(m_model.baseDetectorMask());
   m_view->setCalibrationFilePath(m_model.calibrationFilePath());
   m_view->setSpecularPixel(m_model.specularPixel());
 

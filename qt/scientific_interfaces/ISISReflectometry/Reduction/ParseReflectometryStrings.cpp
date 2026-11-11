@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ParseReflectometryStrings.h"
 #include "Common/Parse.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Strings.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include <boost/algorithm/string.hpp>
@@ -106,6 +107,15 @@ TaggedOptional<std::string> parseProcessingInstructions(std::string const &instr
   } catch (std::runtime_error &) {
     return std::make_pair(std::nullopt, false);
   }
+}
+
+TaggedOptional<std::string> parseDetectorMask(std::string const &mask) {
+  if (isEntirelyWhitespace(mask))
+    return {std::nullopt, true};
+  Mantid::Kernel::ArrayProperty<int> detectorIDs("DetectorMask");
+  if (!detectorIDs.setValue(mask).empty())
+    return {std::nullopt, false};
+  return {mask, true};
 }
 
 TaggedOptional<double> parseSpecularPixel(std::string const &pixel) {

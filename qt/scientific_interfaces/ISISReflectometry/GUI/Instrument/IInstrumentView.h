@@ -71,6 +71,10 @@ public:
   virtual void setDetectorCorrectionType(std::string const &value) = 0;
 
   virtual std::string getCalibrationFilePath() const = 0;
+  virtual std::string getBaseDetectorMask() const = 0;
+  virtual void setBaseDetectorMask(std::string const &value) = 0;
+  virtual void showBaseDetectorMaskValid() = 0;
+  virtual void showBaseDetectorMaskInvalid() = 0;
   virtual void setCalibrationFilePath(std::string const &value) = 0;
   virtual std::string getSpecularPixel() const = 0;
   virtual void setSpecularPixel(std::optional<double> value) = 0;

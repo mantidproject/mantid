@@ -30,6 +30,44 @@ void assertProperty(IAlgorithmRuntimeProps const &props, std::string const &name
 
 class RowProcessingAlgorithmTest : public CxxTest::TestSuite {
 public:
+  void testDetectorMaskPrecedence() {
+    for (auto const &base : {"", "1,2"}) {
+      for (auto const &additional : {"", "3-5"}) {
+        for (auto const &runMask : {"", "5,6"}) {
+          auto instrument = Instrument(m_instrument.wavelengthRange(), m_instrument.monitorCorrections(),
+                                       m_instrument.detectorCorrections(), "", std::nullopt, base);
+          auto experiment = Experiment();
+          auto lookup = LookupRow::ValueArray{};
+          lookup[LookupRow::ADDITIONAL_DETECTOR_MASK] = additional;
+          experiment.updateLookupRow(LookupRowValidator{}(lookup).assertValid(), m_thetaTolerance);
+          auto model = Batch(experiment, instrument, m_runsTable, m_slicing);
+          auto cells = std::vector<std::string>(14);
+          cells[0] = "12345";
+          cells[1] = "0.5";
+          cells[13] = runMask;
+          auto row = RowValidator{}(cells).assertValid();
+          auto properties = RowProcessing::createAlgorithmRuntimeProps(model, row);
+          auto expected = std::string(base);
+          auto selected = std::string(runMask).empty() ? additional : runMask;
+          if (!expected.empty() && !std::string(selected).empty())
+            expected += ",";
+          expected += selected;
+          TS_ASSERT_EQUALS(properties->existsProperty("DetectorMask"), !expected.empty());
+          if (!expected.empty())
+            TS_ASSERT_EQUALS(properties->getPropertyValue("DetectorMask"), expected);
+          auto preview = PreviewRow({"12345"});
+          auto previewProperties = Reduction::createAlgorithmRuntimeProps(model, preview);
+          auto previewMask = std::string(base);
+          if (!previewMask.empty() && !std::string(additional).empty())
+            previewMask += ",";
+          previewMask += additional;
+          if (!previewMask.empty())
+            TS_ASSERT_EQUALS(previewProperties->getPropertyValue("DetectorMask"), previewMask);
+        }
+      }
+    }
+  }
+
   void testSpecularPixelPrecedenceAndBlankActualRemainsUnset() {
     auto experiment = Experiment();
     auto model = Batch(experiment, m_instrument, m_runsTable, m_slicing);

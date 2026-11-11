@@ -19,11 +19,11 @@ LookupRow::LookupRow(std::optional<double> theta, std::optional<boost::regex> ti
                      std::optional<double> scaleFactor, std::optional<ProcessingInstructions> processingInstructions,
                      std::optional<ProcessingInstructions> backgroundProcessingInstructions,
                      std::optional<ProcessingInstructions> roiDetectorIDs, std::optional<double> nominalSpecularPixel,
-                     std::optional<double> actualSpecularPixel)
+                     std::optional<double> actualSpecularPixel, std::string additionalDetectorMask)
     : m_theta(std::move(theta)), m_titleMatcher(std::move(titleMatcher)),
       m_transmissionRuns(std::move(transmissionRuns)), m_qRange(std::move(qRange)),
       m_scaleFactor(std::move(scaleFactor)), m_nominalSpecularPixel(nominalSpecularPixel),
-      m_actualSpecularPixel(actualSpecularPixel),
+      m_actualSpecularPixel(actualSpecularPixel), m_additionalDetectorMask(std::move(additionalDetectorMask)),
       m_transmissionProcessingInstructions(std::move(transmissionProcessingInstructions)),
       m_processingInstructions(std::move(processingInstructions)),
       m_backgroundProcessingInstructions(std::move(backgroundProcessingInstructions)),
@@ -44,6 +44,8 @@ std::optional<double> LookupRow::scaleFactor() const { return m_scaleFactor; }
 std::optional<double> LookupRow::nominalSpecularPixel() const { return m_nominalSpecularPixel; }
 
 std::optional<double> LookupRow::actualSpecularPixel() const { return m_actualSpecularPixel; }
+
+std::string const &LookupRow::additionalDetectorMask() const { return m_additionalDetectorMask; }
 
 std::optional<ProcessingInstructions> LookupRow::processingInstructions() const { return m_processingInstructions; }
 
@@ -93,6 +95,7 @@ bool operator==(LookupRow const &lhs, LookupRow const &rhs) {
           lhs.m_transmissionRuns == rhs.m_transmissionRuns && lhs.m_qRange == rhs.m_qRange &&
           lhs.m_scaleFactor == rhs.m_scaleFactor && lhs.m_nominalSpecularPixel == rhs.m_nominalSpecularPixel &&
           lhs.m_actualSpecularPixel == rhs.m_actualSpecularPixel &&
+          lhs.m_additionalDetectorMask == rhs.m_additionalDetectorMask &&
           lhs.m_transmissionProcessingInstructions == rhs.m_transmissionProcessingInstructions &&
           lhs.m_processingInstructions == rhs.m_processingInstructions &&
           lhs.m_backgroundProcessingInstructions == rhs.m_backgroundProcessingInstructions &&
@@ -129,6 +132,7 @@ LookupRow::ValueArray lookupRowToArray(LookupRow const &lookupRow) {
     result[LookupRow::NOMINAL_SPECULAR_PIXEL] = std::to_string(*lookupRow.nominalSpecularPixel());
   if (lookupRow.actualSpecularPixel())
     result[LookupRow::ACTUAL_SPECULAR_PIXEL] = std::to_string(*lookupRow.actualSpecularPixel());
+  result[LookupRow::ADDITIONAL_DETECTOR_MASK] = lookupRow.additionalDetectorMask();
   return result;
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

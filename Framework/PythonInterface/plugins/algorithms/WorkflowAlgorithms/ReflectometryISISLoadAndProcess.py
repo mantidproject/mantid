@@ -17,6 +17,7 @@ from mantid.kernel import (
     Direction,
     EnabledWhenProperty,
     FloatBoundedValidator,
+    IntArrayProperty,
     IntBoundedValidator,
     Property,
     PropertyCriterion,
@@ -27,6 +28,7 @@ from mantid.kernel import (
 
 
 class Prop:
+    DETECTOR_MASK = "DetectorMask"
     RUNS = "InputRunList"
     ROI_DETECTOR_IDS = "ROIDetectorIDs"
     FIRST_TRANS_RUNS = "FirstTransmissionRunList"
@@ -108,6 +110,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         """Execute the algorithm."""
         cloned_workspaces, input_workspace_names = self._load()
         cloned_workspace_names, cloned_workspace_objects = zip(*cloned_workspaces)
+        self._mask_workspaces(*cloned_workspace_objects)
         adjusted_theta = self._calibrate(*cloned_workspace_objects)
         self._should_sum_banks(*cloned_workspace_objects)
         if self._slicingEnabled():
@@ -185,6 +188,19 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             (cloned_second_transmission_workspace_name, cloned_second_transmission_workspace),
         )
         return reduction_inputs, input_workspace_names
+
+    def _mask_workspaces(self, *workspaces):
+        detector_ids = self.getProperty(Prop.DETECTOR_MASK).value
+        if len(detector_ids) == 0:
+            return
+        for workspace in workspaces:
+            if workspace is None:
+                continue
+            if isinstance(workspace, WorkspaceGroup):
+                self._mask_workspaces(*workspace)
+            else:
+                alg = self.createChildAlgorithm("MaskDetectors", Workspace=workspace, DetectorList=detector_ids.tolist())
+                alg.execute()
 
     def _calibrate(self, cloned_workspace, cloned_first_transmission_workspace, cloned_second_transmission_workspace):
         nominal_specular_pixel = self.getProperty(Prop.NOMINAL_SPECULAR_PIXEL).value
@@ -272,6 +288,10 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         self.declareProperty(Prop.RELOAD, True, doc="If true, reload input workspaces if they are of the incorrect type")
         self.declareProperty(Prop.GROUP_TOF, True, doc="If true, group the TOF workspaces")
 
+        self.declareProperty(
+            IntArrayProperty(Prop.DETECTOR_MASK, []),
+            doc="Detector IDs to mask before slicing and reduction, specified as comma-separated IDs and ranges.",
+        )
         self.declareProperty(Prop.HIDE_INPUT, False, doc="If true, make the input workspaces invisible in the ADS.")
 
     def _declareCalibrationProperties(self):

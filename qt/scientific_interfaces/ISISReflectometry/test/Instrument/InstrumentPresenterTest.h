@@ -43,6 +43,18 @@ public:
     verifyAndClear();
   }
 
+  void testBaseDetectorMaskValidation() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_view, getBaseDetectorMask()).WillOnce(Return("1,2,5-10"));
+    EXPECT_CALL(m_view, showBaseDetectorMaskValid()).Times(1);
+    presenter.notifySettingsChanged();
+    TS_ASSERT_EQUALS(presenter.instrument().baseDetectorMask(), "1,2,5-10");
+    EXPECT_CALL(m_view, getBaseDetectorMask()).WillOnce(Return("1+2"));
+    EXPECT_CALL(m_view, showBaseDetectorMaskInvalid()).Times(1);
+    presenter.notifySettingsChanged();
+    TS_ASSERT_EQUALS(presenter.instrument().baseDetectorMask(), "1+2");
+  }
+
   void testPresenterSubscribesToView() {
     EXPECT_CALL(m_view, subscribe(_)).Times(1);
     auto presenter = makePresenter();

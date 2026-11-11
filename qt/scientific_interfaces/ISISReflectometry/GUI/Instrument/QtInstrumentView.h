@@ -62,6 +62,10 @@ public:
   void setDetectorCorrectionType(std::string const &value) override;
 
   std::string getCalibrationFilePath() const override;
+  std::string getBaseDetectorMask() const override;
+  void setBaseDetectorMask(std::string const &value) override;
+  void showBaseDetectorMaskValid() override;
+  void showBaseDetectorMaskInvalid() override;
   void setCalibrationFilePath(std::string const &value) override;
   std::string getSpecularPixel() const override;
   void setSpecularPixel(std::optional<double> value) override;

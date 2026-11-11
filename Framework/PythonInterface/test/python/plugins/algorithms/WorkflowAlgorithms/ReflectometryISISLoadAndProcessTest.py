@@ -134,6 +134,26 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         config["default.facility"] = self._oldFacility
         config["default.instrument"] = self._oldInstrument
 
+    def test_detector_mask_is_preserved_in_sliced_results_without_masking_cached_tof(self):
+        self._create_event_workspace(38415, "TOF_", bank_pixel_width=2)
+        cached = AnalysisDataService.retrieve("TOF_38415")
+        detector_id = next(iter(cached.getSpectrum(0).getDetectorIDs()))
+        args = dict(
+            self._default_options,
+            **self._default_slice_options_dummy_run,
+            InputRunList="38415",
+            ProcessingInstructions="4-7",
+            DetectorMask=str(detector_id),
+        )
+        self._assert_run_algorithm_succeeds(args)
+
+        for name in ("TOF_processed", "IvsQ_38415", "IvsQ_binned_38415", "IvsLam_38415"):
+            for workspace in AnalysisDataService.retrieve(name):
+                detectors = workspace.detectorInfo()
+                self.assertTrue(detectors.isMasked(detectors.indexOf(detector_id)))
+        cached = AnalysisDataService.retrieve("TOF_38415")
+        self.assertFalse(cached.spectrumInfo().isMasked(0))
+
     def test_all_property_settings_can_be_evaluated(self):
         alg = create_algorithm("ReflectometryISISLoadAndProcess")
         for prop in alg.getProperties():

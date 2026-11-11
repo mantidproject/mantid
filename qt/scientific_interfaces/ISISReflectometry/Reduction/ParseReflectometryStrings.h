@@ -45,6 +45,9 @@ std::variant<RangeInQ, std::vector<int>> parseQRange(std::string const &min, std
                                                      std::string const &step);
 
 MANTIDQT_ISISREFLECTOMETRY_DLL
+TaggedOptional<std::string> parseDetectorMask(std::string const &mask);
+
+MANTIDQT_ISISREFLECTOMETRY_DLL
 TaggedOptional<double> parseSpecularPixel(std::string const &pixel);
 
 MANTIDQT_ISISREFLECTOMETRY_DLL

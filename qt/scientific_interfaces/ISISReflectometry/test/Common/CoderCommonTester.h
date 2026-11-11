@@ -62,8 +62,10 @@ public:
     auto runsTablePresenter = dynamic_cast<RunsTablePresenter *>(runsPresenter->m_tablePresenter.get());
     auto &rows = runsTablePresenter->mutableRunsTable().mutableReductionJobs().mutableGroups()[0].mutableRows();
     rows[0] = Row({"12345"}, 0.5, TransmissionRunPair(), RangeInQ(), std::nullopt, {},
-                  workspaceNames({"12345"}, TransmissionRunPair()), 280.5, 282.25);
+                  workspaceNames({"12345"}, TransmissionRunPair()), 280.5, 282.25, "3,5-10");
     auto lookup = gui->experiment()->getLookupTable();
+    lookup[0][LookupRow::ADDITIONAL_DETECTOR_MASK] = "12-15";
+    gui->m_instrument->setBaseDetectorMask("1,2");
     lookup[0][LookupRow::NOMINAL_SPECULAR_PIXEL] = "281.5";
     lookup[0][LookupRow::ACTUAL_SPECULAR_PIXEL] = "283.25";
     gui->experiment()->setLookupTable(lookup);
@@ -152,6 +154,7 @@ private:
     TS_ASSERT_EQUALS(gui->m_ui.detectorCorrectionTypeComboBox->currentIndex(),
                      map[QString("detectorCorrectionTypeComboBox")].toInt());
     TS_ASSERT_EQUALS(gui->m_ui.calibrationPathEdit->text(), map[QString("calibrationPathEdit")].toString());
+    TS_ASSERT_EQUALS(gui->getBaseDetectorMask(), map["baseDetectorMaskEdit"].toString().toStdString());
     TS_ASSERT_EQUALS(gui->m_ui.specularPixelEdit->text(), map[QString("specularPixelEdit")].toString());
   }
 
@@ -209,6 +212,7 @@ private:
       if (scaleFactorPresent) {
         TS_ASSERT_EQUALS(row.value().scaleFactor().value(), map[QString("scaleFactor")].toDouble());
       }
+      TS_ASSERT_EQUALS(row->additionalDetectorMask(), map["additionalDetectorMask"].toString().toStdString());
       TS_ASSERT_EQUALS(row->nominalSpecularPixel().has_value(), map.contains("nominalSpecularPixel"));
       if (row->nominalSpecularPixel())
         TS_ASSERT_EQUALS(*row->nominalSpecularPixel(), map["nominalSpecularPixel"].toDouble());
@@ -387,6 +391,7 @@ public:
     declareProperty("CorrectDetectors", "");
     declareProperty("ROIDetectorIDs", "");
     declareProperty("CalibrationFile", "");
+    declareProperty("DetectorMask", "");
     declareProperty("NominalSpecularPixelSpectrumNo", 0.0);
     declareProperty("ActualSpecularPixelSpectrumNo", 0.0);
   }
