@@ -64,7 +64,10 @@ Programs started from that Python process inherit ``LD_PRELOAD`` and use it too.
 
 ``tbbmalloc`` can use more memory than the system allocator, because it keeps freed memory for reuse.
 To use the system allocator instead, set the environment variable ``MANTID_DISABLE_TBBMALLOC=1``
-before starting Python, or start Python with ``-S``.
+before starting Python.
+This only stops Python preloading ``tbbmalloc`` itself:
+a Python process started by MantidWorkbench, or by another Python process that is already using ``tbbmalloc``,
+inherits ``LD_PRELOAD`` and keeps using it unless ``libtbbmalloc_proxy.so.2`` is also removed from ``LD_PRELOAD``.
 
 Script and Notebook Generation
 ==============================
