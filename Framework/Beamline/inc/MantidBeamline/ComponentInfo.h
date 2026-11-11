@@ -144,6 +144,7 @@ public:
   bool hasSample() const;
   bool hasEquivalentSample(const ComponentInfo &other) const;
   bool hasSameBase(ComponentInfo const &other) const;
+  void shareBase(ComponentInfo const &base);
   const Eigen::Vector3d &sourcePosition() const;
   const Eigen::Vector3d &samplePosition() const;
   size_t source() const;

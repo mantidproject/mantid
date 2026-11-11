@@ -96,7 +96,9 @@ void Track::removeCojoins() {
   auto nextNode = m_links.begin();
   ++nextNode;
   while (nextNode != m_links.end()) {
-    if (prevNode->componentIndex == nextNode->componentIndex) {
+    // Links of components with no index can only be told apart by their objects
+    if (prevNode->componentIndex == nextNode->componentIndex &&
+        (prevNode->componentIndex != noComponent || prevNode->object == nextNode->object)) {
       prevNode->exitPoint = nextNode->exitPoint;
       prevNode->distFromStart = prevNode->entryPoint.distance(prevNode->exitPoint);
       prevNode->distInsideObject = nextNode->distInsideObject;

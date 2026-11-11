@@ -363,9 +363,16 @@ protected:
 
 private:
   friend class InstrumentVisitor;
+  /// A component index that a copy does not inherit: the copy belongs to no walked tree until its own is cached.
+  struct TreeIndex {
+    std::size_t value{std::numeric_limits<std::size_t>::max()};
+    TreeIndex() = default;
+    TreeIndex(TreeIndex const &) {}
+    TreeIndex &operator=(TreeIndex const &) { return *this; }
+  };
   /// Index of the unparametrized component in its instrument's ComponentInfo. Set by InstrumentVisitor when the
   /// finished tree is walked to cache its beamline.
-  mutable std::size_t m_index{std::numeric_limits<std::size_t>::max()};
+  mutable TreeIndex m_index;
 };
 
 } // namespace Geometry

@@ -559,6 +559,34 @@ public:
     TS_ASSERT_EQUALS(parametrized->getDetector(detectorInfo->detectorIDs()[1])->index(), 1);
   }
 
+  void test_copied_component_has_no_index_until_its_tree_is_cached() {
+    auto const instrument = ComponentCreationHelper::createTestInstrumentRectangular2(2, 2);
+    instrument->makeBaseBeamline();
+    auto const bank = instrument->getComponentByName("bank2");
+    std::unique_ptr<IComponent const> const copy(bank->clone());
+    TS_ASSERT_DIFFERS(bank->index(), ComponentInfo::invalidIndex);
+    TS_ASSERT_EQUALS(copy->index(), ComponentInfo::invalidIndex);
+  }
+
+  void test_beamline_walked_with_a_detached_map_has_the_same_base() {
+    auto const instrument = ComponentCreationHelper::createTestInstrumentRectangular2(2, 2);
+    auto const [baseComponentInfo, baseDetectorInfo] = instrument->makeBaseBeamline();
+    auto const bank = instrument->getComponentByName("bank2");
+    ParameterMap pmap;
+    pmap.addDouble(bank.get(), "a", 1.0);
+    auto const [componentInfo, detectorInfo] = instrument->makeBeamline(pmap);
+    TS_ASSERT(componentInfo->hasSameBase(*baseComponentInfo));
+    TS_ASSERT(pmap.get(bank.get(), "a"));
+  }
+
+  void test_ignored_mark_as_source_keeps_the_cached_beamline() {
+    auto const instrument = ComponentCreationHelper::createTestInstrumentRectangular2(2, 2);
+    auto const [componentInfo, detectorInfo] = instrument->makeBaseBeamline();
+    // The source is already marked, so this is ignored
+    instrument->markAsSource(instrument->getSource().get());
+    TS_ASSERT(instrument->makeBaseBeamline().first->hasSameBase(*componentInfo));
+  }
+
   void test_detectorIndex() {
     auto i = ComponentCreationHelper::createTestInstrumentRectangular(1, 2);
     TS_ASSERT_EQUALS(i->detectorIndex(4), 0);

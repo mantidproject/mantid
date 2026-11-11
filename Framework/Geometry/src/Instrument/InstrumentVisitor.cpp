@@ -183,7 +183,7 @@ void InstrumentVisitor::recordIndex(const IComponent &component, const size_t co
     return;
   }
   if (auto const *const comp = dynamic_cast<Component const *>(&component)) {
-    comp->m_index = componentIndex;
+    comp->m_index.value = componentIndex;
   }
 }
 
@@ -454,7 +454,10 @@ InstrumentVisitor::makeWrappers(const Instrument &instrument, ParameterMap *pmap
     // position parameters from it, which must not happen to a map the caller has only lent with the
     // instrument, e.g. a workspace's map lent with its physical instrument.
     auto const mapCopy = std::make_shared<ParameterMap>(*instrument.getParameterMap());
-    visiteeInstrument = ParComponentFactory::createInstrument(instrument.baseInstrument(), mapCopy);
+    // Rekeying a detached copy needs the component indices, which caching the base beamline sets
+    auto const baseInstrument = instrument.baseInstrument();
+    baseInstrument->cachedBeamline();
+    visiteeInstrument = ParComponentFactory::createInstrument(baseInstrument, mapCopy);
   } else {
     visiteeInstrument = std::shared_ptr<const Instrument>(&instrument, NoDeleting());
   }

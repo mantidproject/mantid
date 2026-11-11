@@ -680,7 +680,6 @@ std::vector<IDetector_const_sptr> Instrument::getDetectors(const std::set<detid_
  *"SamplePos" Component
  */
 void Instrument::markAsSamplePos(const IComponent *comp) {
-  resetBeamlineCache();
   if (m_map)
     throw std::runtime_error("Instrument::markAsSamplePos() called on a "
                              "parametrized Instrument object.");
@@ -698,6 +697,7 @@ void Instrument::markAsSamplePos(const IComponent *comp) {
       throw Exception::InstrumentDefinitionError("The sample component is required to have a name.");
     }
     m_sampleCache = comp;
+    resetBeamlineCache();
   } else {
     g_log.warning("Have already added samplePos component to the _sampleCache.");
   }
@@ -714,7 +714,6 @@ void Instrument::markAsSamplePos(const IComponent *comp) {
  *"source" Component
  */
 void Instrument::markAsSource(const IComponent *comp) {
-  resetBeamlineCache();
   if (m_map)
     throw std::runtime_error("Instrument::markAsSource() called on a "
                              "parametrized Instrument object.");
@@ -724,6 +723,7 @@ void Instrument::markAsSource(const IComponent *comp) {
       throw Exception::InstrumentDefinitionError("The source component is required to have a name.");
     }
     m_sourceCache = comp;
+    resetBeamlineCache();
   } else {
     g_log.warning("Have already added source component to the _sourceCache.");
   }
@@ -738,7 +738,6 @@ void Instrument::markAsSource(const IComponent *comp) {
  *
  */
 void Instrument::markAsDetector(const IDetector *det) {
-  resetBeamlineCache();
   if (m_map)
     throw std::runtime_error("Instrument::markAsDetector() called on a "
                              "parametrized Instrument object.");
@@ -755,6 +754,7 @@ void Instrument::markAsDetector(const IDetector *det) {
   // Create a (non-deleting) shared pointer to it
   IDetector_const_sptr det_sptr = IDetector_const_sptr(det, NoDeleting());
   m_detectorCache.emplace(it, det->getID(), det_sptr, false);
+  resetBeamlineCache();
 }
 
 /// As markAsDetector but without the required sorting. Must call
@@ -773,10 +773,10 @@ void Instrument::markAsDetectorIncomplete(const IDetector *det) {
 /// Sorts the detector cache. Called after all detectors have been marked via
 /// markAsDetectorIncomplete.
 void Instrument::markAsDetectorFinalize() {
-  resetBeamlineCache();
   // We're already finalized! We can't finalize any further!
   if (isFinalized())
     return;
+  resetBeamlineCache();
 
   // Detectors (even when different objects) are NOT allowed to have duplicate
   // ids. This method establishes the presence of duplicates.
@@ -802,7 +802,6 @@ void Instrument::markAsDetectorFinalize() {
  * @throw Exception::ExistsError if cannot add detector to cache
  */
 void Instrument::markAsMonitor(const IDetector *det) {
-  resetBeamlineCache();
   if (m_map)
     throw std::runtime_error("Instrument::markAsMonitor() called on a "
                              "parametrized Instrument object.");
@@ -817,6 +816,7 @@ void Instrument::markAsMonitor(const IDetector *det) {
   // mark detector as a monitor
   auto it = m_detectorCache.find(det->getID());
   it->setIsMonitor(true);
+  resetBeamlineCache();
 }
 
 /** Mark a Component which has already been added to the Instrument class
@@ -842,7 +842,6 @@ void Instrument::markAsMonitorIncomplete(const IDetector *det) {
  *  @note this method is O(N); for removing many detectors, use removeDetectorIncomplete instead
  */
 void Instrument::removeDetector(IDetector *det) {
-  resetBeamlineCache();
   if (m_map)
     throw std::runtime_error("Instrument::removeDetector() called on a "
                              "parameterized Instrument object.");
@@ -851,6 +850,7 @@ void Instrument::removeDetector(IDetector *det) {
                              std::to_string(det->getID()));
 
   const detid_t id = det->getID();
+  resetBeamlineCache();
   // Remove the detector from the detector cache
   const auto it = m_detectorCache.find(id);
   // NOTE this operation is O(N) for the vector cache
@@ -888,7 +888,6 @@ void Instrument::removeDetectorIncomplete(IDetector const *det) {
  * @note This method does not remove the detectors from the parent assembly; this must be done separately.
  */
 void Instrument::removeDetectorFinalize() {
-  resetBeamlineCache();
   if (m_map)
     throw std::runtime_error("Instrument::removeDetectorFinalize() called on a "
                              "parameterized Instrument object.");
@@ -897,6 +896,7 @@ void Instrument::removeDetectorFinalize() {
     m_detectorCache.m_toRemove.clear();
     return;
   }
+  resetBeamlineCache();
 
   // Remove from the cache all the ones to be removed
   auto newEnd = std::remove_if(m_detectorCache.begin(), m_detectorCache.end(), [this](const auto &entry) {
@@ -1486,8 +1486,11 @@ Instrument::makeBeamline(ParameterMap &pmap, const ParameterMap *source) const {
     return makeWrappers(pmap, *componentInfo, *detectorInfo);
   }
   // Caching the beamline sets the component indices the detached map's walk relies on
-  cachedBeamline();
-  return InstrumentVisitor::makeWrappersWithMap(*this, pmap);
+  auto const baseComponentInfo = cachedBeamline().first;
+  auto wrappers = InstrumentVisitor::makeWrappersWithMap(*this, pmap);
+  // The walk builds its own copy of the tree structure; share the cached one so the result has the same base
+  wrappers.first->m_componentInfo->shareBase(*baseComponentInfo->m_componentInfo);
+  return wrappers;
 }
 
 /// Return ComponentInfo and DetectorInfo for the unparametrized instrument, cloned from the cached base beamline,

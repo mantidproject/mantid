@@ -122,6 +122,15 @@ public:
     TS_ASSERT_EQUALS(index, 1);
   }
 
+  void testRemoveCojoinsKeepsLinksOfDifferentObjectsWithNoComponent() {
+    Track A(V3D(1, 1, 1), V3D(1.0, 0.0, 0.0));
+    CSGObject shape1, shape2;
+    A.addLink(V3D(2, 2, 2), V3D(3, 3, 3), 2.0, shape1);
+    A.addLink(V3D(3, 3, 3), V3D(4, 4, 4), 3.0, shape2);
+    A.removeCojoins();
+    TS_ASSERT_EQUALS(A.count(), 2);
+  }
+
   void testNonComplete() {
     Track A(V3D(1, 1, 1), V3D(1.0, 0.0, 0.0));
     CSGObject shape;

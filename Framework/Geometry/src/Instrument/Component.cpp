@@ -298,7 +298,7 @@ V3D Component::getScaleFactor() const {
 }
 
 /// Returns the index of the component, or ComponentInfo::invalidIndex if the instrument has not been cached
-size_t Component::index() const { return m_base ? m_base->m_index : m_index; }
+size_t Component::index() const { return m_base ? m_base->m_index.value : m_index.value; }
 
 bool Component::hasComponentInfo() const {
   const IComponent *root = m_base;
