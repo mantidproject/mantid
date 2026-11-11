@@ -10,6 +10,7 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeRotation.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -159,7 +160,15 @@ void CopySample::copyParameters(Sample &from, Sample &to, bool nameFlag, bool ma
     // Bake the destination's goniometer in place of any existing bake, so a baked shape is not
     // turned twice and a rotation within the shape's own frame survives.
     const auto rhsObject = std::shared_ptr<IObject>(from.getShape().cloneWithMaterial(rhsMaterial));
-    to.setShape(Geometry::getLabFrameShape(*rhsObject, rotationMatrix));
+    const auto *csgObject = dynamic_cast<const Geometry::CSGObject *>(rhsObject.get());
+    if (csgObject && csgObject->getShapeXML().empty()) {
+      // Assembled from surfaces, as SaveHKL's sphere is, so there is no definition to rotate and
+      // getLabFrameShape would refuse it. Failing here would also lose the lattice being copied.
+      g_log.warning("The sample shape has no XML definition, so it is copied without the goniometer rotation.");
+      to.setShape(rhsObject);
+    } else {
+      to.setShape(Geometry::getLabFrameShape(*rhsObject, rotationMatrix));
+    }
     to.setGeometryFlag(from.getGeometryFlag());
     to.setHeight(from.getHeight());
     to.setThickness(from.getThickness());

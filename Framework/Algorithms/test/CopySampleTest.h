@@ -152,6 +152,12 @@ public:
     TS_ASSERT_DELTA(copied.getBoundingBox().yMax(), 6.0, 1e-8);
   }
 
+  void test_shape_with_no_xml_is_copied_unrotated() {
+    // SaveHKL's sphere is built from surfaces, so there is nothing to rotate; the copy must still go ahead
+    auto dest = copyShapeOnto(ShapeFactory::createSphere(V3D(1.0, 0.0, 0.0), 0.5), ninetyAboutZ(), "no_xml");
+    TS_ASSERT(dest->sample().getShape().isValid(V3D(1.0, 0.0, 0.0)));
+  }
+
   void test_mesh_shape_copied_onto_its_own_goniometer_is_left_exactly_as_it_was() {
     // R * R^T is identity only to rounding, so applying it would nudge every vertex.
     const Matrix<double> thirtyAboutY(Quat(30.0, V3D(0, 1, 0)).getRotation());
