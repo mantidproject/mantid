@@ -77,6 +77,11 @@ class LoadRunWidgetPresenter(object):
         self.thread_success = True
 
     def enable_loading(self):
+        # A load in progress must keep the buttons disabled. The global enable notifier is also fired by
+        # the grouping/corrections/fitting tabs when their own threads finish, and those threads belong
+        # to the previous load, so without this guard they re-enable the buttons mid-load.
+        if self._load_thread is not None:
+            return
         if not self._instrument == "PSI":
             self._view.enable_load_buttons()
 
@@ -230,6 +235,8 @@ class LoadRunWidgetPresenter(object):
         return run_list
 
     def load_runs(self, filenames):
+        if self._load_thread is not None:
+            return
         self.disable_notifier.notify_subscribers()
         self.handle_loading(filenames, self._use_threading)
 
@@ -254,6 +261,8 @@ class LoadRunWidgetPresenter(object):
         self.disable_loading()
 
     def handle_load_thread_start(self, filenames, finished_callback):
+        if self._load_thread is not None:
+            return
         self.on_loading_start()
 
         self._load_thread = self.create_load_thread()

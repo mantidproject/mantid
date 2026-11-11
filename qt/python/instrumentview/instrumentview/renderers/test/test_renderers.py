@@ -469,6 +469,40 @@ class TestExtractQuadFromCuboidShapeinfo(unittest.TestCase):
         si.cuboidGeometry.side_effect = RuntimeError("bad shape")
         self.assertIsNone(_extract_quad_from_cuboid_shapeinfo(si))
 
+    def _make_cuboid_si_from_corners(self, lfb, rfb, lft, lbb):
+        si = MagicMock()
+        si.cuboidGeometry.return_value = {
+            "leftFrontBottom": self._make_v3d(*lfb),
+            "rightFrontBottom": self._make_v3d(*rfb),
+            "leftFrontTop": self._make_v3d(*lft),
+            "leftBackBottom": self._make_v3d(*lbb),
+        }
+        return si
+
+    def test_width_not_along_x_returns_none(self):
+        """OSIRIS silicon pixel: its 1 mm width runs along Z, so an XY quad would be a line."""
+        si = self._make_cuboid_si_from_corners(
+            lfb=(0.00635, -0.0054367, 0.0),
+            rfb=(0.00635, -0.0054367, 0.001),
+            lft=(0.00635, 0.0054367, 0.0),
+            lbb=(-0.00635, -0.0054367, 0.0),
+        )
+        self.assertIsNone(_extract_quad_from_cuboid_shapeinfo(si))
+
+    def test_misplaced_top_corner_keeps_its_quad(self):
+        """FIGARO pixel: its top corner sits along the width too, but the 473.6 x 1.2 mm quad is still drawn."""
+        si = self._make_cuboid_si_from_corners(
+            lfb=(0.0, 0.0, 0.0), rfb=(0.4736, 0.0, 0.0), lft=(0.4736, 0.0012, 0.0), lbb=(0.0, 0.0, -0.0074)
+        )
+        quad_verts, _ = _extract_quad_from_cuboid_shapeinfo(si)
+        expected = [[0.0, 0.0, -0.0037], [0.4736, 0.0, -0.0037], [0.4736, 0.0012, -0.0037], [0.0, 0.0012, -0.0037]]
+        np.testing.assert_allclose(quad_verts, expected, atol=1e-12)
+
+    def test_sliver_quad_returns_none(self):
+        """INTER pixel: 0.3 um wide against its 20 mm depth, so its XY quad would be invisible."""
+        si = self._make_cuboid_si_from_corners(lfb=(0.0, 0.0, 0.0), rfb=(-3e-7, 0.0, 0.0), lft=(0.0, 0.001, 0.0), lbb=(0.0, 0.0, -0.02))
+        self.assertIsNone(_extract_quad_from_cuboid_shapeinfo(si))
+
 
 class TestExtractQuadFromCylinderShapeinfo(unittest.TestCase):
     """Tests for _extract_quad_from_cylinder_shapeinfo."""
@@ -695,14 +729,14 @@ class TestShapeRenderer(unittest.TestCase):
         projection.project_points.side_effect = lambda points, apply_x_correction=True: np.column_stack(
             [points[:, 0] + 5.0, points[:, 1] - 3.0]
         )
-        projection.u_period = 0
+        projection.u_period = 2 * np.pi
 
         model = self._create_mock_model(workspace, n_pickable=1)
         model.is_2d_projection = True
         model.projection_type = ProjectionType.CYLINDRICAL_Z
         model.active_projection = projection
 
-        projected_centres = np.array([[100.0, 200.0, 0.0]], dtype=np.float64)
+        projected_centres = np.array([[5.0, -3.0, 0.0]], dtype=np.float64)
         mesh = self.renderer.build_detector_mesh(projected_centres, False, model)
 
         self.assertTrue(projection.project_points.called)
@@ -751,7 +785,7 @@ class TestShapeRenderer(unittest.TestCase):
 
         def make_capturing_projection():
             proj = MagicMock()
-            proj.u_period = 0
+            proj.u_period = 2 * np.pi
             calls = []
 
             def record(pts, apply_x_correction=True, _buf=calls):
@@ -793,7 +827,7 @@ class TestShapeRenderer(unittest.TestCase):
 
         def make_capturing_projection():
             proj = MagicMock()
-            proj.u_period = 0
+            proj.u_period = 2 * np.pi
             calls = []
 
             def record(pts, apply_x_correction=True, _buf=calls):

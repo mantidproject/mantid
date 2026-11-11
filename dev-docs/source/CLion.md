@@ -10,6 +10,22 @@ You will also need to have Visual Studio installed on windows.
 If you haven't installed CLion yet do that now, CLion can be installed
 from [here](https://jetbrains.com/clion/download/).
 
+## Development environment
+
+CLion needs to use the tools from the development environment you set up by following the [Getting Started](GettingStarted/GettingStarted) guide.
+Follow the section below for your environment.
+In the rest of this page, `{ENV}` refers to the root directory of that environment.
+
+### Pixi
+
+- `{ENV}` is `/path/to/source/mantid/.pixi/envs/default`.
+- To activate the environment in a terminal, navigate to your mantid source directory and run `pixi shell`.
+
+### Conda
+
+- `{ENV}` is the location of your conda environment, e.g. `/path/to/miniforge/envs/mantid-developer`.
+- To activate the environment in a terminal, run `conda activate mantid-developer`.
+
 ## Opening CLion
 
 The first time you build from CLion, you will most likely need to launch
@@ -18,11 +34,11 @@ the relevant tools.
 
 - On Linux,
   1. Open any terminal
-  1. Run `conda activate mantid-developer`
+  1. Activate your development environment
   1. Then launch CLion from this terminal with `<CLION_INSTALL>/bin/clion.sh`
 - On Windows,
   1. Using your search bar, open the `x64 Native Tools Command Prompt for VS 2019` command prompt
-  1. Run `conda activate mantid-developer`
+  1. Activate your development environment
   1. Then launch CLion with `<CLION_INSTALL>/bin/clion.bat`
 
 If you get errors about being unable to compile a 'simple test program', then doing the above should fix your issue.
@@ -37,21 +53,20 @@ To set up your toolchain:
 
 1. Create a new `System` toolchain using the `+` icon and call it `Default`
 
-1. Edit the CMake field to point to your conda installed `cmake`
+1. Edit the CMake field to point to the `cmake` installed in your development environment
 
    ::: {.hlist columns="1"}
 
-   - On Linux: `/path/to/miniforge/envs/mantid-developer/bin/cmake`
-   - On Windows:
-     `/path/to/miniforge/envs/mantid-developer/Library/bin/cmake.exe`
+   - On Linux: `{ENV}/bin/cmake`
+   - On Windows: `{ENV}/Library/bin/cmake.exe`
      :::
 
-1. Edit the Build Tool field to point to your conda installed `ninja`
+1. Edit the Build Tool field to point to the `ninja` installed in your development environment
 
    ::: {.hlist columns="1"}
 
-   - On Linux: `/path/to/miniforge/envs/mantid-developer/bin/ninja`
-   - On Windows: `/path/to/miniforge/envs/mantid-developer/Library/bin/ninja.exe`
+   - On Linux: `{ENV}/bin/ninja`
+   - On Windows: `{ENV}/Library/bin/ninja.exe`
      :::
 
 1. For the C Compiler and C++ Compiler fields,
@@ -95,28 +110,50 @@ To set up CMake:
 ### Additional Build Configuration
 
 This (optional) additional configuration allows one to start Clion from the JetBrains Toolbox or
-from a terminal without having to activate the conda environment in the terminal.
+from a terminal without having to activate the development environment in the terminal.
 This is useful when you're working on both Mantid and other projects in CLion simultaneously.
 
 1. Navigate to `File > Settings > Build, Execution, Deployment > CMake`
-1. Under `environment`, add new environment variable `CONDA_PREFIX` with value `/path/to/miniforge/envs/mantid-developer`.
-1. Navigate to `File > Settings > Build, Execution, Deployment > Python Interpreter > Add Interpreter > Add Local Interpreter > Conda Environment > Use existing environment`, then select `mantid-developer`.
+1. Under `environment`, add new environment variable `CONDA_PREFIX` with value `{ENV}`.
+1. Set up the Python interpreter by following the section below for your environment.
+
+#### Pixi Python interpreter
+
+Navigate to `File > Settings > Build, Execution, Deployment > Python Interpreter > Add Interpreter > Add Local Interpreter > Select existing`,
+then select the `python` executable in your pixi environment: `{ENV}/bin/python` on Linux, or `{ENV}/python.exe` on Windows.
+
+#### Conda Python interpreter
+
+Navigate to `File > Settings > Build, Execution, Deployment > Python Interpreter > Add Interpreter > Add Local Interpreter > Conda Environment > Use existing environment`,
+then select `mantid-developer`.
 
 ## Building with CLion
 
-- To build all targets, navigate to `Build > Build All in 'Debug'`. Check that the build command displayed in the Messages window is running the correct cmake executable from your conda installation.
+- To build all targets, navigate to `Build > Build All in 'Debug'`. Check that the build command displayed in the Messages window is running the correct cmake executable from your development environment.
 - To build a specific target, select it in the configurations drop-down menu and click the hammer icon next to it.
 
-If this fails, you may need to open CLion from a terminal with your conda environment activated.
+If this fails, you may need to open CLion from a terminal with your development environment activated.
 
-It is also useful to have your terminals in CLion to run with this environment:
+### Activating the environment in CLion terminals
 
-1. In your `home` directory create a file named `.clionrc` and open in your favourite text editor, adding these lines:
+It is also useful to have your terminals in CLion to run with your development environment.
+In your `home` directory create a file named `.clionrc` and open it in your favourite text editor, adding the lines for your environment from the sections below.
 
-   ```sh
-   source ~/.bashrc
-   source ~/miniforge/bin/activate mantid-developer
-   ```
+#### Pixi `.clionrc`
+
+```sh
+source ~/.bashrc
+eval "$(pixi shell-hook --manifest-path /path/to/source/mantid --frozen)"
+```
+
+#### Conda `.clionrc`
+
+```sh
+source ~/.bashrc
+source ~/miniforge/bin/activate mantid-developer
+```
+
+#### Using `.clionrc` in CLion terminals
 
 1. Start CLion using the above steps
 
@@ -128,13 +165,12 @@ It is also useful to have your terminals in CLion to run with this environment:
 
 To debug workbench, you'll need to edit the `workbench` CMake Application configuration.
 
-1. Set the executable to be the `python` executable in your conda installation:
+1. Set the executable to be the `python` executable in your development environment:
 
    ::: {.hlist columns="1"}
 
-   - On Linux & macOS:
-     `/path/to/miniforge/envs/mantid-developer/bin/python`
-   - On Windows: `/path/to/miniforge/envs/mantid-developer/python.exe`
+   - On Linux & macOS: `{ENV}/bin/python`
+   - On Windows: `{ENV}/python.exe`
      :::
 
 1. Set the program arguments:
@@ -148,7 +184,7 @@ To debug workbench, you'll need to edit the `workbench` CMake Application config
 
    ::: {.hlist columns="1"}
 
-   - All OS: `path/to/miniforge/envs/md/bin/`
+   - All OS: `{ENV}/bin/`
      :::
 
 1. Set any relevant environment variables:

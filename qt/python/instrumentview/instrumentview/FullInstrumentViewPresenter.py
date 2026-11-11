@@ -50,6 +50,7 @@ class FullInstrumentViewPresenter:
     _WAVELENGTH = "Wavelength"
     _MOMENTUM_TRANSFER = "MomentumTransfer"
     _UNIT_OPTIONS = [_TIME_OF_FLIGHT, _D_SPACING, _WAVELENGTH, _MOMENTUM_TRANSFER]
+    _NO_UNITS = "No units"
 
     _LINEAR = "Linear"
     _LOGARITHMIC = "Logarithmic"
@@ -105,13 +106,18 @@ class FullInstrumentViewPresenter:
 
     def setup(self):
         self._view.subscribe_presenter(self)
+        # Before setup_connections_to_presenter below, so filling the combos cannot re-enter
+        # the presenter through currentIndexChanged
+        self._populate_unit_combo_boxes(sliders_unit=self._model.workspace_base_unit)
         self._view.set_projection_combo_options(self._model.get_projection_options())
         self._view.set_default_projection(self._model.get_default_projection())
+        self._on_projection_option_changed()
         self._view.setup_connections_to_presenter()
         self._view.set_contour_range_limits(self._model.counts_limits)
         self._view.set_integration_range_limits(self._model.integration_limits)
         self._view.show_axes()
         self._setup_component_tree()
+        self._update_rotation_controls_enabled()
 
         self._ads_observer = InstrumentViewADSObserver(
             delete_callback=self.delete_workspace_callback,
@@ -122,8 +128,43 @@ class FullInstrumentViewPresenter:
         )
         self.update_plotter(refresh_limits=False)
 
-        if self._model.workspace_base_unit in self._UNIT_OPTIONS:
-            self._view.set_unit_combo_box_index(self._UNIT_OPTIONS.index(self._model.workspace_base_unit))
+    def _populate_unit_combo_boxes(self, sliders_unit: Optional[str] = None, lineplot_unit: Optional[str] = None) -> None:
+        """Fill both unit combo boxes for the current workspace, selecting the given units where
+        they are offered.
+
+        Disabled when the workspace's units cannot be converted, so the only thing the combos
+        could offer is the unit they are already showing. Adding peaks is disabled then too, and
+        the peaks workspaces as a whole for units peaks have no location in, see
+        FullInstrumentViewModel.can_add_peaks and can_show_peaks.
+        """
+        self._view.set_unit_combo_options(self.available_unit_options(), sliders_unit, lineplot_unit)
+        self._view.set_unit_combo_boxes_enabled(self._model.can_convert_units)
+        self._view.set_peaks_workspaces_enabled(self._model.can_show_peaks)
+        self._view.set_start_adding_peaks_enabled(self._model.can_add_peaks)
+
+    def _refresh_unit_combo_boxes(self) -> None:
+        """Rebuild the unit combo boxes after the model is set up on a different workspace,
+        which may have different units, or none that can be converted.
+        """
+        self._populate_unit_combo_boxes(
+            sliders_unit=self._model.workspace_base_unit, lineplot_unit=self._view.current_selected_lineplot_unit()
+        )
+
+    def _sync_unit_combo_boxes(self) -> None:
+        """Put a unit combo box back to the workspace unit if the unit it has selected could not
+        be converted to, since that is the unit the model fell back to showing.
+        """
+        failed_units = self._model.units_failed_to_convert
+        sliders_unit = self._view.current_selected_sliders_unit()
+        lineplot_unit = self._view.current_selected_lineplot_unit()
+        if sliders_unit not in failed_units and lineplot_unit not in failed_units:
+            return
+        base_unit = self._model.workspace_base_unit
+        self._view.set_unit_combo_options(
+            self.available_unit_options(),
+            base_unit if sliders_unit in failed_units else sliders_unit,
+            base_unit if lineplot_unit in failed_units else lineplot_unit,
+        )
 
     def _setup_component_tree(self) -> None:
         component_tree_model = ComponentTreeModel(self._model.workspace)
@@ -163,9 +204,20 @@ class FullInstrumentViewPresenter:
         self._update_line_plot_ws_and_draw(self._view.current_selected_lineplot_unit())
 
     def available_unit_options(self) -> list[str]:
-        if self._model.has_unit:
-            return self._UNIT_OPTIONS
-        return ["No units"]
+        """The units to offer in the unit combo boxes.
+
+        The workspace's own unit is offered even if it is not one of ours, so the combos can say
+        what is shown. When it cannot be converted, it is shown as the only option, or the
+        placeholder if there is no unit at all.
+        """
+        if self._model.can_convert_units:
+            if self._model.workspace_base_unit in self._UNIT_OPTIONS:
+                return self._UNIT_OPTIONS
+            return self._UNIT_OPTIONS + [self._model.workspace_base_unit]
+        # Not has_unit, which also rules out units derived from Empty, such as Label and Degrees
+        if self._model.workspace_base_unit != "Empty":
+            return [self._model.workspace_x_unit_display]
+        return [self._NO_UNITS]
 
     @property
     def workspace_display_unit(self) -> str:
@@ -238,7 +290,7 @@ class FullInstrumentViewPresenter:
         self._view.set_overlaid_shape_controls_enabled(enabled)
         self._view.set_hover_pick_enabled(enabled)
         self._view.set_aspect_ratio_box_enabled(enabled)
-        self._view.set_flip_beam_box_enabled(enabled)
+        self._update_rotation_controls_enabled()
 
     def on_projection_option_changed(self) -> None:
         self._callback_queue.put((self._on_projection_option_changed, ()))
@@ -248,6 +300,7 @@ class FullInstrumentViewPresenter:
             return
         self._model.projection_type = self._view.current_selected_projection()
         self._model.flip_beam = self._view.is_flip_beam_checkbox_checked()
+        self._model.u_offset = np.pi if self._view.is_rotate_180_checkbox_checked() else np.radians(self._view.u_offset_degrees())
         with SuppressRendering(self._view.main_plotter):
             self._update_view_main_plotter(refresh_limits=refresh_limits)
             self.refresh_plotter_peaks()
@@ -362,6 +415,30 @@ class FullInstrumentViewPresenter:
         self.update_plotter(refresh_limits=False)
         self._view.reset_camera()
 
+    def on_u_offset_changed(self, _value=None) -> None:
+        self._view.store_u_offset_option()
+        self.update_plotter(refresh_limits=False)
+        self._view.reset_camera()
+
+    def on_rotate_180_check_box_clicked(self) -> None:
+        self._view.store_rotate_180_option()
+        self._update_rotation_controls_enabled()
+        self.update_plotter(refresh_limits=False)
+        self._view.reset_camera()
+
+    def on_reset_projection_clicked(self) -> None:
+        self._view.reset_rotation_controls()
+        self._view.store_u_offset_option()
+        self._view.store_rotate_180_option()
+        self._update_rotation_controls_enabled()
+        self.update_plotter(refresh_limits=False)
+
+    def _update_rotation_controls_enabled(self) -> None:
+        projection_can_rotate = self._view.current_selected_projection() not in (ProjectionType.THREE_D, ProjectionType.SIDE_BY_SIDE)
+        self._view.set_flip_beam_box_enabled(projection_can_rotate)
+        self._view.set_rotate_180_box_enabled(projection_can_rotate)
+        self._view.set_u_offset_slider_enabled(projection_can_rotate and not self._view.is_rotate_180_checkbox_checked())
+
     @property
     def _detector_mesh_bounds(self) -> list[float]:
         # Output format matches vtk's mesh.GetBounds()
@@ -391,7 +468,6 @@ class FullInstrumentViewPresenter:
 
         self._view.set_clear_point_picked_detectors_disabled(checked)
         self._view.set_sum_spectra_checkbox_disabled(checked)
-        self._view.set_select_bank_tube_disabled(checked)
         self._view.set_export_workspace_button_disabled(checked)
         self._view.set_overlaid_shape_controls_enabled(not checked)
 
@@ -411,7 +487,14 @@ class FullInstrumentViewPresenter:
         if point_index < 0 or point_index >= n_pickable:
             self._last_hovered_point_index = None
             return
-        self._model.extract_spectra_for_line_plot(self._view.current_selected_lineplot_unit(), False, np.array([point_index]))
+        indices = None
+        if self._view.is_select_bank_tube_checked():
+            mask = np.zeros(n_pickable, dtype=bool)
+            mask[point_index] = True
+            indices = np.flatnonzero(self._model.expand_pickable_mask_to_parent_subtrees(mask))
+        else:
+            indices = np.array([point_index])
+        self._model.extract_spectra_for_line_plot(self._view.current_selected_lineplot_unit(), True, indices)
         detector_info = self._model.detector_info_text_for_workspace_index(point_index)
         if len(detector_info) == 0:
             return
@@ -727,6 +810,7 @@ class FullInstrumentViewPresenter:
             self._model._workspace = mtd[ws_new_name]
             self._model.setup()
             self._setup_component_tree()
+            self._refresh_unit_combo_boxes()
             logger.warning(f"Workspace {ws_old_name} renamed to {ws_new_name}, updated Experimental Instrument View.")
 
         self._reload_everything()
@@ -751,6 +835,7 @@ class FullInstrumentViewPresenter:
         self._model._workspace = AnalysisDataService.retrieve(ws_name)
         self._model.setup()
         self._setup_component_tree()
+        self._refresh_unit_combo_boxes()
         self._reload_renderers()  # Clear cached renderers before rendering
         self.update_plotter()
 
@@ -777,19 +862,51 @@ class FullInstrumentViewPresenter:
             del self._ads_observer
         if hasattr(self, "_callback_queue"):
             self._callback_queue.put(self._callback_stop_sentinel)
+        # The styles hold callbacks from VTK that keep the plotter alive, see InteractorStyles.cleanup
+        if getattr(self, "_interactor_styles", None) is not None:
+            self._interactor_styles.cleanup()
+            self._interactor_styles = None
+        # Drop the renderers (and their cached geometry) and meshes now, rather than waiting for the
+        # view <-> presenter reference cycle to be garbage collected.
+        self._renderer = None
+        self._point_cloud_renderer = None
+        self._shape_renderer = None
+        self._shape_renderer_full = None
+        self._sbs_shape_renderer = None
+        self._sbs_shape_renderer_full = None
+        self._detector_mesh = None
+        self._masked_mesh = None
+        self._component_tree_presenter = None
         # Drop presenter->model reference on close while keeping _model non-optional for static typing.
         self._model = cast(FullInstrumentViewModel, None)
 
-    def on_sliders_unit_selected(self, value) -> None:
-        self._model.set_integration_units(self._UNIT_OPTIONS[value])
-        self._update_line_plot_ws_and_draw(self._UNIT_OPTIONS[value])
-        self.on_integration_limits_reset_clicked()
+    def _is_selectable_unit(self, unit: str) -> bool:
+        # The combos hold a placeholder when the units cannot be converted, so go by what they
+        # say rather than by index, which would map that placeholder onto the first real unit
+        return self._model.can_convert_units and unit in self.available_unit_options()
 
-    def on_lineplot_unit_selected(self, value) -> None:
-        self._update_line_plot_ws_and_draw(self._UNIT_OPTIONS[value])
+    def on_sliders_unit_selected(self, _index) -> None:
+        unit = self._view.current_selected_sliders_unit()
+        if not self._is_selectable_unit(unit):
+            return
+        self._model.set_integration_units(unit)
+        self.on_integration_limits_reset_clicked()
+        self._sync_unit_combo_boxes()
+
+    def on_lineplot_unit_selected(self, _index) -> None:
+        unit = self._view.current_selected_lineplot_unit()
+        if not self._is_selectable_unit(unit):
+            return
+        self._update_line_plot_ws_and_draw(unit)
+        self._sync_unit_combo_boxes()
 
     def peaks_workspaces_in_ads(self) -> list[str]:
         return [ws.name() for ws in self._model.get_workspaces_in_ads_of_type(PeaksWorkspace)]
+
+    def _selected_peaks_workspaces(self) -> list[str]:
+        if not self._model.can_show_peaks:
+            return []
+        return self._view.selected_peaks_workspaces()
 
     def on_peaks_workspace_selected(self) -> None:
         self.refresh_plotter_peaks()
@@ -797,14 +914,14 @@ class FullInstrumentViewPresenter:
 
     def refresh_plotter_peaks(self) -> None:
         self._view.clear_overlay_meshes()
-        self._view.plot_overlay_meshes(*self._model.get_peak_overlay_arguments(self._view.selected_peaks_workspaces()))
+        self._view.plot_overlay_meshes(*self._model.get_peak_overlay_arguments(self._selected_peaks_workspaces()))
         # Everytime the pyvista plotter gets updated with peaks, the button for peak picking should be updated
         self._view.set_select_peaks_enabled(self._view.has_any_peak_overlays_in_pyvista_plotter())
 
     def refresh_lineplot_peaks(self) -> None:
         # Plot vertical lines on the lineplot if the peak detector is selected
         self._view.clear_lineplot_overlays()
-        self._view.plot_lineplot_peak_overlays(*self._model.get_peak_lineplot_overlay_arguments(self._view.selected_peaks_workspaces()))
+        self._view.plot_lineplot_peak_overlays(*self._model.get_peak_lineplot_overlay_arguments(self._selected_peaks_workspaces()))
         self._view.redraw_lineplot()
 
     def on_start_adding_peaks_toggled(self, checked) -> None:
@@ -827,14 +944,14 @@ class FullInstrumentViewPresenter:
         if len(self._model.picked_detector_ids) == 0:
             return
         if mouse_click == "left":
-            peaks_ws = self._model.add_peak(x, self._view.selected_peaks_workspaces())
+            peaks_ws = self._model.add_peak(x, self._selected_peaks_workspaces())
             # Trigger selection of peak ws must happen after the callbacks from add peak are complete
             self._callback_queue.put((self._view.select_peaks_workspace, (peaks_ws,)))
         elif mouse_click == "right":
-            self._model.delete_peak(x, self._view.selected_peaks_workspaces())
+            self._model.delete_peak(x, self._selected_peaks_workspaces())
 
     def on_delete_all_selected_peaks_clicked(self) -> None:
-        self._model.delete_peaks_on_all_selected_detectors(self._view.selected_peaks_workspaces())
+        self._model.delete_peaks_on_all_selected_detectors(self._selected_peaks_workspaces())
 
     def on_show_monitors_check_box_clicked(self) -> None:
         self.update_plotter()
@@ -868,6 +985,7 @@ class FullInstrumentViewPresenter:
             self._view.main_plotter, callback=point_hovered, hover=True
         )
 
+        previous_interactor_styles = self._interactor_styles
         self._interactor_styles = InteractorStyles(
             self._view.main_plotter,
             picking_callback=wrapped_picking_callback,
@@ -875,6 +993,9 @@ class FullInstrumentViewPresenter:
             camera_changed_callback=self.on_camera_changed,
         )
         self._update_interactor_style()
+        # Only release the old styles once they are no longer the active one
+        if previous_interactor_styles is not None:
+            previous_interactor_styles.cleanup()
 
     def _update_interactor_style(self):
         if not self._model.is_2d_projection:

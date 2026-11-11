@@ -85,10 +85,12 @@ class ThreadModel(QtWidgets.QWidget):
     def setup_thread_and_start(self):
         # Construct the Async thread
         self.worker = AsyncTaskQtAdaptor(target=self.model.execute, error_cb=self.warning, finished_cb=self.threadWrapperTearDown)
-        self.worker.start()
 
-        # trigger the slot for the start of the process
+        # Trigger the slot for the start of the process before starting the worker. Starting first
+        # leaves a window in which the worker is running but the UI is still enabled, and lets
+        # start_slot overwrite state (such as thread_success) that a fast-failing worker has already set.
         self.start_slot()
+        self.worker.start()
 
     def start(self):
         # keep this method to maintain consistency with older usages of the ThreadModel

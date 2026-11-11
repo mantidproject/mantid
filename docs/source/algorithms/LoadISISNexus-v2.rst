@@ -117,6 +117,16 @@ Properties of the workspace sample object are loaded as follows:
 | ``RSPB[5]`` | ``/sample/width``       | Width                   |
 +-------------+-------------------------+-------------------------+
 
+Correcting the spectrum-detector table
+######################################
+
+The spectrum-detector table is read from ``isis_vms_compat/SPEC`` and ``isis_vms_compat/UDET``, and is used exactly
+as the file records it, unless the instrument definition sets ``spectra-map-source`` to ``instrument`` in its
+:ref:`parameter file <InstrumentParameterFile>`. That is for hardware whose data acquisition electronics address a
+bank more finely than the instrument definition describes, so that the file's table names detector IDs the
+instrument does not contain. See :ref:`the LoadRaw description <raw-spectra-map-source>` for what the correction
+does and when it applies; this algorithm applies exactly the same one.
+
 Usage
 -----
 

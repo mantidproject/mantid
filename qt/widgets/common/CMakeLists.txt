@@ -711,6 +711,7 @@ set(QT${MANTID_QT_VERSION}_TEST_FILES
     test/BatchAlgorithmRunnerTest.h
     test/ConvolutionFunctionModelTest.h
     test/ConfigurableSettingsTest.h
+    test/DataSelectorTest.h
     test/FileDialogHandlerTest.h
     test/FileFinderSettingsTest.h
     test/FindFilesThreadPoolManagerTest.h

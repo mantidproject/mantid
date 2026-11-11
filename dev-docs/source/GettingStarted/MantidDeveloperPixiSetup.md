@@ -1,4 +1,4 @@
-Pixi allows for reducible environments using conda packages.
+Pixi allows for reproducible environments using conda packages.
 It manages environments for all supported platforms together to help keep them in line with each other.
 
 1. Follow the [pixi installation instructions](https://pixi.sh/latest/installation/) for your platform

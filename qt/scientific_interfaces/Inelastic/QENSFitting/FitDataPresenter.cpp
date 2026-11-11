@@ -6,10 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FitDataPresenter.h"
 #include "FitTab.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/Axis.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/Unit.h"
 
 #include <algorithm>
@@ -17,6 +13,7 @@
 #include <utility>
 
 #include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
 namespace MantidQt::CustomInterfaces::Inelastic {
 
@@ -130,26 +127,10 @@ void FitDataPresenter::handleAddData(MantidWidgets::IAddWorkspaceDialog const *d
   }
 }
 
+// Shared with Processor/MomentsPresenter (see WorkspaceUtils.h) so both interfaces use the same
+// axis/unit conversion logic when a workspace's vertical axis needs to be treated as Q.
 void FitDataPresenter::setNumericQAxis(const std::string &wsName) {
-  if (wsName.empty()) {
-    return;
-  }
-  auto ws = AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(wsName);
-  if (!ws) {
-    return;
-  }
-  const auto &axis = ws->getAxis(1);
-  if (!axis->isNumeric()) {
-    auto numericAxis = std::make_unique<NumericAxis>(ws->getNumberHistograms());
-    for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
-      numericAxis->setValue(i, axis->getValue(i));
-    }
-    ws->replaceAxis(1, std::move(numericAxis));
-  }
-
-  if (ws->getAxis(1)->unit()->unitID() != "MomentumTransfer") {
-    ws->getAxis(1)->setUnit("MomentumTransfer");
-  }
+  MantidWidgets::WorkspaceUtils::setNumericQAxis(wsName);
 }
 
 void FitDataPresenter::handleAddNumericData(MantidWidgets::IAddWorkspaceDialog const *dialog) {

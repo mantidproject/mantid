@@ -23,7 +23,7 @@ using namespace testing;
 
 namespace {
 
-IETSaveData createSaveData() { return IETSaveData(true, true, true, true, true); }
+IETSaveData createSaveData() { return IETSaveData(true, true, true, true, true, true); }
 
 } // namespace
 

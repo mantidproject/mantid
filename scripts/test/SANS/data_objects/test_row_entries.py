@@ -32,6 +32,29 @@ class RowEntriesTest(unittest.TestCase):
 
             self.assertEqual(RowState.ERROR, obj.state)  # This will likely stack-overflow instead of failing
 
+    def test_options_displayed_text_is_stable_when_read_back(self):
+        obj = RowEntries()
+        obj.options.set_user_options("WavelengthMin=1, WavelengthMax=3")
+
+        for _ in range(3):
+            obj.options.set_user_options(obj.options.get_displayed_text())
+
+        self.assertEqual("WavelengthMin=1, WavelengthMax=3", obj.options.get_displayed_text())
+
+    def test_options_displayed_text_joins_user_and_developer_options(self):
+        obj = RowEntries()
+        obj.options.set_user_options("WavelengthMin=1,")
+        obj.options.set_developer_option("MergeScale", 1.2)
+        obj.options.set_developer_option("MergeShift", 0.1)
+
+        self.assertEqual("WavelengthMin=1, MergeScale=1.2, MergeShift=0.1", obj.options.get_displayed_text())
+
+    def test_options_displayed_text_with_only_developer_options(self):
+        obj = RowEntries()
+        obj.options.set_developer_option("MergeScale", 1.2)
+
+        self.assertEqual("MergeScale=1.2", obj.options.get_displayed_text())
+
     def test_is_multi_period(self):
         multi_period_keys = [
             "can_direct_period",

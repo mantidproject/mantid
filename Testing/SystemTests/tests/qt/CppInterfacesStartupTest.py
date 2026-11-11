@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import systemtesting
 from itertools import chain
+from sys import platform
 
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt.testing import get_application
@@ -31,6 +32,21 @@ class CppInterfacesStartupTest(systemtesting.MantidSystemTest):
         self._app = get_application()
         self._interface_manager = InterfaceManager()
         self._cpp_interface_names = set(chain.from_iterable(gather_cpp_interface_names().values()))
+        # Use legacy instrument view on windows as CI VMs do not currently have a modern version of openG required by new version/VTK.
+        if platform.startswith("win"):
+            self._legacy_instrument_view_setting = "InstrumentView/use_legacy_instrument_view"
+            self._legacy_instrument_view_setting_exists = CONF.has(self._legacy_instrument_view_setting)
+            self._original_use_legacy_instrument_view = (
+                CONF.get(self._legacy_instrument_view_setting) if self._legacy_instrument_view_setting_exists else None
+            )
+            CONF.set(self._legacy_instrument_view_setting, True)
+
+    def tearDown(self):
+        if platform.startswith("win"):
+            if self._legacy_instrument_view_setting_exists:
+                CONF.set(self._legacy_instrument_view_setting, self._original_use_legacy_instrument_view)
+            else:
+                CONF.remove(self._legacy_instrument_view_setting)
 
     def runTest(self):
         if len(self._cpp_interface_names) == 0:

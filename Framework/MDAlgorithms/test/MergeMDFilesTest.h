@@ -15,6 +15,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include <filesystem>
+#include <format>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -28,11 +29,14 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  void test_exec() { do_test_exec(""); }
+  void test_exec() { do_test_exec("", MDAlgorithmsTestHelper::makeUniqueId()); }
 
-  void test_exec_fileBacked() { do_test_exec("MergeMDFilesTest_OutputWS.nxs"); }
+  void test_exec_fileBacked() {
+    const std::string uniqueId = MDAlgorithmsTestHelper::makeUniqueId();
+    do_test_exec(std::format("MergeMDFilesTest_OutputWS_{}.nxs", uniqueId), uniqueId);
+  }
 
-  void do_test_exec(const std::string &OutputFilename) {
+  void do_test_exec(const std::string &OutputFilename, const std::string &uniqueId) {
     if (OutputFilename != "") {
       if (std::filesystem::exists(OutputFilename))
         std::filesystem::remove(OutputFilename);
@@ -46,10 +50,9 @@ public:
     // how many events put into each file.
     long nFileEvents(1000);
     for (size_t i = 0; i < 3; i++) {
-      std::ostringstream mess;
-      mess << "MergeMDFilesTestInput" << i;
-      MDEventWorkspace3Lean::sptr ws =
-          MDAlgorithmsTestHelper::makeFileBackedMDEWwithMDFrame(mess.str(), true, frame, -nFileEvents, appliedCoord);
+      const std::string inputWorkspaceName = std::format("MergeMDFilesTestInput{}_{}", i, uniqueId);
+      MDEventWorkspace3Lean::sptr ws = MDAlgorithmsTestHelper::makeFileBackedMDEWwithMDFrame(
+          inputWorkspaceName, true, frame, -nFileEvents, appliedCoord);
       inWorkspaces.emplace_back(ws);
       filenames.emplace_back(std::vector<std::string>(1, ws->getBoxController()->getFilename()));
     }

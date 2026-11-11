@@ -65,7 +65,10 @@ class MockGeneralSettingsModel:
         self.set_use_opengl = MagicMock()
         self.set_user_layout = MagicMock()
         self.set_apply_dark_theme_enabled = MagicMock()
-        self.get_use_new_instrument_view = MagicMock()
+        self.get_use_legacy_instrument_view = MagicMock()
+        self.set_use_legacy_instrument_view = MagicMock()
+        self.set_prompt_update_on_startup = MagicMock()
+        self.get_prompt_update_on_startup = MagicMock()
 
 
 @start_qapplication
@@ -175,6 +178,9 @@ class GeneralSettingsTest(unittest.TestCase):
 
         # check that the signals are connected to something
         self.assert_connected_once(presenter.get_view().prompt_save_on_close, presenter.get_view().prompt_save_on_close.stateChanged)
+        self.assert_connected_once(
+            presenter.get_view().prompt_update_on_startup, presenter.get_view().prompt_update_on_startup.stateChanged
+        )
 
     @patch(NOTIFY_CHANGES_PATH)
     def test_action_prompt_save_on_close(self, mock_notify_changes: MagicMock):
@@ -191,6 +197,23 @@ class GeneralSettingsTest(unittest.TestCase):
         presenter.action_prompt_save_on_close(False)
 
         self.mock_model.set_prompt_save_on_close.assert_called_once_with(False)
+        mock_notify_changes.assert_called_once()
+
+    @patch(NOTIFY_CHANGES_PATH)
+    def test_action_prompt_update_on_startup(self, mock_notify_changes: MagicMock):
+        presenter = GeneralSettings(None, model=self.mock_model)
+
+        presenter.action_prompt_update_on_startup(True)
+
+        self.mock_model.set_prompt_update_on_startup.assert_called_once_with("1")
+        mock_notify_changes.assert_called_once()
+
+        self.mock_model.set_prompt_update_on_startup.reset_mock()
+        mock_notify_changes.reset_mock()
+
+        presenter.action_prompt_update_on_startup(False)
+
+        self.mock_model.set_prompt_update_on_startup.assert_called_once_with("0")
         mock_notify_changes.assert_called_once()
 
     @patch(NOTIFY_CHANGES_PATH)

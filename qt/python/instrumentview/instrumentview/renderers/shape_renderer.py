@@ -36,6 +36,7 @@ from mantid.kernel import logger
 
 _AXIS_PARALLEL_TOLERANCE = 1e-12  # minimum norm to treat a vector as non-degenerate
 _CROSS_PRODUCT_TOLERANCE = 1e-6  # minimum cross-product norm before falling back to alternative axis
+_MIN_QUAD_FRACTION = 1e-4  # a cuboid quad narrower than this fraction of the cuboid's longest edge is an invisible sliver
 
 
 class ShapeRenderer(InstrumentRenderer):
@@ -663,12 +664,11 @@ class ShapeRenderer(InstrumentRenderer):
 
                 projected_vertices = projection.project_points(tiled.reshape(-1, 3), apply_x_correction=False).reshape(n_group, n_verts, 2)
 
+                # Keep each detector polygon contiguous at the periodic seam
+                # by wrapping vertices near the projected detector center.
                 u_period = projection.u_period
-                if np.isfinite(u_period) and abs(u_period) > 0.0:
-                    # Keep each detector polygon contiguous at the periodic seam
-                    # by wrapping vertices near the projected detector center.
-                    centre_x = detector_positions[group_indices, 0][:, np.newaxis]
-                    projected_vertices[:, :, 0] += np.round((centre_x - projected_vertices[:, :, 0]) / u_period) * u_period
+                centre_x = detector_positions[group_indices, 0][:, np.newaxis]
+                projected_vertices[:, :, 0] += np.round((centre_x - projected_vertices[:, :, 0]) / u_period) * u_period
 
                 tiled[:, :, :2] = projected_vertices
 
@@ -875,7 +875,11 @@ def _extract_quad_from_cuboid_shapeinfo(si) -> tuple[np.ndarray, np.ndarray] | N
     ``leftBackBottom`` (x_min, y_min, z_back),
     ``rightFrontBottom`` (x_max, y_min, z_front).
 
-    Returns ``None`` when the corners have insufficient extent to form a valid quad.
+    Instrument definitions may point the width or height along another axis,
+    which leaves this quad as a line or a sliver: a side under
+    ``_MIN_QUAD_FRACTION`` of the cuboid's longest edge.  Returns ``None`` then,
+    and when the corners cannot form a quad, so the caller draws the full
+    cuboid instead.
     """
     try:
         cg = si.cuboidGeometry()
@@ -890,7 +894,9 @@ def _extract_quad_from_cuboid_shapeinfo(si) -> tuple[np.ndarray, np.ndarray] | N
     y_min, y_max = lfb.Y(), lft.Y()
     z_front, z_back = lfb.Z(), lbb.Z()
 
-    if abs(x_max - x_min) < _AXIS_PARALLEL_TOLERANCE and abs(y_max - y_min) < _AXIS_PARALLEL_TOLERANCE:
+    longest_edge = max(abs(x_max - x_min), abs(y_max - y_min), abs(z_back - z_front))
+    narrowest_side = max(_MIN_QUAD_FRACTION * longest_edge, _AXIS_PARALLEL_TOLERANCE)
+    if abs(x_max - x_min) < narrowest_side or abs(y_max - y_min) < narrowest_side:
         return None
 
     mid_z = (z_front + z_back) * 0.5

@@ -18,6 +18,8 @@ from workbench.plotting.plotscriptgenerator.utils import (
     get_plotted_workspaces_names,
     clean_variable_name,
     generate_workspace_retrieval_commands,
+    get_figure_layout,
+    get_default_layout,
 )
 
 
@@ -57,6 +59,25 @@ class PlotScriptGeneratorUtilsTest(unittest.TestCase):
             except (SyntaxError, TypeError, ValueError):
                 msg = "Invalid variable name: {}".format(clean_name)
                 self.fail(msg)
+
+    def test_get_figure_layout(self):
+        from matplotlib.layout_engine import TightLayoutEngine, ConstrainedLayoutEngine
+
+        test_cases = [(None, None), (TightLayoutEngine(), "tight"), (ConstrainedLayoutEngine(), "constrained")]
+        mock_fig = Mock()
+        for fig_engine, output in test_cases:
+            with self.subTest(fig_engine=fig_engine):
+                mock_fig.get_layout_engine.return_value = fig_engine
+                self.assertEqual(get_figure_layout(mock_fig), output)
+
+    def test_get_default_layout(self):
+        from matplotlib import rcParams
+
+        test_cases = [((False, False), None), ((True, False), "tight"), ((False, True), "constrained")]
+        for rc_params, output in test_cases:
+            with self.subTest(rc_params=rc_params):
+                with patch.dict(rcParams, {"figure.autolayout": rc_params[0], "figure.constrained_layout.use": rc_params[1]}):
+                    self.assertEqual(get_default_layout(), output)
 
 
 if __name__ == "__main__":

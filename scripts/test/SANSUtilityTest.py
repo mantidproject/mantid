@@ -8,6 +8,7 @@ import os
 import random
 import re
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 
@@ -49,6 +50,9 @@ TEST_STRING_MON2 = TEST_STRING_MON + "_2"
 
 TEST_STRING_DATA3 = TEST_STRING_DATA + "_3"
 TEST_STRING_MON3 = TEST_STRING_MON + "_3"
+DEPRECATED_TEST_MSG = (
+    "This test does not pass and was not used before 1/4/2015. SansUtilitytests was disabled. Can be removed once #35807 is closed"
+)
 
 
 def provide_group_workspace_for_added_event_data(event_ws_name, monitor_ws_name, out_ws_name):
@@ -147,53 +151,60 @@ def provide_workspace_with_x_errors(
             ws.setSharedDx(hists, x_error_array)
 
 
-# This test does not pass and was not used before 1/4/2015. SansUtilitytests was disabled.
 class SANSUtilityTest(unittest.TestCase):
-    # def checkValues(self, list1, list2):
+    def checkValues(self, list1, list2):
+        def _check_single_values(v1, v2):
+            self.assertAlmostEqual(v1, v2)
 
-    #    def _check_single_values( v1, v2):
-    #        self.assertAlmostEqual(v1, v2)
+        self.assertEqual(len(list1), len(list2))
+        for v1, v2 in zip(list1, list2):
+            start_1, stop_1 = v1
+            start_2, stop_2 = v2
+            _check_single_values(start_1, start_2)
+            _check_single_values(stop_1, stop_2)
 
-    #    self.assertEqual(len(list1), len(list2))
-    #    for v1,v2 in zip(list1, list2):
-    #        start_1,stop_1 = v1
-    #        start_2, stop_2 = v2
-    #        _check_single_values(start_1, start_2)
-    #        _check_single_values(stop_1, stop_2)
+    @unittest.skip(DEPRECATED_TEST_MSG)
+    def test_checkValues(self):
+        """sanity check to ensure that the others will work correctly"""
+        values = [
+            [
+                [1, 2],
+            ],
+            [[None, 3], [4, None]],
+        ]
+        for singlevalues in values:
+            self.checkValues(singlevalues, singlevalues)
 
-    # def test_checkValues(self):
-    #    """sanity check to ensure that the others will work correctly"""
-    #    values = [
-    #        [[1,2],],
-    #        [[None, 3],[4, None]],
-    #    ]
-    #    for singlevalues in values:
-    #        self.checkValues(singlevalues, singlevalues)
+    @unittest.skip(DEPRECATED_TEST_MSG)
+    def test_parse_strings(self):
+        inputs = {
+            "1-2": [[1, 2]],  # single period syntax  min < x < max
+            "1.3-5.6": [[1.3, 5.6]],  # float
+            "1-2,3-4": [[1, 2], [3, 4]],  # more than one slice
+            ">1": [[1, -1]],  # just lower bound
+            "<5": [[-1, 5]],  # just upper bound
+            "<5,8-9": [[-1, 5], [8, 9]],
+            "1:2:5": [[1, 3], [3, 5]],  # syntax: start, step, stop
+        }
 
-    # def test_parse_strings(self):
-    #    inputs = { '1-2':[[1,2]],         # single period syntax  min < x < max
-    #               '1.3-5.6':[[1.3,5.6]], # float
-    #               '1-2,3-4':[[1,2],[3,4]],# more than one slice
-    #               '>1':[[1, -1]],       # just lower bound
-    #               '<5':[[-1, 5]],      # just upper bound
-    #               '<5,8-9': [[-1, 5], [8,9]],
-    #               '1:2:5': [[1,3], [3,5]] # syntax: start, step, stop
-    #        }
+        for k, v in inputs.items():
+            self.checkValues(su.sliceParser(k), v)
 
-    #    for (k, v) in inputs.items():
-    #        self.checkValues(su.sliceParser(k),v)
+    @unittest.skip(DEPRECATED_TEST_MSG)
+    def test_accept_spaces(self):
+        self.checkValues(su.sliceParser("1 - 2, 3 - 4"), [[1, 2], [3, 4]])
 
-    # def test_accept_spaces(self):
-    #    self.checkValues(su.sliceParser("1 - 2, 3 - 4"), [[1,2],[3,4]])
+    @unittest.skip(DEPRECATED_TEST_MSG)
+    def test_invalid_values_raise(self):
+        invalid_strs = ["5>6", ":3:", "MAX<min"]
+        for val in invalid_strs:
+            self.assertRaises(SyntaxError, su.sliceParser, val)
 
-    # def test_invalid_values_raise(self):
-    #    invalid_strs = ["5>6", ":3:", "MAX<min"]
-    #    for val in invalid_strs:
-    #        self.assertRaises(SyntaxError, su.sliceParser, val)
+    @unittest.skip(DEPRECATED_TEST_MSG)
+    def test_empty_string_is_valid(self):
+        self.checkValues(su.sliceParser(""), [[-1, -1]])
 
-    # def test_empty_string_is_valid(self):
-    #    self.checkValues(su.sliceParser(""), [[-1,-1]])
-
+    @unittest.skip(DEPRECATED_TEST_MSG)
     def test_extract_spectra(self):
         mtd.clear()
 
@@ -217,6 +228,7 @@ class SANSUtilityTest(unittest.TestCase):
         det_ids = list(range(100, 299, 2))
         result = su.extract_spectra(ws, det_ids, "result")
 
+    @unittest.skip(DEPRECATED_TEST_MSG)
     def test_get_masked_det_ids(self):
         ws = CreateSampleWorkspace("Histogram", "Multiple Peaks")
 
@@ -229,11 +241,40 @@ class SANSUtilityTest(unittest.TestCase):
         self.assertTrue(104 in masked_det_ids)
         self.assertEqual(len(masked_det_ids), 3)
 
+    @unittest.skip(DEPRECATED_TEST_MSG)
     def test_merge_to_ranges(self):
         self.assertEqual([[1, 4]], su._merge_to_ranges([1, 2, 3, 4]))
         self.assertEqual([[1, 3], [5, 7]], su._merge_to_ranges([1, 2, 3, 5, 6, 7]))
         self.assertEqual([[1, 3], [5, 5], [7, 9]], su._merge_to_ranges([1, 2, 3, 5, 7, 8, 9]))
         self.assertEqual([[1, 1]], su._merge_to_ranges([1]))
+
+    @patch("SANSUtility.os.getcwd")
+    @patch("SANSUtility.config")
+    @patch("SANSUtility.os.path.isfile")
+    def test_get_full_path_for_added_event_data(self, mock_isfile, mock_config, mock_getcwd):
+        mock_isfile.side_effect = [True, False, True, True, True, True]
+        mock_config.__getitem__.side_effect = ["config_path", "", "", "config_path"]
+        mock_getcwd.return_value = "cwd_path"
+        # Case 1: path != "" and os.path.isfile(file_name) is True
+        path, base = su.get_full_path_for_added_event_data(os.path.join("mock_path", "event.nxs"))
+        self.assertEqual(os.path.join("mock_path", "event.nxs"), path)
+        self.assertEqual("event.nxs", base)
+        # Case 2: path != "" and os.path.isfile(file_name) is False and config["defaultsave.directory"] = "config_path"
+        path, base = su.get_full_path_for_added_event_data(os.path.join("mock_path", "event.nxs"))
+        self.assertEqual(os.path.join("config_path", "mock_path", "event.nxs"), path)
+        self.assertEqual("event.nxs", base)
+        # Case 3: path == "" and os.path.isfile(file_name) is True and config["defaultsave.directory"] = ""
+        path, base = su.get_full_path_for_added_event_data("event.nxs")
+        self.assertEqual(os.path.join("cwd_path", "event.nxs"), path)
+        self.assertEqual("event.nxs", base)
+        # Case 4: path == "" and os.path.isfile(file_name) is False and config["defaultsave.directory"] = ""
+        path, base = su.get_full_path_for_added_event_data("event.nxs")
+        self.assertEqual(os.path.join("cwd_path", "event.nxs"), path)
+        self.assertEqual("event.nxs", base)
+        # Case 5: path == "" and os.path.isfile(file_name) is False and config["defaultsave.directory"] = "config_path"
+        path, base = su.get_full_path_for_added_event_data("event.nxs")
+        self.assertEqual(os.path.join("config_path", "event.nxs"), path)
+        self.assertEqual("event.nxs", base)
 
 
 class TestBundleAddedEventDataFilesToGroupWorkspaceFile(unittest.TestCase):

@@ -1,1 +1,0 @@
-- The ``MantidORSODataset`` has been updated to make **model** and **validate** optional arguments.

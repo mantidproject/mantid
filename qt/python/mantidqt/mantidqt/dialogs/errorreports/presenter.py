@@ -53,16 +53,21 @@ class ErrorReporterPresenter(object):
 
     def do_not_share(self, continue_working=True, remember_contact_info=False, name="", email=""):
         self.error_log.notice("No information shared")
+        self._manage_remember_me_setting(remember_contact_info, name, email)
         self._handle_exit(continue_working)
         return -1
 
     def _manage_remember_me_setting(self, remember_contact_info=False, name: str = "", email: str = "") -> None:
-        """Store changed contact information after a report is shared with `Remember Me` selected."""
-        if not remember_contact_info:
-            return
+        """
+        Store changed contact information locally when `Remember Me` is selected, or clear it when it is not.
+        This information is never shared if the button `Don't share any information` is clicked.
+        """
+        if remember_contact_info:
+            name = name.strip()
+            email = email.strip()
+        else:
+            name = email = ""
 
-        name = name.strip()
-        email = email.strip()
         name_changed = name != self._saved_name
         email_changed = email != self._saved_email
         if not name_changed and not email_changed:

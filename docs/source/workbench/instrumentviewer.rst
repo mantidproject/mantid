@@ -83,7 +83,7 @@ active.
     * - ``3D``
       - Select a detector
       - Drag to rotate
-      - Zoom
+      - Zoom about the cursor
     * - Flat projection
       - Select a detector
       - Reset the view
@@ -144,8 +144,8 @@ explicitly with the ``side-by-side-view-location`` tag in the
     The same instrument in the ``Side by Side`` projection.
 
 Several controls only apply to the flat projections and are disabled in ``3D``:
-``Rectangle Zoom``, ``Hover Pick``, the shape controls, ``Maintain Aspect Ratio`` and
-``Flip Beam``.
+``Rectangle Zoom``, ``Hover Pick``, the shape controls and ``Maintain Aspect Ratio``.
+``Flip Beam``, ``Rotate 180°`` and ``Rotate`` are disabled in both ``3D`` and ``Side by Side``.
 
 Units
 #####
@@ -181,7 +181,9 @@ selecting one may switch others off where the combination would be ambiguous.
 
 ``Hover Pick``
     Preview a single detector's spectrum and information by moving the mouse over it, without
-    clicking. The selection is not changed. Only available in the 2D projections.
+    clicking. The selection is not changed. Only available in the 2D projections. With
+    ``Select Bank/Tube`` on, the summed spectrum of the whole tube or bank under the cursor is shown
+    instead.
 
 ``Select Peaks``
     Clicking selects the nearest detector that has a peak on it, rather than the exact detector
@@ -408,7 +410,21 @@ Settings tab
 
 ``Flip Beam``
     Mirrors a 2D projection about the plane perpendicular to the beam, which swaps the left and
-    right halves of the instrument. It has no effect in ``3D`` or ``Side by Side``.
+    right halves of the instrument. It is disabled in ``3D`` and ``Side by Side``.
+
+``Rotate 180°``
+    Rotates a 2D projection half a turn about its axis, swapping the two halves of the
+    instrument. This is the setting most often wanted, and is the equivalent of setting the old
+    Instrument View's ``U Correction`` to ``[0, 6.28]``. Unlike ``Flip Beam`` it only turns the
+    instrument, so the order of the banks is unchanged. While it is ticked the ``Rotate`` slider
+    is disabled, because the half turn overrides it.
+
+``Rotate``
+    Rotates a 2D projection by any angle about its axis, moving the seam at which it is cut open
+    and unwrapped. By default the seam is placed automatically, in the widest gap between
+    detectors; use this to choose a different one, for example to bring a bank that is split
+    across the left and right edges back together in the middle. It is the equivalent of the old
+    Instrument View's ``U Correction``, and has no effect in ``3D`` or ``Side by Side``.
 
 ``Monitors``
     Draws the monitors, in the colour shown next to the checkbox.
@@ -421,14 +437,16 @@ Render mode
     How much detector geometry is drawn:
 
     - ``Points (Fastest)``: each detector is a single point.
-    - ``Approximated Shapes (Fast)``: detector shapes are drawn, approximated by simple quads.
+    - ``Approximated Shapes (Fast)``: detector shapes are drawn, approximated by simple quads. Box-shaped detectors
+      that a single quad cannot represent are drawn in full.
     - ``Raw Shapes (Slowest)``: the full detector geometry is drawn. This can take noticeably longer for larger instruments.
 
 Count scale
     ``Linear`` or ``Logarithmic`` colouring of the integrated counts. The logarithmic scale is
     useful when a few detectors dominate the count range.
 
-``Maintain Aspect Ratio``, ``Flip Beam`` and the render mode are remembered between sessions.
+``Maintain Aspect Ratio``, ``Flip Beam``, ``Rotate 180°``, ``Rotate`` and the render mode are
+remembered between sessions.
 
 Component Tree tab
 ------------------

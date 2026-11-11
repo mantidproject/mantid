@@ -122,6 +122,7 @@ set(PYTHON_WIDGET_WORKBENCH_ONLY_TESTS
     mantidqt/widgets/fitpropertybrowser/addfunctiondialog/test/test_addfunctiondialogview.py
     mantidqt/widgets/fitpropertybrowser/test/test_interactive_tool.py
     mantidqt/widgets/helpwindow/test/test_helpwindowmodel.py
+    mantidqt/widgets/helpwindow/test/test_helpwindowpresenter.py
     mantidqt/widgets/instrumentview/test/test_instrumentview_io.py
     mantidqt/widgets/instrumentview/test/test_instrumentview_presenter.py
     mantidqt/widgets/instrumentview/test/test_instrumentview_view.py
@@ -198,6 +199,14 @@ set(PYTHON_WIDGET_WORKBENCH_ONLY_TESTS
     mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_view.py
     mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_io.py
     mantidqt/widgets/workspacewidget/test/test_workspacetreewidget.py
+    mantidqt/widgets/tutorial/test/test_annotator.py
+    mantidqt/widgets/tutorial/test/test_bubble.py
+    mantidqt/widgets/tutorial/test/test_interaction.py
+    mantidqt/widgets/tutorial/test/test_launcher.py
+    mantidqt/widgets/tutorial/test/test_overlay.py
+    mantidqt/widgets/tutorial/test/test_player.py
+    mantidqt/widgets/tutorial/test/test_shell.py
+    mantidqt/widgets/tutorial/test/test_step.py
     mantidqt/icons/test/test_icons.py
 )
 

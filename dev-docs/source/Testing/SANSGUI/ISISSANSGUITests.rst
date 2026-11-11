@@ -51,7 +51,7 @@ In the ``Runs`` tab:
 
 #. Check that the ``Insert``, ``Delete``, ``Copy``, ``Paste``, ``Cut`` and
    ``Erase`` icons work as expected on table rows.
-#. Tick the ``Sample Geometry`` button - some extra columns should appear.
+#. Tick the ``Sample Geometry`` button and change a sample shape to ``Disc``.
 #. Create multiple rows in the table with different data e.g. one row with
    an output name, one row without.
 #. Try changing a random setting in the settings tab and remember what you set
@@ -60,11 +60,8 @@ In the ``Runs`` tab:
    set in the User File.
 #. Click the ``Export Table`` button and save the table as a csv file. Check
    the file in an editor or Excel and ensure it looks like a sensible
-   representation of the table in the format ``key,value,key,value,...``. All
-   columns except ``Options`` and ``Sample Shape`` should be included.
-#. Try unticking ``Sample Geometry`` and ticking ``Multi-period`` and resave the CSV. The
-   displayed columns change but the saved file should contain the same set of
-   columns regardless of whether these are ticked.
+   representation of the table in the format ``key,value,key,value,...``.
+#. Try unticking ``Sample Geometry`` and ticking ``Multi-period``, enter some numbers, and resave the CSV.
 #. Click ``Load Batch file`` and select the newly saved table. All columns
    that were saved should be loaded.
 #. Try deleting and/or reordering some of the columns in the saved file and

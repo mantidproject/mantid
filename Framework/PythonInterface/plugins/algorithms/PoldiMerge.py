@@ -68,7 +68,7 @@ class PoldiMerge(PythonAlgorithm):
                 except RuntimeError as error:
                     self.handleError(error)
 
-        self.setProperty("OutputWorkspace", MergeRuns(workspaceNames))
+        self.setProperty("OutputWorkspace", MergeRuns(workspaceNames, StoreInADS=False))
 
     def canMerge(self, leftWorkspace, rightWorkspace):
         if not self.timingsMatch(leftWorkspace.x(0), rightWorkspace.x(0)):

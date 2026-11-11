@@ -16,6 +16,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include <filesystem>
+#include <format>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -31,30 +32,36 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  void test_exec_InMemory() { do_test(false); }
+  void test_exec_InMemory() { do_test(false, MDAlgorithmsTestHelper::makeUniqueId()); }
 
-  void test_exec_FileBacked() { do_test(true); }
+  void test_exec_FileBacked() { do_test(true, MDAlgorithmsTestHelper::makeUniqueId()); }
 
-  void test_exec_FileBacked_withNeedsUpdating() { do_test(true, "", true); }
+  void test_exec_FileBacked_withNeedsUpdating() { do_test(true, MDAlgorithmsTestHelper::makeUniqueId(), "", true); }
 
-  void test_exec_FileBacked_withFilename() { do_test(true, "CloneMDWorkspaceTest_ws_custom_cloned_name.nxs"); }
-
-  void test_exec_FileBacked_withFilename_withNeedsUpdating() {
-    do_test(true, "CloneMDWorkspaceTest_ws_custom_cloned_name2.nxs", true);
+  void test_exec_FileBacked_withFilename() {
+    const std::string uniqueId = MDAlgorithmsTestHelper::makeUniqueId();
+    do_test(true, uniqueId, std::format("CloneMDWorkspaceTest_ws_custom_cloned_name_{}.nxs", uniqueId));
   }
 
-  void do_test(bool fileBacked, const std::string &Filename = "", bool file_needs_updating = false) {
+  void test_exec_FileBacked_withFilename_withNeedsUpdating() {
+    const std::string uniqueId = MDAlgorithmsTestHelper::makeUniqueId();
+    do_test(true, uniqueId, std::format("CloneMDWorkspaceTest_ws_custom_cloned_name2_{}.nxs", uniqueId), true);
+  }
+
+  void do_test(bool fileBacked, const std::string &uniqueId, const std::string &Filename = "",
+               bool file_needs_updating = false) {
     // Name of the output workspace.
     std::string outWSName("CloneMDWorkspaceTest_OutputWS");
+    const std::string inWSName = std::format("CloneMDWorkspaceTest_ws_{}", uniqueId);
 
     // Make a fake file-backed (or not) MDEW
-    MDEventWorkspace3Lean::sptr ws1 = MDAlgorithmsTestHelper::makeFileBackedMDEW("CloneMDWorkspaceTest_ws", fileBacked);
+    MDEventWorkspace3Lean::sptr ws1 = MDAlgorithmsTestHelper::makeFileBackedMDEW(inWSName, fileBacked);
     ws1->setFileNeedsUpdating(file_needs_updating);
 
     CloneMDWorkspace alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "CloneMDWorkspaceTest_ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", inWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", Filename));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
@@ -103,7 +110,7 @@ public:
     MDEventsTestHelper::checkAndDeleteFile(file2);
 
     // Remove workspace from the data service.
-    AnalysisDataService::Instance().remove("CloneMDWorkspaceTest_ws");
+    AnalysisDataService::Instance().remove(inWSName);
     AnalysisDataService::Instance().remove(outWSName);
   }
 

@@ -12,6 +12,7 @@
 #include <fstream>
 #include <list>
 #include <memory>
+#include <random>
 
 using std::size_t;
 
@@ -1184,12 +1185,18 @@ std::istream &extractToEOL(std::istream &is, std::string &str) {
 //------------------------------------------------------------------------------------------------
 std::string randomString(size_t len) {
   static const std::string alphabet = "0123456789abcdefghijklmnopqrstuvwxyz";
+  thread_local std::mt19937 generator = [] {
+    std::random_device randomDevice;
+    std::seed_seq seed{randomDevice(), randomDevice(), randomDevice(), randomDevice()};
+    return std::mt19937(seed);
+  }();
+  std::uniform_int_distribution<size_t> distribution(0, alphabet.size() - 1);
 
   std::string result;
   result.reserve(len);
 
   while (result.size() != len) {
-    size_t randPos = ((rand() % (alphabet.size() - 1)));
+    const size_t randPos = distribution(generator);
     result.push_back(alphabet[randPos]);
   }
 

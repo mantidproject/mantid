@@ -62,17 +62,44 @@ class ErrorReportPresenterTest(unittest.TestCase):
         self.logger_mock_instance.error.assert_called_once_with("Terminated by user.")
         self.assertEqual(self.view.quit.call_count, 1)
 
-    def test_do_not_share_does_not_construct_qsettings_when_remember_me_is_ticked(self):
-        self.error_report_presenter.do_not_share(False, True, "MantidUser", "MantidUser@mail.com")
+    def test_do_not_share_stores_changed_contact_info_when_remember_me_is_ticked(self):
+        self.error_report_presenter.do_not_share(False, True, "  MantidUser  ", "MantidUser@mail.com\t")
+
+        self._assert_contact_info_stored("MantidUser", "MantidUser@mail.com")
+        self.errorreport_mock.assert_not_called()
+
+    def test_do_not_share_does_not_construct_qsettings_when_contact_info_is_unchanged(self):
+        self.error_report_presenter.do_not_share(False, True, self.view.saved_name, self.view.saved_email)
 
         self.q_settings_mock.assert_not_called()
 
-    def test_share_does_not_construct_qsettings_when_remember_me_is_unticked(self):
+    def test_do_not_share_clears_saved_contact_info_when_remember_me_is_unticked(self):
+        self.error_report_presenter.do_not_share(False, False, "MantidUser", "MantidUser@mail.com")
+
+        self._assert_contact_info_stored("", "")
+
+    def test_share_clears_saved_contact_info_when_remember_me_is_unticked(self):
         self.error_report_presenter._send_report_to_server = mock.MagicMock(return_value=201)
 
         self.error_report_presenter.share_all_information(False, False, "MantidUser", "MantidUser@mail.com", "details")
 
+        self._assert_contact_info_stored("", "")
+
+    def test_remember_me_unticked_does_not_construct_qsettings_when_nothing_saved(self):
+        self.error_report_presenter._send_report_to_server = mock.MagicMock(return_value=201)
+        self.error_report_presenter._saved_name = ""
+        self.error_report_presenter._saved_email = ""
+
+        self.error_report_presenter.do_not_share(False, False, "MantidUser", "MantidUser@mail.com")
+        self.error_report_presenter.share_all_information(False, False, "MantidUser", "MantidUser@mail.com", "details")
+
         self.q_settings_mock.assert_not_called()
+
+    def test_remember_me_only_writes_changes_once_across_reports(self):
+        self.error_report_presenter.do_not_share(True, True, "New User", self.view.saved_email)
+        self.error_report_presenter.do_not_share(True, True, "New User", self.view.saved_email)
+
+        self.q_settings_mock_instance.setValue.assert_called_once_with(self.view.NAME, "New User")
 
     def test_share_does_not_construct_qsettings_when_contact_info_is_unchanged(self):
         self.error_report_presenter._send_report_to_server = mock.MagicMock(return_value=201)
@@ -184,6 +211,12 @@ class ErrorReportPresenterTest(unittest.TestCase):
             cut_down_stack_trace = self.error_report_presenter._cut_down_stacktrace()
             self.assertEqual(len(cut_down_stack_trace), MAX_STACK_TRACE_LENGTH)
             self.assertIn("\n...\n", cut_down_stack_trace)
+
+    def _assert_contact_info_stored(self, name, email):
+        self.q_settings_mock_instance.beginGroup.assert_called_once_with(self.view.CONTACT_INFO)
+        self.q_settings_mock_instance.setValue.assert_has_calls([mock.call(self.view.NAME, name), mock.call(self.view.EMAIL, email)])
+        self.assertEqual(self.q_settings_mock_instance.setValue.call_count, 2)
+        self.q_settings_mock_instance.endGroup.assert_called_once_with()
 
     def test_cut_down_stacktrace_is_called(self):
         self.error_report_presenter._traceback = "x" * (MAX_STACK_TRACE_LENGTH + 100)

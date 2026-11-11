@@ -10,9 +10,43 @@ from mantid.api import AnalysisDataService, MatrixWorkspace
 import mantid.simpleapi as s_api
 
 from typing import List, Tuple, Union
+import glob
 import math
+import os
 import re
 import numpy as np
+
+
+def validate_instrument_configuration(instrument: str, analyser: str, reflection: str) -> Union[str, None]:
+    """
+    Checks that an instrument provides the given analyser and reflection pair, which it does when it ships a
+    parameter file defining that combination. Returns None when the configuration is valid, otherwise a message
+    naming what the instrument does provide.
+
+    @param instrument Instrument name, e.g. OSIRIS
+    @param analyser Analyser bank name, e.g. silicon
+    @param reflection Reflection number, e.g. 111
+    @return None when valid, otherwise the reason it is not
+    """
+    directory = config["instrumentDefinition.directory"]
+    if os.path.exists(os.path.join(directory, f"{instrument}_{analyser}_{reflection}_Parameters.xml")):
+        return None
+
+    def _available(pattern: str, part: int) -> List[str]:
+        names = {os.path.basename(path).split("_")[part] for path in glob.glob(os.path.join(directory, pattern))}
+        return sorted(names)
+
+    analysers = _available(f"{instrument}_*_*_Parameters.xml", 1)
+    if not analysers:
+        return f"No parameter files were found for instrument '{instrument}'."
+    if analyser not in analysers:
+        return f"'{analyser}' is not an analyser on {instrument}. Valid analysers are: {', '.join(analysers)}."
+
+    reflections = _available(f"{instrument}_{analyser}_*_Parameters.xml", 2)
+    return (
+        f"The {analyser} analyser on {instrument} does not support reflection '{reflection}'. "
+        f"Valid reflections are: {', '.join(reflections)}."
+    )
 
 
 def get_run_number(ws_name: str) -> str:
@@ -20,10 +54,13 @@ def get_run_number(ws_name: str) -> str:
     Gets the run number for a given workspace.
 
     Attempts to get from logs and falls back to parsing the workspace name for
-    something that looks like a run number.
+    something that looks like a run number. Workspaces with no run number
+    associated with them, e.g. those loaded from a text file, fall back to
+    "0" rather than raising so that algorithms which only use this to build
+    a default output name do not fail.
 
     @param ws_name Name of workspace
-    @return Parsed run number
+    @return Parsed run number, or "0" if one could not be determined
     """
     workspace = AnalysisDataService.retrieve(ws_name)
     run_number = str(workspace.getRunNumber())
@@ -37,11 +74,12 @@ def get_run_number(ws_name: str) -> str:
 
     # attempt reading from the logs (ILL)
     run = workspace.getRun()
-    if not run.hasProperty("run_number"):
-        raise RuntimeError("Could not find run number associated with workspace.")
+    if run.hasProperty("run_number"):
+        log = run.getLogData("run_number").value
+        return log.split(",")[0]
 
-    log = run.getLogData("run_number").value
-    return log.split(",")[0]
+    # No run number could be found, e.g. for a workspace loaded from a text file.
+    return "0"
 
 
 def get_instrument_and_run(ws_name: str) -> Tuple[str, str]:

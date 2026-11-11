@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 // Includes
 #include "MantidDataHandling/ISISJournal.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 
 #include "Poco/SAX/SAXException.h"
@@ -30,7 +31,6 @@ using Poco::XML::NodeFilter;
 using Poco::XML::TreeWalker;
 
 namespace {
-static constexpr const char *URL_PREFIX = "http://data.isis.rl.ac.uk/journals/ndx";
 static constexpr const char *INDEX_FILE_NAME = "main";
 static constexpr const char *JOURNAL_PREFIX = "/journal_";
 static constexpr const char *JOURNAL_EXT = ".xml";
@@ -50,7 +50,8 @@ static constexpr const char *FILE_TAG = "file";
 std::string constructURL(std::string instrument, std::string const &name) {
   boost::algorithm::to_lower(instrument);
   std::ostringstream url;
-  url << URL_PREFIX << instrument << JOURNAL_PREFIX << name << JOURNAL_EXT;
+  url << Mantid::Kernel::ConfigService::Instance().getString("isisjournal.url_prefix") << instrument << JOURNAL_PREFIX
+      << name << JOURNAL_EXT;
   return url.str();
 }
 

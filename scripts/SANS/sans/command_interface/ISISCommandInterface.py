@@ -42,6 +42,7 @@ from sans.common.general_functions import (
     get_output_name,
     is_part_of_reduced_output_workspace_group,
     parse_simple_range_of_number_pairs,
+    delete_workspaces,
 )
 from sans.data_objects.row_entries import RowEntries
 from sans.sans_batch import SANSBatchReduction, SANSCentreFinder
@@ -810,6 +811,7 @@ def WavRangeReduction(
     use_reduction_mode_as_suffix=False,
     saveAlgs=None,
     save_as_zero_error_free=False,
+    output_diagnostic_names=False,
 ):
     """
     Run reduction from loading the raw data to calculating Q. Its optional arguments allows specifics
@@ -842,6 +844,7 @@ def WavRangeReduction(
     @param output_mode: the way the data should be put out: Can be PublishToADS, SaveToFile or Both
     @param use_reduction_mode_as_suffix: If true then a second suffix will be used which is
                                          based on the reduction mode.
+    @param output_diagnostic_names: Whether output of SANSBatch returns a list of non-reduced ADS workspaces that can be used for deletion
     @return Name of one of the workspaces created
     """
     print_message("WavRangeReduction(" + str(wav_start) + ", " + str(wav_end) + ", " + str(full_trans_wav) + ")")
@@ -890,8 +893,9 @@ def WavRangeReduction(
 
     # Run the reduction
     batch_alg = SANSBatchReduction()
-    batch_alg(states=[state], use_optimizations=True, output_mode=output_mode)
-
+    _, _, new_names = batch_alg(
+        states=[state], use_optimizations=True, output_mode=output_mode, output_diagnostic_names=output_diagnostic_names
+    )
     # -----------------------------------------------------------
     # Return the name fo the reduced workspace (or WorkspaceGroup)
     # -----------------------------------------------------------
@@ -904,7 +908,9 @@ def WavRangeReduction(
         _, output_workspace_base_name_hab = get_output_name(state, ReductionMode.HAB, is_group, wav_range)
         _, output_workspace_base_name_lab = get_output_name(state, ReductionMode.LAB, is_group, wav_range)
         output_workspace_base_name = [output_workspace_base_name_lab, output_workspace_base_name_hab]
-    return output_workspace_base_name
+    if not output_diagnostic_names:
+        return output_workspace_base_name
+    return output_workspace_base_name, new_names
 
 
 def BatchReduce(
@@ -918,6 +924,7 @@ def BatchReduce(
     combineDet=None,
     save_as_zero_error_free=False,
     output_mode=OutputMode.PUBLISH_TO_ADS,
+    clean_up_ads=False,
 ):
     """
     @param filename: the CSV file with the list of runs to analyse
@@ -931,6 +938,7 @@ def BatchReduce(
     @param combineDet: that will be forward to WavRangeReduction (rear, front, both, merged, None)
     @param save_as_zero_error_free: Should the reduced workspaces contain zero errors or not
     @param output_mode: the way the data should be put out: Can be PublishToADS, SaveToFile or Both
+    @param clean_up_ads: If true, will delete diagnostic workspaces (non-reduced) from the ADS upon completion
     @return final_settings: A dictionary with some values of the Reduction - Right Now:(scale, shift)
     """
 
@@ -938,6 +946,9 @@ def BatchReduce(
     _ = format
     _ = reducer
     _ = verbose
+
+    # clean up names
+    clean_up_names = []
 
     if centreit:
         raise RuntimeError("The beam centre finder is currently not supported.")
@@ -995,15 +1006,22 @@ def BatchReduce(
         # suffix that the user can set already -- was there previously, so we have to provide that)
         use_reduction_mode_as_suffix = combineDet is not None
 
-        # Run the reduction for a single
-        reduced_workspace_name = WavRangeReduction(
-            combineDet=combineDet,
-            output_name=output_name,
-            output_mode=output_mode,
-            use_reduction_mode_as_suffix=use_reduction_mode_as_suffix,
-            saveAlgs=saveAlgs,
-            save_as_zero_error_free=save_as_zero_error_free,
-        )
+        reduction_kwargs = {
+            "combineDet": combineDet,
+            "output_name": output_name,
+            "output_mode": output_mode,
+            "use_reduction_mode_as_suffix": use_reduction_mode_as_suffix,
+            "saveAlgs": saveAlgs,
+            "save_as_zero_error_free": save_as_zero_error_free,
+            "output_diagnostic_names": clean_up_ads,
+        }
+
+        # Run the reduction for a single state
+        if clean_up_ads:
+            reduced_workspace_name, new_clean_up_names = WavRangeReduction(**reduction_kwargs)
+            clean_up_names.extend(new_clean_up_names)
+        else:
+            reduced_workspace_name = WavRangeReduction(**reduction_kwargs)
 
         # Remove the settings which were very specific for this single reduction which are:
         # 1. The last user file (if any was set)
@@ -1034,6 +1052,10 @@ def BatchReduce(
                         PlotResult(ws.name())
                 else:
                     PlotResult(workspace.name())
+
+    # if flag to clean up diagnostic output ws is active only reduced workspaces will survive in the ads
+    if clean_up_ads and clean_up_names:
+        delete_workspaces(set(clean_up_names), use_names=True)
 
 
 def CompWavRanges(wavelens, plot=True, combineDet=None, resetSetup=True):

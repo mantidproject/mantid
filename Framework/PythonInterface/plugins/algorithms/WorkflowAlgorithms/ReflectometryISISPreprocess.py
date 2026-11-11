@@ -14,7 +14,13 @@ from mantid.api import (
     WorkspaceGroup,
     WorkspaceProperty,
 )
-from mantid.kernel import CompositeValidator, StringArrayLengthValidator, StringArrayMandatoryValidator, StringArrayProperty, Direction
+from mantid.kernel import (
+    CompositeValidator,
+    StringArrayLengthValidator,
+    StringArrayMandatoryValidator,
+    StringArrayProperty,
+    Direction,
+)
 
 
 class ReflectometryISISPreprocess(DataProcessorAlgorithm):
@@ -23,7 +29,6 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
     _OUTPUT_WS = "OutputWorkspace"
     _MONITOR_WS = "MonitorWorkspace"
     _EVENT_MODE = "EventMode"
-    _CALIBRATION_FILE = "CalibrationFile"
 
     def __init__(self):
         """Initialize an instance of the algorithm."""
@@ -60,14 +65,9 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
             MatrixWorkspaceProperty(self._MONITOR_WS, "", direction=Direction.Output, optional=PropertyMode.Optional),
             doc="The loaded monitors workspace. This is only output in event mode.",
         )
-        self.copyProperties("ReflectometryISISCalibration", [self._CALIBRATION_FILE])
 
     def PyExec(self):
         workspace, monitor_ws = self._loadRun(self.getPropertyValue(self._RUNS))
-
-        calibration_file = self.getPropertyValue(self._CALIBRATION_FILE)
-        if calibration_file:
-            workspace = self._applyCalibration(workspace, calibration_file)
 
         self.setProperty(self._OUTPUT_WS, workspace)
         if monitor_ws:
@@ -100,18 +100,6 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
             ws = alg.getProperty("OutputWorkspace").value
             self.log().information("Loaded workspace ")
         return ws, monitor_ws
-
-    def _applyCalibration(self, ws: MatrixWorkspace, calibration_filepath: str) -> MatrixWorkspace:
-        if isinstance(ws, WorkspaceGroup):
-            raise RuntimeError("Calibrating a Workspace Group as part of pre-processing is not currently supported")
-
-        alg = self.createChildAlgorithm("ReflectometryISISCalibration")
-        alg.setProperty("InputWorkspace", ws)
-        alg.setProperty("CalibrationFile", calibration_filepath)
-        alg.execute()
-        calibrated_ws = alg.getProperty("OutputWorkspace").value
-        self.log().information("Calibrated workspace")
-        return calibrated_ws
 
     @staticmethod
     def _validate_event_ws(workspace):

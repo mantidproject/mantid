@@ -85,7 +85,7 @@ IETPlotData IETView::getPlotData() const {
 IETSaveData IETView::getSaveData() const {
   IETSaveData saveTypes(m_uiForm.ckSaveNexus->isChecked(), m_uiForm.ckSaveSPE->isChecked(),
                         m_uiForm.ckSaveASCII->isChecked(), m_uiForm.ckSaveAclimax->isChecked(),
-                        m_uiForm.ckSaveDaveGrp->isChecked());
+                        m_uiForm.ckSaveDaveGrp->isChecked(), m_uiForm.ckSaveNXSPE->isChecked());
 
   return saveTypes;
 }
@@ -198,6 +198,7 @@ void IETView::setSaveEnabled(bool enable) {
   m_uiForm.ckSaveDaveGrp->setEnabled(enable);
   m_uiForm.ckSaveNexus->setEnabled(enable);
   m_uiForm.ckSaveSPE->setEnabled(enable);
+  m_uiForm.ckSaveNXSPE->setEnabled(enable);
 }
 
 void IETView::setPlotTimeIsPlotting(bool plotting) {
@@ -238,11 +239,13 @@ void IETView::setInstrumentRebinning(std::vector<double> const &rebinParams, std
   m_uiForm.leRebinString->setText(QString::fromStdString(rebinText));
 }
 
-void IETView::setInstrumentGrouping(std::string const &instrumentName) {
+void IETView::setInstrumentGrouping(std::string const &instrumentName, std::string const &analyserName) {
 
   setGroupOutputCheckBoxVisible(instrumentName == "OSIRIS");
   setGroupOutputDropdownVisible(instrumentName == "IRIS");
 
+  m_groupingWidget->setDetectorsGroupingVisible(analyserName == "silicon");
+  m_groupingWidget->setThetaGroupingVisible(analyserName == "silicon");
   m_groupingWidget->setGroupingMethod(instrumentName == "TOSCA" ? "IPF" : "Individual");
   m_uiForm.cbGroupOutput->clear();
   m_uiForm.cbGroupOutput->addItem(QString::fromStdString(IETGroupOption::UNGROUPED));

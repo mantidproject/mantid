@@ -185,6 +185,46 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
 
         self.assertEqual(self.view.warning_popup.call_count, 1)
 
+    # ------------------------------------------------------------------------------------------------------------------
+    # TESTS : Re-entrancy guards. Two loads of the same run running concurrently collide on the ADS names
+    # minted by load_utils.create_load_algorithm, which can deadlock the GUI thread against the loader.
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def test_that_a_second_load_request_is_ignored_while_a_load_thread_is_in_progress(self):
+        self.presenter.create_load_thread = mock.Mock(return_value=mock.Mock())
+
+        self.presenter.handle_increment_run()
+        self.presenter.handle_increment_run()
+
+        self.assertEqual(self.presenter.create_load_thread.call_count, 1)
+
+    def test_that_a_load_request_is_allowed_again_once_the_load_thread_has_finished(self):
+        self.presenter.create_load_thread = mock.Mock(return_value=mock.Mock())
+
+        self.presenter.load_runs(["EMU00001235.nxs"])
+        self.assertEqual(self.presenter.create_load_thread.call_count, 1)
+
+        self.presenter._load_thread = None
+        self.presenter.load_runs(["EMU00001236.nxs"])
+
+        self.assertEqual(self.presenter.create_load_thread.call_count, 2)
+
+    def test_that_enable_loading_does_not_enable_the_buttons_while_a_load_thread_is_in_progress(self):
+        self.view.enable_load_buttons = mock.Mock()
+        self.presenter._load_thread = mock.Mock()
+
+        self.presenter.enable_loading()
+
+        self.assertEqual(self.view.enable_load_buttons.call_count, 0)
+
+    def test_that_enable_loading_enables_the_buttons_once_the_load_thread_has_finished(self):
+        self.view.enable_load_buttons = mock.Mock()
+        self.presenter._load_thread = None
+
+        self.presenter.enable_loading()
+
+        self.assertEqual(self.view.enable_load_buttons.call_count, 1)
+
 
 if __name__ == "__main__":
     unittest.main(buffer=False, verbosity=2)

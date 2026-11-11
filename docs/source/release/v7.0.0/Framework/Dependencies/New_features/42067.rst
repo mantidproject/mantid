@@ -1,1 +1,0 @@
-- Automatically set ``MPLCONFIGDIR`` to ``$XDG_CACHE_HOME/matplotlib`` when ``XDG_CACHE_HOME`` is set

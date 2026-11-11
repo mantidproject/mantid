@@ -7,6 +7,7 @@
 import unittest
 import numpy as np
 
+from scipy.spatial.transform import Rotation
 from unittest.mock import patch, MagicMock
 
 from mantidqtinterfaces.TexturePlanner.model import TexturePlannerModel
@@ -111,6 +112,122 @@ class TestTexturePlannerModel_Setters(unittest.TestCase):
         model.set_plot_transmission(False)
         self.assertFalse(model.plot_transmission)
 
+    def test_set_transform_dirs(self, mock_instr, mock_wsm, mock_ot, mock_dg, mock_abs, mock_exp, mock_plot):
+        model = TexturePlannerModel()
+
+        model.set_transform_dirs(True)
+        self.assertTrue(model.transform_dirs)
+
+        model.set_transform_dirs(False)
+        self.assertFalse(model.transform_dirs)
+
+
+@_patch_collaborators
+class TestTexturePlannerModel_EffectiveAxTransform(unittest.TestCase):
+    """The initial shape rotation only reaches the texture directions when transform_dirs is set."""
+
+    @staticmethod
+    def _model_with_init_R(rotation):
+        model = TexturePlannerModel()
+        # workspaces is a mock, so init_R has to be given a real Rotation to read a matrix from
+        model.workspaces.init_R = rotation
+        return model
+
+    def test_untransformed_returns_the_entered_transform_itself(self, *_):
+        model = self._model_with_init_R(Rotation.from_euler("z", 90, degrees=True))
+        model.ax_transform = np.array([[0.0, 0.0, 1.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
+        model.transform_dirs = False
+
+        # the same object, not just an equal one: the projection path must not pay for a copy
+        self.assertIs(model.effective_ax_transform, model.ax_transform)
+
+    def test_transformed_rotates_each_direction_by_init_R(self, *_):
+        # RD/ND/TD along x/y/z, then a 90 deg rotation about z: x->y, y->-x, z->z
+        model = self._model_with_init_R(Rotation.from_euler("z", 90, degrees=True))
+        model.ax_transform = np.eye(3)
+        model.transform_dirs = True
+
+        # columns are the directions, so compare column-wise against the rotated basis vectors
+        effective = model.effective_ax_transform
+        np.testing.assert_allclose(effective[:, 0], (0.0, 1.0, 0.0), atol=1e-12)
+        np.testing.assert_allclose(effective[:, 1], (-1.0, 0.0, 0.0), atol=1e-12)
+        np.testing.assert_allclose(effective[:, 2], (0.0, 0.0, 1.0), atol=1e-12)
+
+    def test_transformed_with_identity_init_R_is_a_no_op(self, *_):
+        model = self._model_with_init_R(Rotation.identity())
+        model.ax_transform = np.array([[0.0, 0.0, 1.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
+        model.transform_dirs = True
+
+        np.testing.assert_allclose(model.effective_ax_transform, model.ax_transform, atol=1e-12)
+
+    def test_is_derived_so_it_follows_a_later_init_R_change(self, *_):
+        model = self._model_with_init_R(Rotation.identity())
+        model.ax_transform = np.eye(3)
+        model.transform_dirs = True
+        np.testing.assert_allclose(model.effective_ax_transform, np.eye(3), atol=1e-12)
+
+        # init_R is rebuilt on every initial-shape edit; the property must not be caching it
+        model.workspaces.init_R = Rotation.from_euler("x", 90, degrees=True)
+
+        np.testing.assert_allclose(model.effective_ax_transform[:, 1], (0.0, 0.0, 1.0), atol=1e-12)
+
+
+@_patch_collaborators
+class TestTexturePlannerModel_GetTextureDirections(unittest.TestCase):
+    """get_texture_directions feeds the view, which takes one direction per ROW - the transpose of
+    the column-per-direction ax_transform."""
+
+    # RD=(0,1,0), ND=(0,0,1), TD=(1,0,0) as set_ax_transform would store them (as columns)
+    _COLUMNS = np.array([[0.0, 0.0, 1.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
+    _ROWS = np.array([[0.0, 1.0, 0.0], [0.0, 0.0, 1.0], [1.0, 0.0, 0.0]])
+
+    def test_sample_frame_returns_entered_directions_as_rows(self, *_):
+        model = TexturePlannerModel()
+        model.workspaces.init_R = Rotation.from_euler("z", 90, degrees=True)
+        model.ax_transform = self._COLUMNS
+        model.set_dir_names("A", "B", "C")
+        model.transform_dirs = True
+
+        names, vecs = model.get_texture_directions(lab_frame=False)
+
+        self.assertEqual(names, ("A", "B", "C"))
+        # the sample frame is what the user entered - unaffected by init_R even when transforming
+        np.testing.assert_allclose(vecs, self._ROWS, atol=1e-12)
+
+    def test_lab_frame_returns_rotated_directions_as_rows(self, *_):
+        model = TexturePlannerModel()
+        model.workspaces.init_R = Rotation.from_euler("z", 90, degrees=True)
+        model.ax_transform = self._COLUMNS
+        model.transform_dirs = True
+
+        _, vecs = model.get_texture_directions(lab_frame=True)
+
+        # 90 deg about z: RD (0,1,0) -> (-1,0,0), ND (0,0,1) -> (0,0,1), TD (1,0,0) -> (0,1,0)
+        np.testing.assert_allclose(vecs, [[-1.0, 0.0, 0.0], [0.0, 0.0, 1.0], [0.0, 1.0, 0.0]], atol=1e-12)
+
+    def test_lab_frame_matches_sample_frame_when_not_transforming(self, *_):
+        model = TexturePlannerModel()
+        model.workspaces.init_R = Rotation.from_euler("z", 90, degrees=True)
+        model.ax_transform = self._COLUMNS
+        model.transform_dirs = False
+
+        _, lab = model.get_texture_directions(lab_frame=True)
+        _, sample = model.get_texture_directions(lab_frame=False)
+
+        np.testing.assert_allclose(lab, sample, atol=1e-12)
+
+    def test_row_layout_matches_the_defaults(self, *_):
+        # both feed set_view_texture_directions, so they must agree on the layout
+        model = TexturePlannerModel()
+        model.workspaces.init_R = Rotation.identity()
+        model.ax_transform = np.eye(3)
+        model.transform_dirs = False
+
+        _, default_vecs = TexturePlannerModel.get_default_texture_directions()
+        _, vecs = model.get_texture_directions(lab_frame=False)
+
+        np.testing.assert_allclose(vecs, np.array(default_vecs, dtype=float), atol=1e-12)
+
 
 @_patch_collaborators
 class TestTexturePlannerModel_UpdateGonioIndex(unittest.TestCase):
@@ -151,6 +268,23 @@ class TestTexturePlannerModel_ProjectionOrchestration(unittest.TestCase):
         model.orientations.__getitem__.assert_called_once_with(3)
         mock_proj.assert_called_once_with("R_obj", "detQs", model.ax_transform, model.projection)
         self.assertEqual(orientation.pf_points, "pf_points")
+
+    @patch(file_path + ".project_orientation")
+    def test_update_projected_data_projects_through_init_R_when_transforming_dirs(
+        self, mock_proj, mock_instr, mock_wsm, mock_ot, mock_dg, mock_abs, mock_exp, mock_plot
+    ):
+        model = TexturePlannerModel()
+        model.orientations.__getitem__.return_value = MagicMock()
+        model.geometry.detQs_lab = "detQs"
+        model.workspaces.init_R = Rotation.from_euler("z", 90, degrees=True)
+        model.ax_transform = np.eye(3)
+        model.transform_dirs = True
+
+        model.update_projected_data(0)
+
+        # the projection is handed the rotated directions, not the entered ones
+        projected_transform = mock_proj.call_args.args[2]
+        np.testing.assert_allclose(projected_transform, Rotation.from_euler("z", 90, degrees=True).as_matrix(), atol=1e-12)
 
     @patch(file_path + ".project_orientation")
     def test_update_projected_data_skips_absorption_when_transmission_off(

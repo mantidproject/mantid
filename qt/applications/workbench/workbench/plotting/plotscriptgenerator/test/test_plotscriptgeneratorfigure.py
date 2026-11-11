@@ -24,6 +24,7 @@ class PlotScriptGeneratorFigureTest(unittest.TestCase):
             "nrows": 2,
             "ncols": 2,
             "frameon": True,
+            "layout": None,
             "subplot_kw": {"projection": "mantid"},
             "dpi": 110,
             "num": "fig label",
@@ -36,7 +37,7 @@ class PlotScriptGeneratorFigureTest(unittest.TestCase):
         del cls.fig
 
     def test_get_figure_command_kwargs_returns_dict_with_expected_keys(self):
-        expected_keys = ["dpi", "edgecolor", "facecolor", "figsize", "frameon", "ncols", "nrows", "num", "subplot_kw"]
+        expected_keys = ["dpi", "edgecolor", "facecolor", "figsize", "frameon", "layout", "ncols", "nrows", "num", "subplot_kw"]
         keys = sorted(get_subplots_command_kwargs(self.fig))
         self.assertEqual(expected_keys, keys)
 

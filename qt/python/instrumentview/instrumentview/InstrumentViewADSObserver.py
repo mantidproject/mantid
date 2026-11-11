@@ -32,11 +32,14 @@ def _catch_exceptions(func):
 class InstrumentViewADSObserver(AnalysisDataServiceObserver):
     def __init__(self, delete_callback, clear_callback, rename_callback, replace_callback, add_callback):
         super(InstrumentViewADSObserver, self).__init__()
-        self.delete_callback = QAppThreadCall(delete_callback)
-        self.clear_callback = QAppThreadCall(clear_callback)
-        self.rename_callback = QAppThreadCall(rename_callback)
-        self.replace_callback = QAppThreadCall(replace_callback)
-        self.add_callback = QAppThreadCall(add_callback)
+        # Not blocking: an algorithm notifies the ADS while it still holds its output workspace's
+        # write lock, so waiting here for the Qt thread deadlocks whenever that thread is waiting
+        # on the same lock, e.g. to extract spectra from a workspace being converted in place
+        self.delete_callback = QAppThreadCall(delete_callback, blocking=False)
+        self.clear_callback = QAppThreadCall(clear_callback, blocking=False)
+        self.rename_callback = QAppThreadCall(rename_callback, blocking=False)
+        self.replace_callback = QAppThreadCall(replace_callback, blocking=False)
+        self.add_callback = QAppThreadCall(add_callback, blocking=False)
 
         self.observeDelete(True)
         self.observeRename(True)

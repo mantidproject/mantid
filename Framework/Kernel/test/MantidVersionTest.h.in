@@ -46,6 +46,10 @@ public:
     TS_ASSERT_EQUALS(MantidVersion::versionForReleaseNotes({"1", "2", "3", ""}), "1.2.3");
   }
 
+  void testReleaseNotesWithMoreThanTwoPatchVersionNumbers() {
+      TS_ASSERT_EQUALS(MantidVersion::versionForReleaseNotes({"1", "2", "3.4.5.6", ""}), "1.2.3");
+  }
+
   void testReleaseNotesRC() {
     TS_ASSERT_EQUALS(MantidVersion::versionForReleaseNotes({"1", "2", "3", "rc1"}), "1.2.3");
   }

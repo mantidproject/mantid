@@ -33,6 +33,17 @@ class MatrixWorkspaceTableView(QTableView):
 
         self.setItemDelegate(CustomTextElidingDelegate(ELIDE_NCHARS_RIGHT))
 
+        # change the default color of the rows - makes them light blue
+        # monitors and masked rows are colored in the table's custom model
+        # the text is fixed to black so it stays readable on these light backgrounds when using a dark theme
+        # the background is set on the viewport only so the frame and scrollbars keep the theme colors
+        palette = self.palette()
+        palette.setColor(QtGui.QPalette.Text, QtGui.QColor(Qt.black))
+        self.setPalette(palette)
+        viewport_palette = self.viewport().palette()
+        viewport_palette.setColor(QtGui.QPalette.Base, QtGui.QColor(128, 255, 255))
+        self.viewport().setPalette(viewport_palette)
+
     def resizeEvent(self, event):
         super(MatrixWorkspaceTableView, self).resizeEvent(event)
 
@@ -52,12 +63,6 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         self.COPY_ICON = mantidqt.icons.get_icon("mdi.content-copy")
         self.GRAPH_ICON = mantidqt.icons.get_icon("mdi.chart-line")
         self.TABLE_ICON = mantidqt.icons.get_icon("mdi.table")
-
-        # change the default color of the rows - makes them light blue
-        # monitors and masked rows are colored in the table's custom model
-        palette = self.palette()
-        palette.setColor(QtGui.QPalette.Base, QtGui.QColor(128, 255, 255))
-        self.setPalette(palette)
 
         self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.setWindowFlags(window_flags)

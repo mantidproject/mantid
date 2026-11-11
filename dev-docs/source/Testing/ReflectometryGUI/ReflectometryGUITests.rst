@@ -97,16 +97,51 @@ with ``CRISP``, ``POLREF`` or ``OFFSPEC``.
 #. Back on the ``Experiment Settings`` tab, the ``Polarisation Corrections`` combo box should now be enabled and the
    ``Polarization Efficiencies`` combo box should be disabled.
 #. Select ``Parameter File`` from the ``Polarisation Corrections`` combo box. The ``Polarization Efficiencies`` combo
-   box should still be disabled.
-#. Switch to ``Workspace`` from the ``Polarisation Corrections`` combo box. The ``Fredrikze Input Spin State Order`` and
-   ``Polarization Efficiencies`` combo boxes should become enabled. The latter should show a list of all loaded
-   workspaces.
+   box should still be disabled. The ``Input Flipper/SpinState Order`` combo box should be enabled.
+#. Switch to ``Workspace`` from the ``Polarisation Corrections`` combo box. The ``Polarization Efficiencies`` combo box
+   should become enabled and show a list of all loaded workspaces.
 #. Switch to ``FilePath`` from the ``Polarisation Corrections`` combo box. ``Polarization Efficiencies`` should now
    appear as a line edit. It should appear red for invalid paths and white for valid paths on your system.
 #. Switch back to the ``ParameterFile`` setting from the ``Polarisation Corrections`` combo box.
 #. Back on the ``Runs`` tab, delete all rows in the table (this can be done by pressing ``Ctrl-A`` and then ``Delete``).
 #. Note that this will leave an empty row. In that row enter run number ``44956`` and angle ``0.4``.
 #. Check you can process the row and it turns green.
+
+Plotting Tab
+------------
+
+#. Using the output from the previous test, navigate to the ``Plotting`` tab.
+#. Select the ``IvsQ_binned_44956_1`` item and check that only ``Plot`` and ``Plot tiled vertically`` are enabled.
+#. Select the ``IvsQ_binned_44956`` item and check that only ``Add to existing plot`` is disabled.
+#. Click ``Plot``. It should produce four plots, one for each of the workspaces in the ``WorkspaceGroup``.
+
+   #. Click ``Plot over``: One plot with four lines.
+   #. Click ``Plot tiled``: One window with four plots on it.
+   #. Check ``Plot tiled vertically`` and click ``Plot tiled`` again: Single window with four plots, but in a vertical order.
+
+#. With some of the plots left open, make sure that the ``Add to existing plot`` checkbox is enabled while they exist and is
+   disabled once they are all closed.
+#. For the next three tests, ensure that a group item is selected.
+#. Change the ``Plot output type`` to ``Detector Map``:
+
+   - ``Plot over`` is disabled.
+   - All group and workspace items are enabled.
+   - X and Y axis controls are made visible.
+
+#. Change the ``Plot output type`` to ``Spin Asymmetry``:
+
+   - Only the binned group is enabled.
+   - Only the ``Plot`` button is enabled.
+
+#. Change the ``Plot output type`` to ``Alignment``:
+
+   - All three plot buttons are enabled.
+   - All group and workspace items are enabled.
+   - An X axis combobox is visible.
+
+.. HINT::
+   This is a tab with a lot of permutations of its various settings and so would benefit from a small amount of time
+   spent trying to break it beyond the instructions given here.
 
 Search by experiment
 --------------------
@@ -177,7 +212,7 @@ Save tab
 #. Select a workspace in the list that starts with ``IvsQ``.
 #. Type a valid path into the Save path textbox.
 #. Type something in the prefix field you'd like to use to identify the file. *The files are saved in the form [prefix][workspace][ext]*.
-#. In the File Format section, select ``Custom format (*.dat)``. Check that option ``Additional columns (includes Q resolution)`` is ticked but disabled, as it is not applicable.
+#. In the File Format section, select ``Custom format (*.dat)``. Check that option ``Additional columns`` is ticked but disabled, as it is not applicable.
 #. Untick ``Header`` and ``Q resolution`` and set the separator to ``Comma``.
 #. Click ``Save`` and open the file that should have been saved to the save directory you specified. It should contain 3 columns of numbers, separated by commas.
 #. Tick ``Q resolution`` and re-save. It should now contain 4 columns of numbers.
@@ -188,9 +223,9 @@ Save tab
    - Amongst other things this text should contain the logs you selected, e.g. ``nperiods : 1`` and ``run_end : 2011-10-21T13:32:03``.
 
 #. Try changing the separator to spaces or tabs and check that the 3 or 4 columns of numbers are separated using that separator.
-#. Change the dropdown to ``ORSO Ascii (*.ort)``. The ``Header`` checkbox, separators and parameter settings are not applicable so they should be greyed out. The ``Additional columns (includes Q resolution)`` checkbox should be enabled.
+#. Change the dropdown to ``ORSO Ascii (*.ort)``. The ``Header`` checkbox, separators and parameter settings are not applicable so they should be greyed out. The ``Additional columns`` checkbox should be enabled.
 #. Select a single ``IvsQ_binned`` workspace from the left list, e.g. ``IvsQ_binned_11934``, and click Save. Open the ``.ort`` file that should have been created in your specified save directory. You should get a header at the top starting with ``ORSO reflectivity data file``. There should be 8 columns of numbers with headings ``Qz``, ``R``, ``sR``, ``sQz``, ``lambda``, ``slambda``, ``incident theta`` and ``sincident theta``.
-#. Untick ``Additional columns (includes Q resolution)`` and re-save (the ``Q resolution`` checkbox should still be selected from the earlier steps). The file should now contain 4 columns of numbers with headings ``Qz``, ``R``, ``sR`` and ``sQz``.
+#. Untick ``Additional columns`` and re-save (the ``Q resolution`` checkbox should still be selected from the earlier steps). The file should now contain 4 columns of numbers with headings ``Qz``, ``R``, ``sR`` and ``sQz``.
 #. Untick ``Q resolution`` and re-save. The file should now contain 3 columns of numbers with headings ``Qz``, ``R``, ``sR``.
 #. Change the dropdown to ``ORSO Nexus (*.orb)``. The availability of the settings should be the same as they were for the ``ORSO Ascii (*.ort)`` format. Click Save and check that a file with extension ``.orb`` is saved out. This should be a Nexus file type, so will not be possible to view in a text editor. Use an HDF5 viewer to check that the contents of the file appear sensible.
 #. Change the dropdown to ``3 column (*.dat)``. All the settings should be greyed out as they are not applicable. Click Save to create the ``.dat`` file. You should get 3 columns of numbers separated by tabs (including a leading tab). At the top there is an integer indicating the number of lines in the data.

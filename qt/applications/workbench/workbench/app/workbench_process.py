@@ -15,7 +15,7 @@ from sys import setswitchinterval
 from functools import partial
 
 from mantid.api import FrameworkManagerImpl
-from mantid.kernel import ConfigService, Logger, UsageService, version_str as mantid_version_str
+from mantid.kernel import ConfigService, Logger, UsageService, version_str as mantid_version_str, amend_config
 from mantidqt.utils.qt import plugins
 import mantidqt.utils.qt as qtutils
 import mantid.kernel.environment as mtd_env
@@ -242,6 +242,7 @@ def create_and_launch_workbench(app, command_line_options, qsettings_staging_ses
         # backend is not imported too early.
         from workbench.app.mainwindow import MainWindow
         from workbench.widgets.about.presenter import AboutPresenter
+        from workbench.widgets.update_notification.presenter import UpdateNotificationPresenter
 
         # The ordering here is very delicate. Test thoroughly when
         # changing anything!
@@ -268,9 +269,15 @@ def create_and_launch_workbench(app, command_line_options, qsettings_staging_ses
         # Setup widget layouts etc. mantid.simple cannot be used before this
         # or the log messages don't get through to the widget
         main_window.setup()
+
+        notify_update_popup = ConfigService.getString("CheckMantidVersion.NotifyUpdateOnStartup").lower() in ("1", "on", "true")
+        update_check_popup = ConfigService.getString("CheckMantidVersion.OnStartup").lower() in ("1", "on", "true")
+        config_overrides = {"CheckMantidVersion.OnStartup": "0"} if notify_update_popup and update_check_popup else {}
+
         # start mantid
         main_window.set_splash("Initializing mantid framework")
-        FrameworkManagerImpl.Instance()
+        with amend_config(**config_overrides):
+            FrameworkManagerImpl.Instance()
         main_window.post_mantid_init()
 
         if main_window.splash:
@@ -305,6 +312,10 @@ def create_and_launch_workbench(app, command_line_options, qsettings_staging_ses
         if not (command_line_options.execute or command_line_options.quit):
             if AboutPresenter.should_show_on_startup():
                 AboutPresenter(main_window).show()
+
+            if notify_update_popup:
+                main_window.update_notifier = UpdateNotificationPresenter(main_window)
+                main_window.update_notifier.check_for_update()
 
         # lift-off!
         exit_code = app.exec()

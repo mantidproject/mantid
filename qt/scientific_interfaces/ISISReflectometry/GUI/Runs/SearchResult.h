@@ -23,7 +23,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL SearchResult {
 public:
   SearchResult(const std::string &runNumber, std::string title);
   SearchResult(std::string runNumber, std::string title, std::string groupName, std::string theta, std::string error,
-               std::string excludeReason, std::string comment);
+               std::string excludeReason, std::string comment, std::string model);
 
   const std::string &runNumber() const;
   const std::string &title() const;
@@ -35,8 +35,11 @@ public:
   const std::string &excludeReason() const;
   void addExcludeReason(std::string const &error);
   bool hasComment() const;
+  bool hasModel() const;
   const std::string &comment() const;
-  void addComment(std::string const &error);
+  const std::string &model() const;
+  void addComment(std::string const &comment);
+  void addModel(std::string const &model);
 
 private:
   std::string m_runNumber;
@@ -46,6 +49,7 @@ private:
   std::string m_error;
   std::string m_excludeReason;
   std::string m_comment;
+  std::string m_model;
 
   void parseRun(std::string const &runNumber);
   void parseMetadataFromTitle();

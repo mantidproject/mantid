@@ -20,7 +20,16 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-enum class GroupingMethod { Individual = 0, All = 0, IPF = 0, File = 1, Groups = 2, Custom = 3 };
+enum class GroupingMethod {
+  Individual = 0,
+  All = 0,
+  IPF = 0,
+  Detectors = 0,
+  File = 1,
+  Groups = 2,
+  ThetaGroups = 2,
+  Custom = 3
+};
 
 class DetectorGroupingOptions : public QWidget {
   Q_OBJECT
@@ -30,6 +39,8 @@ public:
 
   void removeGroupingMethod(std::string const &option);
   void setGroupingMethod(std::string const &option);
+  void setDetectorsGroupingVisible(bool visible);
+  void setThetaGroupingVisible(bool visible);
 
   void setSaveCustomVisible(bool const visible);
 

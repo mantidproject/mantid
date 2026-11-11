@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from dataclasses import dataclass
-import functools
 import inspect
 import sys
 from typing import Any, Callable, Optional, Sequence
@@ -51,7 +50,7 @@ class QAppThreadCall(QObject):
         :param blocking: If True, the asynchronous call will block until completed
         """
         super().__init__()
-        functools.update_wrapper(self.__call__.__func__, callable)
+        self.__doc__ = callable.__doc__
 
         self._callable = callable
         self._blocking = blocking
@@ -91,7 +90,9 @@ class QAppThreadCall(QObject):
                     return call_result.result
             else:
                 # It makes little sense to return anything from a non-blocking call
-                # as the client cannot have waited for it
+                # as the client cannot have waited for it. Nothing is read back from
+                # _completed_calls here, so _on_call does not record anything for us
+                # either - see the note there.
                 return None
 
     @Slot()
@@ -108,7 +109,12 @@ class QAppThreadCall(QObject):
         except Exception:  # pylint: disable=broad-except
             exc_info = sys.exc_info()
 
-        self._completed_calls.append(QAppThreadCall.CallResult(result, exc_info))
+        # Only a blocking call reads _completed_calls back. Recording a result for a
+        # non-blocking call would grow the list for the lifetime of the object, and an
+        # exc_info stored there keeps the traceback, and so every frame it references,
+        # alive as well.
+        if self._blocking:
+            self._completed_calls.append(QAppThreadCall.CallResult(result, exc_info))
 
     # private api
     def _ensure_self_on_qapp_thread(self):

@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import AnalysisDataService, WorkspaceGroup
+from mantid.api import AlgorithmManager, AnalysisDataService, WorkspaceGroup
 from mantid.simpleapi import CompareWorkspaces, IndirectQuickRun, LoadNexus
 import systemtesting
 import unittest
@@ -19,6 +19,18 @@ def get_ads_workspace(workspace_name):
 
 
 class IndirectQuickRunTest(unittest.TestCase):
+    def test_accepts_osiris_silicon_analyser(self):
+        alg = AlgorithmManager.createUnmanaged("IndirectQuickRun")
+        alg.initialize()
+
+        alg.setProperty("Instrument", "OSIRIS")
+        alg.setProperty("Analyser", "silicon")
+        alg.setProperty("Reflection", "111")
+
+        self.assertEqual(alg.getPropertyValue("Instrument"), "OSIRIS")
+        self.assertEqual(alg.getPropertyValue("Analyser"), "silicon")
+        self.assertEqual(alg.getPropertyValue("Reflection"), "111")
+
     def setUp(self):
         self._run_numbers = "92762-92766"
         self._instrument = "OSIRIS"

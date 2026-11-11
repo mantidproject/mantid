@@ -33,6 +33,7 @@ class TexturePlannerModel(object):
         # cross-cutting projection settings (shared between the plotter and the projection orchestration)
         self.ax_transform = np.eye(3)
         self.dir_names = ["D1", "D2", "D3"]
+        self.transform_dirs = False
         self.projection = projection
 
         # currently-selected goniometer (controls which axis is highlighted in the plot)
@@ -57,10 +58,27 @@ class TexturePlannerModel(object):
     def get_default_texture_directions() -> Tuple[Tuple[str, str, str], FlatArrayTuple]:
         return ("RD", "ND", "TD"), ((1, 0, 0), (0, 1, 0), (0, 0, 1))
 
+    def get_texture_directions(self, lab_frame: bool) -> Tuple[Tuple[str, str, str], np.ndarray]:
+        """The three texture directions as *rows* (one vector per row), matching the layout of
+        get_default_texture_directions so both feed the view the same way.
+
+        Note the transpose: ax_transform holds the directions as COLUMNS (see set_ax_transform)."""
+        transform = self.effective_ax_transform if lab_frame else self.ax_transform
+        return self.get_dir_names(), transform.T
+
+    def get_dir_names(self) -> Tuple[str, str, str]:
+        return self.dir_names[0], self.dir_names[1], self.dir_names[2]
+
     # cross-cutting settings setters -----------------------------------
     def set_ax_transform(self, vec1: str, vec2: str, vec3: str) -> None:
         vec1, vec2, vec3 = vec_string_to_norm_array(vec1), vec_string_to_norm_array(vec2), vec_string_to_norm_array(vec3)
         self.ax_transform = np.concatenate((vec1[:, None], vec2[:, None], vec3[:, None]), axis=1)
+
+    @property
+    def effective_ax_transform(self) -> np.ndarray:
+        if not self.transform_dirs:
+            return self.ax_transform
+        return self.workspaces.init_R.as_matrix() @ self.ax_transform
 
     def set_dir_names(self, name1: str, name2: str, name3: str) -> None:
         self.dir_names = [name1, name2, name3]
@@ -76,6 +94,9 @@ class TexturePlannerModel(object):
     def set_plot_transmission(self, val: bool) -> None:
         self.plot_transmission = val
 
+    def set_transform_dirs(self, val: bool) -> None:
+        self.transform_dirs = val
+
     # projection orchestration -----------------------------------------
     def update_all_projected_data(self) -> None:
         for i in self.orientations.keys():
@@ -83,6 +104,6 @@ class TexturePlannerModel(object):
 
     def update_projected_data(self, index: int) -> None:
         orientation = self.orientations[index]
-        orientation.pf_points = project_orientation(orientation.R, self.geometry.detQs_lab, self.ax_transform, self.projection)
+        orientation.pf_points = project_orientation(orientation.R, self.geometry.detQs_lab, self.effective_ax_transform, self.projection)
         if self.plot_transmission:
             self.absorption.calc_for_index(index)
