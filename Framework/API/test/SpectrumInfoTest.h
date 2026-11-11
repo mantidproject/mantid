@@ -447,26 +447,25 @@ public:
     spectrumInfo.setMasked(GroupOfDets1And4, true);
   }
 
-  void test_detector() {
+  void test_firstDetectorID() {
     const auto &spectrumInfo = m_workspace.spectrumInfo();
-    TS_ASSERT_THROWS_NOTHING(spectrumInfo.detector(0));
-    TS_ASSERT_EQUALS(spectrumInfo.detector(0).getID(), 1);
-    TS_ASSERT_EQUALS(spectrumInfo.detector(1).getID(), 2);
-    TS_ASSERT_EQUALS(spectrumInfo.detector(2).getID(), 3);
-    TS_ASSERT_EQUALS(spectrumInfo.detector(3).getID(), 4);
-    TS_ASSERT_EQUALS(spectrumInfo.detector(4).getID(), 5);
+    TS_ASSERT_EQUALS(spectrumInfo.firstDetectorID(0), 1);
+    TS_ASSERT_EQUALS(spectrumInfo.firstDetectorID(1), 2);
+    TS_ASSERT_EQUALS(spectrumInfo.firstDetectorID(2), 3);
+    TS_ASSERT_EQUALS(spectrumInfo.firstDetectorID(3), 4);
+    TS_ASSERT_EQUALS(spectrumInfo.firstDetectorID(4), 5);
   }
 
   void test_no_detector() {
     const auto &spectrumInfo = m_workspaceNoInstrument.spectrumInfo();
-    TS_ASSERT_THROWS(spectrumInfo.detector(0), const Kernel::Exception::NotFoundError &);
+    TS_ASSERT_THROWS(spectrumInfo.firstDetectorIndex(0), const Kernel::Exception::NotFoundError &);
   }
 
   void test_no_detector_twice() {
     // Regression test: Make sure that *repeated* access also fails.
     const auto &spectrumInfo = m_workspaceNoInstrument.spectrumInfo();
-    TS_ASSERT_THROWS(spectrumInfo.detector(0), const Kernel::Exception::NotFoundError &);
-    TS_ASSERT_THROWS(spectrumInfo.detector(0), const Kernel::Exception::NotFoundError &);
+    TS_ASSERT_THROWS(spectrumInfo.firstDetectorIndex(0), const Kernel::Exception::NotFoundError &);
+    TS_ASSERT_THROWS(spectrumInfo.firstDetectorIndex(0), const Kernel::Exception::NotFoundError &);
   }
 
   void test_ExperimentInfo_basics() {

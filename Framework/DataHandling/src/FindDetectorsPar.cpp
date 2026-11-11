@@ -16,13 +16,14 @@
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
 
+#include <algorithm>
 #include <filesystem>
 #include <limits>
 
@@ -94,6 +95,7 @@ void FindDetectorsPar::exec() {
   const auto progStep = static_cast<int>(ceil(double(nHist) / 100.0));
 
   const auto &spectrumInfo = inputWS->spectrumInfo();
+  auto const &componentInfo = inputWS->componentInfo();
 
   // define the centre of coordinates:
   Kernel::V3D Observer = spectrumInfo.samplePosition();
@@ -110,7 +112,7 @@ void FindDetectorsPar::exec() {
     Detectors[i].detID = spectrumInfo.firstDetectorID(i);
 
     // calculate all parameters for current composite detector
-    calcDetPar(spectrumInfo.detector(i), Observer, Detectors[i]);
+    calcDetPar(spectrumInfo, componentInfo, i, Observer, Detectors[i]);
 
     // make regular progress reports and check for canceling the algorithm
 
@@ -189,13 +191,15 @@ double AvrgDetector::nearAngle(const double &baseAngle, const double &anAngle) {
 
 /** method to cacluate the detectors parameters and add them to the detectors
  *averages
- *@param det      -- reference to the Mantid Detector
+ *@param componentInfo -- the ComponentInfo holding the detector
+ *@param detIndex -- the index of the detector
  *@param Observer -- sample position or the centre of the polar system of
  *coordinates to calculate detector's parameters.
  */
-void AvrgDetector::addDetInfo(const Geometry::IDetector &det, const Kernel::V3D &Observer) {
+void AvrgDetector::addDetInfo(Geometry::ComponentInfo const &componentInfo, std::size_t const detIndex,
+                              const Kernel::V3D &Observer) {
   m_nComponents++;
-  Kernel::V3D detPos = det.getPos();
+  Kernel::V3D detPos = componentInfo.position(detIndex);
   Kernel::V3D toDet = (detPos - Observer);
 
   double dist2Det, Polar, Azimut, ringPolar, ringAzim;
@@ -244,7 +248,7 @@ void AvrgDetector::addDetInfo(const Geometry::IDetector &det, const Kernel::V3D 
   coord[2] = e_tg; // new z
   bbox.setBoxAlignment(ringCentre, coord);
 
-  det.getBoundingBox(bbox);
+  bbox = componentInfo.boundingBox(detIndex, &bbox);
 
   // linear extensions of the bounding box orientied tangentially to the equal
   // scattering angle circle
@@ -296,7 +300,9 @@ void AvrgDetector::returnAvrgDetPar(DetParameters &avrgDet) {
 }
 /** Method calculates averaged polar coordinates of the detector's group
 (which may consist of one detector)
-*@param detector -- reference to the Mantid Detector
+*@param spectrumInfo -- the SpectrumInfo of the workspace
+*@param componentInfo -- the ComponentInfo of the workspace
+*@param wsIndex -- the workspace index of the spectrum
 *@param observer -- sample position or the centre of the polar system of
 coordinates to calculate detector's parameters.
 
@@ -304,31 +310,22 @@ coordinates to calculate detector's parameters.
 of the detector or detector's group in
                      spherical coordinate system with centre at Observer
 */
-void FindDetectorsPar::calcDetPar(const Geometry::IDetector &detector, const Kernel::V3D &observer,
+void FindDetectorsPar::calcDetPar(API::SpectrumInfo const &spectrumInfo, Geometry::ComponentInfo const &componentInfo,
+                                  std::size_t const wsIndex, const Kernel::V3D &observer,
                                   DetParameters &detParameters) {
-
-  // get number of basic detectors within the composit detector
-  size_t nDetectors = detector.nDets();
   // define summator
   AvrgDetector detSum;
   // do we want spherical or linear box sizes?
   detSum.setUseSpherical(!m_SizesAreLinear);
 
-  if (nDetectors == 1) {
-    detSum.addDetInfo(detector, observer);
-  } else {
-    // access contributing detectors;
-    auto detGroup = dynamic_cast<const Geometry::DetectorGroup *>(&detector);
-    if (!detGroup) {
-      g_log.error() << "calc_cylDetPar: can not downcast IDetector_sptr to "
-                       "detector group for detector->ID: "
-                    << detector.getID() << '\n';
-      throw(std::bad_cast());
-    }
-    for (const auto &det : detGroup->getDetectors()) {
-      detSum.addDetInfo(*det, observer);
-    }
-  }
+  // Detector indices are in ascending ID order, the order DetectorGroup used
+  std::vector<std::size_t> detIndices;
+  for (auto const &specDefItem : spectrumInfo.spectrumDefinition(wsIndex))
+    detIndices.emplace_back(specDefItem.first);
+  std::sort(detIndices.begin(), detIndices.end());
+  detIndices.erase(std::unique(detIndices.begin(), detIndices.end()), detIndices.end());
+  for (auto const detIndex : detIndices)
+    detSum.addDetInfo(componentInfo, detIndex, observer);
   // calculate averages and return the detector parameters
   detSum.returnAvrgDetPar(detParameters);
 }

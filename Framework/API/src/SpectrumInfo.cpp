@@ -10,14 +10,11 @@
 #include "MantidBeamline/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Tolerance.h"
-#include "MantidKernel/WarningSuppressions.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <algorithm>
@@ -33,8 +30,7 @@ Kernel::Logger g_log("ExperimentInfo");
 
 SpectrumInfo::SpectrumInfo(const Beamline::SpectrumInfo &spectrumInfo, const ExperimentInfo &experimentInfo,
                            Geometry::DetectorInfo &detectorInfo)
-    : m_experimentInfo(experimentInfo), m_detectorInfo(detectorInfo), m_spectrumInfo(spectrumInfo),
-      m_lastDetector(PARALLEL_GET_MAX_THREADS), m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {}
+    : m_experimentInfo(experimentInfo), m_detectorInfo(detectorInfo), m_spectrumInfo(spectrumInfo) {}
 
 // Defined as default in source for forward declaration with std::unique_ptr.
 SpectrumInfo::~SpectrumInfo() = default;
@@ -316,10 +312,9 @@ void SpectrumInfo::getDetectorValues(const Kernel::Unit &inputUnit, const Kernel
       g_log.warning(e.what());
     }
     if (emode != Kernel::DeltaEMode::Elastic && pmap.find(UnitParams::efixed) == pmap.end()) {
-      std::shared_ptr<const Geometry::IDetector> det(&detector(wsIndex), Mantid::NoDeleting());
       try {
-        pmap[UnitParams::efixed] = m_experimentInfo.getEFixedGivenEMode(det, emode);
-        g_log.debug() << "Detector: " << det->getID() << " EFixed: " << pmap[UnitParams::efixed] << "\n";
+        pmap[UnitParams::efixed] = m_experimentInfo.getEFixedForDetectorIndex(firstDetectorIndex(wsIndex), emode);
+        g_log.debug() << "Detector: " << firstDetectorID(wsIndex) << " EFixed: " << pmap[UnitParams::efixed] << "\n";
       } catch (std::runtime_error &) {
         // let the unit classes work out if this is a problem
       }
@@ -389,12 +384,6 @@ bool SpectrumInfo::hasUniqueDetector(const size_t index) const {
 void SpectrumInfo::setMasked(const size_t index, bool masked) {
   for (const auto &detIndex : checkAndGetSpectrumDefinition(index))
     m_detectorInfo.setMasked(detIndex, masked);
-}
-
-/// Return a const reference to the detector or detector group of the spectrum
-/// with given index.
-const Geometry::IDetector &SpectrumInfo::detector(const size_t index) const {
-  throw std::runtime_error("This has been deleted");
 }
 
 /// Returns the source position.

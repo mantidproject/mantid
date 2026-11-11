@@ -19,6 +19,7 @@
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/ScopedFileHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 
 #include <sstream>
 
@@ -174,8 +175,9 @@ private:
     std::string componentLinks = "";
 
     const auto &spectrumInfo = ws->spectrumInfo();
+    auto const &componentInfo = ws->componentInfo();
     for (size_t wsIndex = 0; wsIndex < ws->getNumberHistograms(); ++wsIndex) {
-      const auto &detector = spectrumInfo.detector(wsIndex);
+      auto const &detectorName = componentInfo.name(spectrumInfo.firstDetectorIndex(wsIndex));
       // A0, will vary with workspace index, from detector to detector, A1 is
       // constant = 1.
       componentLinks += boost::str(boost::format("<component-link name=\"%1%\">\n\
@@ -187,7 +189,7 @@ private:
                <formula eq=\"%3%\" result-unit=\"Wavelength\"/>\n\
                <fixed />\n\
            </parameter>\n\
-           </component-link>\n") % detector.getName() %
+           </component-link>\n") % detectorName %
                                    wsIndex % A1);
     }
 
@@ -223,9 +225,10 @@ private:
 
     std::string componentLinks = "";
     const auto &spectrumInfo = ws->spectrumInfo();
+    auto const &componentInfo = ws->componentInfo();
 
     for (size_t wsIndex = 0; wsIndex < ws->getNumberHistograms(); ++wsIndex) {
-      const auto &detector = spectrumInfo.detector(wsIndex);
+      auto const &detectorName = componentInfo.name(spectrumInfo.firstDetectorIndex(wsIndex));
 
       // A1, will vary with workspace index. NOTE THAT A0 IS MISSING entirely.
       componentLinks += boost::str(boost::format("<component-link name=\"%1%\">\n\
@@ -233,7 +236,7 @@ private:
                <formula eq=\"%2%\" result-unit=\"Wavelength\"/>\n\
                <fixed />\n\
            </parameter>\n\
-           </component-link>\n") % detector.getName() %
+           </component-link>\n") % detectorName %
                                    wsIndex);
     }
 

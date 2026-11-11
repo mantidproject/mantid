@@ -16,6 +16,8 @@
 #include "MantidAlgorithms/MedianDetectorTest.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/SolidAngleParams.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
@@ -100,9 +102,11 @@ public:
         WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(5, 10, 1);
 
     const auto &spectrumInfo = ws->spectrumInfo();
+    auto const &componentInfo = ws->componentInfo();
 
     for (size_t i = 0; i < ws->getNumberHistograms(); i++) {
-      ws->mutableY(i)[0] = 1e9 * spectrumInfo.detector(i).solidAngle(V3D(0, 0, 0));
+      ws->mutableY(i)[0] = 1e9 * componentInfo.solidAngle(spectrumInfo.firstDetectorIndex(i),
+                                                          Mantid::Geometry::SolidAngleParams(V3D(0, 0, 0)));
     }
     AnalysisDataService::Instance().addOrReplace("MDTSolidAngle", ws);
 
@@ -134,9 +138,11 @@ public:
         WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(5, 10, 1);
 
     const auto &spectrumInfo = ws->spectrumInfo();
+    auto const &componentInfo = ws->componentInfo();
 
     for (size_t i = 0; i < ws->getNumberHistograms(); i++) {
-      ws->mutableY(i)[0] = std::floor(1e9 * spectrumInfo.detector(i).solidAngle(V3D(0, 0, 0)));
+      ws->mutableY(i)[0] = std::floor(1e9 * componentInfo.solidAngle(spectrumInfo.firstDetectorIndex(i),
+                                                                     Mantid::Geometry::SolidAngleParams(V3D(0, 0, 0))));
     }
     AnalysisDataService::Instance().addOrReplace("MDTLevelsUp", ws);
 

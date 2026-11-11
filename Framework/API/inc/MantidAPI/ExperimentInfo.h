@@ -119,6 +119,8 @@ public:
                              const Kernel::DeltaEMode::Type emode) const;
   double getEFixedForIndirect(const std::shared_ptr<const Geometry::IDetector> &detector,
                               const std::vector<std::string> &parameterNames) const;
+  /// Easy access to the efixed value for this run & the detector with the given index
+  double getEFixedForDetectorIndex(std::size_t const detectorIndex, Kernel::DeltaEMode::Type const emode) const;
   /// Set the efixed value for a given detector ID
   void setEFixed(const detid_t detID, const double value);
 

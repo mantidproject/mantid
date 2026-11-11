@@ -268,18 +268,15 @@ double GetEi2::calculateEi(const double initial_guess) {
 double GetEi2::getDistanceFromSource(size_t ws_index, const SpectrumInfo &spectrumInfo) const {
   g_log.debug() << "Computing distance between spectrum at index '" << ws_index << "' and the source\n";
 
-  const auto &detector = spectrumInfo.detector(ws_index);
-  const IComponent_const_sptr source = m_input_ws->getInstrument()->getSource();
   if (!spectrumInfo.hasDetectors(ws_index)) {
     std::ostringstream msg;
     msg << "A detector for monitor at workspace index " << ws_index << " cannot be found. ";
     throw std::runtime_error(msg.str());
   }
-  if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
-    g_log.debug() << "Detector position = " << spectrumInfo.position(ws_index)
-                  << ", Source position = " << source->getPos() << "\n";
-  }
-  const double dist = detector.getDistance(*source);
+  auto const &detectorPos = spectrumInfo.position(ws_index);
+  auto const &sourcePos = spectrumInfo.sourcePosition();
+  g_log.debug() << "Detector position = " << detectorPos << ", Source position = " << sourcePos << "\n";
+  const double dist = detectorPos.distance(sourcePos);
   g_log.debug() << "Distance = " << dist << " metres\n";
   return dist;
 }

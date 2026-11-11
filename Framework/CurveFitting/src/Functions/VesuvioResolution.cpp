@@ -10,6 +10,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/PhysicalConstants.h"
 
 #include <gsl/gsl_poly.h>
@@ -44,14 +45,14 @@ ResolutionParams VesuvioResolution::getResolutionParameters(const API::MatrixWor
                                 std::to_string(index));
 
   ResolutionParams respar;
-  const auto &pmap = ws->constInstrumentParameters();
-  const auto &det = spectrumInfo.detector(index);
-  respar.dl1 = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_l1");
-  respar.dl2 = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_l2");
-  respar.dtof = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_tof");
-  respar.dthe = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_theta"); // radians
-  respar.dEnLorentz = ConvertToYSpace::getComponentParameter(det, pmap, "hwhm_lorentz");
-  respar.dEnGauss = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_gauss");
+  auto const &cinfo = ws->componentInfo();
+  auto const &specDef = spectrumInfo.spectrumDefinition(index);
+  respar.dl1 = ConvertToYSpace::getComponentParameter(cinfo, specDef, "sigma_l1");
+  respar.dl2 = ConvertToYSpace::getComponentParameter(cinfo, specDef, "sigma_l2");
+  respar.dtof = ConvertToYSpace::getComponentParameter(cinfo, specDef, "sigma_tof");
+  respar.dthe = ConvertToYSpace::getComponentParameter(cinfo, specDef, "sigma_theta"); // radians
+  respar.dEnLorentz = ConvertToYSpace::getComponentParameter(cinfo, specDef, "hwhm_lorentz");
+  respar.dEnGauss = ConvertToYSpace::getComponentParameter(cinfo, specDef, "sigma_gauss");
   return respar;
 }
 

@@ -67,9 +67,8 @@ void SumNeighbours::exec() {
   Mantid::API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
   const auto &componentInfo = inWS->componentInfo();
   const auto &spectrumInfo = inWS->spectrumInfo();
-  const auto &det = spectrumInfo.detector(0);
+  auto const detIndex = spectrumInfo.firstDetectorIndex(0);
   // Check if grandparent is a Rectangular/Grid detector
-  const size_t detIndex = componentInfo.indexOf(det.getComponentID());
   const size_t parentIndex = componentInfo.parent(detIndex);
   const size_t grandparentIndex = componentInfo.parent(parentIndex);
   const bool rect = componentInfo.isGridDetector(grandparentIndex);

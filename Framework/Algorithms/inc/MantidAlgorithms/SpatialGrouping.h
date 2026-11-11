@@ -60,7 +60,7 @@ private:
   /// sort by distance
   void sortByDistance(std::map<specnum_t, Mantid::Kernel::V3D> &nearest, const size_t noNeighbours);
   /// create expanded bounding box for our purposes
-  void createBox(const Geometry::IDetector &det, Geometry::BoundingBox &bndbox, double searchDist);
+  void createBox(Geometry::BoundingBox const &, Geometry::BoundingBox &bndbox, double searchDist);
   /// grow dimensions of our bounding box to the factor
   void growBox(double &min, double &max, const double factor);
 

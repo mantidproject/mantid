@@ -14,6 +14,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
@@ -298,14 +299,15 @@ void SumEventsByLogValue::addMonitorCounts(const ITableWorkspace_sptr &outputWor
   if (!monitorWorkspace)
     return;
 
-  const auto &spectrumInfo = monitorWorkspace->spectrumInfo();
+  auto const &spectrumInfo = monitorWorkspace->spectrumInfo();
+  auto const &compInfo = monitorWorkspace->componentInfo();
 
-  const auto xLength = std::size_t(maxVal - minVal + 1);
+  auto const xLength = std::size_t(maxVal - minVal + 1);
   // Loop over the spectra - there will be one per monitor
   for (std::size_t spec = 0; spec < monitorWorkspace->getNumberHistograms(); ++spec) {
     try {
       // Create a column for this monitor
-      const std::string monitorName = spectrumInfo.detector(spec).getName();
+      const std::string monitorName = compInfo.name(spectrumInfo.firstDetectorIndex(spec));
       auto monitorCounts = outputWorkspace->addColumn("int", monitorName);
       const IEventList &eventList = monitorWorkspace->getSpectrum(spec);
       // Accumulate things in a local vector before transferring to the table

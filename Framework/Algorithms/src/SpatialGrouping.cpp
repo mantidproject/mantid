@@ -110,8 +110,9 @@ void SpatialGrouping::exec() {
 
     const double empty = EMPTY_DBL();
     Mantid::Geometry::BoundingBox bbox(empty, empty, empty, empty, empty, empty);
+    Mantid::Geometry::BoundingBox ibox = spectrumInfo.boundingBox(i);
 
-    createBox(spectrumInfo.detector(i), bbox, searchDist);
+    createBox(ibox, bbox, searchDist);
 
     bool extend = true;
     while ((nNeighbours > nearest.size()) && extend) {
@@ -294,15 +295,13 @@ void SpatialGrouping::sortByDistance(std::map<detid_t, Mantid::Kernel::V3D> &nea
  * @param searchDist :: search distance in pixels, number of pixels to search
  * through for finding group
  */
-void SpatialGrouping::createBox(const Geometry::IDetector &det, Geometry::BoundingBox &bndbox, double searchDist) {
+void SpatialGrouping::createBox(Mantid::Geometry::BoundingBox const &bbox, Geometry::BoundingBox &bndbox,
+                                double searchDist) {
 
   // We may have DetectorGroups here
   // Unfortunately, IDetector doesn't contain the
   // std::shared_ptr<Mantid::Geometry::Detector> detector =
   // std::dynamic_pointer_cast<Mantid::Geometry::Detector>(det);
-
-  Mantid::Geometry::BoundingBox bbox;
-  det.getBoundingBox(bbox);
 
   double xmax = bbox.xMax();
   double ymax = bbox.yMax();
