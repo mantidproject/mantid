@@ -513,16 +513,6 @@ std::ostream &operator<<(std::ostream &os, const Component &comp) {
   return os;
 }
 
-//------------------------------------------------------------------------------------------------
-/** Reads the XML attributes from Poco XML parser
- * @param attr :: XML attributes  */
-void Component::readXMLAttributes([[maybe_unused]] const Poco::XML::Attributes &attr) {
-  //    std::string pos = attr.getValue("", "pos");
-  //    m_pos.fromString(pos);
-  //    std::string rot = attr.getValue("", "rot");
-  //    m_rot.fromString(rot);
-}
-
 void Component::writeXML(Poco::XML::XMLWriter &writer) const {
   Poco::XML::AttributesImpl attr;
   attr.addAttribute("", "pos", "", "", m_pos.toString());

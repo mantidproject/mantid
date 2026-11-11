@@ -688,8 +688,6 @@ class MANTID_NEXUS_DLL NXRoot : public NXClass {
 public:
   // Constructor
   NXRoot(std::string fname);
-  // Constructor
-  NXRoot(std::string fname, const std::string &entry);
   /// Destructor
   ~NXRoot() override;
   /// Return the NX class for a class (HDF group) or "SDS" for a data set;
