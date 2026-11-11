@@ -49,7 +49,7 @@ class WorkspaceManager:
         # this instance and no two managers collide on the ADS. Each holds a distinct view of the
         # sample needed by a specific consumer:
         #   WS_DATA          live workspace driving plots/exports: holds the translated shape with
-        #                    init_R baked into its XML goniometer tag, and carries the current
+        #                    init_R as a rotation within its own frame, and carries the current
         #                    orientation R on its run goniometer. Read by get_scattering_centre,
         #                    GroupDetectors, etc.
         #   WS_UNGROUPED     pre-group clone of WS_DATA; detector_geometry re-runs GroupDetectors
@@ -63,7 +63,7 @@ class WorkspaceManager:
         #   WS_REFERENCE     transient name for output_as_reference_workspace; created and removed inside
         #                    the export call, never persists across calls.
         #   WS_MC_INPUT      per-orientation MonteCarloAbsorption input. Rebuilt each calc_for_index with
-        #                    R*init_R baked into the shape and identity goniometer.
+        #                    R*init_R applied to the shape and identity goniometer.
         #   WS_MC_OUTPUT     MonteCarloAbsorption output (transmission factors).
         #   WS_TMP           transient name for update_initial_shape's working copy; removed in finally.
         #   WS_MATERIAL      dedicated holder for the ground-truth sample material. Its shape is never
@@ -254,8 +254,7 @@ class WorkspaceManager:
             self.translate_shape(_tmp_ws, *self.initial_translation_vector())
 
             # CopySample bakes the destination workspace's current goniometer R into the new
-            # shape's XML (see CopySample::copyParameters -> addGoniometerTag), and the plotter
-            # leaves a non-identity R on self.ws on every redraw.
+            # shape, and the plotter leaves a non-identity R on self.ws on every redraw.
             #
             # Reset to identity *before* the CopySamples so the shape we hand on carries only init_R
             self.ws.run().getGoniometer().setR(np.eye(3))

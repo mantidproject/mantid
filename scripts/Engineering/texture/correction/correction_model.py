@@ -248,7 +248,8 @@ class TextureCorrectionModel:
                 CopySample(InputWorkspace=_tmp_ws, OutputWorkspace=ws, CopyName=False, CopyEnvironment=False, CopyLattice=False)
             ADS.remove("_tmp_ws")
         else:
-            # if is_ref flag then we want to take this baked orientation forward
+            # the reference is already unoriented, so copy it as is - CopySample bakes in each
+            # destination's goniometer
             for ws in wss:
                 CopySample(InputWorkspace=ref_ws_name, OutputWorkspace=ws, CopyName=False, CopyEnvironment=False, CopyLattice=False)
 
