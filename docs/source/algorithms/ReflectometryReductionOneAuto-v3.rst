@@ -146,14 +146,6 @@ Previous Versions
 
 This is version 3 of the algorithm. For version 2, please see `here <ReflectometryReductionOneAuto-v2.html>`_ and for version 1, please see `here. <ReflectometryReductionOneAuto-v1.html>`_
 
-Input preservation
-------------------
-
-``PreserveInputWorkspace`` defaults to ``True``. Setting it to ``False`` allows
-detector-position correction and detector ROI masking to modify the supplied TOF
-workspace in place. Use this only for a disposable working copy. Reduced outputs
-and bank-summed data may still require separate workspaces.
-
 Usage
 -----
 

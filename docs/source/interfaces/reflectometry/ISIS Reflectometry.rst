@@ -158,15 +158,6 @@ and/or all rows in the selected group(s). The plot-groups |plotgroup| button
 plots the stitched output for the selected group(s)
 (i.e. ``IvsQ_13460_13462``).
 
-Detector-map and alignment plots use the processed TOF input associated with the
-selected reduction, including the combined input for summed runs and the selected
-period for workspace groups. Processed inputs, bank-summed TOF data and flattened slice members are
-collected in ``TOF_processed`` (or ``__TOF_processed`` when hidden) when
-``GroupTOFWorkspaces`` is enabled. The initially loaded TOF workspaces remain unchanged
-for reuse. Plotting matches association IDs in that flat group; redundant processed group
-containers are removed. If the processed data is deleted, reduce the row again to
-recreate it.
-
 .. figure:: /images/ISISReflectometryInterface/workflow_plot.png
   :class: screenshot
   :width: 700px
@@ -338,10 +329,9 @@ The processing table contains the following columns:
 |                     |           |                                                                                 |
 |                     |           | Example: ``0.7``                                                                |
 +---------------------+-----------+---------------------------------------------------------------------------------+
-| Adjusted Angle      | No        | Read-only adjusted angle in degrees from the reduced workspace's                |
+| Adjusted Angle      | No        | Read-only adjusted angle in degrees from the reduced output workspace's         |
 |                     |           | ``reflectometry_adjusted_theta`` sample log. Visible only for POLREF.           |
 |                     |           | Refreshed after reduction; blank when the log or reduction output is absent.    |
-|                     |           | The angle remains available if the processed TOF workspace is deleted.          |
 +---------------------+-----------+---------------------------------------------------------------------------------+
 | 1st Trans Run(s)    | No        | Contains the transmission run(s) used to                                        |
 |                     |           | normalise the sample runs. To specify two                                       |
