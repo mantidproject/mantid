@@ -17,7 +17,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
-#include "MantidGeometry/Objects/ShapeRotation.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Material.h"
@@ -125,15 +124,16 @@ void AddAbsorptionWeightedPathLengths::exec() {
   bool applyCorrection = getProperty("ApplyCorrection");
   const auto npeaks = inputWS->getNumberPeaks();
 
+  // Each peak's outstanding rotation is R * bakedRotation^T, as Geometry::outstandingGoniometerRotation
+  // gives, but worked out here so that it logs nothing per peak.
+  const auto bakedRotation = inputWS->sample().getShape().getAppliedRotation();
+
   // The Monte Carlo path builds its interaction volume and beam profile once, but the goniometer
   // varies peak to peak, so there is no single orientation to build them in.
   if (!useSinglePath) {
-    const Kernel::Matrix<double> identity(3, 3, true);
-    const auto &shape = inputWS->sample().getShape();
     bool anyOutstanding = false;
     for (int i = 0; i < npeaks && !anyOutstanding; ++i) {
-      anyOutstanding =
-          Geometry::outstandingGoniometerRotation(shape, inputWS->getPeak(i).getGoniometerMatrix()) != identity;
+      anyOutstanding = inputWS->getPeak(i).getGoniometerMatrix() != bakedRotation;
     }
     if (anyOutstanding) {
       g_log.warning("The sample shape is not in the lab frame and this workspace has peaks with a "
@@ -163,7 +163,7 @@ void AddAbsorptionWeightedPathLengths::exec() {
     if (useSinglePath) {
       // Rotate the ray into the shape's frame rather than build a rotated shape per peak: R varies
       // peak to peak and this loop is parallel. Path lengths are unchanged by rotation.
-      const auto labToShape = Geometry::outstandingGoniometerRotation(inputWS->sample().getShape(), R).Tprime();
+      const auto labToShape = bakedRotation * R.Tprime();
       const IObject *sampleShape = &(inputWS->sample().getShape());
 
       const auto scatterPos = labToShape * samplePos;
