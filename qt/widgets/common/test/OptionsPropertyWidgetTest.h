@@ -55,6 +55,19 @@ public:
     TS_ASSERT_EQUALS(widget.getValue(), "visible");
   }
 
+  void test_case_mismatched_visible_workspace_is_not_added() {
+    // the ADS lookup is case-insensitive, so "VISIBLE" is valid, but only hidden workspaces should be added
+    AnalysisDataService::Instance().addOrReplace("another",
+                                                 std::make_shared<Mantid::DataObjects::WorkspaceSingleValue>(1.0));
+    WorkspaceProperty<Workspace> prop("InputWorkspace", "", Direction::Input);
+    OptionsPropertyWidget widget(&prop);
+    TS_ASSERT_EQUALS(widget.getValue(), "another");
+
+    widget.setValue("VISIBLE");
+
+    TS_ASSERT_EQUALS(widget.getValue(), "another");
+  }
+
 private:
   std::string m_showHidden;
 };

@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/OptionsPropertyWidget.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/ConfigService.h"
 
@@ -77,8 +78,8 @@ void OptionsPropertyWidget::setValueImpl(const QString &value) {
   const QString temp = value.isEmpty() ? QString::fromStdString(m_prop->getDefault()) : value;
 
   int index = m_combo->findText(temp);
-  // A valid workspace missing from the list is hidden; add it rather than silently keeping the first listed workspace
-  if (index < 0 && m_combo->isEditable() && !temp.isEmpty() &&
+  // Hidden workspaces are left out of the list; add a valid one rather than silently keeping the first listed workspace
+  if (index < 0 && m_combo->isEditable() && AnalysisDataServiceImpl::isHiddenDataServiceObject(temp.toStdString()) &&
       std::unique_ptr<Property>(m_prop->clone())->setValue(temp.toStdString()).empty()) {
     m_combo->addItem(temp);
     index = m_combo->count() - 1;
