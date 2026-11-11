@@ -25,7 +25,9 @@
 
 #include <algorithm>
 #include <filesystem>
+#include <iterator>
 #include <limits>
+#include <set>
 
 namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
@@ -319,11 +321,10 @@ void FindDetectorsPar::calcDetPar(API::SpectrumInfo const &spectrumInfo, Geometr
   detSum.setUseSpherical(!m_SizesAreLinear);
 
   // Detector indices are in ascending ID order, the order DetectorGroup used
-  std::vector<std::size_t> detIndices;
-  for (auto const &specDefItem : spectrumInfo.spectrumDefinition(wsIndex))
-    detIndices.emplace_back(specDefItem.first);
-  std::sort(detIndices.begin(), detIndices.end());
-  detIndices.erase(std::unique(detIndices.begin(), detIndices.end()), detIndices.end());
+  auto const &spectrumDefinition = spectrumInfo.spectrumDefinition(wsIndex);
+  std::set<std::size_t> detIndices;
+  std::transform(spectrumDefinition.begin(), spectrumDefinition.end(), std::inserter(detIndices, detIndices.end()),
+                 [](auto const &specDefItem) { return specDefItem.first; });
   for (auto const detIndex : detIndices)
     detSum.addDetInfo(componentInfo, detIndex, observer);
   // calculate averages and return the detector parameters

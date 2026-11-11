@@ -288,7 +288,7 @@ void SpatialGrouping::sortByDistance(std::map<detid_t, Mantid::Kernel::V3D> &nea
  * neighbours, and a scaling vector representing the dimensions
  * of the detector
  *
- * @param det :: input detector
+ * @param bbox :: bounding box of the detector(s) of the spectrum
  *
  * @param bndbox :: reference to BoundingBox object (changed by this function)
  *
@@ -297,12 +297,6 @@ void SpatialGrouping::sortByDistance(std::map<detid_t, Mantid::Kernel::V3D> &nea
  */
 void SpatialGrouping::createBox(Mantid::Geometry::BoundingBox const &bbox, Geometry::BoundingBox &bndbox,
                                 double searchDist) {
-
-  // We may have DetectorGroups here
-  // Unfortunately, IDetector doesn't contain the
-  // std::shared_ptr<Mantid::Geometry::Detector> detector =
-  // std::dynamic_pointer_cast<Mantid::Geometry::Detector>(det);
-
   double xmax = bbox.xMax();
   double ymax = bbox.yMax();
   double zmax = bbox.zMax();
