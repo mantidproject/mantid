@@ -43,10 +43,6 @@ struct WorkspaceGroupInputs {
   std::vector<std::string> workspaceNames;
 };
 
-const std::unordered_map<std::string, IndexRegion> instrumentDetectorIndexRegions{
-    {"INTER", {0, 0}}, {"POLREF", {4, 643}}, {"OFFSPEC", {0, 0}}, {"SURF", {0, 0}}, {"CRISP", {0, 0}},
-};
-
 Mantid::API::MatrixWorkspace_sptr findProcessedInputWorkspace(std::string const &reducedWorkspaceName,
                                                               std::optional<int> period) {
   auto &ads = Mantid::API::AnalysisDataService::Instance();
@@ -71,20 +67,6 @@ Mantid::API::MatrixWorkspace_sptr findProcessedInputWorkspace(std::string const 
     }
   }
   return nullptr;
-}
-
-IndexRegion configuredInstrumentRegion(std::unordered_map<std::string, IndexRegion> const &regions,
-                                       std::string const &instrumentName, std::string const &regionName) {
-  auto const region = regions.find(instrumentName);
-  if (region == regions.cend()) {
-    throw std::invalid_argument("Reflectometry plotting " + regionName + " region is not configured for instrument '" +
-                                instrumentName + "'.");
-  }
-  return region->second;
-}
-
-IndexRegion detectorIndexRegion(std::string const &instrumentName) {
-  return configuredInstrumentRegion(instrumentDetectorIndexRegions, instrumentName, "detector");
 }
 
 Mantid::API::IAlgorithm_sptr createAlgorithm(std::string const &name, int const version = -1) {
@@ -364,7 +346,7 @@ std::string createAlignmentWorkspace(PlottingWorkspace const &workspace, Alignme
   auto const fittedPeakWorkspace = outputWorkspace + alignmentFittedPeakWorkspaceSuffix;
   auto const peakCentreWorkspace = outputWorkspace + alignmentPeakCentreWorkspaceSuffix;
 
-  auto detectorSpectraWorkspace = extractDetectorSpectra(processedWorkspace, instrumentName);
+  auto detectorSpectraWorkspace = extractDetectorSpectra(processedWorkspace);
   auto peakFit = fitSpecularPeak(detectorSpectraWorkspace);
   auto fittedWorkspace = peakFit.fitWorkspace ? extractSpectrum(peakFit.fitWorkspace, 1) : nullptr;
   auto const peakCentre = xValueForFractionalWorkspaceIndex(*detectorSpectraWorkspace, peakFit.peakCentre, xAxis);
@@ -413,7 +395,7 @@ std::string createDetectorMapWorkspace(PlottingWorkspace const &workspace, Detec
     return outputWorkspace;
   }
 
-  auto detectorMapWorkspace = extractDetectorSpectra(processedWorkspace, instrumentName);
+  auto detectorMapWorkspace = extractDetectorSpectra(processedWorkspace);
   if (xAxis == DetectorMapXAxis::Lambda) {
     detectorMapWorkspace = convertToWavelength(detectorMapWorkspace);
   }
