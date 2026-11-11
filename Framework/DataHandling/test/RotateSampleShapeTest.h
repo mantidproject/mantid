@@ -326,18 +326,35 @@ public:
     TS_ASSERT_EQUALS(meshWs->sample().getShape().getAppliedRotation(), Mantid::Kernel::Matrix<double>(3, 3, true));
   }
 
-  void test_a_baked_rotation_survives_a_user_rotation() {
-    // The user's turn goes on top of the total, leaving the record of the bake unchanged.
+  void test_a_baked_shape_is_rotated_within_its_own_frame() {
+    // The user's turn goes under the bake, leaving the record of it unchanged. About x it leaves a
+    // sphere on +x where it is, then the bake carries it to +y. Turned about the lab's x after the
+    // bake instead, it would end up on +z.
     auto shapeXML = ComponentCreationHelper::sphereXML(0.5, V3D(1.0, 0.0, 0.0), "sphere");
     ShapeFactory factory;
     auto baked = factory.rebakeGoniometer(ninetyAboutZ(), shapeXML, Mantid::Kernel::Matrix<double>(3, 3, true));
     Workspace2D_sptr ws = getWsWithCSGSampleShape(baked, "RotSampleShapeTest_baked");
     TS_ASSERT_EQUALS(ws->sample().getShape().getAppliedRotation(), ninetyAboutZ());
 
-    runRotateSampleShape("RotSampleShapeTest_baked", "90,0,0,1,1");
+    runRotateSampleShape("RotSampleShapeTest_baked", "90,1,0,0,1");
 
     TS_ASSERT_EQUALS(ws->sample().getShape().getAppliedRotation(), ninetyAboutZ());
-    // the bake and the user rotation together carry the sphere from +x round to -x
-    TS_ASSERT(ws->sample().getShape().isValid(V3D(-1.0, 0.0, 0.0)));
+    TS_ASSERT(ws->sample().getShape().isValid(V3D(0.0, 1.0, 0.0)));
+    TS_ASSERT(!ws->sample().getShape().isValid(V3D(0.0, 0.0, 1.0)));
+  }
+
+  void test_a_baked_mesh_shape_is_rotated_within_its_own_frame() {
+    // As above: the cube spanning x = 4..6 stays on x under the turn about x, then the bake carries
+    // it onto y, rather than on round to z.
+    auto cube = createCube(2, V3D(5.0, 0.0, 0.0));
+    cube->bakeGoniometerRotation(ninetyAboutZ());
+    Workspace2D_sptr ws = getWsWithMeshSampleShape(cube, "RotSampleShapeTest_mesh_baked");
+
+    runRotateSampleShape("RotSampleShapeTest_mesh_baked", "90,1,0,0,1");
+
+    TS_ASSERT_EQUALS(ws->sample().getShape().getAppliedRotation(), ninetyAboutZ());
+    const auto &box = ws->sample().getShape().getBoundingBox();
+    TS_ASSERT_DELTA(box.yMin(), 4.0, 1e-8);
+    TS_ASSERT_DELTA(box.yMax(), 6.0, 1e-8);
   }
 };
