@@ -19,8 +19,8 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 namespace {
 // Map of column number to hard-coded tooltips (used for lookup criteria columns)
 std::unordered_map<int, std::string> ColumnTooltips{
-    {LookupRow::ADDITIONAL_DETECTOR_MASK,
-     "Detectors specified are masked in addition to those specified in the base mask"},
+    {LookupRow::ADDITIONAL_DETECTOR_MASK, "Detectors specified are masked in addition to those specified in the base "
+                                          "mask. Specify detector IDs as individual values or ranges, e.g. 1,2,5-10."},
     {LookupRow::THETA,
      "Theta lookup: runs with theta within 0.01 of this value will use the settings specified in this row"},
     {LookupRow::TITLE,

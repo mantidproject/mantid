@@ -155,6 +155,7 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
             "PolarizationCorrectionInputSpinStateOrder",
             "FredrikzePolarizationSpinStateOrder",
             "ROIDetectorIDs",
+            "DetectorMask",
         ]
         self.copyProperties("ReflectometryISISLoadAndProcess", self._child_properties)
 

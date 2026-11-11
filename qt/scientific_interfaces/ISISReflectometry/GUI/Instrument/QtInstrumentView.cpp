@@ -139,7 +139,8 @@ void QtInstrumentView::registerInstrumentSettingsWidgets(const Mantid::API::IAlg
   registerSettingWidget(*m_ui.detectorCorrectionTypeComboBox, "DetectorCorrectionType", alg);
   registerSettingWidget(*m_ui.correctDetectorsCheckBox, "CorrectDetectors", alg);
   registerSettingWidget(*m_ui.baseDetectorMaskEdit, "DetectorMask", alg);
-  m_ui.baseDetectorMaskEdit->setToolTip("Detectors specified are always masked for relevant workspaces");
+  m_ui.baseDetectorMaskEdit->setToolTip("Detectors specified are always masked for relevant workspaces. Specify "
+                                        "detector IDs as individual values or ranges, e.g. 1,2,5-10.");
   registerSettingWidget(*m_ui.calibrationPathEdit, "CalibrationFile", alg);
   registerSettingWidget(*m_ui.specularPixelEdit, "NominalSpecularPixelSpectrumNo", alg);
 }
