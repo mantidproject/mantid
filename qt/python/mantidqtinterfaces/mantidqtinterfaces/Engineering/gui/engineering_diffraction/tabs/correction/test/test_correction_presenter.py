@@ -150,7 +150,7 @@ class TestTextureCorrectionPresenter(unittest.TestCase):
         self.view.get_selected_workspaces.return_value = ["ws1"]
         self.presenter.redraw_table = MagicMock()
         self.presenter._copy_ref_sample_to_all_selected()
-        self.model.copy_sample_info.assert_called_once_with("ref_ws", ["ws1"], True)
+        self.model.copy_sample_info.assert_called_once_with("ref_ws", ["ws1"])
         self.presenter.redraw_table.assert_called_once()
 
     def test_update_custom_shape_finder_vis(self):
