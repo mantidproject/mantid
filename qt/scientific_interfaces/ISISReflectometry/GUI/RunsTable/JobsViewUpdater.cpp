@@ -11,6 +11,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 
+#include <algorithm>
+
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 using ValueFunction = std::optional<double> (RangeInQ::*)() const;
@@ -81,12 +83,15 @@ MantidWidgets::Batch::Cell adjustedAngleCell(Row const &row, std::optional<int> 
     auto &ads = Mantid::API::AnalysisDataService::Instance();
     if (!ads.doesExist(name))
       continue;
-    for (auto const &workspace : getMembers(ads.retrieve(name)))
-      if (workspace && workspace->run().hasProperty("reflectometry_adjusted_theta")) {
-        cell.setContentText(
-            valueToString(workspace->run().getPropertyAsSingleValue("reflectometry_adjusted_theta"), precision));
-        return cell;
-      }
+    auto const members = getMembers(ads.retrieve(name));
+    auto const member = std::find_if(members.cbegin(), members.cend(), [](auto const &workspace) {
+      return workspace && workspace->run().hasProperty("reflectometry_adjusted_theta");
+    });
+    if (member != members.cend()) {
+      cell.setContentText(
+          valueToString((*member)->run().getPropertyAsSingleValue("reflectometry_adjusted_theta"), precision));
+      return cell;
+    }
   }
 
   return cell;
