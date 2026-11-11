@@ -146,7 +146,7 @@ agent-skill-rattler-build = ">=0.0.2,<0.0.3"
 wcwidth = "<0.9"
 
 [target.linux-64.dependencies]
-gxx_linux-64 = "13.*"
+gxx_linux-64 = "15.*"
 xorg-libxcomposite = ">=0.4.5"
 xorg-libxcursor = ">=1.2.0"
 xorg-libxdamage = ">=1.1.5"
@@ -171,8 +171,8 @@ conda-wrappers = ">=1.1.3,<2"
 lib3mf = ">=2.4.1,<3"
 
 [target.osx-arm64.dependencies]
-clang_osx-arm64 = "18.*"
-clangxx_osx-arm64 = "18.*"
+clang_osx-arm64 = "21.*"
+clangxx_osx-arm64 = "21.*"
 llvm-openmp = ">=19.1.7"
 "python.app" = ">=1.4,<2"
 libcxx = ">=21.1.6,<22"
