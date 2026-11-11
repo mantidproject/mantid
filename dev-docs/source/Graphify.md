@@ -41,33 +41,6 @@ It tells graphify to parse `.h` and `.hxx` files as C++.
 
 ## Usage
 
-Run these from the root of the source tree:
-
-```sh
-graphify extract . --code-only      # build graphify-out/graph.json
-graphify cluster-only . --no-label  # write GRAPH_REPORT.md
-graphify update .                   # re-extract only the files that changed
-graphify query "how does DownloadInstrument work"
-graphify path "DownloadInstrument" "InternetHelper"
-graphify explain "MatrixWorkspace"
-graphify export html                # interactive graphify-out/graph.html
-graphify hook install               # rebuild the graph automatically after commits
-```
-
-The output goes into `graphify-out/`, which is ignored by git.
-`GRAPH_REPORT.md` summarises the most connected nodes, the communities and suggested questions.
-
-Without `--no-label`, `graphify cluster-only` names the communities with an LLM.
-It uses an API key if one is set, and otherwise falls back to the `claude` command-line tool if it is installed.
-For Mantid's more than 3,000 communities this takes several minutes and uses LLM tokens.
-Pass `--no-label`, or set `GRAPHIFY_BACKEND=none`, to keep the whole run local.
-For graphs over 5,000 nodes, which includes Mantid's, `graph.html` shows one node per community, not one per symbol.
-
-`graphify hook install` adds git hooks (post-commit, post-checkout, post-merge and post-rewrite)
-that re-extract the changed code files and rebuild the graph.
-If a hook of the same name already exists, graphify adds to it and does not replace it.
-Remove the hooks with `graphify hook uninstall`, and check them with `graphify hook status`.
-
 See the [CLI quickstart](https://docs.graphify.com/open-source/cli-quickstart)
 and the [CLI reference](https://docs.graphify.com/open-source/configuration/cli) for all commands and options.
 
