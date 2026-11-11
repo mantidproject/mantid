@@ -827,6 +827,12 @@ global options that will be applied to all the rows in the table, whereas the
 row values will only be applicable to the specific row for which those options
 are defined.
 
+**Base detector mask** on the **Instrument Settings** tab applies to all relevant workspaces.
+**Additional Detector Mask** on the Runs table overrides the matching Experiment lookup
+value when supplied; otherwise the Experiment value is used. The selected additional mask
+is appended to the base mask. Specify comma-separated detector IDs and ranges, for example
+``1,2,5-10``. Cached TOF inputs remain unmasked, allowing masks to be changed without reloading data.
+
 Sample and angle lookup table
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
