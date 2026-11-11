@@ -45,7 +45,8 @@ class ISISReflectometryWorkflowPreprocessingTest(systemtesting.MantidSystemTest,
             first_transmission_runs=self.first_transmission_runs,
             second_transmission_runs=self.second_transmission_runs,
         )
-        self.finaliseResults()
+        run = self.run_numbers[0]
+        self.finaliseResults([f"{run}_IvsQ", f"{run}_IvsQ_binned", "TRANS_LAM_45226_45227"], expected_workspace_count=11)
 
     def regenerateReferenceFileByReducing(self):
         setupInstrument()
