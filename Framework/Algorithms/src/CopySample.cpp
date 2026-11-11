@@ -10,8 +10,7 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
-#include "MantidGeometry/Objects/MeshObject.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidGeometry/Objects/ShapeRotation.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Material.h"
@@ -157,21 +156,10 @@ void CopySample::copyParameters(Sample &from, Sample &to, bool nameFlag, bool ma
       // Reset to lhs material
       rhsMaterial = to.getMaterial();
     }
-    auto rhsObject = std::shared_ptr<IObject>(from.getShape().cloneWithMaterial(rhsMaterial));
-
     // Bake the destination's goniometer in place of any existing bake, so a baked shape is not
     // turned twice and a rotation within the shape's own frame survives.
-    const auto currentBake = rhsObject->getAppliedRotation();
-
-    if (auto csgObj = std::dynamic_pointer_cast<Geometry::CSGObject>(rhsObject)) {
-      const auto xml = Geometry::ShapeFactory().rebakeGoniometer(rotationMatrix, csgObj->getShapeXML(), currentBake);
-      rhsObject = Geometry::ShapeFactory().createShape(xml, false);
-      rhsObject->setMaterial(rhsMaterial); // add back in Material
-    } else if (auto meshObj = std::dynamic_pointer_cast<Geometry::MeshObject>(rhsObject)) {
-      meshObj->bakeGoniometerRotation(rotationMatrix * currentBake.Tprime());
-    }
-
-    to.setShape(rhsObject);
+    const auto rhsObject = std::shared_ptr<IObject>(from.getShape().cloneWithMaterial(rhsMaterial));
+    to.setShape(Geometry::getLabFrameShape(*rhsObject, rotationMatrix));
     to.setGeometryFlag(from.getGeometryFlag());
     to.setHeight(from.getHeight());
     to.setThickness(from.getThickness());

@@ -22,6 +22,7 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/NeutronAtom.h"
+#include "MantidKernel/Quat.h"
 
 #include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/MDEventFactory.h"
@@ -149,6 +150,19 @@ public:
     // still on +y rather than carried round to -x
     TS_ASSERT_DELTA(copied.getBoundingBox().yMin(), 4.0, 1e-8);
     TS_ASSERT_DELTA(copied.getBoundingBox().yMax(), 6.0, 1e-8);
+  }
+
+  void test_mesh_shape_copied_onto_its_own_goniometer_is_left_exactly_as_it_was() {
+    // R * R^T is identity only to rounding, so applying it would nudge every vertex.
+    const Matrix<double> thirtyAboutY(Quat(30.0, V3D(0, 1, 0)).getRotation());
+    auto cube = createOffsetCube();
+    cube->bakeGoniometerRotation(thirtyAboutY);
+    const auto before = cube->getVertices();
+
+    auto dest = copyShapeOnto(cube, thirtyAboutY, "mesh_same_goniometer");
+
+    // exactly: V3D's operator== has a tolerance that would hide the drift
+    TS_ASSERT(dynamic_cast<const MeshObject &>(dest->sample().getShape()).getVertices() == before);
   }
 
   void test_mesh_shape_in_its_own_frame_is_baked_to_the_destination() {
