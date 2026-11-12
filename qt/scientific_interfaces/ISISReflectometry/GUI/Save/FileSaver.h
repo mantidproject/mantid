@@ -24,7 +24,8 @@ public:
 
   bool isValidSaveDirectory(std::string const &filePath) const override;
   void save(std::string const &saveDirectory, std::vector<std::string> const &workspaceNames,
-            std::vector<std::string> const &logParameters, FileFormatOptions const &inputParameters) const override;
+            std::vector<std::string> const &logParameters, FileFormatOptions const &inputParameters,
+            ORSOModelOptions const &modelOptions) const override;
 
 private:
   std::unique_ptr<ISaveAlgorithmRunner> m_saveAlgRunner;
@@ -35,21 +36,19 @@ private:
                              std::vector<std::string> const &logParameters, FileFormatOptions const &fileFormat) const;
 
   void runSaveORSOAlgorithm(std::string const &savePath, std::vector<std::string> const &workspaceNames,
-                            FileFormatOptions const &fileFormat) const;
-
-  std::vector<std::string> modelsForWorkspaces(std::vector<std::string> const &workspaceNames,
-                                               FileFormatOptions const &fileFormat) const;
-  std::string runNumber(std::string const &workspaceName) const;
+                            std::vector<std::string> const &models, FileFormatOptions const &fileFormat,
+                            ORSOModelOptions const &modelOptions) const;
 
   std::string assembleSavePath(std::string const &saveDirectory, std::string const &prefix, std::string const &name,
                                std::string const &extension) const;
 
   Mantid::API::Workspace_sptr workspace(std::string const &workspaceName) const;
   void save(Mantid::API::Workspace_sptr const &workspace, std::string const &saveDirectory,
-            std::vector<std::string> const &logParameters, FileFormatOptions const &fileFormat) const;
+            std::vector<std::string> const &logParameters, FileFormatOptions const &fileFormat,
+            std::string const &model, ORSOModelOptions const &modelOptions) const;
 
   void saveToSingleFile(std::vector<std::string> const &workspaceNames, std::string const &saveDirectory,
-                        FileFormatOptions const &fileFormat) const;
+                        FileFormatOptions const &fileFormat, ORSOModelOptions const &modelOptions) const;
 
   bool shouldSaveToSingleFile(std::vector<std::string> const &workspaceNames,
                               FileFormatOptions const &fileFormat) const;

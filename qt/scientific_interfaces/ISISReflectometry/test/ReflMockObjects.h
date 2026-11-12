@@ -114,7 +114,8 @@ public:
   MOCK_CONST_METHOD0(getMatchingProcessingInstructionsForPreviewRow, std::map<ROIType, ProcessingInstructions>());
   MOCK_CONST_METHOD0(getMatchingROIDetectorIDsForPreviewRow, std::optional<ProcessingInstructions>());
   MOCK_CONST_METHOD1(getBatchState, std::string(const std::vector<std::string> &));
-  MOCK_METHOD((std::map<std::string, std::string>), searchResultModels, (), (const, override));
+  MOCK_METHOD((std::map<std::string, std::string>), modelsForWorkspaces, (std::vector<std::string> const &),
+              (const, override));
 };
 
 class MockRunsPresenter : public IRunsPresenter {
@@ -160,7 +161,8 @@ public:
   MOCK_METHOD0(resetRoundPrecision, void());
   MOCK_METHOD0(notifySearchComplete, void());
   MOCK_CONST_METHOD0(instrumentName, std::string());
-  MOCK_METHOD((std::map<std::string, std::string>), searchResultModels, (), (const, override));
+  MOCK_METHOD((std::map<std::string, std::string>), modelsForWorkspaces, (std::vector<std::string> const &),
+              (const, override));
 };
 
 class MockEventPresenter : public IEventPresenter {
@@ -356,8 +358,8 @@ public:
 class MockFileSaver : public IFileSaver {
 public:
   MOCK_CONST_METHOD1(isValidSaveDirectory, bool(std::string const &));
-  MOCK_CONST_METHOD4(save, void(std::string const &, std::vector<std::string> const &, std::vector<std::string> const &,
-                                FileFormatOptions const &));
+  MOCK_CONST_METHOD5(save, void(std::string const &, std::vector<std::string> const &, std::vector<std::string> const &,
+                                FileFormatOptions const &, ORSOModelOptions const &));
   virtual ~MockFileSaver() = default;
 };
 

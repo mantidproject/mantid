@@ -23,7 +23,6 @@ public:
 
   virtual void runSaveORSOAlgorithm(std::vector<std::string> const &workspaceNames, std::string const &savePath,
                                     const bool &includeQResolution, const bool &includeAdditionalColumns,
-                                    std::string const &modelDescription,
                                     std::vector<std::string> const &modelDescriptions,
                                     const bool &validateModel) const = 0;
 };

@@ -20,6 +20,7 @@
 #include "MantidQtWidgets/Common/MockProgressableView.h"
 #include "MantidQtWidgets/Common/MockQtAlgorithmRunner.h"
 #include "MockRunsView.h"
+#include <boost/algorithm/string/join.hpp>
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -442,17 +443,75 @@ public:
     presenter->notifySearchComplete();
   }
 
-  void testSearchResultModelsReturnsModelsForRunsThatHaveOne() {
+  void testModelsForWorkspacesReturnsModelOfRunThatProducedEachRowOutput() {
     auto presenter = makePresenter();
     auto searchModel = NiceMock<MockSearchModel>();
-    auto const searchResults = SearchResults{SearchResult("13460", "", "", "", "", "", "", "air | Ni 100 | Si"),
-                                             SearchResult("13461", "", "", "", "", "", "", ""),
-                                             SearchResult("13462", "", "", "", "", "", "", "air | Si")};
-    EXPECT_CALL(m_view, searchResults()).Times(1).WillOnce(ReturnRef(searchModel));
-    EXPECT_CALL(searchModel, getRows()).Times(1).WillOnce(ReturnRef(searchResults));
+    auto const searchResults = makeSearchResultsWithModels({{"13460", "air | Ni 100 | Si"}, {"13462", "air | Si"}});
+    expectSearchResults(searchModel, searchResults);
+    auto const runsTable = makeRunsTableWithOutputs({{"13460"}, {"13461"}, {"13462"}});
+    EXPECT_CALL(*m_runsTablePresenter, runsTable()).WillRepeatedly(ReturnRef(runsTable));
 
-    auto const expected = std::map<std::string, std::string>{{"13460", "air | Ni 100 | Si"}, {"13462", "air | Si"}};
-    TS_ASSERT_EQUALS(presenter->searchResultModels(), expected);
+    auto const expected =
+        std::map<std::string, std::string>{{"IvsQ_binned_13460", "air | Ni 100 | Si"}, {"IvsQ_13462", "air | Si"}};
+    TS_ASSERT_EQUALS(presenter->modelsForWorkspaces({"IvsQ_binned_13460", "IvsQ_binned_13461", "IvsQ_13462"}),
+                     expected);
+  }
+
+  void testModelsForWorkspacesUsesModelSharedByAllRunsInASummedRow() {
+    auto presenter = makePresenter();
+    auto searchModel = NiceMock<MockSearchModel>();
+    auto const searchResults =
+        makeSearchResultsWithModels({{"13460", "air | Si"}, {"13461", "air | Si"}, {"13462", "air | Ni 100 | Si"}});
+    expectSearchResults(searchModel, searchResults);
+    auto const runsTable = makeRunsTableWithOutputs({{"13460", "13461"}, {"13461", "13462"}});
+    EXPECT_CALL(*m_runsTablePresenter, runsTable()).WillRepeatedly(ReturnRef(runsTable));
+
+    auto const expected = std::map<std::string, std::string>{{"IvsQ_binned_13460+13461", "air | Si"}};
+    TS_ASSERT_EQUALS(presenter->modelsForWorkspaces({"IvsQ_binned_13460+13461", "IvsQ_binned_13461+13462"}), expected);
+  }
+
+  void testModelsForWorkspacesUsesModelSharedByAllRowsForGroupOutput() {
+    auto presenter = makePresenter();
+    auto searchModel = NiceMock<MockSearchModel>();
+    auto const searchResults = makeSearchResultsWithModels({{"13460", "air | Si"}, {"13461", "air | Si"}});
+    expectSearchResults(searchModel, searchResults);
+    auto const runsTable = makeRunsTableWithOutputs({{"13460"}, {"13461"}}, "IvsQ_13460_13461");
+    EXPECT_CALL(*m_runsTablePresenter, runsTable()).WillRepeatedly(ReturnRef(runsTable));
+
+    auto const expected = std::map<std::string, std::string>{{"IvsQ_13460_13461", "air | Si"}};
+    TS_ASSERT_EQUALS(presenter->modelsForWorkspaces({"IvsQ_13460_13461"}), expected);
+  }
+
+  void testModelsForWorkspacesExcludesGroupOutputWhenRowsHaveDifferentModels() {
+    auto presenter = makePresenter();
+    auto searchModel = NiceMock<MockSearchModel>();
+    auto const searchResults = makeSearchResultsWithModels({{"13460", "air | Si"}, {"13461", "air | Ni 100 | Si"}});
+    expectSearchResults(searchModel, searchResults);
+    auto const runsTable = makeRunsTableWithOutputs({{"13460"}, {"13461"}}, "IvsQ_13460_13461");
+    EXPECT_CALL(*m_runsTablePresenter, runsTable()).WillRepeatedly(ReturnRef(runsTable));
+
+    TS_ASSERT(presenter->modelsForWorkspaces({"IvsQ_13460_13461"}).empty());
+  }
+
+  void testModelsForWorkspacesExcludesWorkspacesThatAreNotInTheRunsTable() {
+    auto presenter = makePresenter();
+    auto searchModel = NiceMock<MockSearchModel>();
+    auto const searchResults = makeSearchResultsWithModels({{"13460", "air | Si"}});
+    expectSearchResults(searchModel, searchResults);
+    auto const runsTable = makeRunsTableWithOutputs({{"13460"}});
+    EXPECT_CALL(*m_runsTablePresenter, runsTable()).WillRepeatedly(ReturnRef(runsTable));
+
+    TS_ASSERT(presenter->modelsForWorkspaces({"some_other_workspace"}).empty());
+  }
+
+  void testModelsForWorkspacesIsEmptyWhenNoSearchResultHasAModel() {
+    auto presenter = makePresenter();
+    auto searchModel = NiceMock<MockSearchModel>();
+    auto const searchResults = SearchResults{SearchResult("13460", "")};
+    expectSearchResults(searchModel, searchResults);
+    EXPECT_CALL(*m_runsTablePresenter, runsTable()).Times(0);
+
+    TS_ASSERT(presenter->modelsForWorkspaces({"IvsQ_binned_13460"}).empty());
   }
 
   void testTransferWithNoRowsSelected() {
@@ -873,6 +932,37 @@ private:
     ON_CALL(*m_runsTablePresenter, runsTable()).WillByDefault(ReturnRef(m_runsTable));
 
     return presenter;
+  }
+
+  SearchResults makeSearchResultsWithModels(std::map<std::string, std::string> const &runModels) {
+    SearchResults results;
+    for (auto const &[runNumber, model] : runModels)
+      results.emplace_back(runNumber, "", "", "", "", "", "", model);
+    return results;
+  }
+
+  void expectSearchResults(MockSearchModel &searchModel, SearchResults const &searchResults) {
+    EXPECT_CALL(m_view, searchResults()).Times(1).WillOnce(ReturnRef(searchModel));
+    EXPECT_CALL(searchModel, getRows()).Times(1).WillOnce(ReturnRef(searchResults));
+  }
+
+  /** Make a runs table with one group containing a row for each set of runs. Each row has outputs named after its
+   * runs, and the group has a postprocessed output if a name is given.
+   */
+  RunsTable makeRunsTableWithOutputs(std::vector<std::vector<std::string>> const &rowRuns,
+                                     std::string const &groupOutputName = "") {
+    auto group = Group("Test group");
+    for (auto const &runs : rowRuns) {
+      auto row = makeRow(runs, 0.5);
+      auto const name = boost::algorithm::join(runs, "+");
+      row.setOutputNames({{"IvsLam_" + name}, {"IvsQ_" + name}, {"IvsQ_binned_" + name}});
+      group.appendRow(row);
+    }
+    if (!groupOutputName.empty())
+      group.setOutputNames({{groupOutputName}});
+    auto jobs = ReductionJobs();
+    jobs.appendGroup(std::move(group));
+    return RunsTable(m_instruments, m_thetaTolerance, std::move(jobs));
   }
 
   void verifyAndClear() {

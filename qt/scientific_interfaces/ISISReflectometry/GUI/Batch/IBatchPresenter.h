@@ -16,6 +16,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -76,7 +77,8 @@ public:
   virtual void notifyChangesSaved() = 0;
   virtual Mantid::Geometry::Instrument_const_sptr instrument() const = 0;
   virtual std::string instrumentName() const = 0;
-  virtual std::map<std::string, std::string> searchResultModels() const = 0;
+  virtual std::map<std::string, std::string>
+  modelsForWorkspaces(std::vector<std::string> const &workspaceNames) const = 0;
 
   virtual std::map<ROIType, ProcessingInstructions> getMatchingProcessingInstructionsForPreviewRow() const = 0;
   virtual std::optional<ProcessingInstructions> getMatchingROIDetectorIDsForPreviewRow() const = 0;

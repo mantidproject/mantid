@@ -7,12 +7,9 @@
 #include "FileSaver.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/Run.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
-#include <algorithm>
 #include <filesystem>
 #include <utility>
 
@@ -91,73 +88,34 @@ void FileSaver::runSaveAsciiAlgorithm(std::string const &savePath, std::string c
 }
 
 void FileSaver::runSaveORSOAlgorithm(std::string const &savePath, std::vector<std::string> const &workspaceNames,
-                                     FileFormatOptions const &fileFormat) const {
+                                     std::vector<std::string> const &models, FileFormatOptions const &fileFormat,
+                                     ORSOModelOptions const &modelOptions) const {
   m_saveAlgRunner->runSaveORSOAlgorithm(workspaceNames, savePath, fileFormat.shouldIncludeQResolution(),
-                                        fileFormat.shouldIncludeAdditionalColumns(), fileFormat.model(),
-                                        modelsForWorkspaces(workspaceNames, fileFormat), fileFormat.validate());
-}
-
-/** Get the model description for each workspace from the models keyed by run number.
- * @return : a list with one model for each workspace, or an empty list if the model
- * given for all workspaces should be used instead
- */
-std::vector<std::string> FileSaver::modelsForWorkspaces(std::vector<std::string> const &workspaceNames,
-                                                        FileFormatOptions const &fileFormat) const {
-  auto const &runModels = fileFormat.runModels();
-  if (!fileFormat.model().empty() || runModels.empty()) {
-    return {};
-  }
-
-  std::vector<std::string> models;
-  models.reserve(workspaceNames.size());
-  for (auto const &name : workspaceNames) {
-    auto const it = runModels.find(runNumber(name));
-    models.emplace_back(it != runModels.cend() ? it->second : "");
-  }
-
-  if (std::all_of(models.cbegin(), models.cend(), [](auto const &model) { return model.empty(); })) {
-    return {};
-  }
-  return models;
-}
-
-/** Get the run number from the logs of a workspace, or the first child of a workspace group.
- * @return : the run number, or an empty string if it cannot be found
- */
-std::string FileSaver::runNumber(std::string const &workspaceName) const {
-  auto ws = workspace(workspaceName);
-  if (auto const group = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws)) {
-    ws = group->size() > 0 ? group->getItem(0) : nullptr;
-  }
-
-  auto const matrixWs = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
-  if (!matrixWs || !matrixWs->run().hasProperty("run_number")) {
-    return "";
-  }
-  return matrixWs->run().getProperty("run_number")->value();
+                                        fileFormat.shouldIncludeAdditionalColumns(), models, modelOptions.validate());
 }
 
 void FileSaver::save(Mantid::API::Workspace_sptr const &workspace, std::string const &saveDirectory,
-                     std::vector<std::string> const &logParameters, FileFormatOptions const &fileFormat) const {
+                     std::vector<std::string> const &logParameters, FileFormatOptions const &fileFormat,
+                     std::string const &model, ORSOModelOptions const &modelOptions) const {
   auto const extension = extensionForFormat(fileFormat.format());
   auto const savePath = assembleSavePath(saveDirectory, fileFormat.prefix(), workspace->getName(), extension);
 
   if (fileFormat.isORSOFormat()) {
     std::vector<std::string> const workspaceNames{workspace->getName()};
-    runSaveORSOAlgorithm(savePath, workspaceNames, fileFormat);
+    runSaveORSOAlgorithm(savePath, workspaceNames, {model}, fileFormat, modelOptions);
   } else {
     runSaveAsciiAlgorithm(savePath, extension, workspace, logParameters, fileFormat);
   }
 }
 
 void FileSaver::saveToSingleFile(std::vector<std::string> const &workspaceNames, std::string const &saveDirectory,
-                                 FileFormatOptions const &fileFormat) const {
+                                 FileFormatOptions const &fileFormat, ORSOModelOptions const &modelOptions) const {
   auto const extension = extensionForFormat(fileFormat.format());
   auto const filename = workspaceNames.front() + MULTI_DATASET_FILE_SUFFIX;
   auto const savePath = assembleSavePath(saveDirectory, fileFormat.prefix(), filename, extension);
 
   if (fileFormat.isORSOFormat()) {
-    runSaveORSOAlgorithm(savePath, workspaceNames, fileFormat);
+    runSaveORSOAlgorithm(savePath, workspaceNames, modelOptions.models(workspaceNames), fileFormat, modelOptions);
   } else {
     throw std::invalid_argument(
         "Saving multiple workspaces to a single file is not supported for the selected file format.");
@@ -165,26 +123,27 @@ void FileSaver::saveToSingleFile(std::vector<std::string> const &workspaceNames,
 }
 
 void FileSaver::save(std::string const &saveDirectory, std::vector<std::string> const &workspaceNames,
-                     std::vector<std::string> const &logParameters, FileFormatOptions const &fileFormat) const {
+                     std::vector<std::string> const &logParameters, FileFormatOptions const &fileFormat,
+                     ORSOModelOptions const &modelOptions) const {
   if (!isValidSaveDirectory(saveDirectory)) {
     throw InvalidSavePath(saveDirectory);
   }
 
   // Setup the appropriate save algorithm
   if (shouldSaveToSingleFile(workspaceNames, fileFormat)) {
-    saveToSingleFile(workspaceNames, saveDirectory, fileFormat);
+    saveToSingleFile(workspaceNames, saveDirectory, fileFormat, modelOptions);
   } else {
     for (auto const &name : workspaceNames) {
       auto const ws = workspace(name);
       if (ws->isGroup()) {
-        // Save child workspaces into separate files
+        // Save child workspaces into separate files, using the model for the group
         Mantid::API::WorkspaceGroup_sptr group = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws);
         for (auto child : group->getAllItems())
-          save(child, saveDirectory, logParameters, fileFormat);
+          save(child, saveDirectory, logParameters, fileFormat, modelOptions.model(name), modelOptions);
         continue;
       }
 
-      save(ws, saveDirectory, logParameters, fileFormat);
+      save(ws, saveDirectory, logParameters, fileFormat, modelOptions.model(name), modelOptions);
     }
   }
 }
