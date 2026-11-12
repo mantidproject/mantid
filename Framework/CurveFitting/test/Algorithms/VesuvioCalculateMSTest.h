@@ -8,6 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidCurveFitting/Algorithms/VesuvioCalculateMS.h"
@@ -99,10 +100,12 @@ Mantid::API::MatrixWorkspace_sptr createTestWorkspace(const bool detShape = true
   return ws2d;
 }
 
-Mantid::API::MatrixWorkspace_sptr createFlatPlateSampleWS(const bool detShape = true, const bool groupedDets = false) {
+Mantid::API::MatrixWorkspace_sptr createFlatPlateSampleWS(const bool detShape = true, const bool groupedDets = false,
+                                                          const double halfWidth = 0.05,
+                                                          const double halfThick = 0.0025) {
   auto testWS = createTestWorkspace(detShape, groupedDets);
   // Sample shape
-  const double halfHeight(0.05), halfWidth(0.05), halfThick(0.0025);
+  const double halfHeight(0.05);
   std::ostringstream sampleShapeXML;
   sampleShapeXML << " <cuboid id=\"detector-shape\"> "
                  << "<left-front-bottom-point x=\"" << halfWidth << "\" y=\"" << -halfHeight << "\" z=\"" << -halfThick
@@ -142,6 +145,10 @@ void checkOutputValuesAsExpected(const Mantid::API::IAlgorithm_sptr &alg, const 
   const auto &msX = multScatter->x(0);
   TS_ASSERT_DELTA(150.0, msX[checkIdx], tolerance); // based on workspace setup
 }
+double totalScatteringAt(const Mantid::API::IAlgorithm_sptr &alg) {
+  const Mantid::API::MatrixWorkspace_sptr totScatter = alg->getProperty("TotalScatteringWS");
+  return totScatter->y(0)[100];
+}
 } // namespace
 class VesuvioCalculateMSTest : public CxxTest::TestSuite {
 public:
@@ -171,6 +178,22 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
     checkOutputValuesAsExpected(alg, 0.0134925929, 0.0045957949);
+  }
+
+  void test_goniometer_turns_the_sample() {
+    // A quarter turn about y swings the plate edge-on to the beam, as if it had been defined that way.
+    auto turnedWS = createFlatPlateSampleWS();
+    turnedWS->mutableRun().mutableGoniometer().setR(
+        Mantid::Kernel::DblMatrix(std::vector<double>{0, 0, 1, 0, 1, 0, -1, 0, 0}));
+    auto turned = createTestAlgorithm(turnedWS);
+    turned->execute();
+    auto edgeOn = createTestAlgorithm(createFlatPlateSampleWS(true, false, 0.0025, 0.05));
+    edgeOn->execute();
+
+    const double edgeOnTotal = totalScatteringAt(edgeOn);
+    TS_ASSERT_DELTA(totalScatteringAt(turned), edgeOnTotal, 1e-6 * edgeOnTotal);
+    // and differs from the face-on plate of test_exec_with_flat_plate_sample, so the turn mattered
+    TS_ASSERT(std::abs(edgeOnTotal - 0.0134925929) > 1e-3);
   }
 
   // --------------------- Failure Cases --------------------------------
