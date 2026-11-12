@@ -7,6 +7,7 @@ Mantid 7.0.1 Release Notes
 This is a patch release that corrects some significant issues since :ref:`version 7.0.0 <v7.0.0>`.
 
 The changes are:
+- Fixed the UI elements for Mac users while :ref:`fitting models to data <01_fitting_models_to_data>` using the :ref:`UserFunction <func-UserFunction>` and :ref:`TabulatedFunction <func-TabulatedFunction>`. `#42606 <https://github.com/mantidproject/mantid/pull/42606>`_
 - Remove workaround for qsettings location on nfs home area `#42716 <https://github.com/mantidproject/mantid/pull/42716>`_
 - Fix bug creating ReflectometryISISLoadAndProcess dialog `#42646 <https://github.com/mantidproject/mantid/pull/42646/>`_
 - Fixed the parameter line edits collapsing on macOS in the :ref:`QENS Fitting <interface-inelastic-qens-fitting>` interface, which made the parameter values difficult to edit `#42735 <https://github.com/mantidproject/mantid/pull/42735>`_
