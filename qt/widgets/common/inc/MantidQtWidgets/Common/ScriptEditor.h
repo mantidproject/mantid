@@ -25,6 +25,7 @@ class QMimeData;
 class QKeyEvent;
 class QMouseEvent;
 class QsciAPIs;
+class QTimer;
 
 /**
     This class provides an area to write scripts. It inherits from QScintilla to
@@ -120,10 +121,13 @@ public slots:
   void padMargin();
   /// Set the marker state
   void setMarkerState(bool enabled);
+  /// Start or stop the timer that does progress marker updates
+  void runProgressMarkerTimer(bool enable);
   /// Update the progress marker potentially from a separate thread
   void updateProgressMarkerFromThread(int lineno, bool error = false);
   /// Update the progress marker
   void updateProgressMarker(int lineno, bool error = false);
+
   /// Mark the progress arrow as an error
   void markExecutingLineAsError();
   /// Refresh the autocomplete information base on a new set of keywords
@@ -168,6 +172,9 @@ private:
   /// in QsciScintilla
   void forwardKeyPressToBase(QKeyEvent *event);
 
+  /// Update the progress marker
+  void showUpdatedProgressMarker();
+
   /// The file name associated with this editor
   QString m_filename;
 
@@ -187,4 +194,7 @@ private:
   FindReplaceDialog *m_findDialog;
   /// Name of group that the settings are stored under
   QString m_settingsGroup;
+
+  std::unique_ptr<QTimer> m_progress_marker_timer;
+  bool m_progress_marker_error;
 };
