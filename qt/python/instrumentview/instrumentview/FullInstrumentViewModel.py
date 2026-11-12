@@ -34,6 +34,7 @@ from mantid.simpleapi import (
 )
 from mantid.api import MatrixWorkspace, WorkspaceUnitValidator
 from mantid.kernel import logger
+from mantidqt.utils.lab_frame_sample import lab_frame_sample
 from pathlib import Path
 import numpy as np
 from enum import Enum
@@ -201,7 +202,7 @@ class FullInstrumentViewModel:
         return self._sample_position
 
     def _get_sample_shape_from_workspace(self, ws: Workspace2D) -> Optional[np.ndarray]:
-        shape = ws.sample().getShape()
+        shape = lab_frame_sample(ws).getShape()
         return shape.getMesh() if shape.hasValidShape() else None
 
     @property
