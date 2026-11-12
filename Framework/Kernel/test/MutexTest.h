@@ -31,8 +31,7 @@ void reader() {
   Poco::ScopedReadRWLock lock(g_mutex);
   //  std::cout << "Read launching\n";
   // do work here, without anyone having exclusive access
-  for (double val : shared_data) {
-    UNUSED_ARG(val);
+  for ([[maybe_unused]] double val : shared_data) {
   }
   //  std::cout << "Read finished\n";
 }

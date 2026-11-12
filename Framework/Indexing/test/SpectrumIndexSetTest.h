@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/WarningSuppressions.h"
+#include <concepts>
 
 #include "MantidIndexing/SpectrumIndexSet.h"
 
@@ -23,7 +23,6 @@ public:
   static void destroySuite(SpectrumIndexSetTest *suite) { delete suite; }
 
   void test_has_correct_mixins() {
-    SpectrumIndexSet data(0);
-    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(dynamic_cast<detail::IndexSet<SpectrumIndexSet> &>(data)));
+    TS_ASSERT((std::derived_from<SpectrumIndexSet, detail::IndexSet<SpectrumIndexSet>>));
   }
 };
