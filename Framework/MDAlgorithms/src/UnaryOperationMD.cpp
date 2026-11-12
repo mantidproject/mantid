@@ -105,6 +105,12 @@ void UnaryOperationMD::exec() {
 
   // Give the output
   setProperty("OutputWorkspace", m_out);
+
+  // Release workspace references held by this instance
+  m_in.reset();
+  m_in_event.reset();
+  m_in_histo.reset();
+  m_out.reset();
 }
 
 } // namespace Mantid::MDAlgorithms
