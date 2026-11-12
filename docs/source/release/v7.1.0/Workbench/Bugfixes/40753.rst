@@ -1,1 +1,2 @@
+- Opening a saved project now reopens superplots and bin plots. A superplot opens with its default settings rather than the settings it had when the project was saved.
 - Saving a project with ``Save Altered Workspaces Only`` selected no longer gives an error or removes open plots from the plots list.

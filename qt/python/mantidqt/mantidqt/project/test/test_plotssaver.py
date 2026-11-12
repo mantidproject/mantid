@@ -8,8 +8,10 @@
 #
 import matplotlib
 import unittest
+from unittest import mock
 
 from mantid.api import AnalysisDataService as ADS
+from mantid.plots.utility import MantidAxType
 from mantid.simpleapi import CreateSampleWorkspace
 from mantidqt.project.plotsloader import PlotsLoader
 from mantidqt.project.plotssaver import PlotsSaver
@@ -204,6 +206,23 @@ class PlotsSaverTest(unittest.TestCase):
 
         self.maxDiff = None
         self.assertDictEqual(return_value, self.loader_plot_dict)
+
+    def test_get_dict_from_fig_saves_axis_type_as_its_value(self):
+        self.fig.axes[0].creation_args = [{"specNum": 2, "function": "plot", "axis": MantidAxType.BIN}]
+
+        return_value = self.plot_saver.get_dict_from_fig(self.fig)
+
+        self.assertEqual(MantidAxType.BIN.value, return_value["creationArguments"][0][0]["axis"])
+
+    def test_save_plots_records_an_open_superplot(self):
+        self.fig.axes[0].creation_args = [{"specNum": 2, "function": "plot"}]
+        with_superplot, without_superplot = mock.Mock(), mock.Mock(superplot=None)
+        with_superplot.canvas.figure = without_superplot.canvas.figure = self.fig
+
+        return_value = self.plot_saver.save_plots({1: with_superplot, 2: without_superplot})
+
+        self.assertTrue(return_value[0]["superplot"])
+        self.assertNotIn("superplot", return_value[1])
 
     def test_get_dict_from_axes(self):
         self.plot_saver.figure_creation_args = [{"function": "plot"}]

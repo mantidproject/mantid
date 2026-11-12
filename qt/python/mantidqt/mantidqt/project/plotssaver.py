@@ -30,7 +30,10 @@ class PlotsSaver(object):
         plot_list = []
         for index in plot_dict:
             try:
-                plot_list.append(self.get_dict_from_fig(plot_dict[index].canvas.figure))
+                fig_dict = self.get_dict_from_fig(plot_dict[index].canvas.figure)
+                if getattr(plot_dict[index], "superplot", None) is not None:
+                    fig_dict["superplot"] = True
+                plot_list.append(fig_dict)
             except BaseException as e:
                 # Catch all errors in here so it can fail silently-ish, if this is happening on all plots make sure you
                 # have built your project.
@@ -68,8 +71,6 @@ class PlotsSaver(object):
                     if "norm" in args_dict.keys() and isinstance(args_dict["norm"], Normalize):
                         norm_dict = self._convert_normalise_obj_to_dict(args_dict["norm"])
                         args_dict["norm"] = norm_dict
-                    if "axis" in args_dict.keys():
-                        args_dict["axis"] = args_dict["axis"].value
                 create_list.append(creation_args)
                 self.figure_creation_args = creation_args
             except AttributeError:
