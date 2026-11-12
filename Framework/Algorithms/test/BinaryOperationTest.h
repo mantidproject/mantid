@@ -51,9 +51,6 @@ public:
     return BinaryOperation::checkSizeCompatibility(ws1, ws2);
   }
 
-  auto getLHSEventWorkspacePointerCast() { return m_elhs; }
-  auto getOutputEventWorkspacePointerCast() { return m_eout; }
-
 private:
   // Unhide base class method to avoid Intel compiler warning
   using BinaryOperation::checkSizeCompatibility;
@@ -283,10 +280,9 @@ public:
 
     TS_ASSERT(eventHelper.isExecuted());
 
-    // Given BinaryOp was able to cast the LHS to an event workspace, it should have also cast the output to
-    // an event workspace.
-    TS_ASSERT(eventHelper.getLHSEventWorkspacePointerCast());
-    TS_ASSERT(eventHelper.getOutputEventWorkspacePointerCast());
+    // Given the LHS is an event workspace, the output should also be an event workspace.
+    auto eventOutput = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace);
+    TS_ASSERT(std::dynamic_pointer_cast<EventWorkspace>(eventOutput));
 
     // Second call to BinaryOp. f(WS2D, SVWS) = WS2D using the same output workspace as before.
     BinaryOpHelper helper;
@@ -299,9 +295,12 @@ public:
 
     TS_ASSERT(helper.isExecuted());
 
-    // Given BinaryOp shouldn't have been able cast the LHS to an event workspace,
-    // it shouldn't have also cast the output an event workspace.
-    TS_ASSERT(!helper.getLHSEventWorkspacePointerCast())
-    TS_ASSERT(!helper.getOutputEventWorkspacePointerCast())
+    // Given the LHS is not an event workspace, the output should not be an event workspace,
+    // even though the previous output with the same name was.
+    auto output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSpace);
+    TS_ASSERT(output);
+    TS_ASSERT(!std::dynamic_pointer_cast<EventWorkspace>(output));
+
+    AnalysisDataService::Instance().remove(outputSpace);
   }
 };

@@ -282,6 +282,14 @@ void BinaryOperation::exec() {
 
   // Assign the result to the output workspace property
   setProperty(outputPropName(), m_out);
+
+  // Release workspace references held by this instance
+  m_lhs.reset();
+  m_elhs.reset();
+  m_rhs.reset();
+  m_erhs.reset();
+  m_out.reset();
+  m_eout.reset();
 }
 
 /**
