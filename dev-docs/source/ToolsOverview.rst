@@ -8,6 +8,7 @@ Tools Overview
    :hidden:
 
    AlgorithmProfiler
+   Graphify
 
 
 .. _class_maker_py:
@@ -297,3 +298,9 @@ and configuring the available
 `Graphviz options <https://cmake.org/cmake/help/latest/module/CMakeGraphVizOptions.html>`_.
 See the `dot documentation <https://graphviz.org/documentation/>`_
 for more options on converting the diagrams to something more easily viewed.
+
+Code knowledge graph: graphify
+------------------------------
+
+Graphify builds a queryable graph of the classes, functions and calls in the source tree.
+See :ref:`Graphify` for how it is configured for Mantid and how to use it.
