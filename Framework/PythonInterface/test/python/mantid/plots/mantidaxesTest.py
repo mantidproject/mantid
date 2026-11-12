@@ -287,6 +287,15 @@ class MantidAxesTest(unittest.TestCase):
         ax.plot(np.arange(10), np.arange(10), np.arange(10))
         ax.plot_wireframe(self.ws2d_histo)
 
+    def test_3d_workspace_plots_are_recorded_in_creation_args(self):
+        ax = plt.figure().add_subplot(111, projection="mantid3d")
+        ax.plot_wireframe(self.ws2d_histo)
+        ax.plot_surface(self.ws2d_histo)
+
+        name = self.ws2d_histo.name()
+        expected = [{"workspaces": name, "function": "plot_wireframe"}, {"workspaces": name, "function": "plot_surface"}]
+        self.assertEqual(expected, ax.creation_args)
+
     def test_fail(self):
         fig, ax = plt.subplots()
         self.assertRaises(Exception, ax.plot, self.ws2d_histo, "rs", specNum=1)

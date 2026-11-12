@@ -173,6 +173,16 @@ class PlotsLoaderTest(unittest.TestCase):
         self.assertEqual(MantidAxType.BIN, self.plots_loader.workspace_plot_func.call_args[0][3]["axis"])
         fig.canvas.manager.superplot_toggle.assert_called_once()
 
+    def test_make_fig_recreates_3d_plot_from_its_workspaces(self):
+        mock_plot_surface = mock.Mock()
+        plot_dict = {"label": "plot", "creationArguments": [[{"workspaces": "ws", "function": "plot_surface"}]]}
+
+        with mock.patch.dict("mantidqt.project.plotsloader.PLOT_FUNCTIONS_3D", {"plot_surface": mock_plot_surface}):
+            self.plots_loader.make_fig(plot_dict)
+
+        mock_plot_surface.assert_called_once_with(["ws"])
+        mock_plot_surface.return_value.canvas.manager.set_window_title.assert_called_once_with("plot")
+
     def test_restore_fig_properties(self):
         matplotlib.figure.Figure.set_figheight = mock.MagicMock()
         matplotlib.figure.Figure.set_figwidth = mock.MagicMock()

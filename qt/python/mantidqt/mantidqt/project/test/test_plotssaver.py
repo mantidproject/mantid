@@ -7,6 +7,7 @@
 #  This file is part of the mantidqt package
 #
 import matplotlib
+import matplotlib.pyplot as plt
 import unittest
 from unittest import mock
 
@@ -213,6 +214,15 @@ class PlotsSaverTest(unittest.TestCase):
         return_value = self.plot_saver.get_dict_from_fig(self.fig)
 
         self.assertEqual(MantidAxType.BIN.value, return_value["creationArguments"][0][0]["axis"])
+
+    def test_get_dict_from_fig_saves_creation_args_of_3d_plot(self):
+        fig, ax = plt.subplots(subplot_kw={"projection": "mantid3d"})
+        ax.plot_surface(ADS.retrieve("ws1"))
+
+        return_value = self.plot_saver.get_dict_from_fig(fig)
+
+        self.assertEqual([[{"workspaces": "ws1", "function": "plot_surface"}]], return_value["creationArguments"])
+        self.assertEqual([], return_value["axes"])
 
     def test_save_plots_records_an_open_superplot(self):
         self.fig.axes[0].creation_args = [{"specNum": 2, "function": "plot"}]

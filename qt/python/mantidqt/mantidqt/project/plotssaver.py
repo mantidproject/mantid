@@ -12,6 +12,7 @@ from matplotlib import ticker
 from matplotlib.image import AxesImage
 
 from mantid import logger
+from mantid.plots import MantidAxes3D
 from mantid.plots.legend import LegendProperties
 from mantid.plots.utility import MantidAxType
 
@@ -76,7 +77,9 @@ class PlotsSaver(object):
             except AttributeError:
                 logger.debug("Axis had an axis without creation_args - Common with a Colorfill plot")
                 continue
-            axes_list.append(self.get_dict_for_axes(ax))
+            # 3D axes are recreated from their creation_args alone
+            if not isinstance(ax, MantidAxes3D):
+                axes_list.append(self.get_dict_for_axes(ax))
 
         if create_list and axes_list:
             self._add_normalisation_kwargs(create_list, axes_list)
