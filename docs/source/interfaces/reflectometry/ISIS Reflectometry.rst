@@ -998,7 +998,10 @@ for a description of the supported formats.
 |                               | non-stitched datasets.                               |
 |                               | Each dataset in the file is given the model          |
 |                               | description entered in the ``Model`` column of the   |
-|                               | search results table on the Runs tab for its run. To |
+|                               | search results table on the Runs tab for its run. A  |
+|                               | dataset made from several runs, such as a summed row |
+|                               | or a stitched group, is only given a model if all of |
+|                               | its runs have the same model. To                     |
 |                               | use the same model for every dataset instead, enter  |
 |                               | it in the ``Model Description`` box, which overrides |
 |                               | the search results table.                            |

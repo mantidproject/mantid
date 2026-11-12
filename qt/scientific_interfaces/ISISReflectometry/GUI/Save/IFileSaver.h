@@ -21,31 +21,38 @@ enum class NamedFormat { Custom, ThreeColumn, ANSTO, ILLCosmos, ORSOAscii, ORSON
 class MANTIDQT_ISISREFLECTOMETRY_DLL FileFormatOptions {
 public:
   FileFormatOptions(NamedFormat format, std::string prefix, bool includeHeader, std::string separator,
-                    bool includeQResolution, bool includeAdditionalColumns, bool saveToSingleFile, std::string model,
-                    bool model_validation, std::map<std::string, std::string> runModels = {});
+                    bool includeQResolution, bool includeAdditionalColumns, bool saveToSingleFile);
   bool shouldIncludeHeader() const;
   bool shouldIncludeQResolution() const;
   bool shouldIncludeAdditionalColumns() const;
   bool shouldSaveToSingleFile() const;
   std::string const &separator() const;
   std::string const &prefix() const;
-  std::string const &model() const;
-  std::map<std::string, std::string> const &runModels() const;
-  bool validate() const;
   NamedFormat format() const;
   bool isORSOFormat() const;
 
 private:
   NamedFormat m_format;
   std::string m_prefix;
-  std::string m_model;
-  std::map<std::string, std::string> m_runModels;
-  bool m_model_validation;
   bool m_includeHeader;
   std::string m_separator;
   bool m_includeQResolution;
   bool m_includeAdditionalCols;
   bool m_saveToSingleFile;
+};
+
+/** The sample model descriptions to include when saving to an ORSO format */
+class MANTIDQT_ISISREFLECTOMETRY_DLL ORSOModelOptions {
+public:
+  ORSOModelOptions(std::map<std::string, std::string> workspaceModels = {}, bool validate = false);
+  std::map<std::string, std::string> const &workspaceModels() const;
+  std::string model(std::string const &workspaceName) const;
+  std::vector<std::string> models(std::vector<std::string> const &workspaceNames) const;
+  bool validate() const;
+
+private:
+  std::map<std::string, std::string> m_workspaceModels;
+  bool m_validate;
 };
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL InvalidSavePath : public std::runtime_error {
@@ -61,10 +68,16 @@ private:
 inline bool operator==(const FileFormatOptions &lhs, const FileFormatOptions &rhs) {
   return lhs.format() == rhs.format() && lhs.shouldIncludeHeader() == rhs.shouldIncludeHeader() &&
          lhs.shouldIncludeQResolution() == rhs.shouldIncludeQResolution() && lhs.separator() == rhs.separator() &&
-         lhs.prefix() == rhs.prefix() && lhs.runModels() == rhs.runModels();
+         lhs.prefix() == rhs.prefix();
 }
 
 inline bool operator!=(const FileFormatOptions &lhs, const FileFormatOptions &rhs) { return !(lhs == rhs); }
+
+inline bool operator==(const ORSOModelOptions &lhs, const ORSOModelOptions &rhs) {
+  return lhs.workspaceModels() == rhs.workspaceModels() && lhs.validate() == rhs.validate();
+}
+
+inline bool operator!=(const ORSOModelOptions &lhs, const ORSOModelOptions &rhs) { return !(lhs == rhs); }
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL InvalidWorkspaceName : public std::runtime_error {
 public:
@@ -80,7 +93,8 @@ class IFileSaver {
 public:
   virtual bool isValidSaveDirectory(std::string const &filePath) const = 0;
   virtual void save(std::string const &saveDirectory, std::vector<std::string> const &workspaceNames,
-                    std::vector<std::string> const &logParameters, FileFormatOptions const &inputParameters) const = 0;
+                    std::vector<std::string> const &logParameters, FileFormatOptions const &inputParameters,
+                    ORSOModelOptions const &modelOptions) const = 0;
   virtual ~IFileSaver() = default;
 };
 } // namespace ISISReflectometry

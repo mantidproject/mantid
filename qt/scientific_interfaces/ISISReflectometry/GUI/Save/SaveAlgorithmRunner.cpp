@@ -37,7 +37,6 @@ void SaveAlgorithmRunner::runSaveAsciiAlgorithm(const Mantid::API::Workspace_spt
 void SaveAlgorithmRunner::runSaveORSOAlgorithm(std::vector<std::string> const &workspaceNames,
                                                std::string const &savePath, const bool &includeQResolution,
                                                const bool &includeAdditionalColumns,
-                                               std::string const &modelDescription,
                                                std::vector<std::string> const &modelDescriptions,
                                                const bool &validateModel) const {
   auto alg = Mantid::API::AlgorithmManager::Instance().create("SaveISISReflectometryORSO");
@@ -48,7 +47,6 @@ void SaveAlgorithmRunner::runSaveORSOAlgorithm(std::vector<std::string> const &w
   alg->setProperty("Filename", savePath);
   alg->setProperty("WriteResolution", includeQResolution);
   alg->setProperty("IncludeAdditionalColumns", includeAdditionalColumns);
-  alg->setProperty("ModelDescription", modelDescription);
   alg->setProperty("ModelDescriptions", modelDescriptions);
   alg->setProperty("ValidateModel", validateModel);
   alg->execute();

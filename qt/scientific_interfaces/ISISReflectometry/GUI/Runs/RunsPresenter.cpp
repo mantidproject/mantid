@@ -30,6 +30,43 @@ using namespace MantidQt::MantidWidgets;
 
 namespace {
 Mantid::Kernel::Logger g_log("Reflectometry RunsPresenter");
+
+/** Get the model shared by the given runs
+ * @return : the model, or an empty string if no run has a model or the runs have different models
+ */
+std::string sharedModel(std::vector<std::string> const &runNumbers,
+                        std::map<std::string, std::string> const &runModels) {
+  std::string model;
+  for (auto const &runNumber : runNumbers) {
+    auto const it = runModels.find(runNumber);
+    if (it == runModels.cend())
+      continue;
+    if (!model.empty() && model != it->second)
+      return "";
+    model = it->second;
+  }
+  return model;
+}
+
+/** Get the model for an output workspace of a group or one of its rows
+ * @return : the model, or an empty string if the workspace is not an output of this group or there is no single model
+ */
+std::string modelForGroupOutput(MantidQt::CustomInterfaces::ISISReflectometry::Group const &group,
+                                std::string const &workspaceName, std::map<std::string, std::string> const &runModels) {
+  auto const &postprocessedNames = group.postprocessedWorkspaceNames();
+  auto const isGroupOutput =
+      std::find(postprocessedNames.cbegin(), postprocessedNames.cend(), workspaceName) != postprocessedNames.cend();
+  std::vector<std::string> runNumbers;
+  for (auto const &row : group.rows()) {
+    if (!row)
+      continue;
+    if (row->hasOutputWorkspace(workspaceName))
+      return sharedModel(row->runNumbers(), runModels);
+    if (isGroupOutput)
+      runNumbers.insert(runNumbers.end(), row->runNumbers().cbegin(), row->runNumbers().cend());
+  }
+  return sharedModel(runNumbers, runModels);
+}
 } // namespace
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
@@ -325,14 +362,30 @@ void RunsPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
 
 std::string RunsPresenter::instrumentName() const { return mainPresenter().instrumentName(); }
 
-/** Get the model descriptions entered in the search results table
- * @return : a map of run number to model description, for all runs that have a model
+/** Get the model descriptions entered in the search results table for the runs that produced the given workspaces
+ * @param workspaceNames : the names of output workspaces from the runs table
+ * @return : a map of workspace name to model description, for all workspaces that have a single model
  */
-std::map<std::string, std::string> RunsPresenter::searchResultModels() const {
-  std::map<std::string, std::string> models;
+std::map<std::string, std::string>
+RunsPresenter::modelsForWorkspaces(std::vector<std::string> const &workspaceNames) const {
+  std::map<std::string, std::string> runModels;
   for (auto const &result : m_view->searchResults().getRows()) {
     if (result.hasModel())
-      models[result.runNumber()] = result.model();
+      runModels[result.runNumber()] = result.model();
+  }
+
+  std::map<std::string, std::string> models;
+  if (runModels.empty())
+    return models;
+
+  for (auto const &workspaceName : workspaceNames) {
+    for (auto const &group : runsTable().reductionJobs().groups()) {
+      auto const model = modelForGroupOutput(group, workspaceName, runModels);
+      if (!model.empty()) {
+        models[workspaceName] = model;
+        break;
+      }
+    }
   }
   return models;
 }

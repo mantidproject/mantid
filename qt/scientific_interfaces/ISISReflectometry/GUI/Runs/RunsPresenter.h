@@ -73,7 +73,7 @@ public:
   void setRoundPrecision(int &precision) override;
   void resetRoundPrecision() override;
   std::string instrumentName() const override;
-  std::map<std::string, std::string> searchResultModels() const override;
+  std::map<std::string, std::string> modelsForWorkspaces(std::vector<std::string> const &workspaceNames) const override;
   bool notifyChangeInstrumentRequested(std::string const &instrumentName) override;
   void notifyResumeReductionRequested() override;
   void notifyPauseReductionRequested() override;
