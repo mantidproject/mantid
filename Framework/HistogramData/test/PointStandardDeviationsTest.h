@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#define UNUSED_ARG(...) (void)(__VA_ARGS__)
+#include <concepts>
 
 #include "MantidHistogramData/PointStandardDeviations.h"
 
@@ -23,10 +23,9 @@ public:
   static void destroySuite(PointStandardDeviationsTest *suite) { delete suite; }
 
   void test_has_correct_mixins() {
-    PointStandardDeviations data;
-    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(
-        (dynamic_cast<detail::StandardDeviationVectorOf<PointStandardDeviations, HistogramDx, PointVariances> &>(
-            data))));
+    TS_ASSERT(
+        (std::derived_from<PointStandardDeviations,
+                           detail::StandardDeviationVectorOf<PointStandardDeviations, HistogramDx, PointVariances>>));
   }
 
   void test_construct_default() {

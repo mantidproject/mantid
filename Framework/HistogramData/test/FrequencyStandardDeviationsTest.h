@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#define UNUSED_ARG(...) (void)(__VA_ARGS__)
+#include <concepts>
 
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/CountStandardDeviations.h"
@@ -27,10 +27,9 @@ public:
   static void destroySuite(FrequencyStandardDeviationsTest *suite) { delete suite; }
 
   void test_has_correct_mixins() {
-    FrequencyStandardDeviations data;
-    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(
-        (dynamic_cast<detail::StandardDeviationVectorOf<FrequencyStandardDeviations, HistogramE, FrequencyVariances> &>(
-            data))));
+    TS_ASSERT((std::derived_from<
+               FrequencyStandardDeviations,
+               detail::StandardDeviationVectorOf<FrequencyStandardDeviations, HistogramE, FrequencyVariances>>));
   }
 
   void test_construct_default() {

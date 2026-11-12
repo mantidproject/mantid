@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#define UNUSED_ARG(...) (void)(__VA_ARGS__)
+#include <concepts>
 
 #include "MantidHistogramData/Addable.h"
 #include "MantidHistogramData/FixedLengthVector.h"
@@ -33,11 +33,10 @@ public:
   // have the expected mixins.
 
   void test_has_correct_mixins() {
-    HistogramY y;
-    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(dynamic_cast<detail::FixedLengthVector<HistogramY> &>(y)));
-    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(dynamic_cast<detail::Addable<HistogramY> &>(y)));
-    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(dynamic_cast<detail::Offsetable<HistogramY> &>(y)));
-    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(dynamic_cast<detail::Multipliable<HistogramY> &>(y)));
-    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(dynamic_cast<detail::Scalable<HistogramY> &>(y)));
+    TS_ASSERT((std::derived_from<HistogramY, detail::FixedLengthVector<HistogramY>>));
+    TS_ASSERT((std::derived_from<HistogramY, detail::Addable<HistogramY>>));
+    TS_ASSERT((std::derived_from<HistogramY, detail::Offsetable<HistogramY>>));
+    TS_ASSERT((std::derived_from<HistogramY, detail::Multipliable<HistogramY>>));
+    TS_ASSERT((std::derived_from<HistogramY, detail::Scalable<HistogramY>>));
   }
 };

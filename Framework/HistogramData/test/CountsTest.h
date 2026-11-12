@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#define UNUSED_ARG(...) (void)(__VA_ARGS__)
+#include <concepts>
 
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Counts.h"
@@ -25,12 +25,11 @@ public:
   static void destroySuite(CountsTest *suite) { delete suite; }
 
   void test_has_correct_mixins() {
-    Counts data;
-    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG((dynamic_cast<detail::VectorOf<Counts, HistogramY> &>(data))));
-    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(dynamic_cast<detail::Addable<Counts> &>(data)));
-    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(dynamic_cast<detail::Iterable<Counts> &>(data)));
-    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(dynamic_cast<detail::Offsetable<Counts> &>(data)));
-    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(dynamic_cast<detail::Scalable<Counts> &>(data)));
+    TS_ASSERT((std::derived_from<Counts, detail::VectorOf<Counts, HistogramY>>));
+    TS_ASSERT((std::derived_from<Counts, detail::Addable<Counts>>));
+    TS_ASSERT((std::derived_from<Counts, detail::Iterable<Counts>>));
+    TS_ASSERT((std::derived_from<Counts, detail::Offsetable<Counts>>));
+    TS_ASSERT((std::derived_from<Counts, detail::Scalable<Counts>>));
   }
 
   void test_construct_default() {

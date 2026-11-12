@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#define UNUSED_ARG(...) (void)(__VA_ARGS__)
+#include <concepts>
 
 #include "MantidHistogramData/FixedLengthVector.h"
 #include "MantidHistogramData/HistogramDx.h"
@@ -29,7 +29,6 @@ public:
   // have the expected mixins.
 
   void test_has_correct_mixins() {
-    HistogramDx dx;
-    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(dynamic_cast<detail::FixedLengthVector<HistogramDx> &>(dx)));
+    TS_ASSERT((std::derived_from<HistogramDx, detail::FixedLengthVector<HistogramDx>>));
   }
 };

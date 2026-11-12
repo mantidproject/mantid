@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#define UNUSED_ARG(...) (void)(__VA_ARGS__)
+#include <concepts>
 
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Points.h"
@@ -24,11 +24,10 @@ public:
   static void destroySuite(BinEdgesTest *suite) { delete suite; }
 
   void test_has_correct_mixins() {
-    BinEdges data;
-    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG((dynamic_cast<detail::VectorOf<BinEdges, HistogramX> &>(data))));
-    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(dynamic_cast<detail::Iterable<BinEdges> &>(data)));
-    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(dynamic_cast<detail::Offsetable<BinEdges> &>(data)));
-    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(dynamic_cast<detail::Scalable<BinEdges> &>(data)));
+    TS_ASSERT((std::derived_from<BinEdges, detail::VectorOf<BinEdges, HistogramX>>));
+    TS_ASSERT((std::derived_from<BinEdges, detail::Iterable<BinEdges>>));
+    TS_ASSERT((std::derived_from<BinEdges, detail::Offsetable<BinEdges>>));
+    TS_ASSERT((std::derived_from<BinEdges, detail::Scalable<BinEdges>>));
   }
 
   void test_default_constructor() {
