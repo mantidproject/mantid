@@ -1161,7 +1161,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         rebuilds the spectrum->detector mapping from the new geometry, False preserves an
         existing (e.g. grouped) mapping and only replaces the geometry.
         """
-        idf = self.getProperty("IDFFilename").values
+        idf = self.getProperty("IDFFilename").value
         if not idf:
             return
         workspace = mtd[wsname]
