@@ -74,7 +74,7 @@ public:
                     const double packingFraction = 1, const double temperature = 300,
                     const double pressure = PhysicalConstants::StandardAtmosphere);
   /// Virtual destructor.
-  virtual ~Material() = default;
+  ~Material() = default;
 
   /// Allow an explicit attenuation profile to be loaded onto the material
   /// that overrides the standard linear absorption coefficient

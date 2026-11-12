@@ -62,7 +62,7 @@ typedef struct {
  * \li EOD end of file -1
  * \ingroup cpp_types
  */
-enum class NXstatus : const int { NX_OK = 1, NX_ERROR = 0, NX_EOD = -1 };
+enum class NXstatus : int { NX_OK = 1, NX_ERROR = 0, NX_EOD = -1 };
 
 /**
  * \ingroup c_types
@@ -118,7 +118,7 @@ constexpr int NX_BINARY{21};
  * \li UINT64 uint8_t if available on the machine
  * \ingroup cpp_types
  */
-enum class NXnumtype : const int {
+enum class NXnumtype : int {
   FLOAT32 = NX_FLOAT32,
   FLOAT64 = NX_FLOAT64,
   INT8 = NX_INT8,
