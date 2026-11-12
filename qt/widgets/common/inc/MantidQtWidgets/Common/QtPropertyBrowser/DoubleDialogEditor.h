@@ -11,7 +11,7 @@
 
 class QCheckBox;
 class QLineEdit;
-class QPushButton;
+class QToolButton;
 
 /**
  * Partially implemented string editor. It has a QLineEdit for manual editing
@@ -41,7 +41,7 @@ protected slots:
 private:
   bool eventFilter(QObject * /*obj*/, QEvent * /*evt*/) override;
   DoubleEditor *m_editor;
-  QPushButton *m_button;
+  QToolButton *m_button;
   QCheckBox *m_checkBox;
   QtProperty *m_property;
   bool m_hasOption;

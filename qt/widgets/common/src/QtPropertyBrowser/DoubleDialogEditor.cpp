@@ -13,8 +13,8 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
-#include <QPushButton>
 #include <QSettings>
+#include <QToolButton>
 
 /**
  * Constructor.
@@ -29,8 +29,9 @@ DoubleDialogEditor::DoubleDialogEditor(QtProperty *property, QWidget *parent, bo
   setFocusProxy(m_editor);
   setFocusPolicy(Qt::StrongFocus);
 
-  m_button = new QPushButton("...", this);
-  m_button->setMaximumSize(20, 1000000);
+  m_button = new QToolButton(this);
+  m_button->setText("...");
+  m_button->setFixedWidth(20);
   connect(m_button, SIGNAL(clicked()), this, SLOT(runDialog()));
   layout->addWidget(m_button);
   m_checkBox = new QCheckBox;
