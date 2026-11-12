@@ -65,7 +65,6 @@ class Prop:
     WRITE_RESOLUTION = "WriteResolution"
     INCLUDE_EXTRA_COLS = "IncludeAdditionalColumns"
     FILENAME = "Filename"
-    MODEL = "ModelDescription"
     MODEL_LIST = "ModelDescriptions"
     VALIDATION = "ValidateModel"
     META_SOURCE = "MetadataSource"
@@ -103,11 +102,11 @@ class MetadataSourceOptions:
 
 
 class ReflectometryDatasetBase:
-    def __init__(self, ws, is_ws_grp_member: bool, model: str):
+    def __init__(self, ws, is_ws_grp_member: bool):
         self._name: str = ""
         self._ws = ws
         self._is_ws_grp_member: bool = is_ws_grp_member
-        self._model: str = model
+        self._model: Optional[str] = None
         self._reduction_timestamp: datetime = None
         self._is_stitched: bool = False
         self._q_conversion_theta: Optional[float] = None
@@ -202,7 +201,7 @@ class ReflectometryDatasetBase:
         return self._resolution
 
     @property
-    def model(self) -> str:
+    def model(self) -> Optional[str]:
         return self._model
 
     @name.setter
@@ -270,10 +269,15 @@ class ReflectometryDatasetBase:
     def resolution(self, resolution: Optional[float]) -> None:
         self._resolution = resolution
 
+    @model.setter
+    @check_read_only
+    def model(self, model: Optional[str]) -> None:
+        self._model = model
+
 
 class ReflectometryDatasetManual(ReflectometryDatasetBase):
-    def __init__(self, ws, is_ws_grp_member: bool, model: str):
-        super(ReflectometryDatasetManual, self).__init__(ws, is_ws_grp_member, model)
+    def __init__(self, ws, is_ws_grp_member: bool):
+        super(ReflectometryDatasetManual, self).__init__(ws, is_ws_grp_member)
         self._name = ws.name()
 
     def _read_only(self) -> bool:
@@ -303,8 +307,8 @@ class ReflectometryDatasetHistory(ReflectometryDatasetBase):
     def _read_only(self) -> bool:
         return True
 
-    def __init__(self, ws, is_ws_grp_member: bool, model: str, preferred_q_conversion_method: str = REF_ROI_ALG):
-        super(ReflectometryDatasetHistory, self).__init__(ws, is_ws_grp_member, model)
+    def __init__(self, ws, is_ws_grp_member: bool, preferred_q_conversion_method: str = REF_ROI_ALG):
+        super(ReflectometryDatasetHistory, self).__init__(ws, is_ws_grp_member)
         self._q_conversion_history = None
         self._preferred_q_conversion_method = preferred_q_conversion_method
         self._stitch_history = None
@@ -605,10 +609,8 @@ class ReflectometryDatasetHybrid(ReflectometryDatasetHistory, ReflectometryDatas
     a chance to manually enter any remaining properties.
     """
 
-    def __init__(
-        self, ws, is_ws_grp_member: bool, model: str, preferred_q_conversion_method: str = ReflectometryDatasetHistory.REF_ROI_ALG
-    ):
-        super(ReflectometryDatasetHybrid, self).__init__(ws, is_ws_grp_member, model, preferred_q_conversion_method)
+    def __init__(self, ws, is_ws_grp_member: bool, preferred_q_conversion_method: str = ReflectometryDatasetHistory.REF_ROI_ALG):
+        super(ReflectometryDatasetHybrid, self).__init__(ws, is_ws_grp_member, preferred_q_conversion_method)
 
     def _read_only(self):
         return False
@@ -761,24 +763,20 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         )
 
         self.declareProperty(
-            name=Prop.MODEL,
-            defaultValue="",
-            direction=Direction.Input,
-            doc=f"The model description of the sample. Used for any dataset that does not have an entry in {Prop.MODEL_LIST}.",
-        )
-
-        self.declareProperty(
             StringArrayProperty(Prop.MODEL_LIST, values=[]),
-            doc=f"A list of model descriptions, one for each workspace in {Prop.WORKSPACE_LIST}. "
-            f"An empty entry falls back to the {Prop.MODEL} value.",
+            doc=f"A list of sample model descriptions, one for each workspace in {Prop.WORKSPACE_LIST}. "
+            "A workspace with an empty entry is saved without a model. "
+            f"Ignored when using the '{MetadataSourceOptions.FROM_HISTORY}' metadata source.",
         )
+        self.setPropertySettings(Prop.MODEL_LIST, manual_metadata_condition)
 
         self.declareProperty(
             name=Prop.VALIDATION,
             defaultValue=False,
             direction=Direction.Input,
-            doc=f"Whether or not to validate the model descriptions provided to `{Prop.MODEL}` and `{Prop.MODEL_LIST}`.",
+            doc=f"Whether or not to validate the model descriptions provided to `{Prop.MODEL_LIST}`.",
         )
+        self.setPropertySettings(Prop.VALIDATION, manual_metadata_condition)
 
     def validateInputs(self):
         """Return a dictionary containing issues found in properties."""
@@ -926,25 +924,26 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         dataset_list.sort(key=lambda refl_dataset: refl_dataset.is_stitched)
         return dataset_list
 
-    def _get_model_for_each_workspace(self, num_workspaces: int) -> List[str]:
-        default_model = self.getProperty(Prop.MODEL).value
+    def _get_model_for_each_workspace(self, num_workspaces: int) -> List[Optional[str]]:
         model_list = self.getProperty(Prop.MODEL_LIST).value
         if len(model_list) != num_workspaces:
-            return [default_model] * num_workspaces
-        return [model or default_model for model in model_list]
+            return [None] * num_workspaces
+        return [model or None for model in model_list]
 
     def _create_single_refl_dataset(self, ws, is_child, model, metadata_dict=None) -> ReflectometryDatasetBase:
         match self.getPropertyValue(Prop.META_SOURCE):
             case MetadataSourceOptions.FROM_HISTORY:
-                return ReflectometryDatasetHistory(ws, is_child, model, self.getPropertyValue(Prop.Q_CONVERT_METHOD))
+                return ReflectometryDatasetHistory(ws, is_child, self.getPropertyValue(Prop.Q_CONVERT_METHOD))
             case MetadataSourceOptions.HYBRID:
-                dataset = ReflectometryDatasetHybrid(ws, is_child, model, self.getPropertyValue(Prop.Q_CONVERT_METHOD))
+                dataset = ReflectometryDatasetHybrid(ws, is_child, self.getPropertyValue(Prop.Q_CONVERT_METHOD))
                 use_default = False
             case MetadataSourceOptions.MANUAL:
-                dataset = ReflectometryDatasetManual(ws, is_child, model)
+                dataset = ReflectometryDatasetManual(ws, is_child)
                 use_default = True
             case _:
                 raise RuntimeError("An invalid metadata source was given.")
+
+        dataset.model = model
 
         def set_simple_dataset_value_from_property(dataset_attr: str, value, alg_prop: str) -> None:
             if use_default or not self.getProperty(alg_prop).isDefault:

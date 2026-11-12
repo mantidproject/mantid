@@ -70,11 +70,12 @@ Model description
 -----------------
 
 A model description of the sample, for example ``air | Ni 100 | SiO2 0.5 | Si``, can be included in the header of each dataset.
-The ``ModelDescription`` property sets the same model for every dataset in the file.
-To set a different model for each workspace, pass a list to ``ModelDescriptions`` with one entry for each workspace in ``WorkspaceList``.
+To include models, pass a list to ``ModelDescriptions`` with one entry for each workspace in ``WorkspaceList``.
 All the datasets created from a workspace group use the entry for that group.
-An empty entry in ``ModelDescriptions`` falls back to the ``ModelDescription`` value.
+A workspace with an empty entry is saved without a model.
 If ``ValidateModel`` is set to ``True`` then the syntax of each model is checked using the orsopy library.
+The model is not stored in the workspace history, so ``ModelDescriptions`` is only used with the ``HistoryWherePossible`` and ``Manual`` metadata sources.
+It is ignored with the ``History`` metadata source.
 
 Data values
 -----------
