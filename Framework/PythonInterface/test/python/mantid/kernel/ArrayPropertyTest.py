@@ -159,7 +159,7 @@ class ArrayPropertyTest(unittest.TestCase):
     def test_uint32_array_property_holds_unsigned_int_values(self):
         arr = UInt32ArrayProperty("indices", [1, 2, 5], NullValidator(), Direction.Input)
         self._check_object_attributes(arr, "indices", Direction.Input, length=3)
-        self.assertEqual(arr.dtype(), "I")
+        self.assertEqual(arr.dtype(), "i")
         self.assertEqual(arr.value.dtype, np.uint32)
         np.testing.assert_array_equal(arr.value, [1, 2, 5])
 

@@ -17745,6 +17745,7 @@ def SaveISISReflectometryORSO(
     SecondTransmissionFileList: _Str1DArray | str | None = ...,
     FloodCorrectionSource: _Str1DArray | str | None = ...,
     CalibrationFile: str | None = ...,
+    PolarizationEfficienciesFile: str | None = ...,
     WriteResolution: bool | str | None = ...,
     IncludeAdditionalColumns: bool | str | None = ...,
     ModelDescription: str | None = ...,
