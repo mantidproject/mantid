@@ -1,2 +1,3 @@
 - Opening a saved project now reopens superplots, bin plots, 3D surface and wireframe plots and :ref:`sliceviewer` windows. These windows open with their default settings rather than the settings they had when the project was saved.
 - Saving a project with ``Save Altered Workspaces Only`` selected no longer gives an error or removes open plots from the plots list.
+- Saving a project no longer fails when an open plot of a workspace was created with numpy array arguments, such as ``levels=np.linspace(0, 10, 5)`` for a contour plot. A plot that cannot be saved is now skipped with a warning, rather than preventing the whole project from being saved.

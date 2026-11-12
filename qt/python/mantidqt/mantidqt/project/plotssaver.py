@@ -7,7 +7,10 @@
 #  This file is part of the mantidqt package
 #
 from copy import deepcopy
+import json
+
 import matplotlib.axis
+import numpy as np
 from matplotlib import ticker
 from matplotlib.image import AxesImage
 
@@ -34,6 +37,8 @@ class PlotsSaver(object):
                 fig_dict = self.get_dict_from_fig(plot_dict[index].canvas.figure)
                 if getattr(plot_dict[index], "superplot", None) is not None:
                     fig_dict["superplot"] = True
+                # A plot that cannot be written to the project file is skipped, rather than failing the whole save
+                json.dumps(fig_dict)
                 plot_list.append(fig_dict)
             except BaseException as e:
                 # Catch all errors in here so it can fail silently-ish, if this is happening on all plots make sure you
@@ -54,6 +59,21 @@ class PlotsSaver(object):
         return norm_dict
 
     @staticmethod
+    def _convert_numpy_to_json_types(value):
+        """
+        Recursively replace numpy arrays and scalars, which cannot be json serialised, with their python equivalents
+        """
+        if isinstance(value, np.ndarray):
+            return value.tolist()
+        if isinstance(value, np.generic):
+            return value.item()
+        if isinstance(value, dict):
+            return {key: PlotsSaver._convert_numpy_to_json_types(item) for key, item in value.items()}
+        if isinstance(value, (list, tuple)):
+            return [PlotsSaver._convert_numpy_to_json_types(item) for item in value]
+        return value
+
+    @staticmethod
     def _add_normalisation_kwargs(cargs_list, axes_list):
         for ax_cargs, ax_dict in zip(cargs_list[0], axes_list):
             is_norm = ax_dict.pop("_is_norm")
@@ -72,6 +92,7 @@ class PlotsSaver(object):
                     if "norm" in args_dict.keys() and isinstance(args_dict["norm"], Normalize):
                         norm_dict = self._convert_normalise_obj_to_dict(args_dict["norm"])
                         args_dict["norm"] = norm_dict
+                creation_args = [self._convert_numpy_to_json_types(args_dict) for args_dict in creation_args]
                 create_list.append(creation_args)
                 self.figure_creation_args = creation_args
             except AttributeError:

@@ -6,8 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
+import json
 import matplotlib
 import matplotlib.pyplot as plt
+import numpy as np
 import unittest
 from unittest import mock
 
@@ -223,6 +225,47 @@ class PlotsSaverTest(unittest.TestCase):
 
         self.assertEqual([[{"workspaces": "ws1", "function": "plot_surface"}]], return_value["creationArguments"])
         self.assertEqual([], return_value["axes"])
+
+    def test_get_dict_from_fig_converts_numpy_array_arguments_to_lists(self):
+        fig, ax = plt.subplots(subplot_kw={"projection": "mantid"})
+        ax.contour(ADS.retrieve("ws1"), levels=np.linspace(0, 10, 3), colors="white", alpha=0.5)
+
+        return_value = self.plot_saver.get_dict_from_fig(fig)
+
+        levels = return_value["creationArguments"][0][0]["levels"]
+        self.assertIsInstance(levels, list)
+        self.assertEqual([0.0, 5.0, 10.0], levels)
+        json.dumps(return_value)
+
+    def test_get_dict_from_fig_converts_nested_numpy_values(self):
+        self.fig.axes[0].creation_args = [
+            {"function": "axhline", "args": (np.float32(1.5),), "kwargs": {"dashes": [np.int64(2), np.array([1, 2])]}}
+        ]
+
+        return_value = self.plot_saver.get_dict_from_fig(self.fig)
+
+        creation_args = return_value["creationArguments"][0][0]
+        self.assertEqual([1.5], creation_args["args"])
+        self.assertIs(float, type(creation_args["args"][0]))
+        self.assertEqual({"dashes": [2, [1, 2]]}, creation_args["kwargs"])
+        self.assertIs(int, type(creation_args["kwargs"]["dashes"][0]))
+        json.dumps(return_value)
+
+    def test_save_plots_skips_plot_that_cannot_be_serialised(self):
+        fig, ax = plt.subplots(subplot_kw={"projection": "mantid"})
+        ax.creation_args = [{"specNum": 2, "function": "plot", "not_json": object()}]
+        self.fig.axes[0].creation_args = [{"specNum": 2, "function": "plot"}]
+        bad_plot, good_plot = mock.Mock(superplot=None), mock.Mock(superplot=None)
+        bad_plot.canvas.figure = fig
+        good_plot.canvas.figure = self.fig
+
+        with mock.patch("mantidqt.project.plotssaver.logger") as mock_logger:
+            return_value = self.plot_saver.save_plots({1: bad_plot, 2: good_plot})
+
+        self.assertEqual(1, len(return_value))
+        self.assertEqual(self.fig._label, return_value[0]["label"])
+        mock_logger.warning.assert_called_once()
+        self.assertIn("Plot: 1 was not saved", mock_logger.warning.call_args[0][0])
 
     def test_save_plots_records_an_open_superplot(self):
         self.fig.axes[0].creation_args = [{"specNum": 2, "function": "plot"}]
