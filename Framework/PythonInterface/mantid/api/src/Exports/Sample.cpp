@@ -16,6 +16,7 @@
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/return_internal_reference.hpp>
 
 using Mantid::API::Sample;
 using Mantid::Geometry::IObject;
@@ -72,7 +73,7 @@ void export_Sample() {
       .def("hasEnvironment", &Sample::hasEnvironment, arg("self"),
            "Returns True if the sample has an environment defined")
       .def("hasShape", &Sample::hasShape, arg("self"), "Returns True if the sample has a shape defined")
-      .def("getEnvironment", &Sample::getEnvironment, return_value_policy<reference_existing_object>(), arg("self"),
+      .def("getEnvironment", &Sample::getEnvironment, return_internal_reference<>(), arg("self"),
            "Returns the sample environment")
       .def("setEnvironment", &Sample::setEnvironment, (arg("self"), arg("env")), "Set the sample environment")
       // -------------------------Operators

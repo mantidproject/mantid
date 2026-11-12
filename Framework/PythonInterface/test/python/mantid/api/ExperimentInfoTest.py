@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import gc
 import unittest
 
 import numpy as np
@@ -23,6 +24,7 @@ from mantid.simpleapi import (
     LoadEmptyInstrument,
     MoveInstrumentComponent,
     RotateInstrumentComponent,
+    SetSample,
 )
 
 
@@ -183,6 +185,35 @@ class ExperimentInfoTest(unittest.TestCase):
         np.testing.assert_allclose(applied, rotation, atol=1e-6)
         # a view of the temporary shape's matrix would be read-only
         self.assertTrue(applied.flags.writeable)
+
+    @staticmethod
+    def _ws_with_a_sample_in_a_can():
+        """An upright cylinder in an upright can, so a quarter turn about z visibly lays both down."""
+        ws = CreateSampleWorkspace()
+        SetSample(
+            ws,
+            Geometry={"Shape": "Cylinder", "Height": 4.0, "Radius": 1.0, "Center": [0.0, 0.0, 0.0]},
+            Material={"ChemicalFormula": "V", "NumberDensity": 0.07},
+            ContainerGeometry={"Shape": "HollowCylinder", "Height": 4.0, "InnerRadius": 1.0, "OuterRadius": 1.3, "Center": [0.0, 0.0, 0.0]},
+            ContainerMaterial={"ChemicalFormula": "Al", "NumberDensity": 0.06},
+        )
+        ws.run().getGoniometer().setR(np.array([[0.0, -1.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, 1.0]]))
+        return ws
+
+    def _assert_upright(self, shape):
+        self.assertAlmostEqual(shape.getBoundingBox().width().Y(), 0.04, places=6)
+
+    def test_a_sample_in_an_environment_is_left_as_defined(self):
+        ws = self._ws_with_a_sample_in_a_can()
+
+        self._assert_upright(ws.getLabFrameSampleShape())
+        self._assert_upright(ws.getLabFrameSample().getShape())
+
+    def test_the_lab_frame_environment_outlives_the_temporary_sample(self):
+        container_shape = self._ws_with_a_sample_in_a_can().getLabFrameSample().getEnvironment().getContainer().getShape()
+        gc.collect()
+
+        self._assert_upright(container_shape)
 
 
 if __name__ == "__main__":

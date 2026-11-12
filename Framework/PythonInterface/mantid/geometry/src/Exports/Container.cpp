@@ -9,6 +9,7 @@
 
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/return_internal_reference.hpp>
 
 using Mantid::Geometry::Container;
 using Mantid::Geometry::IObject;
@@ -21,5 +22,5 @@ void export_Container() {
 
   class_<Container, boost::python::bases<IObject>, boost::noncopyable>("Container", no_init)
       .def("getShape", &Container::getShape, arg("self"), "Returns a shape of a Sample object.",
-           return_value_policy<reference_existing_object>());
+           return_internal_reference<>());
 }
