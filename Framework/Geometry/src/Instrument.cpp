@@ -9,7 +9,6 @@
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ComponentInfoBankHelpers.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/GridDetectorPixel.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
@@ -641,25 +640,6 @@ bool Instrument::isMonitor(const std::set<detid_t> &detector_ids) const {
 
   return std::any_of(detector_ids.cbegin(), detector_ids.cend(),
                      [this](const auto detector_id) { return isMonitor(detector_id); });
-}
-
-/**
- * Returns a pointer to the geometrical object for the given set of IDs
- * @param det_ids :: A list of detector ids
- *  @returns A pointer to the detector object
- *  @throw   NotFoundError If no detector is found for the detector ID given
- */
-IDetector_const_sptr Instrument::getDetectorG(const std::set<detid_t> &det_ids) const {
-  const size_t ndets(det_ids.size());
-  if (ndets == 1) {
-    return this->getDetector(*det_ids.begin());
-  } else {
-    std::shared_ptr<DetectorGroup> det_group = std::make_shared<DetectorGroup>();
-    for (const auto detID : det_ids) {
-      det_group->addDetector(this->getDetector(detID));
-    }
-    return det_group;
-  }
 }
 
 /**

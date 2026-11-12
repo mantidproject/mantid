@@ -14,7 +14,6 @@
 #include "MantidGeometry/IDetector_fwd.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -261,8 +260,7 @@ double GetEi2::calculateEi(const double initial_guess) {
  * passed
  *  @param ws_index :: The workspace index of the detector
  *  @param spectrumInfo :: A spectrum info object for the input workspace
- *  @return The distance between the source and the given detector (or
- * DetectorGroup)
+ *  @return The mean distance between the source and the detector(s) of the spectrum
  *  @throw runtime_error if there is a problem
  */
 double GetEi2::getDistanceFromSource(size_t ws_index, const SpectrumInfo &spectrumInfo) const {

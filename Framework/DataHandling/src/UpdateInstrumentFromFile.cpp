@@ -14,7 +14,6 @@
 #include "MantidDataHandling/LoadRawHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidNexus/NexusDescriptorLazy.h"

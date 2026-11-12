@@ -72,9 +72,6 @@ public:
   bool isMonitor(const detid_t &detector_id) const;
   bool isMonitor(const std::set<detid_t> &detector_ids) const;
 
-  /// Returns a pointer to the geometrical object for the given set of IDs
-  IDetector_const_sptr getDetectorG(const std::set<detid_t> &det_ids) const;
-
   /// Returns a list of Detectors for the given detectors ids
   std::vector<IDetector_const_sptr> getDetectors(const std::vector<detid_t> &det_ids) const;
 
