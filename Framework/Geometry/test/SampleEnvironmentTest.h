@@ -113,7 +113,64 @@ public:
     TS_ASSERT_THROWS(SampleEnvironment("TestKit", std::make_shared<Container>(baked)), const std::invalid_argument &);
   }
 
+  void test_In_Lab_Frame_Turns_Mounted_Components_And_Shares_Fixed_Ones() {
+    using Mantid::Kernel::V3D;
+    const auto kit = createOffsetKit();
+
+    const auto lab = kit->inLabFrame(quarterTurnAboutZ());
+
+    // a quarter turn about z takes +x to +y
+    assertCentredOn(lab->getContainer(), V3D(0, 2, 0));
+    TS_ASSERT_EQUALS(lab->getComponentPtr(1), kit->getComponentPtr(1));
+    assertCentredOn(lab->getComponent(2), V3D(0, 2, 0));
+    TS_ASSERT_EQUALS(lab->name(), "OffsetKit");
+    TS_ASSERT_EQUALS(lab->containerID(), "can");
+    TS_ASSERT(lab->isOnGoniometer(0) && !lab->isOnGoniometer(1) && lab->isOnGoniometer(2));
+    // and the original is untouched
+    assertCentredOn(kit->getContainer(), V3D(2, 0, 0));
+  }
+
+  void test_Turning_A_Lab_Frame_View_Starts_From_The_Original() {
+    const auto kit = createOffsetKit();
+
+    const auto twice = kit->inLabFrame(quarterTurnAboutZ())->inLabFrame(quarterTurnAboutZ());
+
+    // on +y, as one turn puts it, not on -x as two would
+    assertCentredOn(twice->getContainer(), Mantid::Kernel::V3D(0, 2, 0));
+    assertCentredOn(twice->ownFrame().getContainer(), Mantid::Kernel::V3D(2, 0, 0));
+  }
+
+  void test_Adding_To_A_Lab_Frame_View_Throws() {
+    const auto lab = createOffsetKit()->inLabFrame(quarterTurnAboutZ());
+    TS_ASSERT_THROWS(lab->add(ComponentCreationHelper::createSphere(0.1)), const std::logic_error &);
+  }
+
 private:
+  static Mantid::Kernel::Matrix<double> quarterTurnAboutZ() {
+    return Mantid::Kernel::Matrix<double>(std::vector<double>{0, -1, 0, 1, 0, 0, 0, 0, 1});
+  }
+
+  static void assertCentredOn(const Mantid::Geometry::IObject &shape, const Mantid::Kernel::V3D &expected) {
+    const auto centre = shape.getBoundingBox().centrePoint();
+    TS_ASSERT_DELTA(centre.X(), expected.X(), 1e-6);
+    TS_ASSERT_DELTA(centre.Y(), expected.Y(), 1e-6);
+    TS_ASSERT_DELTA(centre.Z(), expected.Z(), 1e-6);
+  }
+
+  /// A can and two components, all on +x so any turn shows: the can and the last are mounted.
+  std::shared_ptr<SampleEnvironment> createOffsetKit() {
+    using namespace Mantid::Geometry;
+    const auto onPlusX = [](const std::string &id) {
+      return ShapeFactory().createShape(ComponentCreationHelper::sphereXML(0.5, {2, 0, 0}, id));
+    };
+    auto can = std::make_shared<Container>(onPlusX("can"));
+    can->setID("can");
+    auto kit = std::make_shared<SampleEnvironment>("OffsetKit", can);
+    kit->add(onPlusX("fixed"));
+    kit->add(onPlusX("mounted"), true);
+    return kit;
+  }
+
   std::shared_ptr<SampleEnvironment> createTestKit() {
     using namespace Mantid::Geometry;
     using namespace Mantid::Kernel;

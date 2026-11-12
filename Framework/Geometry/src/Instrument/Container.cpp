@@ -65,6 +65,13 @@ Container &Container::operator=(const Container &container) {
   return *this;
 }
 
+std::shared_ptr<Container> Container::withShape(IObject_sptr shape) const {
+  auto can = std::make_shared<Container>(std::move(shape));
+  can->m_sampleShapeXML = m_sampleShapeXML;
+  can->m_sampleShape = m_sampleShape;
+  return can;
+}
+
 /**
  * Construct a container providing an XML definition shape
  * @param xml Definition of the shape in xml

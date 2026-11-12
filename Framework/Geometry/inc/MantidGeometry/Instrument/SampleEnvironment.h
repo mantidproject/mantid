@@ -61,11 +61,19 @@ public:
 
   void add(const IObject_const_sptr &component, bool onGoniometer = false);
 
+  /// A view of this environment as the goniometer places it: mounted components turned by
+  /// goniometerR, fixed ones shared. Always built from the own-frame original, so turning a view
+  /// again starts afresh rather than adding to the turn.
+  std::shared_ptr<SampleEnvironment> inLabFrame(const Kernel::Matrix<double> &goniometerR) const;
+  /// The environment as defined: this one, or the original a lab-frame view was made from.
+  const SampleEnvironment &ownFrame() const { return m_ownFrame ? *m_ownFrame : *this; }
+
 private:
   std::string m_name;
   // Element zero is always assumed to be the can
   std::vector<IObject_const_sptr> m_components;
-  std::vector<bool> m_onGoniometer; ///< Parallel to m_components
+  std::vector<bool> m_onGoniometer;                    ///< Parallel to m_components
+  std::shared_ptr<const SampleEnvironment> m_ownFrame; ///< Set only on a view made by inLabFrame
 };
 
 // Typedef a unique_ptr

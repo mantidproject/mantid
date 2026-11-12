@@ -41,6 +41,8 @@ public:
 
   const IObject &getShape() const { return *m_shape; }
   const IObject_sptr getShapePtr() const { return m_shape; }
+  /// This container around another shape - the same can turned, say - keeping its sample-shape definitions.
+  std::shared_ptr<Container> withShape(IObject_sptr shape) const;
 
   bool isValid(const Kernel::V3D &p) const override { return m_shape->isValid(p); }
   bool isOnSide(const Kernel::V3D &p) const override { return m_shape->isOnSide(p); }

@@ -56,6 +56,23 @@ public:
     TS_ASSERT_DELTA(1.0, getSphereRadius(dynamic_cast<const Mantid::Geometry::CSGObject &>(*sampleShape)), 1e-10);
   }
 
+  void test_WithShape_Keeps_The_Sample_Shape_Definition() {
+    auto can = createTestCan();
+    can->setSampleShape("<samplegeometry><sphere id=\"shape\"> "
+                        "<radius val=\"1.0\" /> "
+                        "</sphere></samplegeometry>");
+    const auto otherShape = std::make_shared<Mantid::Geometry::CSGObject>();
+
+    const auto rewrapped = can->withShape(otherShape);
+
+    TS_ASSERT_EQUALS(&rewrapped->getShape(), otherShape.get());
+    TS_ASSERT(rewrapped->hasCustomizableSampleShape());
+    TS_ASSERT_DELTA(1.0,
+                    getSphereRadius(dynamic_cast<const Mantid::Geometry::CSGObject &>(
+                        *rewrapped->createSampleShape(Container::ShapeArgs()))),
+                    1e-10);
+  }
+
   void test_CreateSampleShape_Args_Override_Defaults() {
     using Mantid::Geometry::IObject_sptr;
     auto can = createTestCan();

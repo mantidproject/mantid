@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Objects/ShapeRotation.h"
+#include "MantidGeometry/Instrument/Container.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Objects/MeshObject.h"
@@ -37,6 +38,14 @@ Kernel::Matrix<double> outstandingGoniometerRotation(const IObject &shape, const
 }
 
 std::shared_ptr<IObject> getLabFrameShape(const IObject &shape, const Kernel::Matrix<double> &goniometerR) {
+  if (dynamic_cast<const Container *>(&shape)) {
+    // Whether a can turns is its environment's to say, so there is one way to turn one.
+    throw std::invalid_argument("A container is turned with its environment: use SampleEnvironment::inLabFrame.");
+  }
+  if (!shape.hasValidShape()) {
+    // Nothing to turn. An empty CSGObject - a default Container's, say - has no XML either.
+    return std::shared_ptr<IObject>(shape.clone());
+  }
   const auto outstanding = outstandingGoniometerRotation(shape, goniometerR);
   if (outstanding == identityMatrix()) {
     // Already in the lab frame. Returning the clone unrotated is not a shortcut - rotating by an

@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/IObjComponent.h"
+#include "MantidGeometry/Objects/ShapeRotation.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 
@@ -99,8 +100,28 @@ int SampleEnvironment::interceptSurfaces(Track &track) const {
  * @param onGoniometer Whether it turns with the sample when a goniometer is set
  */
 void SampleEnvironment::add(const IObject_const_sptr &component, const bool onGoniometer) {
+  if (m_ownFrame)
+    throw std::logic_error("A lab-frame environment is a view; add to the environment it was made from.");
   requireOwnFrame(*component);
   m_components.emplace_back(component);
   m_onGoniometer.emplace_back(onGoniometer);
+}
+
+std::shared_ptr<SampleEnvironment> SampleEnvironment::inLabFrame(const Kernel::Matrix<double> &goniometerR) const {
+  const auto &own = ownFrame();
+  // Copying shares every component, so fixed ones keep their addresses: Discus finds them by pointer.
+  auto lab = std::make_shared<SampleEnvironment>(own);
+  lab->m_ownFrame = m_ownFrame ? m_ownFrame : std::make_shared<const SampleEnvironment>(own);
+  for (size_t i = 0; i < own.nelements(); ++i) {
+    if (!own.m_onGoniometer[i])
+      continue;
+    if (i == 0) {
+      const auto &can = own.getContainer();
+      lab->m_components[i] = can.withShape(getLabFrameShape(can.getShape(), goniometerR));
+    } else {
+      lab->m_components[i] = getLabFrameShape(*own.m_components[i], goniometerR);
+    }
+  }
+  return lab;
 }
 } // namespace Mantid::Geometry
