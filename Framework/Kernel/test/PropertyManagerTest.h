@@ -20,8 +20,8 @@
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-#include <boost/scoped_ptr.hpp>
 #include <json/json.h>
+#include <memory>
 
 using namespace Mantid::Kernel;
 

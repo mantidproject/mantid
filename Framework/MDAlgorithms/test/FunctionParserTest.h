@@ -12,7 +12,7 @@
 #include "MantidMDAlgorithms/MDParameterParserDeclarations.h"
 #include "MantidMDAlgorithms/PlaneFunctionBuilder.h"
 #include "MantidMDAlgorithms/Vector3DParameterParser.h"
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 
 #include "MantidAPI/ImplicitFunctionParameterParser.h"
 #include "MantidAPI/ImplicitFunctionParser.h"

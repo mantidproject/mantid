@@ -10,7 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFunctionWithLocation.h"
-#include "boost/shared_ptr.hpp"
+#include <memory>
 
 namespace Mantid {
 namespace API {
@@ -133,7 +133,7 @@ private:
   /// The default level for searching a domain interval (getDomainInterval())
   static constexpr double DEFAULT_SEARCH_LEVEL = 1e-5;
   // Cache the result of a PeakFunctionIntegrator call
-  mutable boost::shared_ptr<IntegrationResultCache> integrationResult = nullptr;
+  mutable std::shared_ptr<IntegrationResultCache> integrationResult = nullptr;
   // Flag to dirty the cache when a param has been set
   mutable bool m_parameterContextDirty = false;
 };

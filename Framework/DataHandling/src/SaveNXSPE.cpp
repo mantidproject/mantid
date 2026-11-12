@@ -21,8 +21,8 @@
 #include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/Unit.h"
 
-#include <boost/scoped_array.hpp>
 #include <limits>
+#include <memory>
 
 namespace Mantid::DataHandling {
 
@@ -262,7 +262,7 @@ void SaveNXSPE::exec() {
   slabSize[1] = nBins;
 
   // Allocate the temporary buffers for the signal and errors
-  using Buffer = boost::scoped_array<double>;
+  using Buffer = std::unique_ptr<double[]>;
   const size_t bufferSize(slabSize[0] * slabSize[1]);
   Buffer signalBuffer(new double[bufferSize]);
   Buffer errorBuffer(new double[bufferSize]);

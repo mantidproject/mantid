@@ -13,8 +13,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
-#include <boost/pointer_cast.hpp>
-
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace Inelastic {

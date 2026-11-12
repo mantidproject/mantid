@@ -15,8 +15,8 @@
 
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/scoped_ptr.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 
 #include <string>
 
@@ -130,8 +130,8 @@ public:
     // Are the returned arrays the right size?
     const EventList el(ew->getSpectrum(1));
     TS_ASSERT_EQUALS(el.x().size(), NUMBINS);
-    boost::scoped_ptr<MantidVec> Y(el.makeDataY());
-    boost::scoped_ptr<MantidVec> E(el.makeDataE());
+    std::unique_ptr<MantidVec> Y(el.makeDataY());
+    std::unique_ptr<MantidVec> E(el.makeDataE());
     TS_ASSERT_EQUALS(Y->size(), NUMBINS - 1);
     TS_ASSERT_EQUALS(E->size(), NUMBINS - 1);
     TS_ASSERT(el.hasDetectorID(1));
@@ -216,10 +216,10 @@ public:
     TS_ASSERT_EQUALS(el.x().size(), 2);
     TS_ASSERT_EQUALS(el.x()[0], 0.0);
     TS_ASSERT_EQUALS(el.x()[1], std::numeric_limits<double>::min());
-    boost::scoped_ptr<MantidVec> Y(el.makeDataY());
+    std::unique_ptr<MantidVec> Y(el.makeDataY());
     TS_ASSERT_EQUALS(Y->size(), 1);
     TS_ASSERT_EQUALS((*Y)[0], 0.0);
-    boost::scoped_ptr<MantidVec> E(el.makeDataE());
+    std::unique_ptr<MantidVec> E(el.makeDataE());
     TS_ASSERT_EQUALS(E->size(), 1);
     TS_ASSERT_EQUALS((*E)[0], 0.0);
   }
@@ -312,8 +312,8 @@ public:
     // Are the returned arrays the right size?
     TS_ASSERT_EQUALS(el.x().size(), NUMBINS / 2);
 
-    boost::scoped_ptr<MantidVec> Y(el.makeDataY());
-    boost::scoped_ptr<MantidVec> E(el.makeDataE());
+    std::unique_ptr<MantidVec> Y(el.makeDataY());
+    std::unique_ptr<MantidVec> E(el.makeDataE());
     TS_ASSERT_EQUALS(Y->size(), NUMBINS / 2 - 1);
     TS_ASSERT_EQUALS(E->size(), NUMBINS / 2 - 1);
 
@@ -324,7 +324,7 @@ public:
     // But pixel 1 is the same, 2 events in the bin
     const EventList el1(ew->getSpectrum(1));
     TS_ASSERT_EQUALS(el1.x()[1], BIN_DELTA * 1);
-    boost::scoped_ptr<MantidVec> Y1(el1.makeDataY());
+    std::unique_ptr<MantidVec> Y1(el1.makeDataY());
     TS_ASSERT_EQUALS((*Y1)[1], 2);
   }
 

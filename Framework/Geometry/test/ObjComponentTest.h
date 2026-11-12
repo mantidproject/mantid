@@ -22,7 +22,7 @@
 
 #include "MantidKernel/Timer.h"
 
-#include "boost/make_shared.hpp"
+#include <memory>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;

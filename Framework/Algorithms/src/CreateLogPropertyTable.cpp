@@ -17,7 +17,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
-#include "boost/shared_ptr.hpp"
+#include <memory>
 
 #include <algorithm>
 #include <cassert>

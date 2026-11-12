@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/DllConfig.h"
-#include "boost/shared_ptr.hpp"
+#include <memory>
 #include <string>
 
 namespace Mantid {

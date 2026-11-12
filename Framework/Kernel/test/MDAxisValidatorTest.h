@@ -9,9 +9,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/MDAxisValidator.h"
-#include "boost/make_shared.hpp"
-#include "boost/shared_ptr.hpp"
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 

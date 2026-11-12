@@ -24,6 +24,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <utility>
@@ -663,7 +664,7 @@ void LoadPLNnxs::exec() {
   logManager.addProperty("filename", filename);
 
   Types::Core::time_duration duration =
-      boost::posix_time::microseconds(static_cast<boost::int64_t>(eventCounter.duration() * 1.0e6));
+      boost::posix_time::microseconds(static_cast<std::int64_t>(eventCounter.duration() * 1.0e6));
   Types::Core::DateAndTime endDateTime(startDateTime + duration);
   logManager.addProperty("start_time", startDateTime.toISO8601String());
   logManager.addProperty("end_time", endDateTime.toISO8601String());

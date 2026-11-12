@@ -234,12 +234,12 @@ void EventWorkspaceCollection::setTitle(const std::string &title) {
   std::for_each(m_WsVec.begin(), m_WsVec.end(), [&title](auto &ws) { ws->setTitle(title); });
 }
 
-void EventWorkspaceCollection::applyFilterInPlace(const boost::function<void(MatrixWorkspace_sptr)> &func) {
+void EventWorkspaceCollection::applyFilterInPlace(const std::function<void(MatrixWorkspace_sptr)> &func) {
   std::for_each(m_WsVec.begin(), m_WsVec.end(), [&func](auto &ws) { func(ws); });
 }
 
 void EventWorkspaceCollection::applyFilter(
-    const boost::function<DataObjects::EventWorkspace_sptr(DataObjects::EventWorkspace_sptr)> &func) {
+    const std::function<DataObjects::EventWorkspace_sptr(DataObjects::EventWorkspace_sptr)> &func) {
   std::for_each(m_WsVec.begin(), m_WsVec.end(), [&func](auto &ws) { ws = func(ws); });
 }
 

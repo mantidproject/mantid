@@ -36,7 +36,7 @@ public:
 
   void testClone() {
     SingleValueParameter original(2);
-    boost::scoped_ptr<SingleValueParameter> cloned(original.clone());
+    std::unique_ptr<SingleValueParameter> cloned(original.clone());
 
     TSM_ASSERT_EQUALS("Cloned Parameter getValue() is not same as original.", 2, cloned->getValue());
     TSM_ASSERT_EQUALS("Cloned Parameter isValid() is not same as original.", original.isValid(), cloned->isValid());

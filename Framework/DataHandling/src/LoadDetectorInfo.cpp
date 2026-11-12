@@ -13,7 +13,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidNexus/NexusFile.h"
 
-#include <boost/algorithm/string/compare.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
 #include <filesystem>

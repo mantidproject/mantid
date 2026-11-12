@@ -14,8 +14,9 @@
 #include "MantidGeometry/MDGeometry/MDPlane.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/VMD.h"
-#include <boost/scoped_ptr.hpp>
 #include <cmath>
+#include <functional>
+#include <memory>
 #include <utility>
 
 #include <cxxtest/TestSuite.h>
@@ -56,7 +57,7 @@ public:
     for (size_t i = 0; i < numPoints; i++) {
       ws->setSignalAt(i, double(i));
     }
-    boost::scoped_ptr<MDHistoWorkspaceIterator> it(new MDHistoWorkspaceIterator(ws));
+    std::unique_ptr<MDHistoWorkspaceIterator> it(new MDHistoWorkspaceIterator(ws));
     TSM_ASSERT("This iterator is valid at the start.", it->valid());
     size_t i = 0;
 
@@ -343,7 +344,7 @@ public:
   }
 
   void do_test_neighbours_1d(
-      const boost::function<std::vector<size_t>(MDHistoWorkspaceIterator *)> &findNeighbourMemberFunction) {
+      const std::function<std::vector<size_t>(MDHistoWorkspaceIterator *)> &findNeighbourMemberFunction) {
     const size_t nd = 1;
     MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 10);
     /*
@@ -391,13 +392,13 @@ public:
   }
 
   void test_neighbours_1d_face_touching() {
-    boost::function<std::vector<size_t>(MDHistoWorkspaceIterator *)> findNeighbourIndexesFaceTouching =
+    std::function<std::vector<size_t>(MDHistoWorkspaceIterator *)> findNeighbourIndexesFaceTouching =
         &MDHistoWorkspaceIterator::findNeighbourIndexesFaceTouching;
     do_test_neighbours_1d(findNeighbourIndexesFaceTouching);
   }
 
   void test_neighours_1d_vertex_touching() {
-    boost::function<std::vector<size_t>(MDHistoWorkspaceIterator *)> findNeighbourIndexesVertexTouching =
+    std::function<std::vector<size_t>(MDHistoWorkspaceIterator *)> findNeighbourIndexesVertexTouching =
         &MDHistoWorkspaceIterator::findNeighbourIndexes;
     do_test_neighbours_1d(findNeighbourIndexesVertexTouching);
   }
@@ -1317,7 +1318,7 @@ public:
   }
 
   void test_masked_get_vertexes_call_throws() {
-    boost::scoped_ptr<MDHistoWorkspaceIterator> it(new MDHistoWorkspaceIterator(ws, new SkipNothing));
+    std::unique_ptr<MDHistoWorkspaceIterator> it(new MDHistoWorkspaceIterator(ws, new SkipNothing));
     size_t numVertexes;
     size_t outDimensions = 1;
     bool maskDim[] = {true};

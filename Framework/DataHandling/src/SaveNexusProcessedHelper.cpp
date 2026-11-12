@@ -500,7 +500,7 @@ void NexusFileIO::writeNexusVectorColumn(const Column_const_sptr &col, const std
   const Nexus::DimVector dims{rowCount, maxSize};
 
   // Create data array
-  boost::scoped_array<ElemType> data(new ElemType[rowCount * maxSize]);
+  std::unique_ptr<ElemType[]> data(new ElemType[rowCount * maxSize]);
 
   for (size_t i = 0; i < rowCount; ++i) {
     // copy data in a cell to a vector with the same element type

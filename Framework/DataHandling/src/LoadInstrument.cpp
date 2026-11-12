@@ -20,8 +20,6 @@
 #include "MantidKernel/Strings.h"
 #include "MantidNexusGeometry/NexusGeometryParser.h"
 
-#include <boost/algorithm/string.hpp>
-
 namespace Mantid::DataHandling {
 
 DECLARE_ALGORITHM(LoadInstrument)

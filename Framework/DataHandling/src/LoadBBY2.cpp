@@ -42,6 +42,7 @@
 #include <Poco/DOM/NodeList.h>
 #include <Poco/TemporaryFile.h>
 #include <Poco/Util/PropertyFileConfiguration.h>
+#include <cstdint>
 
 namespace Mantid::DataHandling {
 
@@ -398,7 +399,7 @@ void LoadBBY2::exec() {
                                           1.0e6); // static_cast<double>(instrumentInfo.bm_counts)
 
   Types::Core::time_duration duration =
-      boost::posix_time::microseconds(static_cast<boost::int64_t>(static_cast<double>(frame_count) * period));
+      boost::posix_time::microseconds(static_cast<std::int64_t>(static_cast<double>(frame_count) * period));
 
   Types::Core::DateAndTime start_time(instrumentInfo.start_time);
   Types::Core::DateAndTime end_time(start_time + duration);

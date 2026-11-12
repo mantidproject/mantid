@@ -13,7 +13,7 @@
 #include "MantidDataObjects/CoordTransformAligned.h"
 #include "MantidKernel/Matrix.h"
 
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 
 using namespace Mantid;
 using namespace Mantid::DataObjects;
@@ -74,7 +74,7 @@ public:
     coord_t origin[3] = {5, 10, 15};
     coord_t scaling[3] = {1, 2, 3};
     CoordTransformAligned ct(4, 3, dimToBinFrom, origin, scaling);
-    boost::scoped_ptr<CoordTransform> clone(ct.clone());
+    std::unique_ptr<CoordTransform> clone(ct.clone());
 
     coord_t input[4] = {16, 11, 11111111 /*ignored*/, 6};
     coord_t output[3] = {0, 0, 0};

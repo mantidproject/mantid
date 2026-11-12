@@ -61,8 +61,8 @@ std::unordered_map<std::string, std::size_t> extractAxisLabels(const MatrixWorks
   return std::unordered_map<std::string, std::size_t>();
 }
 
-std::vector<std::string> extractParameterNames(Axis *axis) {
-  auto const *textAxis = boost::static_pointer_cast<TextAxis>(axis);
+std::vector<std::string> extractParameterNames(Axis const *axis) {
+  auto const *textAxis = static_cast<TextAxis const *>(axis);
   std::vector<std::string> parameters;
 
   for (auto i = 0u; i < textAxis->length(); ++i)

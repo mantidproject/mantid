@@ -16,7 +16,6 @@
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 #include <Poco/TemporaryFile.h>
-#include <boost/algorithm/string/predicate.hpp>
 #include <cmath>
 #include <filesystem>
 #include <fstream>

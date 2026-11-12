@@ -11,7 +11,6 @@
 #include "MantidKernel/StringTokenizer.h"
 
 #include <algorithm>
-#include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <vector>
 

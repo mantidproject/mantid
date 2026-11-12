@@ -9,7 +9,7 @@
 #include "MantidSINQ/DllConfig.h"
 #include "MantidSINQ/PoldiUtilities/MillerIndices.h"
 #include "MantidSINQ/PoldiUtilities/UncertainValue.h"
-#include "boost/shared_ptr.hpp"
+#include <memory>
 
 namespace Mantid {
 namespace Poldi {

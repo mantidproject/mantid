@@ -11,7 +11,7 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MultiThreaded.h"
-#include <boost/function.hpp>
+#include <functional>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -95,7 +95,7 @@ void ThresholdMD::exec() {
   const int64_t nPoints = inputWS->getNPoints();
 
   using namespace std::placeholders;
-  boost::function<bool(double)> comparitor = std::bind(std::less<double>(), std::placeholders::_1, referenceValue);
+  std::function<bool(double)> comparitor = std::bind(std::less<double>(), std::placeholders::_1, referenceValue);
   if (condition == GreaterThan()) {
     comparitor = std::bind(std::greater<double>(), std::placeholders::_1, referenceValue);
   }

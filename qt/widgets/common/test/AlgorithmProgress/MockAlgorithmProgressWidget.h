@@ -8,7 +8,6 @@
 
 #include "MantidQtWidgets/Common/AlgorithmProgress/IAlgorithmProgressWidget.h"
 
-#include <boost/enable_shared_from_this.hpp>
 #include <gmock/gmock.h>
 #include <memory>
 

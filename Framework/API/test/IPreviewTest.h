@@ -13,7 +13,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include <cxxtest/TestSuite.h>
 
-#include <boost/pointer_cast.hpp>
+#include <memory>
 
 using Mantid::API::FrameworkManager;
 using Mantid::API::IPreview;
@@ -51,7 +51,7 @@ public:
     TS_ASSERT_EQUALS(preview->facility(), "TestFacility")
     TS_ASSERT_EQUALS(preview->technique(), "SANS")
     auto inWS = WorkspaceFactory::Instance().create("Workspace2D", 5, 8, 7);
-    Workspace_sptr ws = boost::dynamic_pointer_cast<Workspace>(inWS);
+    Workspace_sptr ws = std::dynamic_pointer_cast<Workspace>(inWS);
     auto outWS = preview->view(ws);
     TS_ASSERT(outWS);
     TS_ASSERT_DIFFERS(outWS, inWS);

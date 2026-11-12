@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/Batch/Row.h"
 #include "MantidQtWidgets/Common/Batch/AssertOrThrow.h"
-#include <boost/algorithm/string/predicate.hpp>
 namespace MantidQt::MantidWidgets::Batch {
 
 Row::Row(RowLocation location, std::vector<Cell> cells) : m_location(std::move(location)), m_cells(std::move(cells)) {}
