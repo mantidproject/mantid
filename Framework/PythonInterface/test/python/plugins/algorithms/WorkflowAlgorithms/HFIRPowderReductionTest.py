@@ -18,10 +18,12 @@ from mantid.simpleapi import (
     AddSampleLog,
     GroupWorkspaces,
     SaveNexusESS,
+    SaveNexusProcessed,
+    LoadEmptyInstrument,
     Load,
     mtd,
 )
-from mantid.api import AlgorithmManager, MatrixWorkspace, WorkspaceGroup
+from mantid.api import AlgorithmManager, ExperimentInfo, MatrixWorkspace, WorkspaceGroup
 from mantid.kernel import Logger, Property
 from plugins.algorithms.WorkflowAlgorithms.HFIRPowderReduction import HFIRPowderReduction as _HFIRPowderReduction
 import h5py
@@ -2332,6 +2334,64 @@ class IDFOverrideTests(unittest.TestCase):
         algo._loadMIDASData(midas_file, "test_midas_custom_idf")
         instrument_name = mtd["test_midas_custom_idf"].getInstrumentName()
         self.assertEqual(instrument_name, os.path.basename(self._idf))
+
+
+class MIDASMaskTests(unittest.TestCase):
+    """Tests for the standard MIDAS mask applied by _loadMIDASData when ApplyMask is True."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls._test_dir = tempfile.mkdtemp()
+        LoadEmptyInstrument(InstrumentName="MIDAS", OutputWorkspace="_midas_empty")
+        cls._midas_file = os.path.join(cls._test_dir, "midas_sample.nxs")
+        SaveNexusProcessed(mtd["_midas_empty"], Filename=cls._midas_file)
+        mtd.remove("_midas_empty")
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls._test_dir, ignore_errors=True)
+
+    def tearDown(self):
+        for name in list(mtd.getObjectNames()):
+            if mtd.doesExist(name):
+                mtd.remove(name)
+
+    @staticmethod
+    def _masked_detector_ids(ws):
+        detector_info = ws.detectorInfo()
+        ids = detector_info.detectorIDs()
+        return {int(ids[i]) for i in range(len(ids)) if detector_info.isMasked(i) and not detector_info.isMonitor(i)}
+
+    @staticmethod
+    def _expected_mask_ids():
+        # 7 banks x 16 tubes x 512 pixels; the first and last 40 pixels of each tube are masked
+        expected = set()
+        for tube in range(7 * 16):
+            start = tube * 512
+            expected.update(range(start, start + 40))
+            expected.update(range(start + 472, start + 512))
+        return expected
+
+    def test_apply_mask_masks_tube_ends(self):
+        algo = _create_algo(Instrument="MIDAS", Wavelength=2.5, ApplyMask=True)
+        algo._loadMIDASData(self._midas_file, "test_midas_masked")
+        self.assertEqual(self._masked_detector_ids(mtd["test_midas_masked"]), self._expected_mask_ids())
+
+    def test_apply_mask_with_custom_idf(self):
+        # A custom IDF renames the instrument; the mask is defined by detector ID so it still applies
+        custom_idf = os.path.join(self._test_dir, "My_MIDAS_IDF.xml")
+        shutil.copyfile(ExperimentInfo.getInstrumentFilename("MIDAS"), custom_idf)
+
+        algo = _create_algo(Instrument="MIDAS", Wavelength=2.5, ApplyMask=True, IDFFilename=custom_idf)
+        algo._loadMIDASData(self._midas_file, "test_midas_masked_custom_idf")
+        ws = mtd["test_midas_masked_custom_idf"]
+        self.assertEqual(ws.getInstrumentName(), os.path.basename(custom_idf))
+        self.assertEqual(self._masked_detector_ids(ws), self._expected_mask_ids())
+
+    def test_no_mask_when_apply_mask_false(self):
+        algo = _create_algo(Instrument="MIDAS", Wavelength=2.5, ApplyMask=False)
+        algo._loadMIDASData(self._midas_file, "test_midas_unmasked")
+        self.assertEqual(self._masked_detector_ids(mtd["test_midas_unmasked"]), set())
 
 
 if __name__ == "__main__":

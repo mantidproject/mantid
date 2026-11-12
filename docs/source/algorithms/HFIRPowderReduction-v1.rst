@@ -18,6 +18,14 @@ and reduction steps are slightly modified.
 By default the instrument geometry is determined by the sample file. An instrument definition file (IDF) can
 optionally be supplied through the ``IDFFilename`` property to override the geometry used by the sample file.
 
+Masking
+-------
+
+When ``ApplyMask`` is enabled (the default), a standard mask is applied when the data are loaded.
+For WAND\ :sup:`2` this is the mask applied by :ref:`algm-LoadWAND`. For MIDAS, the first 40 and last
+40 pixels of every 512-pixel detector tube are masked. The MIDAS mask is defined by detector ID,
+so it is also applied when a custom IDF is supplied through ``IDFFilename``.
+
 Binning
 -------
 

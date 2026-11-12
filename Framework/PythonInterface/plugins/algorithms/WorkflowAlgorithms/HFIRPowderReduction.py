@@ -60,6 +60,7 @@ from mantid.simpleapi import (
     LoadEventAsWorkspace2D,
     LoadInstrument,
     AddSampleLog,
+    MaskDetectors,
 )
 import h5py
 import numpy as np
@@ -67,6 +68,12 @@ import os
 import re
 
 logger = Logger(__name__)
+
+# Standard MIDAS mask: the first and last MIDAS_MASKED_END_PIXELS pixels of every tube.
+# Detector IDs run consecutively along each tube, tube after tube, through all banks.
+MIDAS_NUM_TUBES = 7 * 16  # 7 banks of one 16-tube pack each
+MIDAS_PIXELS_PER_TUBE = 512
+MIDAS_MASKED_END_PIXELS = 40
 
 
 class HFIRPowderReduction(DataProcessorAlgorithm):
@@ -918,6 +925,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         except RuntimeError:
             logger.warning(f"LoadEventAsWorkspace2D failed for {filename}, falling back to generic Load")
             self._load_MIDAS(filename, wsname)
+            self._apply_MIDAS_mask(wsname)
             return
 
         # Normalization needs these logs (gd_prtn_chrg for Monitor, duration for Time).
@@ -953,9 +961,36 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
 
         # A user-supplied IDF overrides the geometry embedded in the sample file.
         self._load_IDF_if_supplied(wsname, rewrite_spectra_map=True)
-        # Masking is not used yet, but will be added back later
-        # if self.getProperty("ApplyMask").value:
-        #     MaskBTP(wsname, Pixel="1,2,511,512", EnableLogging=False)
+        self._apply_MIDAS_mask(wsname)
+
+    def _apply_MIDAS_mask(self, wsname):
+        """Apply the standard MIDAS mask when ApplyMask is set.
+
+        Masks the first and last MIDAS_MASKED_END_PIXELS pixels of every detector tube. The mask
+        is defined by detector ID rather than by instrument name or component tree, so it also
+        applies when a user-supplied IDF has replaced the geometry.
+        """
+        if not self.getProperty("ApplyMask").value:
+            return
+        tube_starts = np.arange(MIDAS_NUM_TUBES) * MIDAS_PIXELS_PER_TUBE
+        tube_offsets = np.concatenate(
+            (
+                np.arange(MIDAS_MASKED_END_PIXELS),
+                np.arange(MIDAS_PIXELS_PER_TUBE - MIDAS_MASKED_END_PIXELS, MIDAS_PIXELS_PER_TUBE),
+            )
+        )
+        mask_ids = (tube_starts[:, np.newaxis] + tube_offsets).ravel()
+
+        workspace = mtd[wsname]
+        names = workspace.getNames() if isinstance(workspace, WorkspaceGroup) else [wsname]
+        for name in names:
+            # only mask IDs present in the instrument, e.g. in case a custom IDF has fewer pixels
+            detector_ids = mtd[name].detectorInfo().detectorIDs()
+            ids_to_mask = np.intersect1d(mask_ids, detector_ids)
+            if ids_to_mask.size == 0:
+                logger.warning(f"None of the standard MIDAS mask detector IDs exist in {name}; no mask applied")
+                continue
+            MaskDetectors(Workspace=name, DetectorList=ids_to_mask, EnableLogging=False)
 
     def PyExec(self):
         """
