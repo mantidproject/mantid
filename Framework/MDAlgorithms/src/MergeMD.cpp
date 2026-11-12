@@ -53,6 +53,10 @@ void MergeMD::init() {
  * @param inputs :: list of names of input MDWorkspaces
  */
 void MergeMD::createOutputWorkspace(std::vector<std::string> &inputs) {
+  // Discard any state left over from a previous execution of this instance
+  m_workspaces.clear();
+  experimentInfoNo = {0};
+
   auto it = inputs.begin();
   for (; it != inputs.end(); it++) {
     IMDEventWorkspace_sptr ws =
@@ -298,6 +302,10 @@ void MergeMD::exec() {
   this->setProperty("OutputWorkspace", out);
 
   g_log.debug() << tim << " to merge all workspaces.\n";
+
+  // Release workspace references held by this instance
+  m_workspaces.clear();
+  out.reset();
 }
 
 } // namespace Mantid::MDAlgorithms
