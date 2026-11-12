@@ -17,6 +17,7 @@
 #include "MantidGeometry/Instrument/Container.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/IObject.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "SampleFrameEquivalence.h"
@@ -183,25 +184,54 @@ public:
     // Here the rotation comes from the peak, not the run, and it varies peak to peak.
     SampleFrameEquivalence::assertFramesAgree(
         SampleFrameEquivalence::rotationY(30.0),
-        [this](const auto &r, bool baked) { return singlePathThroughPlate(r, baked); });
+        [this](const auto &r, bool baked) { return pathLengthsThroughPlate(r, baked, true); });
+  }
+
+  void test_monte_carlo_both_ways_of_orienting_the_sample_agree() {
+    // Two peaks on different goniometers, so a shape baked to the first is still outstanding for the second.
+    SampleFrameEquivalence::assertFramesAgree(
+        SampleFrameEquivalence::rotationY(30.0),
+        [this](const auto &r, bool baked) { return pathLengthsThroughPlate(r, baked, false); });
+  }
+
+  void test_monte_carlo_uses_a_shape_with_no_xml_as_stored() {
+    // SaveHKL's sphere, which has no definition to rotate.
+    auto pathLength = [](const Matrix<double> &rotation) {
+      auto peaksWS = WorkspaceCreationHelper::createPeaksWorkspace(1);
+      auto sphere = ShapeFactory::createSphere(V3D(), 0.001);
+      sphere->setMaterial(SampleFrameEquivalence::vanadium());
+      peaksWS->mutableSample().setShape(sphere);
+      peaksWS->getPeak(0).setGoniometerMatrix(rotation);
+      Mantid::Algorithms::AddAbsorptionWeightedPathLengths alg;
+      alg.initialize();
+      alg.setRethrows(true);
+      alg.setChild(true);
+      alg.setProperty("InputWorkspace", peaksWS);
+      alg.execute();
+      return peaksWS->getPeak(0).getAbsorptionWeightedPathLength();
+    };
+    TS_ASSERT_DELTA(pathLength(SampleFrameEquivalence::rotationY(30.0)),
+                    pathLength(SampleFrameEquivalence::unrotated()), 1e-9);
   }
 
 private:
-  /// The single-path absorption weighted path length through a plate held in the given frame, with
-  /// the peak carrying the same rotation either way.
-  double singlePathThroughPlate(const Matrix<double> &rotation, const bool baked) {
-    auto peaksWS = WorkspaceCreationHelper::createPeaksWorkspace(1);
+  /// The absorption weighted path lengths through a plate held in the given frame, for a peak carrying the
+  /// same rotation either way and a second peak turned a further 45 degrees.
+  std::vector<double> pathLengthsThroughPlate(const Matrix<double> &rotation, const bool baked, const bool singlePath) {
+    auto peaksWS = WorkspaceCreationHelper::createPeaksWorkspace(2);
     SampleFrameEquivalence::setSample(*peaksWS, rotation, baked);
     peaksWS->getPeak(0).setGoniometerMatrix(rotation);
+    peaksWS->getPeak(1).setGoniometerMatrix(SampleFrameEquivalence::rotationY(45.0) * rotation);
 
     Mantid::Algorithms::AddAbsorptionWeightedPathLengths alg;
     alg.initialize();
     alg.setRethrows(true);
     alg.setChild(true); // the InOut workspace is modified in place; keep it out of the ADS
     alg.setProperty("InputWorkspace", peaksWS);
-    alg.setProperty("UseSinglePath", true);
+    alg.setProperty("UseSinglePath", singlePath);
     alg.execute();
-    return peaksWS->getPeak(0).getAbsorptionWeightedPathLength();
+    return {peaksWS->getPeak(0).getAbsorptionWeightedPathLength(),
+            peaksWS->getPeak(1).getAbsorptionWeightedPathLength()};
   }
 
   void setTestInstrument(std::shared_ptr<PeaksWorkspace> peaksWS) {
