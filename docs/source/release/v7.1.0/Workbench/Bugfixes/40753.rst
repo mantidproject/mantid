@@ -1,0 +1,1 @@
+- Saving a project with ``Save Altered Workspaces Only`` selected no longer gives an error or removes open plots from the plots list.
