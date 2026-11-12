@@ -34,7 +34,7 @@ public:
   /// No-arg Constructor
   BoundedValidator() noexcept
       : TypedValidator<TYPE>(), m_hasLowerBound(false), m_hasUpperBound(false), m_lowerExclusive(false),
-        m_upperExclusive(false), m_lowerBound(TYPE()), m_upperBound(TYPE()), m_hasError(false) {}
+        m_upperExclusive(false), m_lowerBound(TYPE()), m_upperBound(TYPE()), m_error(TYPE()), m_hasError(false) {}
 
   /** Constructor
    * @param lowerBound :: The lower bounding value
@@ -43,7 +43,8 @@ public:
    */
   BoundedValidator(const TYPE &lowerBound, const TYPE &upperBound, bool exclusive = false) noexcept
       : TypedValidator<TYPE>(), m_hasLowerBound(true), m_hasUpperBound(true), m_lowerExclusive(exclusive),
-        m_upperExclusive(exclusive), m_lowerBound(lowerBound), m_upperBound(upperBound), m_hasError(false) {}
+        m_upperExclusive(exclusive), m_lowerBound(lowerBound), m_upperBound(upperBound), m_error(TYPE()),
+        m_hasError(false) {}
 
   /// Return if it has a lower bound
   bool hasLower() const noexcept { return m_hasLowerBound; }
