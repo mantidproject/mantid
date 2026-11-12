@@ -44,7 +44,7 @@ private:
   /// Execution code
   void exec() override;
   /// Return the TOF resolution for a particular wavelength
-  virtual double getTOFResolution(double wl);
+  double getTOFResolution(double wl);
   /// Get the collimation length when we evaluate it using 5 Guards
   double getCollimationLengthWithGuard(Mantid::API::MatrixWorkspace_sptr inWS, const double L1,
                                        const double collimationLengthCorrection) const;
