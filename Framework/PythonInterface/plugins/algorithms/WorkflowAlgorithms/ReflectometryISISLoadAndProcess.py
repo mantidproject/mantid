@@ -44,6 +44,7 @@ class Prop:
     MULT_OUTPUT_WS = "OutputWorkspaces"
     MULT_OUTPUT_WS_BINNED = "OutputWorkspacesBinned"
     MULT_OUTPUT_WS_LAM = "OutputWorkspacesWavelength"
+    USED_MULTI_OUTPUTS = "UsingMultiOutputs"
     OUTPUT_WS_FIRST_TRANS = "OutputWorkspaceFirstTransmission"
     OUTPUT_WS_SECOND_TRANS = "OutputWorkspaceSecondTransmission"
     OUTPUT_WS_TRANS = "OutputWorkspaceTransmission"
@@ -308,6 +309,9 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         self.declareProperty(
             StringArrayProperty(Prop.MULT_OUTPUT_WS_LAM, values=[], direction=Direction.Output),
             doc="A list of wavelength output workspaces. Only used when slicing a group workspace.",
+        )
+        self.declareProperty(
+            Prop.USED_MULTI_OUTPUTS, False, direction=Direction.Output, doc="If the outputs were stored in the multi output properties."
         )
 
     def _declareFloodCorrectionProperties(self):
@@ -947,6 +951,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             self._setOutputProperty(Prop.OUTPUT_WS, child_alg)
             self._setOutputProperty(Prop.OUTPUT_WS_BINNED, child_alg)
             self._setOutputProperty(Prop.OUTPUT_WS_LAM, child_alg)
+            self.setProperty(Prop.USED_MULTI_OUTPUTS, False)
         else:
             self.enableCheckForStringArrayWorkspaceOutputs(True)
             outputs = []
@@ -959,6 +964,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             self.setProperty(Prop.MULT_OUTPUT_WS, outputs)
             self.setProperty(Prop.MULT_OUTPUT_WS_BINNED, binned_outputs)
             self.setProperty(Prop.MULT_OUTPUT_WS_LAM, lambda_outputs)
+            self.setProperty(Prop.USED_MULTI_OUTPUTS, True)
 
         # Set the Q params as outputs if they were not specified as inputs
         self._setOutputPropertyIfInputNotSet(Prop.QMIN, child_alg)
