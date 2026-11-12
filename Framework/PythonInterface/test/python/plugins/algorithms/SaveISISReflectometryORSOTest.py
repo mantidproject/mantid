@@ -42,6 +42,14 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
     _CALIB_FILE_COMMENT = "Calibration file"
     _POL_EFF_FILE_COMMENT = "Polarization efficiencies file"
     _STITCHED_DATASET_NAME = "Stitched"
+    _ALL_HYBRID_OPTIONAL_PROPS = [
+        "ReductionTimestamp",
+        "FirstTransmissionFileList",
+        "SecondTransmissionFileList",
+        "FloodCorrectionSource",
+        "CalibrationFile",
+        "PolarizationEfficienciesFile",
+    ]
 
     _NUM_COLS_BASIC = 3
     _NUM_COLS_BASIC_WITH_RES = 4
@@ -1117,39 +1125,42 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
             excluded_header_values=["#     - file: pol_corr.nxs\n#       comment: Polarization efficiencies file"],
         )
 
-    def test_model_description_is_used_for_all_datasets(self):
-        ws_names = ["ws_1", "ws_2"]
-        for ws_name in ws_names:
-            self._create_sample_workspace(ws_name=ws_name)
-
-        self._run_save_alg(ws_names, write_resolution=False, ModelDescription="air | Si")
-
-        self.assertEqual(["air | Si", "air | Si"], self._get_model_stacks_from_file())
-
     def test_model_descriptions_are_set_for_each_dataset(self):
-        ws_names = ["ws_1", "ws_2"]
-        for ws_name in ws_names:
-            self._create_sample_workspace(ws_name=ws_name)
+        ws_names = self._create_sample_workspaces(["ws_1", "ws_2"])
 
-        self._run_save_alg(ws_names, write_resolution=False, ModelDescriptions=["air | Ni 100 | Si", "air | Si"])
+        self._run_save_alg(ws_names, write_resolution=False, MetadataSource="Manual", ModelDescriptions=["air | Ni 100 | Si", "air | Si"])
 
         self.assertEqual(["air | Ni 100 | Si", "air | Si"], self._get_model_stacks_from_file())
 
-    def test_empty_model_descriptions_entry_falls_back_to_model_description(self):
-        ws_names = ["ws_1", "ws_2"]
-        for ws_name in ws_names:
-            self._create_sample_workspace(ws_name=ws_name)
+    def test_model_descriptions_are_set_for_each_dataset_with_hybrid_metadata_source(self):
+        ws_names = self._create_sample_workspaces(["ws_1", "ws_2"])
 
-        self._run_save_alg(ws_names, write_resolution=False, ModelDescription="air | Si", ModelDescriptions=["air | Ni 100 | Si", ""])
+        self._run_save_alg(
+            ws_names,
+            write_resolution=False,
+            MetadataSource="HistoryWherePossible",
+            IgnoredProperties=self._ALL_HYBRID_OPTIONAL_PROPS,
+            ModelDescriptions=["air | Ni 100 | Si", "air | Si"],
+        )
 
         self.assertEqual(["air | Ni 100 | Si", "air | Si"], self._get_model_stacks_from_file())
 
-    def test_empty_model_descriptions_entry_without_model_description_excludes_model(self):
-        ws_names = ["ws_1", "ws_2"]
-        for ws_name in ws_names:
-            self._create_sample_workspace(ws_name=ws_name)
+    def test_model_descriptions_are_ignored_with_history_metadata_source(self):
+        ws_names = self._create_sample_workspaces(["ws_1", "ws_2"])
 
-        self._run_save_alg(ws_names, write_resolution=False, ModelDescriptions=["", "air | Si"])
+        self._run_save_alg(
+            ws_names,
+            write_resolution=False,
+            MetadataSource="History",
+            ModelDescriptions=["air | Ni 100 | Si", "air | Si"],
+        )
+
+        self.assertEqual([None, None], self._get_model_stacks_from_file())
+
+    def test_empty_model_descriptions_entry_excludes_model(self):
+        ws_names = self._create_sample_workspaces(["ws_1", "ws_2"])
+
+        self._run_save_alg(ws_names, write_resolution=False, MetadataSource="Manual", ModelDescriptions=["", "air | Si"])
 
         self.assertEqual([None, "air | Si"], self._get_model_stacks_from_file())
 
@@ -1157,17 +1168,22 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         ws_grp = self._create_sample_workspace_group(["ws_1", "ws_2"])
         self._create_sample_workspace(ws_name="ws_3")
 
-        self._run_save_alg([ws_grp.name(), "ws_3"], write_resolution=False, ModelDescriptions=["air | Ni 100 | Si", "air | Si"])
+        self._run_save_alg(
+            [ws_grp.name(), "ws_3"], write_resolution=False, MetadataSource="Manual", ModelDescriptions=["air | Ni 100 | Si", "air | Si"]
+        )
 
         self.assertEqual(["air | Ni 100 | Si", "air | Ni 100 | Si", "air | Si"], self._get_model_stacks_from_file())
 
     def test_model_descriptions_with_wrong_length_raises_error(self):
-        ws_names = ["ws_1", "ws_2"]
-        for ws_name in ws_names:
-            self._create_sample_workspace(ws_name=ws_name)
+        ws_names = self._create_sample_workspaces(["ws_1", "ws_2"])
 
         with self.assertRaisesRegex(RuntimeError, "ModelDescriptions must either be empty or contain one entry for each workspace"):
-            self._run_save_alg(ws_names, write_resolution=False, ModelDescriptions=["air | Si"])
+            self._run_save_alg(ws_names, write_resolution=False, MetadataSource="Manual", ModelDescriptions=["air | Si"])
+
+    def _create_sample_workspaces(self, ws_names):
+        for ws_name in ws_names:
+            self._create_sample_workspace(ws_name=ws_name)
+        return ws_names
 
     def _get_model_stacks_from_file(self):
         self.assertTrue(os.path.exists(self._output_filename))
