@@ -92,8 +92,8 @@ private:
     MatrixWorkspace_sptr ws =
         WorkspaceFactory::Instance().create("Workspace2D", nspecs, isHistogram ? (nbins + 1) : nbins, nbins);
     for (int64_t i = 0; i < nspecs; i++) {
-      ws->mutableX(i).assign(X.begin(), X.end());
-      ws->mutableY(i).assign(Y.begin(), Y.end());
+      ws->mutableX(i) = X;
+      ws->mutableY(i) = Y;
     }
     ws->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
     ws->getAxis(1)->unit() = UnitFactory::Instance().create("DeltaE");

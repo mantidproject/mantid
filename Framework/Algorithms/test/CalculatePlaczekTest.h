@@ -154,7 +154,7 @@ private:
   //  the testing here is using a mocked spectrum, x denotes lambda
   //        -(x-0.05)(x-2)(x-2.2)(x-3)  x \in (0.05, 2)
   //  fig@https://www.wolframalpha.com/input/?i=-%28x-0.05%29%28x-2%29%28x-2.2%29%28x-3%29
-  std::vector<double> generateIncidentSpectrum(const Mantid::HistogramData::HistogramX &lambda) {
+  std::vector<double> generateIncidentSpectrum(const std::vector<double> &lambda) {
     std::vector<double> amplitude;
     std::transform(lambda.begin(), lambda.end(), std::back_inserter(amplitude),
                    [](double x) { return -(x - 0.05) * (x - 2) * (x - 2.2) * (x - 3); });
@@ -166,7 +166,7 @@ private:
   //  The first order derivative of the mocked spectrum above is
   //        -4(-3.5125 + 8.68 x - 5.4375 x^2 + x^3)  x \in (0.05, 2)
   //  fig@https://www.wolframalpha.com/input/?i=-4.%28-3.5125+%2B+8.68+x+-+5.4375+x%5E2+%2B+x%5E3%29
-  std::vector<double> generateIncidentSpectrumPrime(const Mantid::HistogramData::HistogramX &lambda) {
+  std::vector<double> generateIncidentSpectrumPrime(const std::vector<double> &lambda) {
     std::vector<double> amplitude;
     std::transform(lambda.begin(), lambda.end(), std::back_inserter(amplitude),
                    [](double x) { return -4 * (-3.5125 + 8.68 * x - 5.4375 * x * x + x * x * x); });
@@ -178,7 +178,7 @@ private:
   //  The second order derivative of the mocked spectrum above is
   //        -34.72 + 43.5 x - 12 x^2  x \in (0.05, 2)
   //  fig@https://www.wolframalpha.com/input/?i=-34.72+%2B+43.5+x+-+12+x%5E2
-  std::vector<double> generateIncidentSpectrumPrimePrime(const Mantid::HistogramData::HistogramX &lambda) {
+  std::vector<double> generateIncidentSpectrumPrimePrime(const std::vector<double> &lambda) {
     std::vector<double> amplitude;
     std::transform(lambda.begin(), lambda.end(), std::back_inserter(amplitude),
                    [](double x) { return -34.72 + 43.5 * x - 12 * x * x; });
