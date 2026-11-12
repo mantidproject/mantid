@@ -1,0 +1,1 @@
+- In :ref:`algm-VesuvioCalculateMS`, when the sample is oriented by a goniometer, for example with :ref:`algm-SetGoniometer`, the simulation now uses the sample in its rotated position. Previously the goniometer rotation was ignored unless :ref:`algm-CopySample` had rotated the shape itself.
