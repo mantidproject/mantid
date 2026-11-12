@@ -20,8 +20,8 @@ The one exception is naming communities, described under [Usage](#usage).
 
 ## Installing
 
-`graphifyy` (note the double `y`) is part of the pixi developer environment,
-so `graphify` is available inside `pixi shell` or through `pixi run graphify`.
+The name of the package is `graphifyy` (note the double `y`) and is not part of the developer environment.
+It can be installed `pixi add --global graphifyy` then it can be used inside `pixi shell` or through `pixi run graphify`.
 See the [installation guide](https://docs.graphify.com/open-source/installation) for other ways to install it.
 
 ## Configuration
