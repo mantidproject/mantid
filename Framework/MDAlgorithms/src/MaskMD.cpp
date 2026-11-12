@@ -10,7 +10,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include <algorithm>
-#include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 
 using namespace Mantid::Kernel;

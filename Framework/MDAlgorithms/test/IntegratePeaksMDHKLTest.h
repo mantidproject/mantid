@@ -21,7 +21,6 @@
 #include "MantidMDAlgorithms/IntegratePeaksMDHKL.h"
 
 #include <boost/math/distributions/normal.hpp>
-#include <boost/math/special_functions/pow.hpp>
 
 #include <cxxtest/TestSuite.h>
 

@@ -11,7 +11,6 @@
 #include "MantidNexus/H5Util.h"
 #include "test_helper.h"
 #include <H5Cpp.h>
-#include <boost/numeric/conversion/cast.hpp>
 #include <filesystem>
 #include <limits>
 

@@ -12,7 +12,6 @@
 #include <stdexcept>
 
 #ifndef Q_MOC_RUN
-#include <boost/function.hpp>
 #include <utility>
 
 #endif

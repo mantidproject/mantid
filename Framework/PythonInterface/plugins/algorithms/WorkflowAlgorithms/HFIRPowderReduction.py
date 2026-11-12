@@ -960,7 +960,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         )
 
         # A user-supplied IDF overrides the geometry embedded in the sample file.
-        self._load_IDF_if_supplied(wsname, rewrite_spectra_map=True)
+        self._load_IDF_if_supplied(wsname, rewrite_spectra_map=False)
         self._apply_MIDAS_mask(wsname)
 
     def _apply_MIDAS_mask(self, wsname):
@@ -1161,7 +1161,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         rebuilds the spectrum->detector mapping from the new geometry, False preserves an
         existing (e.g. grouped) mapping and only replaces the geometry.
         """
-        idf = self.getProperty("IDFFilename").value
+        idf = self.getProperty("IDFFilename").values
         if not idf:
             return
         workspace = mtd[wsname]
@@ -1178,7 +1178,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         """
         Load(Filename=filename, OutputWorkspace=wsname, EnableLogging=False)
         # A user-supplied IDF overrides the geometry that came from the loaded sample file.
-        self._load_IDF_if_supplied(wsname, rewrite_spectra_map=True)
+        self._load_IDF_if_supplied(wsname, rewrite_spectra_map=False)
 
     def _load_WAND_Data(self, filename, wsname):
         grouping = self.getProperty("Grouping").value

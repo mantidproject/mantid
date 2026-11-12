@@ -183,6 +183,22 @@ void BinaryOperationMD::exec() {
 
   // Give the output
   setProperty("OutputWorkspace", m_out);
+
+  // Release workspace references held by this instance
+  m_lhs.reset();
+  m_rhs.reset();
+  m_out.reset();
+  m_lhs_event.reset();
+  m_rhs_event.reset();
+  m_lhs_histo.reset();
+  m_rhs_histo.reset();
+  m_lhs_scalar.reset();
+  m_rhs_scalar.reset();
+  m_operand_event.reset();
+  m_out_event.reset();
+  m_operand_histo.reset();
+  m_out_histo.reset();
+  m_operand_scalar.reset();
 }
 
 } // namespace Mantid::MDAlgorithms

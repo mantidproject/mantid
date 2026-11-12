@@ -31,7 +31,7 @@
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
 
-#include "boost/make_shared.hpp"
+#include <memory>
 
 #include <algorithm>
 #include <iomanip>

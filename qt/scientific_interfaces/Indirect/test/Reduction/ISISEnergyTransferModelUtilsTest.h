@@ -9,7 +9,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include "Reduction/ISISEnergyTransferModelUtils.h"
-#include <boost/algorithm/string.hpp>
 #include <chrono>
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>

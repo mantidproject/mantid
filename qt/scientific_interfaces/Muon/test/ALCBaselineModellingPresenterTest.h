@@ -9,7 +9,7 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -25,7 +25,6 @@
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 using namespace testing;
-using boost::scoped_ptr;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::LinearGenerator;

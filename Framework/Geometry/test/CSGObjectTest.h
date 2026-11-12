@@ -24,8 +24,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "boost/make_shared.hpp"
-#include "boost/shared_ptr.hpp"
+#include <memory>
 
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/Document.h>

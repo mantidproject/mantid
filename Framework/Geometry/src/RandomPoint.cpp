@@ -7,7 +7,6 @@
 #include "MantidGeometry/RandomPoint.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
-#include <boost/math/special_functions/pow.hpp>
 
 namespace Mantid::Geometry::RandomPoint {
 

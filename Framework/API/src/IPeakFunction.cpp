@@ -14,7 +14,6 @@
 #include "MantidAPI/Jacobian.h"
 #include "MantidAPI/PeakFunctionIntegrator.h"
 #include "MantidKernel/Exception.h"
-#include "boost/make_shared.hpp"
 
 #include <cmath>
 #include <limits>
@@ -166,9 +165,9 @@ IntegrationResultCache IPeakFunction::integrate() const {
 
     auto const result = integrator.integrate(*this, interval.first, interval.second);
     if (result.success)
-      integrationResult = boost::make_shared<IntegrationResultCache>(result.result, result.error);
+      integrationResult = std::make_shared<IntegrationResultCache>(result.result, result.error);
     else
-      integrationResult = boost::make_shared<IntegrationResultCache>(std::nan(""), std::nan(""));
+      integrationResult = std::make_shared<IntegrationResultCache>(std::nan(""), std::nan(""));
     m_parameterContextDirty = false;
   }
   return *integrationResult;

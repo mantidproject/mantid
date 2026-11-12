@@ -11,7 +11,7 @@
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include <boost/function.hpp>
+#include <functional>
 #include <memory>
 #include <vector>
 
@@ -76,8 +76,8 @@ public:
   void setMonitorWorkspace(const std::shared_ptr<API::MatrixWorkspace> &monitorWS);
   void updateSpectraUsing(const API::SpectrumDetectorMapping &map);
   void setTitle(const std::string &title);
-  void applyFilterInPlace(const boost::function<void(API::MatrixWorkspace_sptr)> &func);
-  void applyFilter(const boost::function<DataObjects::EventWorkspace_sptr(DataObjects::EventWorkspace_sptr)> &func);
+  void applyFilterInPlace(const std::function<void(API::MatrixWorkspace_sptr)> &func);
+  void applyFilter(const std::function<DataObjects::EventWorkspace_sptr(DataObjects::EventWorkspace_sptr)> &func);
   virtual bool threadSafe() const;
 };
 

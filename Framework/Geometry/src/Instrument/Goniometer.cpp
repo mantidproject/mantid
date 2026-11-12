@@ -9,7 +9,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/Strings.h"
-#include <boost/algorithm/string.hpp>
 #include <cstdlib>
 #include <sstream>
 #include <stdexcept>

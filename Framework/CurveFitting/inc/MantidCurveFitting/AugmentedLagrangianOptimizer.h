@@ -9,7 +9,7 @@
 #include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/Matrix.h"
 
-#include <boost/function.hpp>
+#include <functional>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -54,7 +54,7 @@ class MANTID_CURVEFITTING_DLL AugmentedLagrangianOptimizer {
 
 public:
   /// Function type
-  using ObjFunction = boost::function<double(const size_t, const double *)>;
+  using ObjFunction = std::function<double(const size_t, const double *)>;
 
 public:
   /**

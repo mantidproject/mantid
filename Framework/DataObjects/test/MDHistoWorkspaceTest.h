@@ -21,10 +21,9 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/VMD.h"
 #include "PropertyManagerHelper.h"
-#include <boost/scoped_array.hpp>
-#include <boost/scoped_ptr.hpp>
 #include <cmath>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
@@ -378,7 +377,7 @@ public:
     MDHistoWorkspaceIterator *hwit = dynamic_cast<MDHistoWorkspaceIterator *>(it.get());
     TS_ASSERT(hwit);
     TS_ASSERT(it->next());
-    boost::scoped_ptr<MDImplicitFunction> mdfunction(new MDImplicitFunction);
+    std::unique_ptr<MDImplicitFunction> mdfunction(new MDImplicitFunction);
     it = ws.createIterator(mdfunction.get());
     TS_ASSERT(it);
   }

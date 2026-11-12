@@ -21,8 +21,10 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
-#include <boost/iterator/counting_iterator.hpp>
+#include <algorithm>
+#include <iterator>
 #include <numeric>
+#include <ranges>
 
 namespace {
 struct Variances {
@@ -154,8 +156,7 @@ void CrossCorrelate::exec() {
     const int wsIndexMin = getProperty("WorkspaceIndexMin");
     const int wsIndexMax = getProperty("WorkspaceIndexMax");
     indexes.reserve(static_cast<size_t>(wsIndexMax - wsIndexMin + 1)); // validated in validateInputs
-    std::copy(boost::make_counting_iterator(wsIndexMin), boost::make_counting_iterator(wsIndexMax + 1),
-              std::back_inserter(indexes));
+    std::ranges::copy(std::views::iota(wsIndexMin, wsIndexMax + 1), std::back_inserter(indexes));
   }
   const int numSpectra = static_cast<int>(indexes.size());
 

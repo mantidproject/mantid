@@ -56,7 +56,6 @@ using Mantid::Types::Core::DateAndTime;
 
 // from boost
 #include <boost/algorithm/string.hpp>
-#include <boost/foreach.hpp>
 #include <boost/regex.hpp>
 
 #include <json/json.h>

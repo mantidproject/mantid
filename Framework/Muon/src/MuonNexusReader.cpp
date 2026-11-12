@@ -7,7 +7,7 @@
 #include "MantidMuon/MuonNexusReader.h"
 #include "MantidKernel/Logger.h"
 #include "MantidLegacyNexus/NeXusException.hpp"
-#include <boost/scoped_array.hpp>
+#include <memory>
 #include <sstream>
 #include <vector>
 
@@ -301,13 +301,13 @@ bool MuonNexusReader::readMuonLogData(Mantid::LegacyNexus::File &handle) {
   Mantid::LegacyNexus::Info info = handle.getInfo();
   if (info.type == Mantid::LegacyNexus::NXnumtype::FLOAT32 && info.dims.size() == 1) {
     isNumeric = true;
-    boost::scoped_array<float> dataVals(new float[info.dims[0]]);
+    std::unique_ptr<float[]> dataVals(new float[info.dims[0]]);
     handle.getAttr("units", units);
     handle.getData(dataVals.get());
     values.assign(dataVals.get(), dataVals.get() + info.dims[0]);
     stringValues.resize(info.dims[0]); // Leave empty
   } else if (info.type == Mantid::LegacyNexus::NXnumtype::CHAR && info.dims.size() == 2) {
-    boost::scoped_array<char> dataVals(new char[info.dims[0] * info.dims[1] + 1]);
+    std::unique_ptr<char[]> dataVals(new char[info.dims[0] * info.dims[1] + 1]);
     handle.getAttr("units", units);
     handle.getData(dataVals.get());
     dataVals[info.dims[0] * info.dims[1]] = 0;
@@ -332,7 +332,7 @@ bool MuonNexusReader::readMuonLogData(Mantid::LegacyNexus::File &handle) {
   }
 
   info = handle.getInfo();
-  boost::scoped_array<float> timeVals(new float[info.dims[0]]);
+  std::unique_ptr<float[]> timeVals(new float[info.dims[0]]);
   if (info.type == Mantid::LegacyNexus::NXnumtype::FLOAT32 && info.dims.size() == 1) {
     handle.getData(timeVals.get());
   } else {

@@ -7,9 +7,9 @@
 #pragma once
 
 #include <algorithm>
-#include <boost/scoped_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
+#include <memory>
 #include <set>
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -589,7 +589,7 @@ class ConnectedComponentLabelingTestPerformance : public CxxTest::TestSuite {
 private:
   IMDHistoWorkspace_sptr m_inWS;
   const double m_backgroundSignal;
-  boost::scoped_ptr<BackgroundStrategy> m_backgroundStrategy;
+  std::unique_ptr<BackgroundStrategy> m_backgroundStrategy;
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically

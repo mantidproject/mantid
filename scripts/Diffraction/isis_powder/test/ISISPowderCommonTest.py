@@ -624,8 +624,8 @@ class ISISPowderCommonTest(unittest.TestCase):
         for i in range(returned_ws.blocksize()):
             self.assertAlmostEqual(y_values[i], original_y_values[i] * 0.7)
 
-        mantid.DeleteWorkspace(no_scale_ws)
-        mantid.DeleteWorkspace(empty_ws)
+        # Minus runs in place, so returned_ws is no_scale_ws; empty_ws was already removed by subtract_summed_runs
+        mantid.DeleteWorkspace(original_ws)
         mantid.DeleteWorkspace(returned_ws)
 
     def test_subtract_summed_runs_no_current(self):

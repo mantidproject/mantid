@@ -14,7 +14,6 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/WarningSuppressions.h"
 
-#include <boost/utility.hpp>
 #include <utility>
 
 namespace Mantid::API {

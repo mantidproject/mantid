@@ -32,6 +32,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <cstdio>
 #include <filesystem>
 #include <fstream>
@@ -813,7 +814,7 @@ template <typename FD> void LoadEMU<FD>::exec(const std::string &hdfFile, const 
   logManager.addProperty("filename", filename);
 
   Types::Core::time_duration duration =
-      boost::posix_time::microseconds(static_cast<boost::int64_t>(eventCounter.duration() * 1.0e6));
+      boost::posix_time::microseconds(static_cast<std::int64_t>(eventCounter.duration() * 1.0e6));
   Types::Core::DateAndTime endTime(startTime + duration);
   logManager.addProperty("end_time", endTime.toISO8601String());
   logManager.addProperty<double>("dur", eventCounter.duration());
@@ -966,7 +967,7 @@ void LoadEMU<FD>::calibrateDopplerPhase(const std::vector<size_t> &eventCounts,
   // call the optimizer and update the doppler phase value
   // limit the optimization to 30 iterations
   int bits = std::numeric_limits<double>::digits;
-  boost::uintmax_t itn = 30;
+  std::uintmax_t itn = 30;
   using boost::math::tools::brent_find_minima;
   auto minPhase = m_dopplerPhase - 5.0;
   auto maxPhase = m_dopplerPhase + 5.0;
@@ -1106,7 +1107,7 @@ template <typename FD> void LoadEMU<FD>::loadParameters(const std::string &hdfFi
     auto nthTime = GetNeXusValue<int32_t>(entry, "instrument/detector/start_time", 0, m_datasetIndex);
 
     Types::Core::time_duration duration =
-        boost::posix_time::microseconds(static_cast<boost::int64_t>((nthTime - baseTime) * 1.0e6));
+        boost::posix_time::microseconds(static_cast<std::int64_t>((nthTime - baseTime) * 1.0e6));
     Types::Core::DateAndTime startDataset(startTime + duration);
     m_startRun = startDataset.toISO8601String();
   } else {

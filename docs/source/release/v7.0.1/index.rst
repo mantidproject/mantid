@@ -9,6 +9,7 @@ This is a patch release that corrects some significant issues since :ref:`versio
 The changes are:
 - Remove workaround for qsettings location on nfs home area `#42716 <https://github.com/mantidproject/mantid/pull/42716>`_
 - Fix bug creating ReflectometryISISLoadAndProcess dialog `#42646 <https://github.com/mantidproject/mantid/pull/42646/>`_
+- Fixed the parameter line edits collapsing on macOS in the :ref:`QENS Fitting <interface-inelastic-qens-fitting>` interface, which made the parameter values difficult to edit `#42735 <https://github.com/mantidproject/mantid/pull/42735>`_
 
 Citation
 --------

@@ -13,7 +13,7 @@
 #include "MantidKernel/PropertyManagerProperty.h"
 #include "MantidKernel/PropertyWithValue.hxx"
 
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 
 using Mantid::Kernel::PropertyManagerProperty;
 
@@ -60,7 +60,7 @@ public:
 
     auto testMgr = createPropMgrWithInt();
     PropertyManagerProperty pmap("Test", testMgr, Direction::Output);
-    boost::scoped_ptr<PropertyManagerProperty> copy(pmap.clone());
+    std::unique_ptr<PropertyManagerProperty> copy(pmap.clone());
     TS_ASSERT_EQUALS("Test", copy->name());
     TS_ASSERT_EQUALS(static_cast<unsigned int>(Direction::Output), copy->direction());
     TS_ASSERT_EQUALS(testMgr, (*copy)());

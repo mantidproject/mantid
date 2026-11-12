@@ -19,7 +19,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/WarningSuppressions.h"
 
-#include "boost/make_shared.hpp"
+#include <memory>
 
 #include <algorithm>
 #include <cctype>

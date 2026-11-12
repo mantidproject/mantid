@@ -8,8 +8,8 @@
 
 #include "MantidCurveFitting/Functions/CubicSpline.h"
 
-#include <boost/scoped_array.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 
 using namespace Mantid::API;
 using Mantid::CurveFitting::Functions::CubicSpline;
@@ -108,8 +108,8 @@ public:
 
     int nData = 10; // number of data points to fit too
 
-    boost::scoped_array<double> x(new double[nData]);
-    boost::scoped_array<double> referenceSet(new double[nData]);
+    std::unique_ptr<double[]> x(new double[nData]);
+    std::unique_ptr<double[]> referenceSet(new double[nData]);
 
     // setup spline with n data points separated by 1
     setupCubicSpline(cspline, nData, 1);
@@ -139,8 +139,8 @@ public:
 
     int testDataSize = 5;
 
-    boost::scoped_array<double> x(new double[testDataSize]);
-    boost::scoped_array<double> refSet(new double[testDataSize]);
+    std::unique_ptr<double[]> x(new double[testDataSize]);
+    std::unique_ptr<double[]> refSet(new double[testDataSize]);
 
     generateTestData(testDataSize, refSet, x, 1);
 
@@ -164,8 +164,8 @@ public:
     int nData = 20;
     int testDataSize = 30;
 
-    boost::scoped_array<double> x(new double[testDataSize]);
-    boost::scoped_array<double> referenceSet(new double[testDataSize]);
+    std::unique_ptr<double[]> x(new double[testDataSize]);
+    std::unique_ptr<double[]> referenceSet(new double[testDataSize]);
 
     // init spline with 10 data points
     setupCubicSpline(cspline, nData, 1);
@@ -190,9 +190,9 @@ public:
     int nData = 10;
     int testDataSize = 10;
 
-    boost::scoped_array<double> x(new double[nData]);
-    boost::scoped_array<double> refSet(new double[testDataSize]);
-    boost::scoped_array<double> testDataValues(new double[testDataSize]);
+    std::unique_ptr<double[]> x(new double[nData]);
+    std::unique_ptr<double[]> refSet(new double[testDataSize]);
+    std::unique_ptr<double[]> testDataValues(new double[testDataSize]);
 
     setupCubicSpline(cspline, nData, 1);
     generateDerviTestData(testDataSize, refSet, x, 1, 1);
@@ -207,7 +207,7 @@ public:
 
 private:
   // generate a set of uniform points to test the spline
-  void generateTestData(int numTests, boost::scoped_array<double> &refSet, boost::scoped_array<double> &xValues,
+  void generateTestData(int numTests, std::unique_ptr<double[]> &refSet, std::unique_ptr<double[]> &xValues,
                         double xModify) {
     for (int i = 0; i < numTests; ++i) {
       xValues[i] = (i * xModify);
@@ -215,7 +215,7 @@ private:
     }
   }
 
-  void generateDerviTestData(int numTests, boost::scoped_array<double> &refSet, boost::scoped_array<double> &xValues,
+  void generateDerviTestData(int numTests, std::unique_ptr<double[]> &refSet, std::unique_ptr<double[]> &xValues,
                              double xModify, double h) {
     for (int i = 0; i < numTests; ++i) {
       xValues[i] = (i * xModify);

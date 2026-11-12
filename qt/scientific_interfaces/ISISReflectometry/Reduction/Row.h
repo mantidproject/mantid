@@ -10,7 +10,6 @@
 #include "RangeInQ.h"
 #include "ReductionOptionsMap.h"
 #include "ReductionWorkspaces.h"
-#include <boost/range/algorithm/set_algorithm.hpp>
 #include <optional>
 #include <string>
 #include <vector>

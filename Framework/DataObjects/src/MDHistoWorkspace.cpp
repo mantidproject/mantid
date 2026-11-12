@@ -17,7 +17,6 @@
 #include "MantidKernel/VMD.h"
 #include "MantidKernel/WarningSuppressions.h"
 
-#include <boost/scoped_array.hpp>
 #include <cmath>
 #include <map>
 #include <memory>

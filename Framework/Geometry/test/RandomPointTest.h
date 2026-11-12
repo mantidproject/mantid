@@ -12,7 +12,6 @@
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/RandomPoint.h"
 #include "MockRNG.h"
-#include <boost/math/special_functions/pow.hpp>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Geometry::RandomPoint;
@@ -265,7 +264,6 @@ public:
   void test_localPointInCylinderWithNonzeroXAndZBasisElements() {
     // This test uses a hollow cylinder geometry
     using namespace ::testing;
-    using boost::math::pow;
     constexpr double radialLength{0.3};
     constexpr double polarAngle{0.4};
     constexpr V3D alongAxis{0., 0., 1.};

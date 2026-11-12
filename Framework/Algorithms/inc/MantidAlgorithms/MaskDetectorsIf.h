@@ -12,7 +12,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
-#include <boost/function.hpp>
+#include <functional>
 
 // To be compatible with VSC Express edition that does not have tr1
 
@@ -60,7 +60,7 @@ private:
   /// The input workspace
   API::MatrixWorkspace_const_sptr m_inputW;
   /// A comparator function
-  boost::function<bool(double, double)> m_compar_f;
+  std::function<bool(double, double)> m_compar_f;
   void outputToWorkspace();
   void retrieveProperties();
   void validateAndSetIxProperties();

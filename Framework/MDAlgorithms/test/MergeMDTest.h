@@ -210,4 +210,40 @@ public:
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
   }
+
+  void test_expInfoIndex_when_algorithm_instance_is_reused() {
+    const std::string outWSName("MergeMDTest_OutputWS");
+
+    MergeMD alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspaces", "mde3,mde3,mde3"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
+
+    // Executing the same instance twice must give the same experiment info indices each time
+    for (int run = 0; run < 2; ++run) {
+      TS_ASSERT_THROWS_NOTHING(alg.execute());
+      TS_ASSERT(alg.isExecuted());
+
+      MDEventWorkspace3::sptr ws;
+      TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3>(outWSName));
+      TS_ASSERT(ws);
+      TS_ASSERT_EQUALS(3, ws->getNumExperimentInfo());
+
+      std::vector<API::IMDNode *> boxes;
+      ws->getBox()->getBoxes(boxes, 10, true);
+      std::vector<coord_t> events;
+      size_t ncols;
+      boxes[0]->getEventsData(events, ncols);
+      // 8 columns: I, err^2, expInfoIndex, goniometerIndex, det_id, x, y, z
+      TS_ASSERT_EQUALS(ncols, 8);
+      TS_ASSERT_EQUALS(events.size(), 24);
+
+      // One event from each input, with expInfoIndex 0, 1 and 2
+      for (size_t i = 0; i < 3 && 8 * i + 2 < events.size(); ++i) {
+        TSM_ASSERT_EQUALS("run " + std::to_string(run), events[8 * i + 2], static_cast<coord_t>(i));
+      }
+    }
+
+    AnalysisDataService::Instance().remove(outWSName);
+  }
 };

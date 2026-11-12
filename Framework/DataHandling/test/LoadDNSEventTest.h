@@ -17,7 +17,6 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include <boost/range/irange.hpp>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;

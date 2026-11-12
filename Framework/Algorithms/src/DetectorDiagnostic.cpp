@@ -17,7 +17,7 @@
 #include "MantidKernel/Statistics.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
-#include <boost/iterator/counting_iterator.hpp>
+#include <numeric>
 
 #include <algorithm>
 #include <cfloat>
@@ -483,8 +483,9 @@ DataObjects::MaskWorkspace_sptr DetectorDiagnostic::generateEmptyMask(const API:
 }
 
 std::vector<std::vector<size_t>> DetectorDiagnostic::makeInstrumentMap(const API::MatrixWorkspace &countsWS) {
-  return {{boost::counting_iterator<std::size_t>(0),
-           boost::counting_iterator<std::size_t>(countsWS.getNumberHistograms())}};
+  std::vector<std::size_t> indices(countsWS.getNumberHistograms());
+  std::iota(indices.begin(), indices.end(), std::size_t{0});
+  return {indices};
 }
 /** This function will check how to group spectra when calculating median
  *

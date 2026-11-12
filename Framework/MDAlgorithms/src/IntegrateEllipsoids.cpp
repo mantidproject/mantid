@@ -10,8 +10,6 @@
 #include "MantidMDAlgorithms/IntegrateEllipsoidsV1.h"
 #include "MantidMDAlgorithms/IntegrateEllipsoidsV2.h"
 
-#include <boost/algorithm/string.hpp>
-
 using namespace Mantid::API;
 using namespace Mantid::HistogramData;
 using namespace Mantid::Kernel;
