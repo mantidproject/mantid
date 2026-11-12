@@ -20,7 +20,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <cxxtest/TestSuite.h>
 
-#include "boost/shared_ptr.hpp"
+#include <memory>
 #include <stdexcept>
 #include <utility>
 

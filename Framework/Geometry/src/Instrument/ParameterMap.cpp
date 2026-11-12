@@ -16,7 +16,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidNexus/NexusFile.h"
-#include <boost/algorithm/string.hpp>
 #include <cstring>
 #include <numeric>
 

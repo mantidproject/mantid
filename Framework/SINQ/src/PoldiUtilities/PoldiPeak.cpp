@@ -7,6 +7,7 @@
 #include "MantidSINQ/PoldiUtilities/PoldiPeak.h"
 
 #include <cmath>
+#include <functional>
 #include <stdexcept>
 #include <utility>
 

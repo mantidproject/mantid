@@ -33,8 +33,7 @@
 #include "MantidLegacyNexus/NexusClasses.h"
 #include "MantidMuon/MuonNexusReader.h"
 
-#include <boost/iterator/counting_iterator.hpp>
-#include <boost/scoped_array.hpp>
+#include <ranges>
 
 #include <Poco/Path.h>
 
@@ -399,8 +398,8 @@ void LoadMuonNexus1::loadDeadTimes(LegacyNexus::NXRoot &root) {
     // Set the spectrum list that should be loaded
     if (m_interval || m_list) {
       // Load only selected spectra
-      specToLoad.insert(specToLoad.end(), boost::counting_iterator<specnum_t>(m_spec_min),
-                        boost::counting_iterator<specnum_t>(m_spec_max));
+      const auto specRange = std::views::iota(m_spec_min, m_spec_max);
+      specToLoad.insert(specToLoad.end(), specRange.begin(), specRange.end());
       specToLoad.insert(specToLoad.end(), m_spec_list.begin(), m_spec_list.end());
     } else {
       // Load all the spectra
@@ -498,8 +497,8 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(LegacyNexus::NXRoot &root,
     // Set the spectrum list that should be loaded
     if (m_interval || m_list) {
       // Load only selected spectra
-      specToLoad.insert(specToLoad.end(), boost::counting_iterator<specnum_t>(m_spec_min),
-                        boost::counting_iterator<specnum_t>(m_spec_max));
+      const auto specRange = std::views::iota(m_spec_min, m_spec_max);
+      specToLoad.insert(specToLoad.end(), specRange.begin(), specRange.end());
       specToLoad.insert(specToLoad.end(), m_spec_list.begin(), m_spec_list.end());
     } else {
       // Load all the spectra
@@ -831,7 +830,7 @@ void LoadMuonNexus1::addGoodFrames(const DataObjects::Workspace2D_sptr &localWor
       }
 
       // read frames_period_daq
-      boost::scoped_array<int> dataVals(new int[1]);
+      std::unique_ptr<int[]> dataVals(new int[1]);
       handle.getData(dataVals.get());
 
       auto &run = localWorkspace->mutableRun();
@@ -866,7 +865,7 @@ void LoadMuonNexus1::addGoodFrames(const DataObjects::Workspace2D_sptr &localWor
       }
 
       // read frames_period_daq
-      boost::scoped_array<int> dataVals(new int[info.dims[0]]);
+      std::unique_ptr<int[]> dataVals(new int[info.dims[0]]);
       handle.getData(dataVals.get());
 
       auto &run = localWorkspace->mutableRun();

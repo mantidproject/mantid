@@ -11,7 +11,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidSINQ/DllConfig.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeak.h"
-#include "boost/shared_ptr.hpp"
+#include <memory>
 
 namespace Mantid {
 namespace Poldi {

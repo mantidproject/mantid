@@ -262,7 +262,6 @@ void ConvertToDetectorFaceMD::exec() {
 
         // We want to bind to the right templated function, so we have to know
         // the type of TofEvent contained in the EventList.
-        boost::function<void()> func;
         switch (el.getEventType()) {
         case TOF:
           if (nd == 3)

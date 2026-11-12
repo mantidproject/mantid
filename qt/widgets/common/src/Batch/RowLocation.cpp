@@ -9,11 +9,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <utility>
 
-#include "MantidQtWidgets/Common/Batch/equal.hpp"
-// equivalent to
-//         #include <boost/algorithm/cxx14/equal.hpp>
-// or just #include <algorithm> in c++14
-// available in boost 1.54+ - required for RHEL7.
+#include <algorithm>
 
 namespace MantidQt::MantidWidgets::Batch {
 
@@ -28,7 +24,7 @@ bool RowLocation::isChildOf(RowLocation const &other) const {
     } else {
       auto const &otherPath = other.path();
       if (depth() - other.depth() == 1)
-        return boost::algorithm::equal(m_path.cbegin(), m_path.cend() - 1, otherPath.cbegin(), otherPath.cend());
+        return std::equal(m_path.cbegin(), m_path.cend() - 1, otherPath.cbegin(), otherPath.cend());
       else
         return false;
     }
@@ -90,7 +86,7 @@ bool RowLocation::isSiblingOf(RowLocation const &other) const {
   if (!(isRoot() || other.isRoot())) {
     auto const &otherPath = other.path();
     if (depth() == other.depth())
-      return boost::algorithm::equal(m_path.cbegin(), m_path.cend() - 1, otherPath.cbegin(), otherPath.cend() - 1);
+      return std::equal(m_path.cbegin(), m_path.cend() - 1, otherPath.cbegin(), otherPath.cend() - 1);
   }
   return false;
 }
@@ -104,8 +100,8 @@ bool RowLocation::isDescendantOf(RowLocation const &ancestor) const {
     } else {
       auto const &ancestorPath = ancestor.path();
       if (depth() > ancestor.depth())
-        return boost::algorithm::equal(m_path.cbegin(), m_path.cbegin() + ancestor.depth(), ancestorPath.cbegin(),
-                                       ancestorPath.cend());
+        return std::equal(m_path.cbegin(), m_path.cbegin() + ancestor.depth(), ancestorPath.cbegin(),
+                          ancestorPath.cend());
     }
   }
   return false;
@@ -117,6 +113,6 @@ bool pathsSameUntilDepth(int depth, RowLocation const &locationA, RowLocation co
   assertOrThrow(depth <= std::min(locationA.depth(), locationB.depth()),
                 "pathsSameUntilDepth: Comparison depth must be less than or "
                 "equal to the depth of both locations");
-  return boost::algorithm::equal(pathA.cbegin(), pathA.cbegin() + depth, pathB.cbegin(), pathB.cbegin() + depth);
+  return std::equal(pathA.cbegin(), pathA.cbegin() + depth, pathB.cbegin(), pathB.cbegin() + depth);
 }
 } // namespace MantidQt::MantidWidgets::Batch

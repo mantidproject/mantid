@@ -22,7 +22,6 @@
 #include "MantidTypes/Core/DateAndTime.h"
 
 #include <Poco/TemporaryFile.h>
-#include <boost/algorithm/string/predicate.hpp>
 #include <cmath>
 #include <filesystem>
 #include <fstream>

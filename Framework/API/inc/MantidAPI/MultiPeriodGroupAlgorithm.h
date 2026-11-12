@@ -9,7 +9,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/MultiPeriodGroupWorker.h"
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace API {
@@ -40,7 +40,7 @@ private:
   /// multi period group workspaces.
   VecWSGroupType m_multiPeriodGroups;
   /// Multiperiod group worker.
-  boost::scoped_ptr<MultiPeriodGroupWorker> m_worker;
+  std::unique_ptr<MultiPeriodGroupWorker> m_worker;
 };
 
 } // namespace API

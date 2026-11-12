@@ -16,8 +16,6 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 
-#include <boost/algorithm/string.hpp>
-
 namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory

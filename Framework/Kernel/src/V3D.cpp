@@ -9,16 +9,10 @@
 #include "MantidKernel/Quat.h"
 #include "MantidNexus/NexusFile.h"
 #include <algorithm>
-#include <boost/version.hpp>
+#include <numeric>
 #include <sstream>
 
-#if BOOST_VERSION < 106700
-#include <boost/math/common_factor.hpp>
-using boost::math::gcd;
-#else
-#include <boost/integer/common_factor.hpp>
-using boost::integer::gcd;
-#endif
+using std::gcd;
 
 namespace {
 /** transform vector into form, used to describe directions in crystallogaphical

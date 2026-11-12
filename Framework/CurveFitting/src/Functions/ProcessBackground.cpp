@@ -20,8 +20,6 @@
 #include "MantidKernel/VisibleWhenProperty.h"
 
 #include <algorithm>
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <utility>
 

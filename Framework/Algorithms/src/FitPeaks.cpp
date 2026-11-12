@@ -38,7 +38,6 @@
 #include "MantidKernel/VectorHelper.h"
 
 #include "MantidAPI/Column.h"
-#include "boost/algorithm/string.hpp"
 #include "boost/algorithm/string/trim.hpp"
 #include <cmath>
 #include <limits>

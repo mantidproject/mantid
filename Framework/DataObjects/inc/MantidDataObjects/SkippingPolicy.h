@@ -8,7 +8,7 @@
 
 #include "MantidAPI/IMDIterator.h"
 #include "MantidDataObjects/DllConfig.h"
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace DataObjects {
@@ -48,7 +48,7 @@ public:
   bool keepGoing() const override { return false; }
 };
 
-using SkippingPolicy_scptr = boost::scoped_ptr<SkippingPolicy>;
+using SkippingPolicy_scptr = std::unique_ptr<SkippingPolicy>;
 
 } // namespace DataObjects
 } // namespace Mantid

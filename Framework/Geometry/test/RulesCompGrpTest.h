@@ -20,7 +20,7 @@
 #include "MantidGeometry/Surfaces/Sphere.h"
 #include "MantidKernel/V3D.h"
 
-#include "boost/make_shared.hpp"
+#include <memory>
 
 using namespace Mantid;
 using namespace Geometry;

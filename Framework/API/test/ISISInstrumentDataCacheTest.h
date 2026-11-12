@@ -17,7 +17,6 @@
 #include "MantidAPI/ISISInstrumentDataCache.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Strings.h"
-#include <boost/algorithm/string.hpp>
 
 using namespace Mantid::API;
 

@@ -365,8 +365,8 @@ void LoadNexusMonitors2::exec() {
  */
 void LoadNexusMonitors2::fixUDets(Nexus::File &file) {
   const size_t nmonitors = m_monitorInfo.size();
-  boost::scoped_array<detid_t> det_ids(new detid_t[nmonitors]);
-  boost::scoped_array<specnum_t> spec_ids(new specnum_t[nmonitors]);
+  std::unique_ptr<detid_t[]> det_ids(new detid_t[nmonitors]);
+  std::unique_ptr<specnum_t[]> spec_ids(new specnum_t[nmonitors]);
   // convert the monitor info into two arrays for resorting
   for (size_t i = 0; i < nmonitors; ++i) {
     spec_ids[i] = m_monitorInfo[i].specNum;

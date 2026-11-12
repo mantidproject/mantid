@@ -13,7 +13,7 @@
 #include "MantidMDAlgorithms/DllConfig.h"
 #include "MantidNexus/NexusDescriptorLazy.h"
 
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 #include <optional>
 
 namespace Mantid {
@@ -85,7 +85,7 @@ private:
   std::vector<double> qDimensions(const API::IMDWorkspace_sptr &ws);
 
   /// Open file handle
-  boost::scoped_ptr<Nexus::File> m_file;
+  std::unique_ptr<Nexus::File> m_file;
 
   /// Name of that file
   std::string m_filename;

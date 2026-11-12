@@ -23,11 +23,6 @@
 #include <memory>
 #include <vector>
 
-#ifndef Q_MOC_RUN
-#include <boost/interprocess/smart_ptr/unique_ptr.hpp>
-#include <memory>
-#endif
-
 #include "ImplicitFunctionParameter.h"
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -66,7 +61,7 @@ public:
   /// Successor type. Unique shared pointer with stack scoped deletion
   /// semantics.
   using SuccessorType =
-      boost::interprocess::unique_ptr<ImplicitFunctionParameterParser, DeleterPolicy<ImplicitFunctionParameterParser>>;
+      std::unique_ptr<ImplicitFunctionParameterParser, DeleterPolicy<ImplicitFunctionParameterParser>>;
 
   virtual ImplicitFunctionParameter *createParameter(Poco::XML::Element *parameterElement) = 0;
   virtual void setSuccessorParser(ImplicitFunctionParameterParser *paramParser) = 0;

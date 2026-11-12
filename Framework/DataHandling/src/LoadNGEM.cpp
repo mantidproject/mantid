@@ -19,7 +19,6 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <boost/algorithm/string.hpp>
 #include <fstream>
 #include <ranges>
 

@@ -14,7 +14,6 @@
 #include "MantidAPI/FunctionValues.h"
 #include "MantidCurveFitting/Jacobian.h"
 
-#include <boost/scoped_ptr.hpp>
 #include <memory>
 
 using Mantid::API::IFunction;
@@ -34,7 +33,7 @@ public:
   }
 
   void test_intialized_function_has_4_parameters_with_expected_names() {
-    boost::scoped_ptr<IFunction> voigtFn(new Voigt);
+    std::unique_ptr<IFunction> voigtFn(new Voigt);
     voigtFn->initialize();
 
     size_t expectedNParams(4);

@@ -19,7 +19,6 @@
 #include <Poco/DateTimeFormat.h>
 #include <Poco/DateTimeParser.h>
 #include <Poco/DirectoryIterator.h>
-#include <boost/algorithm/string.hpp>
 
 #include <algorithm>
 #include <fstream> // used to get ifstream

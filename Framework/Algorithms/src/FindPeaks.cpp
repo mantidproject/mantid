@@ -22,7 +22,6 @@
 
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
-#include <boost/algorithm/string.hpp>
 #include <boost/math/special_functions/round.hpp>
 #include <numeric>
 

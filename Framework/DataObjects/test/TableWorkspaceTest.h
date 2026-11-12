@@ -16,7 +16,6 @@
 #include "PropertyManagerHelper.h"
 
 #include <algorithm>
-#include <boost/scoped_ptr.hpp>
 #include <limits>
 #include <memory>
 #include <vector>
@@ -288,7 +287,7 @@ public:
     tw.getColumn(1)->cell<std::string>(0) = "b";
     tw.getColumn(2)->cell<std::string>(0) = "c";
 
-    boost::scoped_ptr<ITableWorkspace> cloned(tw.clone().release());
+    std::unique_ptr<ITableWorkspace> cloned(tw.clone().release());
 
     // Check clone is same as original.
     TS_ASSERT_EQUALS(tw.columnCount(), cloned->columnCount());
@@ -320,7 +319,7 @@ public:
 
     std::vector<std::string> colNames{"X", "Z"};
 
-    boost::scoped_ptr<ITableWorkspace> cloned(tw.cloneColumns(colNames).release());
+    std::unique_ptr<ITableWorkspace> cloned(tw.cloneColumns(colNames).release());
 
     // Check clone is same as original.
     TS_ASSERT_EQUALS(colNames.size(), cloned->columnCount());

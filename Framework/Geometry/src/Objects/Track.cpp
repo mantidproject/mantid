@@ -10,7 +10,7 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Tolerance.h"
 #include "MantidKernel/V3D.h"
-#include <boost/iterator/distance.hpp>
+#include <iterator>
 
 #include <algorithm>
 #include <cmath>
@@ -75,7 +75,7 @@ int Track::nonComplete() const {
 
   while (bc != m_links.end()) {
     if ((ac->exitPoint).distance(bc->entryPoint) > Tolerance) {
-      return (static_cast<int>(boost::distance(m_links.begin(), bc)) + 1);
+      return (static_cast<int>(std::distance(m_links.begin(), bc)) + 1);
     }
     ++ac;
     ++bc;

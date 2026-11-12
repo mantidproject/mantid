@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidSINQ/PoldiUtilities/MillerIndices.h"
 
-#include "boost/format.hpp"
 #include <stdexcept>
 
 namespace Mantid::Poldi {

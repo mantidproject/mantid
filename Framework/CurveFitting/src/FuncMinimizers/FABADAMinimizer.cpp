@@ -28,8 +28,6 @@
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 #include "MantidKernel/normal_distribution.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
-
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -419,7 +417,7 @@ void FABADAMinimizer::tieApplication(const size_t &parameterIndex, EigenVector &
       API::ParameterTie *tie = m_fitFunction->getTie(j);
       if (tie) {
         newValue = tie->eval();
-        if (boost::math::isnan(newValue)) { // maybe not needed
+        if (std::isnan(newValue)) { // maybe not needed
           throw std::runtime_error("Parameter value is NaN.");
         }
         newParameters.set(j, newValue);
@@ -431,7 +429,7 @@ void FABADAMinimizer::tieApplication(const size_t &parameterIndex, EigenVector &
   API::ParameterTie *tie = m_fitFunction->getTie(parameterIndex);
   if (tie) {
     newValue = tie->eval();
-    if (boost::math::isnan(newValue)) { // maybe not needed
+    if (std::isnan(newValue)) { // maybe not needed
       throw std::runtime_error("Parameter value is NaN.");
     }
     newParameters.set(parameterIndex, newValue);

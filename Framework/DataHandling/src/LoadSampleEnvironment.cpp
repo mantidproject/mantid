@@ -28,7 +28,6 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 
-#include <boost/algorithm/string.hpp>
 #include <filesystem>
 #include <fstream>
 
@@ -289,7 +288,7 @@ void LoadSampleEnvironment::loadEnvironmentFrom3MF([[maybe_unused]] const Matrix
   std::unique_ptr<Geometry::SampleEnvironment> environment = nullptr;
   Mantid3MFFileIO MeshLoader;
   MeshLoader.LoadFile(filename);
-  boost::shared_ptr<MeshObject> environmentMesh = nullptr;
+  std::shared_ptr<MeshObject> environmentMesh = nullptr;
   std::string name = getProperty("EnvironmentName");
   std::vector<std::shared_ptr<Geometry::MeshObject>> environmentMeshes;
   std::shared_ptr<Geometry::MeshObject> sampleMesh;

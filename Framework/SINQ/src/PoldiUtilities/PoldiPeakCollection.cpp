@@ -15,7 +15,6 @@
 #include "MantidGeometry/Crystal/ReflectionGenerator.h"
 
 #include "boost/algorithm/string/join.hpp"
-#include "boost/format.hpp"
 
 #include "MantidSINQ/PoldiUtilities/MillerIndicesIO.h"
 #include "MantidSINQ/PoldiUtilities/UncertainValueIO.h"

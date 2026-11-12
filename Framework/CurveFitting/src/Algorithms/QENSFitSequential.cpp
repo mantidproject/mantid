@@ -18,7 +18,6 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <boost/cast.hpp>
 #include <boost/regex.hpp>
 
 #include <sstream>

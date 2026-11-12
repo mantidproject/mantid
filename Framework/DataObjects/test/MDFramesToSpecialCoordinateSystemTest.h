@@ -19,7 +19,7 @@
 #include "MantidGeometry/MDGeometry/UnknownFrame.h"
 #include "MantidKernel/MDUnit.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <optional>
 
 using namespace Mantid::Geometry;
