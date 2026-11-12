@@ -373,7 +373,8 @@ rather than a Python loop over detectors, which is much faster for large instrum
    )
 
 Integrated counts come from the C++ method
-``MatrixWorkspace.getIntegratedCountsForWorkspaceIndices``, again to avoid a per-spectrum loop. The
+``MatrixWorkspace.getIntegratedCountsForWorkspaceIndices`` and the integration limits from
+``MatrixWorkspace.getXMinMax``, again to avoid a per-spectrum loop. The
 line plot is produced with :ref:`ExtractSpectra <algm-ExtractSpectra>`, then
 :ref:`ConvertUnits <algm-ConvertUnits>` if the plot units differ, then, when summing more than one
 spectrum, :ref:`Rebin <algm-Rebin>` onto a common grid followed by

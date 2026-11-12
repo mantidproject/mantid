@@ -146,7 +146,7 @@ std::vector<double> getZscoreNumpyDeprecated(const NDArray &data, const bool sor
  * arrays,
  */
 std::vector<double> getModifiedZscoreNumpy(const NDArray &data, const bool sorted = false) {
-  UNUSED_ARG(sorted) // We explicitly check in the kernel now
+  UNUSED_ARG(sorted); // We explicitly check in the kernel now
   using Converters::NDArrayToVector;
   using Mantid::Kernel::getModifiedZscore;
 

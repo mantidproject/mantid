@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid import config, FileFinder
+from mantid import config
 from mantid.api import AnalysisDataService, IEventWorkspace, MatrixWorkspace, WorkspaceGroup
 from mantid.simpleapi import CreateSampleWorkspace
 from plugins.algorithms.WorkflowAlgorithms.ReflectometryISISPreprocess import ReflectometryISISPreprocess
@@ -14,8 +14,6 @@ from testhelpers import create_algorithm
 
 
 class ReflectometryISISPreprocessTest(unittest.TestCase):
-    _CALIBRATION_TEST_DATA = FileFinder.getFullPath("ISISReflectometry/calibration_test_data_INTER45455.dat")
-
     def setUp(self):
         self._oldFacility = config["default.facility"]
         if self._oldFacility.strip() == "":
@@ -52,10 +50,12 @@ class ReflectometryISISPreprocessTest(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "proton_charge"):
             ReflectometryISISPreprocess._validate_event_ws(ws)
 
-    def test_validation_of_event_workspace_group_throws(self):
+    def test_validation_of_event_workspace_checks_members(self):
         ws = WorkspaceGroup()
-
-        with self.assertRaisesRegex(RuntimeError, "Workspace Groups"):
+        member_ws = CreateSampleWorkspace()
+        ws.addWorkspace(member_ws)
+        # Check that the member workspaces are validated.
+        with self.assertRaisesRegex(RuntimeError, "proton_charge"):
             ReflectometryISISPreprocess._validate_event_ws(ws)
 
     def test_monitors_are_not_loaded_in_histo_mode(self):
@@ -76,9 +76,13 @@ class ReflectometryISISPreprocessTest(unittest.TestCase):
         self.assertIsInstance(output_ws, WorkspaceGroup)
         self.assertEqual(output_ws.getNumberOfEntries(), 2)
 
-    def test_workspace_group_with_calibration_throws(self):
-        args = {"InputRunList": "POLREF14966", "CalibrationFile": self._CALIBRATION_TEST_DATA, "OutputWorkspace": "ws"}
-        self._assert_run_algorithm_raises_exception(args, "Workspace Group")
+    @staticmethod
+    def _initialized_algorithm(**kwargs):
+        alg = ReflectometryISISPreprocess()
+        alg.initialize()
+        for property_name, value in kwargs.items():
+            alg.setProperty(property_name, value)
+        return alg
 
     def _setup_algorithm(self, args):
         alg = create_algorithm("ReflectometryISISPreprocess", **args)

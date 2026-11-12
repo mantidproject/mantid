@@ -8,6 +8,7 @@
 #include "FitPlotModel.h"
 #include "FitPlotView.h"
 #include "FitTab.h"
+#include "MantidQtWidgets/Common/ColorTheme.h"
 #include "MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h"
 
 #include <utility>
@@ -180,7 +181,8 @@ void FitPlotPresenter::plotInput(MatrixWorkspace_sptr workspace) {
 }
 
 void FitPlotPresenter::plotInput(MatrixWorkspace_sptr workspace, WorkspaceIndex spectrum) {
-  m_view->plotInTopPreview("Sample", std::move(workspace), spectrum, Qt::black);
+  m_view->plotInTopPreview("Sample", std::move(workspace), spectrum,
+                           MantidQt::MantidWidgets::isDarkMode() ? Qt::white : Qt::black);
 }
 
 void FitPlotPresenter::plotFit(const MatrixWorkspace_sptr &workspace) {

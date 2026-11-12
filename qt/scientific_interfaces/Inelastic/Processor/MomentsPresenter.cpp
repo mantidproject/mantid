@@ -40,10 +40,10 @@ MomentsPresenter::MomentsPresenter(QWidget *parent, std::unique_ptr<MantidQt::AP
 
 /**
  * Handles the event of data being loaded. Validates the loaded data.
- *
  */
 void MomentsPresenter::handleDataReady(std::string const &dataName) {
   if (m_runPresenter->validate()) {
+    setNumericQAxis(m_view->getDataName());
     m_model->setInputWorkspace(m_view->getDataName());
     plotNewData(dataName);
   }

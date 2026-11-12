@@ -228,14 +228,15 @@ private:
 class IETSaveData {
 public:
   IETSaveData(const bool &nexus = false, const bool &spe = false, const bool &ascii = false,
-              const bool &aclimax = false, const bool &daveGrp = false)
-      : m_nexus(nexus), m_spe(spe), m_ascii(ascii), m_aclimax(aclimax), m_daveGrp(daveGrp) {}
+              const bool &aclimax = false, const bool &daveGrp = false, const bool &nxspe = false)
+      : m_nexus(nexus), m_spe(spe), m_ascii(ascii), m_aclimax(aclimax), m_daveGrp(daveGrp), m_nxspe(nxspe) {}
 
   bool getNexus() const { return m_nexus; }
   bool getSPE() const { return m_spe; }
   bool getASCII() const { return m_ascii; }
   bool getAclimax() const { return m_aclimax; }
   bool getDaveGrp() const { return m_daveGrp; }
+  bool getNXSPE() const { return m_nxspe; }
 
 private:
   bool m_nexus;
@@ -243,6 +244,7 @@ private:
   bool m_ascii;
   bool m_aclimax;
   bool m_daveGrp;
+  bool m_nxspe;
 };
 
 class IETGroupOption {

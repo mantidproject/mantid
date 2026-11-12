@@ -698,7 +698,7 @@ public:
       TS_ASSERT_DELTA(E_other[0], M_SQRT2, 1e-5);
     }
     // suppress unused argument when built without openmp.
-    UNUSED_ARG(do_parallel)
+    UNUSED_ARG(do_parallel);
   }
 
   void test_dirtyFlag() { do_test_dirtyFlag(false); }

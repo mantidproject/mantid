@@ -31,7 +31,7 @@ ResNorm tab
 Quasi Tab
 ---------
 
-**Time required 3 - 5 minutes**
+**Time required 7 - 10 minutes (may vary depending on compute power of the test machine)**
 
 --------------
 
@@ -40,7 +40,7 @@ Quasi Tab
 #. Click on ``Manage Directories`` and set the default save directory to any location in your machine
 #. With the sample combo box set to ``File`` click browse and select the file ``irs26176_graphite002_red`` from the Usage Data folder
 #. With the resolution combo box set to ``File`` click browse and select the file ``irs26173_graphite002_res`` from the Usage Data folder
-#. Click ``Run``
+#. Click ``Run``. Keep an eye on the logs and progress bar on the main window to track the execution of the ``BayesQuasi2`` algorithm, as this step may take some time to complete.
 #. This should produce three workspaces with ``Fit``, ``Prob`` and ``Result`` suffixes
 #. Make sure that moving the black sliders in the plot will change the value of ``EMin`` and ``EMax``
 #. Run the tab with different options in the ``Fit Options`` section

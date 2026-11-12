@@ -10,6 +10,7 @@
 #include "MantidAPI/ISpectrum.h"
 #include "MantidDataObjects/DllConfig.h"
 #include "MantidDataObjects/EventList.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <string>
 
@@ -182,6 +183,10 @@ using EventWorkspace_const_sptr = std::shared_ptr<const EventWorkspace>;
 
 } // namespace DataObjects
 } // namespace Mantid
+
+// Instantiated and exported by DataObjects/src/PropertyWithValue.cpp
+MANTID_DATAOBJECTS_EXTERN_TEMPLATE(
+    Mantid::Kernel::PropertyWithValue<std::shared_ptr<Mantid::DataObjects::EventWorkspace>>);
 
 #ifndef DataObjects_EXPORTS
 #include "MantidAPI/WorkspaceProperty.h"

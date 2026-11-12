@@ -11,6 +11,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Common/ColorTheme.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <QDoubleValidator>
@@ -29,8 +30,13 @@ MomentsView::MomentsView(QWidget *parent) : QWidget(parent), m_presenter() {
   m_dblManager = new QtDoublePropertyManager();
   m_dblEdFac = new DoubleEditorFactory(this);
 
-  m_uiForm.ppRawPlot->setCanvasColour(QColor(240, 240, 240));
-  m_uiForm.ppMomentsPreview->setCanvasColour(QColor(240, 240, 240));
+  if (MantidQt::MantidWidgets::isDarkMode()) {
+    m_uiForm.ppRawPlot->setCanvasColour(QColor(MantidQt::MantidWidgets::DARK_CANVAS_COLOUR));
+    m_uiForm.ppMomentsPreview->setCanvasColour(QColor(MantidQt::MantidWidgets::DARK_CANVAS_COLOUR));
+  } else {
+    m_uiForm.ppRawPlot->setCanvasColour(QColor(240, 240, 240));
+    m_uiForm.ppMomentsPreview->setCanvasColour(QColor(240, 240, 240));
+  }
 
   MantidWidgets::RangeSelector *xRangeSelector = m_uiForm.ppRawPlot->addRangeSelector("XRange");
 
@@ -45,6 +51,9 @@ MomentsView::MomentsView(QWidget *parent) : QWidget(parent), m_presenter() {
 
   // Allows empty workspace selector when initially selected
   m_uiForm.dsInput->isOptional(true);
+  // Text files loaded via LoadAscii default to Unit="Energy"; this workspace is
+  // always in energy transfer, so label it correctly regardless of the input format.
+  m_uiForm.dsInput->setLoadProperty("Unit", std::string("DeltaE"));
 
   // Disables searching for run files in the data archive
   m_uiForm.dsInput->isForRunFiles(false);
@@ -203,7 +212,8 @@ void MomentsView::plotOutput(MatrixWorkspace_sptr outputWorkspace) {
   // Plot each spectrum
   m_uiForm.ppMomentsPreview->clear();
   m_uiForm.ppMomentsPreview->addSpectrum("M0", outputWorkspace, 0, Qt::green);
-  m_uiForm.ppMomentsPreview->addSpectrum("M1", outputWorkspace, 1, Qt::black);
+  m_uiForm.ppMomentsPreview->addSpectrum("M1", outputWorkspace, 1,
+                                         MantidQt::MantidWidgets::isDarkMode() ? Qt::white : Qt::black);
   m_uiForm.ppMomentsPreview->addSpectrum("M2", outputWorkspace, 2, Qt::red);
   m_uiForm.ppMomentsPreview->resizeX();
 

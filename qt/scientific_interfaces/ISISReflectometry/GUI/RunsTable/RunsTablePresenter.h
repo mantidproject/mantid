@@ -93,6 +93,7 @@ public:
   void notifyRowModelChanged(std::optional<std::reference_wrapper<Item const>> item) override;
 
 private:
+  void resetReadOnlyCells(MantidWidgets::Batch::RowLocation const &location);
   void applyGroupStylingToRow(MantidWidgets::Batch::RowLocation const &location);
   void applyStylingToParent(Row const &row);
   void clearInvalidCellStyling(std::vector<MantidQt::MantidWidgets::Batch::Cell> &cells);

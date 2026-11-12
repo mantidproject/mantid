@@ -454,42 +454,6 @@ void CompAssembly::printTree(std::ostream &os) const {
   }
 }
 
-/** Gets the absolute position of the Parametrized CompAssembly
- * This attempts to read the cached position value from the parameter map, and
- * creates it if it is not available.
- * @returns A vector of the absolute position
- */
-V3D CompAssembly::getPos() const {
-  if (!m_map || hasComponentInfo())
-    return Component::getPos();
-  else {
-    V3D pos;
-    if (!m_map->getCachedLocation(m_base, pos)) {
-      pos = Component::getPos();
-      m_map->setCachedLocation(m_base, pos);
-    }
-    return pos;
-  }
-}
-
-/** Gets the absolute position of the Parametrized CompAssembly
- * This attempts to read the cached position value from the parameter map, and
- * creates it if it is not available.
- * @returns A vector of the absolute position
- */
-Quat CompAssembly::getRotation() const {
-  if (!m_map || hasComponentInfo())
-    return Component::getRotation();
-  else {
-    Quat rot;
-    if (!m_map->getCachedRotation(m_base, rot)) {
-      rot = Component::getRotation();
-      m_map->setCachedRotation(m_base, rot);
-    }
-    return rot;
-  }
-}
-
 size_t CompAssembly::registerContents(ComponentVisitor &visitor) const {
   // Generic Assembly registration call.
   return visitor.registerComponentAssembly(*this);

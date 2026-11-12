@@ -97,6 +97,7 @@ endif()
 generate_mantid_export_header(
   MantidQtWidgetsSpectroscopyQt${MANTID_QT_VERSION}
   FALSE
+  GENERATE_UNUSED_ARG
   BASE_NAME
   MANTID_SPECTROSCOPY
   EXPORT_MACRO_NAME

@@ -329,6 +329,11 @@ The processing table contains the following columns:
 |                     |           |                                                                                 |
 |                     |           | Example: ``0.7``                                                                |
 +---------------------+-----------+---------------------------------------------------------------------------------+
+| Adjusted Angle      | No        | Read-only adjusted angle in degrees from the input workspace's                  |
+|                     |           | ``reflectometry_adjusted_theta`` sample log. Visible only for POLREF.           |
+|                     |           | Refreshed after reduction; blank when the log or reduction output is absent.    |
+|                     |           | The input and output require non-empty ``run_number`` metadata.                 |
++---------------------+-----------+---------------------------------------------------------------------------------+
 | 1st Trans Run(s)    | No        | Contains the transmission run(s) used to                                        |
 |                     |           | normalise the sample runs. To specify two                                       |
 | 2nd Trans Run(s)    |           | transmission runs, enter them in each input box.                                |
@@ -386,6 +391,19 @@ The processing table contains the following columns:
 |                     |           | in the **Settings** tab.                                                        |
 |                     |           |                                                                                 |
 |                     |           | Example: ``RegionOfDirectBeam="0,2", Params="1,2,3"``                           |
++---------------------+-----------+---------------------------------------------------------------------------------+
+| Nominal Specular    | No        | Nominal specular pixel spectrum number for POLREF calibration. Visible only     |
+| Pixel No.           |           | for POLREF. Accepts non-negative fractional values and sets                     |
+|                     |           | ``NominalSpecularPixelSpectrumNo``. If blank, uses the matching Experiment      |
+|                     |           | lookup value, then **Default Nominal Specular Pixel** on the Instrument tab.    |
+|                     |           | Example: ``280.5``                                                              |
++---------------------+-----------+---------------------------------------------------------------------------------+
+| Actual Specular     | No        | Actual specular pixel spectrum number for POLREF calibration. Visible only      |
+| Pixel No.           |           | for POLREF. Accepts non-negative fractional values and sets                     |
+|                     |           | ``ActualSpecularPixelSpectrumNo``. If blank, uses the matching Experiment       |
+|                     |           | lookup value. If neither table supplies a value, the algorithm obtains one      |
+|                     |           | by means of fitting the specular peak during calibration.                       |
+|                     |           | Example: ``282.25``                                                             |
 +---------------------+-----------+---------------------------------------------------------------------------------+
 
 Toolbar

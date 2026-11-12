@@ -17,6 +17,7 @@
 #include "../Runs/QtCatalogSearcher.h"
 #include "../Runs/QtRunsView.h"
 #include "../Runs/RunsPresenter.h"
+#include "../RunsTable/JobsViewUpdater.h"
 #include "../RunsTable/QtRunsTableView.h"
 #include "../RunsTable/RunsTablePresenter.h"
 #include "../Save/QtSaveView.h"
@@ -26,6 +27,16 @@
 #include <QApplication>
 #include <QSignalBlocker>
 #include <utility>
+
+namespace {
+std::vector<std::string> getStringVectorFromQList(QList<QVariant> listToConvert) {
+  std::vector<std::string> toReturn;
+  toReturn.reserve(listToConvert.size());
+  std::transform(listToConvert.cbegin(), listToConvert.cend(), std::back_inserter(toReturn),
+                 [](const auto &element) { return element.toString().toStdString(); });
+  return toReturn;
+}
+} // namespace
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
@@ -41,7 +52,7 @@ BatchPresenter *Decoder::findBatchPresenter(const QtBatchView *gui, const IMainW
 }
 
 QWidget *Decoder::decode(const QMap<QString, QVariant> &map, const std::string &directory) {
-  UNUSED_ARG(directory)
+  UNUSED_ARG(directory);
   auto userSubWindow = MantidQt::API::InterfaceManager().createSubWindow("ISIS Reflectometry");
   auto mwv = dynamic_cast<QtMainWindowView *>(userSubWindow);
   auto batches = map["batches"].toList();
@@ -193,6 +204,7 @@ void Decoder::decodeInstrument(const QtInstrumentView *gui, const QMap<QString, 
   gui->m_ui.correctDetectorsCheckBox->setChecked(map[QString("correctDetectorsCheckBox")].toBool());
   gui->m_ui.detectorCorrectionTypeComboBox->setCurrentIndex(map[QString("detectorCorrectionTypeComboBox")].toInt());
   gui->m_ui.calibrationPathEdit->setText(map[QString("calibrationPathEdit")].toString());
+  gui->m_ui.specularPixelEdit->setText(map[QString("specularPixelEdit")].toString());
 }
 
 void Decoder::decodeRuns(QtRunsView *gui, ReductionJobs *redJobs, RunsTablePresenter *presenter,
@@ -209,40 +221,6 @@ void Decoder::decodeRuns(QtRunsView *gui, ReductionJobs *redJobs, RunsTablePrese
   searcher->m_searchCriteria.cycle = map[QString("textCycle")].toString().toStdString();
   searcher->m_searchCriteria.instrument = map[QString("textInstrument")].toString().toStdString();
 }
-
-namespace {
-using ValueFunction = std::optional<double> (RangeInQ::*)() const;
-
-MantidWidgets::Batch::Cell qRangeCellOrDefault(RangeInQ const &qRangeInput, RangeInQ const &qRangeOutput,
-                                               ValueFunction valueFunction, std::optional<int> precision) {
-  auto maybeValue = (qRangeInput.*valueFunction)();
-  auto useOutputValue = false;
-  if (!maybeValue.has_value()) {
-    maybeValue = (qRangeOutput.*valueFunction)();
-    useOutputValue = true;
-  }
-  auto result = MantidWidgets::Batch::Cell(optionalToString(maybeValue, precision));
-  if (useOutputValue)
-    result.setOutput();
-  else
-    result.setInput();
-  return result;
-}
-
-std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, const std::optional<int> &precision) {
-  return std::vector<MantidQt::MantidWidgets::Batch::Cell>(
-      {MantidQt::MantidWidgets::Batch::Cell(boost::join(row.runNumbers(), "+")),
-       MantidQt::MantidWidgets::Batch::Cell(valueToString(row.theta(), precision)),
-       MantidQt::MantidWidgets::Batch::Cell(row.transmissionWorkspaceNames().firstRunList()),
-       MantidQt::MantidWidgets::Batch::Cell(row.transmissionWorkspaceNames().secondRunList()),
-       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::min, precision),
-       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::max, precision),
-       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::step, precision),
-       MantidQt::MantidWidgets::Batch::Cell(optionalToString(row.scaleFactor(), precision)),
-       MantidQt::MantidWidgets::Batch::Cell(MantidWidgets::optionsToString(row.reductionOptions())),
-       MantidQt::MantidWidgets::Batch::Cell(optionalToString(row.lookupIndex(), precision))});
-}
-} // namespace
 
 void Decoder::updateRunsTableViewFromModel(QtRunsTableView *view, const ReductionJobs *model,
                                            const std::optional<int> &precision) {
@@ -324,7 +302,7 @@ MantidQt::CustomInterfaces::ISISReflectometry::Group Decoder::decodeGroup(const 
     auto itemState = map[QString("itemState")].toInt();
     group.setState(State(itemState));
   }
-  group.m_postprocessedWorkspaceName = map[QString("postprocessedWorkspaceName")].toString().toStdString();
+  group.m_postprocessedWorkspaceNames = getStringVectorFromQList(map[QString("postprocessedWorkspaceNames")].toList());
   return group;
 }
 
@@ -364,7 +342,11 @@ Decoder::decodeRow(const QMap<QString, QVariant> &map) {
       number, map[QString("theta")].toDouble(), decodeTransmissionRunPair(map[QString("transRunNums")].toMap()),
       decodeRangeInQ(map[QString("qRange")].toMap()), maybeScaleFactor,
       decodeReductionOptions(map[QString("reductionOptions")].toMap()),
-      decodeReductionWorkspace(map[QString("reductionWorkspaces")].toMap()));
+      decodeReductionWorkspace(map[QString("reductionWorkspaces")].toMap()),
+      map.contains("nominalSpecularPixel") ? std::optional<double>(map["nominalSpecularPixel"].toDouble())
+                                           : std::nullopt,
+      map.contains("actualSpecularPixel") ? std::optional<double>(map["actualSpecularPixel"].toDouble())
+                                          : std::nullopt);
   if (m_projectSave) {
     auto itemState = map[QString("itemState")].toInt();
     row.setState(State(itemState));
@@ -434,20 +416,18 @@ Decoder::decodeSearchResult(const QMap<QString, QVariant> &map) {
       map[QString("runNumber")].toString().toStdString(), map[QString("title")].toString().toStdString(),
       map[QString("groupName")].toString().toStdString(), map[QString("theta")].toString().toStdString(),
       map[QString("error")].toString().toStdString(), map[QString("excludeReason")].toString().toStdString(),
-      map[QString("comment")].toString().toStdString());
+      map[QString("comment")].toString().toStdString(), map[QString("model")].toString().toStdString());
   return searchResult;
 }
 
 ReductionWorkspaces Decoder::decodeReductionWorkspace(const QMap<QString, QVariant> &map) {
-  std::vector<std::string> inputRunNumbers;
-  const auto inputRunList = map[QString("inputRunNumbers")].toList();
-  std::transform(inputRunList.cbegin(), inputRunList.cend(), std::back_inserter(inputRunNumbers),
-                 [](const auto &elem) { return elem.toString().toStdString(); });
+  std::vector<std::string> inputRunNumbers = getStringVectorFromQList(map[QString("inputRunNumbers")].toList());
   auto transmissionRunPair = decodeTransmissionRunPair(map[QString("transPair")].toMap());
   ReductionWorkspaces redWs(inputRunNumbers, transmissionRunPair);
-  redWs.setOutputNames(map[QString("iVsLambda")].toString().toStdString(),
-                       map[QString("iVsQ")].toString().toStdString(),
-                       map[QString("iVsQBinned")].toString().toStdString());
+  const auto iVsLambdas = getStringVectorFromQList(map[QString("iVsLambda")].toList());
+  const auto iVsQs = getStringVectorFromQList(map[QString("iVsQ")].toList());
+  const auto iVsQBinneds = getStringVectorFromQList(map[QString("iVsQBinned")].toList());
+  redWs.setOutputNames(iVsLambdas, iVsQs, iVsQBinneds);
   return redWs;
 }
 

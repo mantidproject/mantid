@@ -1,0 +1,1 @@
+- The POLDI 2D Pawley refinement classes (``PawleyPattern2D``, ``PawleyPattern2DNoConstraints``) have moved from ``Engineering.pawley_utils`` to ``Engineering.poldi_pawley_utils``; scripts importing them must update the import. ``Engineering.pawley_utils`` keeps the instrument-agnostic classes (e.g. ``Phase``, ``PawleyPattern1D``).

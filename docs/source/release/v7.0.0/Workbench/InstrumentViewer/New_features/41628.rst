@@ -1,1 +1,0 @@
-- In the new Instrument View, when drawing the sample position, if there is a sample shape defined, then that shape will be drawn instead of a simple point.

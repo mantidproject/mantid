@@ -6,10 +6,22 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from mantid.simpleapi import EnergyWindowScan
-from mantid.api import mtd
+from mantid.api import AlgorithmManager, mtd
 
 
 class EnergyWindowScanTest(unittest.TestCase):
+    def test_accepts_osiris_silicon_analyser(self):
+        alg = AlgorithmManager.createUnmanaged("EnergyWindowScan")
+        alg.initialize()
+
+        alg.setProperty("Instrument", "OSIRIS")
+        alg.setProperty("Analyser", "silicon")
+        alg.setProperty("Reflection", "111")
+
+        self.assertEqual(alg.getPropertyValue("Instrument"), "OSIRIS")
+        self.assertEqual(alg.getPropertyValue("Analyser"), "silicon")
+        self.assertEqual(alg.getPropertyValue("Reflection"), "111")
+
     def test_IRIS(self):
         EnergyWindowScan(
             InputFiles="IRS26176.raw, IRS26173.raw",

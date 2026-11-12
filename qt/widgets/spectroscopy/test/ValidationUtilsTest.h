@@ -112,6 +112,27 @@ public:
     TS_ASSERT_EQUALS("The number of groups must be less or equal to the number of spectra (51).", *message);
   }
 
+  void test_when_grouping_method_is_theta_groups_and_a_valid_number_of_groups_is_provided() {
+    m_properties->setProperty("GroupingMethod", "ThetaGroups");
+    m_properties->setProperty("NGroups", "51");
+
+    auto const message =
+        ValidationUtils::validateGroupingProperties(std::move(m_properties), m_spectraMin, m_spectraMax);
+
+    TS_ASSERT(!message);
+  }
+
+  void test_when_grouping_method_is_theta_groups_and_the_number_of_groups_is_too_large() {
+    m_properties->setProperty("GroupingMethod", "ThetaGroups");
+    m_properties->setProperty("NGroups", "52");
+
+    auto const message =
+        ValidationUtils::validateGroupingProperties(std::move(m_properties), m_spectraMin, m_spectraMax);
+
+    TS_ASSERT(message);
+    TS_ASSERT_EQUALS("The number of groups must be less or equal to the number of spectra (51).", *message);
+  }
+
 private:
   std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> m_properties;
   std::size_t m_spectraMin;

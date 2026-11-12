@@ -4,7 +4,11 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import math
 import unittest
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from unittest.mock import MagicMock, call, patch
 
 from mantid import config, FileFinder
 from mantid.api import AnalysisDataService
@@ -16,8 +20,10 @@ from mantid.simpleapi import (
     CropWorkspace,
     GroupWorkspaces,
     JoinISISPolarizationEfficiencies,
+    LoadEmptyInstrument,
     Rebin,
 )
+from plugins.algorithms.WorkflowAlgorithms.ReflectometryISISLoadAndProcess import ReflectometryISISLoadAndProcess
 from testhelpers import assertRaisesNothing, create_algorithm
 
 
@@ -94,10 +100,55 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
             "TOF",
         ]
 
+        self._expected_time_sliced_group_outputs = [
+            "TOF",
+            "TOF_38426_1",
+            "TOF_38426_2",
+            "TOF_38426_2_monitors",
+            "TOF_38426_1_monitors",
+            "TOF_38426_sliced_0_1800",
+            "TOF_38426_1_TOF_38426_1_monitors_TOF_38426_sliced_0_0_1800",
+            "TOF_38426_2_TOF_38426_2_monitors_TOF_38426_sliced_1_0_1800",
+            "TOF_38426_sliced_1800_3600",
+            "TOF_38426_1_TOF_38426_1_monitors_TOF_38426_sliced_0_1800_3600",
+            "TOF_38426_2_TOF_38426_2_monitors_TOF_38426_sliced_1_1800_3600",
+            "IvsQ_TOF_38426_sliced_0_1800",
+            "IvsQ_TOF_38426_sliced_0_1800_1_TOF_38426_1_monitors_TOF_38426_sliced_0_0_1800",
+            "IvsQ_TOF_38426_sliced_0_1800_2_TOF_38426_2_monitors_TOF_38426_sliced_1_0_1800",
+            "IvsQ_TOF_38426_sliced_1800_3600",
+            "IvsQ_TOF_38426_sliced_1800_3600_1_TOF_38426_1_monitors_TOF_38426_sliced_0_1800_3600",
+            "IvsQ_TOF_38426_sliced_1800_3600_2_TOF_38426_2_monitors_TOF_38426_sliced_1_1800_3600",
+            "IvsLam_TOF_38426_sliced_0_1800",
+            "IvsLam_TOF_38426_sliced_0_1800_2_TOF_38426_2_monitors_TOF_38426_sliced_1_0_1800",
+            "IvsLam_TOF_38426_sliced_0_1800_1_TOF_38426_1_monitors_TOF_38426_sliced_0_0_1800",
+            "IvsLam_TOF_38426_sliced_1800_3600",
+            "IvsLam_TOF_38426_sliced_1800_3600_1_TOF_38426_1_monitors_TOF_38426_sliced_0_1800_3600",
+            "IvsLam_TOF_38426_sliced_1800_3600_2_TOF_38426_2_monitors_TOF_38426_sliced_1_1800_3600",
+            "IvsQ_binned_TOF_38426_sliced_0_1800",
+            "IvsQ_binned_TOF_38426_sliced_0_1800_1_TOF_38426_1_monitors_TOF_38426_sliced_0_0_1800",
+            "IvsQ_binned_TOF_38426_sliced_0_1800_2_TOF_38426_2_monitors_TOF_38426_sliced_1_0_1800",
+            "IvsQ_binned_TOF_38426_sliced_1800_3600",
+            "IvsQ_binned_TOF_38426_sliced_1800_3600_1_TOF_38426_1_monitors_TOF_38426_sliced_0_1800_3600",
+            "IvsQ_binned_TOF_38426_sliced_1800_3600_2_TOF_38426_2_monitors_TOF_38426_sliced_1_1800_3600",
+        ]
+
     def tearDown(self):
         AnalysisDataService.clear()
         config["default.facility"] = self._oldFacility
         config["default.instrument"] = self._oldInstrument
+
+    def test_all_property_settings_can_be_evaluated(self):
+        alg = create_algorithm("ReflectometryISISLoadAndProcess")
+        for prop in alg.getProperties():
+            settings = prop.settings
+            if settings is None:
+                continue
+            if not isinstance(settings, list):
+                settings = [settings]
+            for setting in settings:
+                with self.subTest(property=prop.name):
+                    self.assertIsInstance(setting.isEnabled(alg), bool)
+                    self.assertIsInstance(setting.isVisible(alg), bool)
 
     def test_missing_input_runs(self):
         self._assert_run_algorithm_throws()
@@ -119,6 +170,21 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ["ReflectometryReductionOneAuto", "GroupWorkspaces"]
         self._check_history(AnalysisDataService.retrieve("IvsQ_binned_13460"), history)
+
+    def test_input_workspace_with_requested_calibration_is_reused(self):
+        self._create_workspace(13460, "TOF_")
+        AddSampleLog(
+            Workspace="TOF_13460",
+            LogName="reflectometry_calibration_file",
+            LogText=self._CALIBRATION_TEST_DATA,
+        )
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+        alg.setProperty("CalibrationFile", self._CALIBRATION_TEST_DATA)
+
+        workspace_name = alg._getRunFromADSOrNone("13460", False)
+
+        self.assertEqual(workspace_name, "TOF_13460")
 
     def test_input_run_that_is_in_ADS_without_prefix_is_not_reloaded(self):
         self._create_workspace(13460)
@@ -456,7 +522,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         self._check_history(AnalysisDataService.retrieve("IvsQ_binned_38415_sliced_0_210"), history, False)
 
     def test_slicing_loads_input_run_if_monitor_ws_not_in_ADS(self):
-        self._create_event_workspace(38415, "TOF_", False)
+        self._create_event_workspace(38415, "TOF_", includeMonitors=False)
         args = self._default_options
         args.update(self._default_slice_options_real_run)
         args["InputRunList"] = "38415"
@@ -561,6 +627,22 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         self._assert_run_algorithm_succeeds(args, outputs)
         history = ["ReflectometryReductionOneAuto", "GroupWorkspaces"]
         self._check_history(AnalysisDataService.retrieve("IvsQ_binned_38415" + sliceName), history, False)
+
+    def test_slicing_by_number_of_slices_with_group_maintains_history(self):
+        self._create_workspace_group(38426, 2, "TOF_", self._create_event_workspace, has_monitors=True)
+        args = self._default_options
+        args["InputRunList"] = "38426"
+        args["SliceWorkspace"] = True
+        args["NumberOfSlices"] = 2
+        args["ProcessingInstructions"] = "4"
+        outputs = self._expected_time_sliced_group_outputs
+        self._assert_run_algorithm_succeeds(args, outputs)
+        history = ["ReflectometryReductionOneAuto", "ReflectometryReductionOneAuto", "ReflectometryReductionOneAuto", "GroupWorkspaces"]
+        self._check_history(
+            AnalysisDataService.retrieve("IvsQ_binned_TOF_38426_sliced_0_1800_2_TOF_38426_2_monitors_TOF_38426_sliced_1_0_1800"),
+            history,
+            False,
+        )
 
     def test_with_input_workspace_group(self):
         self._create_workspace_group(12345, 2, "TOF_")
@@ -855,6 +937,267 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         self._assert_run_algorithm_succeeds(args, outputs)
         self._check_calibration(AnalysisDataService.retrieve("IvsQ_binned_45455"), is_calibrated=True)
 
+    def test_nominal_specular_pixel_is_unset_by_default(self):
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+
+        self.assertTrue(alg.getProperty("NominalSpecularPixelSpectrumNo").isDefault)
+
+    def test_nominal_specular_pixel_is_forwarded_to_polref_calibration(self):
+        workspace = MagicMock()
+        workspace.getInstrumentName.return_value = "POLREF"
+        calibration_alg = MagicMock()
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+        alg.setProperty("CorrectDetectors", False)
+        alg.setProperty("NominalSpecularPixelSpectrumNo", 281.5)
+
+        with (
+            patch.object(alg, "_find_specular_pixel_spectrum_no", return_value=282.0),
+            patch.object(alg, "_experiment_angle", return_value=0.5),
+        ):
+            alg._setInstrumentSpecificProperties(calibration_alg, workspace, adjust_theta=True)
+
+        calibration_alg.setProperty.assert_any_call("NominalSpecularPixelSpectrumNo", 281.5)
+        calibration_alg.setProperty.assert_any_call("SpecularPixelSpectrumNo", 282.0)
+        calibration_alg.setProperty.assert_any_call("AdjustExperimentAngle", True)
+
+    def test_actual_specular_pixel_is_unset_by_default(self):
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+
+        self.assertTrue(alg.getProperty("ActualSpecularPixelSpectrumNo").isDefault)
+
+    def test_actual_specular_pixel_rejects_negative_values(self):
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+
+        with self.assertRaises(ValueError):
+            alg.setProperty("ActualSpecularPixelSpectrumNo", -0.5)
+
+    def test_actual_specular_pixel_bypasses_fitting_and_controls_angle_correction(self):
+        for nominal, expected_nominal, correct_angle in [(None, 282.5, False), (282.5, 282.5, False), (281.0, 281.0, True)]:
+            with self.subTest(nominal=nominal):
+                workspace = MagicMock()
+                workspace.getInstrumentName.return_value = "POLREF"
+                calibration_alg = MagicMock()
+                alg = ReflectometryISISLoadAndProcess()
+                alg.initialize()
+                alg.setProperty("CorrectDetectors", False)
+                alg.setProperty("ActualSpecularPixelSpectrumNo", 282.5)
+                if nominal is not None:
+                    alg.setProperty("NominalSpecularPixelSpectrumNo", nominal)
+
+                alg._validate_instrument_specific_calibration_properties(workspace)
+                with patch.object(alg, "_find_specular_pixel_spectrum_no") as fit:
+                    angle, has_geometry = alg._setInstrumentSpecificProperties(calibration_alg, workspace, True, experiment_angle=0.5)
+
+                fit.assert_not_called()
+                self.assertEqual(0.5, angle)
+                self.assertTrue(has_geometry)
+                calibration_alg.setProperty.assert_any_call("SpecularPixelSpectrumNo", 282.5)
+                calibration_alg.setProperty.assert_any_call("NominalSpecularPixelSpectrumNo", expected_nominal)
+                calibration_alg.setProperty.assert_any_call("AdjustExperimentAngle", correct_angle)
+
+    def test_polref_specular_pixel_inputs_produce_expected_angle_and_detector_alignment(self):
+        cases = [(280.5, None, 0.5), (280.5, 280.5, 0.5), (280.5, 280.0, 0.55), (None, 280.0, 0.55)]
+        with TemporaryDirectory() as directory:
+            calibration_file = Path(directory) / "calibration.dat"
+            calibration_file.write_text("spectrumnumber angle\n279 0.2\n280 0.1\n281 0.0\n")
+            for actual, nominal, expected_angle in cases:
+                with self.subTest(actual=actual, nominal=nominal):
+                    LoadEmptyInstrument(InstrumentName="POLREF", OutputWorkspace="TOF_1")
+                    alg = ReflectometryISISLoadAndProcess()
+                    alg.initialize()
+                    alg.setProperty("CalibrationFile", str(calibration_file))
+                    alg.setProperty("CorrectDetectors", False)
+                    alg.setProperty("ThetaIn", 0.5)
+                    if actual is not None:
+                        alg.setProperty("ActualSpecularPixelSpectrumNo", actual)
+                    if nominal is not None:
+                        alg.setProperty("NominalSpecularPixelSpectrumNo", nominal)
+
+                    with patch.object(alg, "_find_specular_pixel_spectrum_no", return_value=280.5) as fit:
+                        _, angle = alg._calibrate_workspace("TOF_1", adjust_theta=True)
+
+                    if actual is None:
+                        fit.assert_called_once()
+                    else:
+                        fit.assert_not_called()
+                    self.assertAlmostEqual(expected_angle, angle)
+                    output = AnalysisDataService.retrieve("TOF_1")
+                    self.assertEqual(expected_angle != 0.5, output.run().hasProperty("reflectometry_adjusted_theta"))
+                    indices = [output.getIndexFromSpectrumNumber(number) for number in (280, 281)]
+                    actual_two_theta = sum(math.degrees(output.spectrumInfo().signedTwoTheta(index)) for index in indices) / 2.0
+                    self.assertAlmostEqual(2.0 * expected_angle, actual_two_theta)
+
+    def test_polref_calibration_requires_actual_or_nominal_specular_pixel(self):
+        workspace = MagicMock()
+        workspace.getInstrumentName.return_value = "POLREF"
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+        alg.setProperty("CorrectDetectors", False)
+
+        with self.assertRaisesRegex(RuntimeError, "ActualSpecularPixelSpectrumNo or NominalSpecularPixelSpectrumNo must be provided"):
+            alg._validate_instrument_specific_calibration_properties(workspace)
+
+    def test_transmission_calibration_uses_nominal_pixel_without_fitting_or_angle_correction(self):
+        workspace = MagicMock()
+        workspace.getInstrumentName.return_value = "POLREF"
+        calibration_alg = MagicMock()
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+        alg.setProperty("ActualSpecularPixelSpectrumNo", 282.5)
+        alg.setProperty("NominalSpecularPixelSpectrumNo", 280.0)
+
+        with patch.object(alg, "_find_specular_pixel_spectrum_no") as fit:
+            alg._setInstrumentSpecificProperties(calibration_alg, workspace, False, experiment_angle=0.0, specular_spectrum_no=280.0)
+
+        fit.assert_not_called()
+        calibration_alg.setProperty.assert_any_call("SpecularPixelSpectrumNo", 280.0)
+        calibration_alg.setProperty.assert_any_call("ExperimentAngle", 0.0)
+        calibration_alg.setProperty.assert_any_call("AdjustExperimentAngle", False)
+
+    def test_sample_calibration_returns_experiment_angle_when_angle_correction_is_disabled(self):
+        self._create_workspace(1, "TOF_")
+        workspace = AnalysisDataService.retrieve("TOF_1")
+        calibration_alg = MagicMock()
+        calibration_alg.getProperty.return_value.value = workspace
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+        alg.setProperty("CalibrationFile", self._CALIBRATION_TEST_DATA)
+
+        with (
+            patch.object(alg, "createChildAlgorithm", return_value=calibration_alg),
+            patch.object(alg, "_setInstrumentSpecificProperties", return_value=(0.5, True)),
+        ):
+            _, angle = alg._calibrate_workspace("TOF_1", adjust_theta=True)
+
+        self.assertEqual(0.5, angle)
+        self.assertFalse(workspace.run().hasProperty("reflectometry_adjusted_theta"))
+
+    def test_polref_calibration_rejects_detector_correction(self):
+        workspace = MagicMock()
+        workspace.getInstrumentName.return_value = "POLREF"
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+
+        with self.assertRaisesRegex(RuntimeError, "CorrectDetectors must be False when CalibrationFile is provided for POLREF data"):
+            alg._validate_instrument_specific_calibration_properties(workspace)
+
+    def test_non_polref_calibration_does_not_reject_detector_correction(self):
+        workspace = MagicMock()
+        workspace.getInstrumentName.return_value = "INTER"
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+
+        alg._validate_instrument_specific_calibration_properties(workspace)
+
+    def test_multiple_input_runs_are_calibrated_once_after_summing(self):
+        args = self._default_options
+        args["InputRunList"] = "INTER45455, INTER45455"
+        del args["ProcessingInstructions"]
+        args["CalibrationFile"] = self._CALIBRATION_TEST_DATA
+        args["AnalysisMode"] = "MultiDetectorAnalysis"
+        args["ROIDetectorIDs"] = self._INTER45455_DETECTOR_ROI
+
+        self._assert_run_algorithm_succeeds(args)
+
+        output_ws = AnalysisDataService.retrieve("IvsQ_binned_45455+45455")
+        workflow_history = output_ws.getHistory().getAlgorithmHistory(output_ws.getHistory().size() - 1)
+        child_names = [alg.name() for alg in workflow_history.getChildHistories()]
+        self.assertEqual(1, child_names.count("ReflectometryISISCalibration"))
+        self.assertLess(child_names.index("MergeRuns"), child_names.index("ReflectometryISISCalibration"))
+
+    def test_transmission_calibration_does_not_apply_angle_correction(self):
+        self._create_workspace(1, "TOF_")
+        workspace = AnalysisDataService.retrieve("TOF_1")
+        calibration_alg = MagicMock()
+        calibration_alg.getProperty.return_value.value = workspace
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+        alg.setProperty("CalibrationFile", self._CALIBRATION_TEST_DATA)
+
+        with (
+            patch.object(alg, "createChildAlgorithm", return_value=calibration_alg),
+            patch.object(alg, "_setInstrumentSpecificProperties", return_value=(0.0, True)),
+        ):
+            alg._calibrate_workspace("TOF_1", adjust_theta=False, experiment_angle=0.0, specular_spectrum_no=280.0)
+
+        self.assertTrue(workspace.run().hasProperty("reflectometry_calibration_file"))
+        self.assertFalse(workspace.run().hasProperty("reflectometry_adjusted_theta"))
+        self.assertFalse(alg._inputs_require_raw_reload(["TOF_1"]))
+
+    def test_mixed_calibration_states_require_raw_inputs_before_summing(self):
+        self._create_workspace(1, "TOF_")
+        self._create_workspace(2, "TOF_")
+        AddSampleLog(
+            Workspace="TOF_1",
+            LogName="reflectometry_calibration_file",
+            LogText=self._CALIBRATION_TEST_DATA,
+        )
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+        alg.setProperty("CalibrationFile", self._CALIBRATION_TEST_DATA)
+
+        self.assertTrue(alg._inputs_require_raw_reload(["TOF_1", "TOF_2"]))
+
+    def test_incompatible_calibration_requires_raw_inputs_before_summing(self):
+        self._create_workspace(1, "TOF_")
+        AddSampleLog(Workspace="TOF_1", LogName="reflectometry_calibration_file", LogText="a_different_calibration.dat")
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+        alg.setProperty("CalibrationFile", self._CALIBRATION_TEST_DATA)
+
+        self.assertTrue(alg._inputs_require_raw_reload(["TOF_1"]))
+
+    def test_angle_corrected_input_requires_raw_reload(self):
+        self._create_workspace(1, "TOF_")
+        AddSampleLog(
+            Workspace="TOF_1",
+            LogName="reflectometry_calibration_file",
+            LogText=self._CALIBRATION_TEST_DATA,
+        )
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+        alg.setProperty("CalibrationFile", self._CALIBRATION_TEST_DATA)
+
+        self.assertFalse(alg._inputs_require_raw_reload(["TOF_1"]))
+        AddSampleLog(Workspace="TOF_1", LogName="reflectometry_adjusted_theta", LogText="0.5", LogType="Number")
+        self.assertTrue(alg._inputs_require_raw_reload(["TOF_1"]))
+
+    def test_raw_cached_input_is_retained_when_another_input_requires_reload(self):
+        self._create_workspace(1, "cached_")
+        self._create_workspace(2, "cached_")
+        self._create_workspace(2, "raw_")
+        AddSampleLog(
+            Workspace="cached_2",
+            LogName="reflectometry_calibration_file",
+            LogText=self._CALIBRATION_TEST_DATA,
+        )
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+        alg.setProperty("CalibrationFile", self._CALIBRATION_TEST_DATA)
+
+        with (
+            patch.object(alg, "_getRunFromADSOrNone", side_effect=["cached_1", "cached_2"]),
+            patch.object(alg, "_loadRun", return_value="raw_2") as load_run,
+        ):
+            workspaces = alg._getInputWorkspaces(["1", "2"], isTrans=False)
+
+        self.assertEqual(["cached_1", "raw_2"], workspaces)
+        self.assertEqual([call("2", False)], load_run.call_args_list)
+
+    def test_uncalibrated_workspace_in_ads_is_reused_when_calibration_file_is_provided(self):
+        self._create_workspace(45455, "custom_")
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+        alg.setProperty("CalibrationFile", self._CALIBRATION_TEST_DATA)
+
+        workspace_name = alg._getRunFromADSOrNone("custom_45455", False)
+
+        self.assertEqual("custom_45455", workspace_name)
+
     def test_calibration_is_skipped_if_file_not_provided(self):
         args = self._default_options
         args["InputRunList"] = "INTER45455"
@@ -864,6 +1207,50 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         outputs = ["IvsQ_45455", "IvsQ_binned_45455", "TOF", "TOF_45455", "TOF_45455_summed_segment"]
         self._assert_run_algorithm_succeeds(args, outputs)
         self._check_calibration(AnalysisDataService.retrieve("IvsQ_binned_45455"), is_calibrated=False)
+
+    def test_experiment_angle_uses_theta_in_when_provided(self):
+        ws = CreateSampleWorkspace()
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+        alg.setProperty("ThetaIn", 1.2)
+
+        self.assertEqual(1.2, alg._experiment_angle(ws))
+
+    def test_experiment_angle_uses_last_time_series_log_value(self):
+        ws = CreateSampleWorkspace()
+        AddTimeSeriesLog(Workspace=ws, Name="theta", Time="2010-01-01T00:00:00", Value=0.5)
+        AddTimeSeriesLog(Workspace=ws, Name="theta", Time="2010-01-01T00:10:00", Value=0.7)
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+        alg.setProperty("ThetaLogName", "theta")
+
+        self.assertEqual(0.7, alg._experiment_angle(ws))
+
+    def test_experiment_angle_uses_scalar_log_value(self):
+        ws = CreateSampleWorkspace()
+        AddSampleLog(Workspace=ws, LogName="theta", LogText="0.7", LogType="Number", NumberType="Double")
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+        alg.setProperty("ThetaLogName", "theta")
+
+        self.assertEqual(0.7, alg._experiment_angle(ws))
+
+    def test_experiment_angle_throws_when_theta_is_not_available(self):
+        ws = CreateSampleWorkspace()
+        alg = ReflectometryISISLoadAndProcess()
+        alg.initialize()
+
+        with self.assertRaisesRegex(RuntimeError, "ThetaIn or ThetaLogName"):
+            alg._experiment_angle(ws)
+
+    def test_fractional_workspace_index_is_converted_to_fractional_spectrum_number(self):
+        ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=2)
+        ws.getSpectrum(0).setSpectrumNo(100)
+        ws.getSpectrum(1).setSpectrumNo(104)
+
+        spectrum_number = ReflectometryISISLoadAndProcess._spectrum_number_for_workspace_index(ws, 0.25)
+
+        self.assertEqual(101.0, spectrum_number)
 
     def test_invalid_polarization_efficiency_file_name_raises_error(self):
         args = self._default_options
@@ -960,8 +1347,8 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         )
         AddSampleLog(Workspace=ws, LogName="run_number", LogText=str(run_number))
 
-    def _create_event_workspace(self, run_number, prefix="", includeMonitors=True):
-        name = prefix + str(run_number)
+    def _create_event_workspace(self, run_number, prefix="", suffix="", includeMonitors=True):
+        name = prefix + str(run_number) + suffix
         CreateSampleWorkspace(WorkspaceType="Event", NumBanks=1, NumMonitors=3, BankPixelWidth=1, XMin=200, OutputWorkspace=name)
         if includeMonitors:
             CropWorkspace(InputWorkspace=name, StartWorkspaceIndex=0, EndWorkspaceIndex=2, OutputWorkspace=name + "_monitors")
@@ -975,7 +1362,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         AddTimeSeriesLog(Workspace=name, Name="proton_charge", Time="2010-01-01T00:40:00", Value=15)
         AddTimeSeriesLog(Workspace=name, Name="proton_charge", Time="2010-01-01T00:50:00", Value=100)
 
-    def _create_workspace_group(self, run_number, number_of_items, prefix="", workspace_creator=None):
+    def _create_workspace_group(self, run_number, number_of_items, prefix="", workspace_creator=None, has_monitors=False):
         group_name = prefix + str(run_number)
         child_names = list()
         workspace_creator = workspace_creator or self._create_workspace
@@ -985,6 +1372,10 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
             workspace_creator(run_number, prefix, child_suffix)
             child_names.append(child_name)
         GroupWorkspaces(InputWorkspaces=",".join(child_names), OutputWorkspace=group_name)
+        if has_monitors:
+            GroupWorkspaces(
+                InputWorkspaces=",".join([child_name + "_monitors" for child_name in child_names]), OutputWorkspace=group_name + "_monitors"
+            )
 
     def _check_history(self, ws, expected, unroll=True):
         """Return true if algorithm names listed in algorithmNames are found in the
@@ -1014,7 +1405,10 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
 
     def _check_calibration(self, ws, is_calibrated):
         """Check whether the calibration algorithm has run by checking the workspace history"""
-        self._check_child_history(ws, 0, "ReflectometryISISCalibration", is_calibrated)
+        history = ws.getHistory()
+        reduction_history = history.getAlgorithmHistory(history.size() - 1)
+        alg_names = [alg.name() for alg in reduction_history.getChildHistories()]
+        self.assertEqual("ReflectometryISISCalibration" in alg_names, is_calibrated)
 
     def _check_sum_banks(self, ws, is_summed):
         """Check whether the sum banks algorithm has run by checking the workspace history"""

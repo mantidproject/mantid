@@ -237,6 +237,12 @@ Mantid Graphical User Interface Properties
 | ``InstrumentView.FlipBeam``                        |Value of the "Flip Beam" option in the Instrument   | ``Yes``, ``No`` |
 |                                                    |View                                                |                 |
 +----------------------------------------------------+----------------------------------------------------+-----------------+
+| ``InstrumentView.Rotate180``                       |Value of the "Rotate 180" option in the Instrument  | ``Yes``, ``No`` |
+|                                                    |View                                                |                 |
++----------------------------------------------------+----------------------------------------------------+-----------------+
+| ``InstrumentView.UOffset``                         |Value of the "Rotate" option in the Instrument View,| ``0`` - ``360`` |
+|                                                    |in degrees                                          |                 |
++----------------------------------------------------+----------------------------------------------------+-----------------+
 | ``MantidOptions.InvisibleWorkspaces``              |Do not show 'invisible' workspaces                  | ``0``, ``1``    |
 +----------------------------------------------------+----------------------------------------------------+-----------------+
 | ``PeakColumn.hklPrec``                             |Precision of hkl values shown in tables             | ``2``           |
@@ -294,6 +300,13 @@ Network Properties
 |                                               | installation are used.                                |                                 |
 +-----------------------------------------------+-------------------------------------------------------+---------------------------------+
 | ``usagereports.enabled``                      | Enable usage reporting                                | ``1``                           |
++-----------------------------------------------+-------------------------------------------------------+---------------------------------+
+| ``CheckMantidVersion.NotifyUpdateOnStartup``  | Prompt to update MantidWorkbench on startup.          | ``0``, ``1``, ``On``, ``True``, |
+|                                               | This is enabled by default and can be turned off by   |  ``true``                       |
+|                                               | unticking the check box "Prompt to update Mantid      |                                 |
+|                                               | Workbench on startup" in the General Settings of      |                                 |
+|                                               | the workbench or by toggling the                      |                                 |
+|                                               | "Don't show this again" checkbox at the startup       |                                 |
 +-----------------------------------------------+-------------------------------------------------------+---------------------------------+
 
 
@@ -466,6 +479,16 @@ See :doc:`algorithm profiling <mantid-dev:AlgorithmProfiler>` for more details o
 |``performancelog.write``         |Enable or disable writing the performance log. Write is disabled  | ``On``, ``True``, ``1``,  |
 |                                 |by default.                                                       | ``Off``, ``False``, ``0`` |
 +---------------------------------+------------------------------------------------------------------+---------------------------+
+
+
+ISIS Journal Settings
+*********************
+
++------------------------------+------------------------------------+--------------------------------------------+
+|Property                      |Description                         |Example value                               |
++==============================+====================================+============================================+
+|``isisjournal.url_prefix``    |URL prefix of the ISIS journal      | ``http://data.isis.rl.ac.uk/journals/ndx`` |
++------------------------------+------------------------------------+--------------------------------------------+
 
 
 Getting access to Mantid properties

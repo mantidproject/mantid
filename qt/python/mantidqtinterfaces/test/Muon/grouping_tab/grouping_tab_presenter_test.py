@@ -275,6 +275,44 @@ class GroupingTabPresenterTest(unittest.TestCase):
         )
         self.presenter.update_thread.start.assert_called_once_with()
 
+    def test_that_the_error_callback_does_not_clear_the_update_thread_or_enable_editing(self):
+        self.presenter.enable_editing = mock.Mock()
+        self.presenter.handle_update_all_clicked()
+
+        self.presenter.error_callback("an error")
+
+        # handle_update_finished always runs after this callback and owns both of these
+        self.assertIsNotNone(self.presenter.update_thread)
+        self.presenter.enable_editing.assert_not_called()
+        self.view.display_warning_box.assert_called_once_with("an error")
+
+    def test_that_an_update_cannot_be_restarted_between_the_error_and_finished_callbacks(self):
+        self.presenter.handle_update_all_clicked()
+        self.presenter.error_callback("an error")
+
+        self.presenter.handle_update_all_clicked()
+
+        self.assertEqual(self.presenter.create_update_thread.call_count, 1)
+
+    def test_that_the_finished_callback_clears_the_update_thread_and_enables_editing_after_an_error(self):
+        self.presenter.enable_editing = mock.Mock()
+        self.presenter.handle_update_all_clicked()
+        self.presenter.error_callback("an error")
+
+        self.presenter.handle_update_finished()
+
+        self.assertIsNone(self.presenter.update_thread)
+        self.presenter.enable_editing.assert_called_once_with()
+
+    def test_that_an_update_can_be_started_again_once_the_finished_callback_has_run_after_an_error(self):
+        self.presenter.handle_update_all_clicked()
+        self.presenter.error_callback("an error")
+        self.presenter.handle_update_finished()
+
+        self.presenter.handle_update_all_clicked()
+
+        self.assertEqual(self.presenter.create_update_thread.call_count, 2)
+
     def test_that_adding_pair_with_context_menu_allows_for_name_specification(self):
         self.presenter.add_pair_from_grouping_table("first", "second")
         self.pairing_table_widget.handle_add_pair_button_clicked.assert_called_once_with("first", "second")

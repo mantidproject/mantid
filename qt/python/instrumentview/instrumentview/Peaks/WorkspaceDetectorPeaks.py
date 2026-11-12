@@ -62,4 +62,7 @@ class WorkspaceDetectorPeaks:
         return picked_peaks
 
     def _is_within_limits(self, x, limits):
+        # A peak with no position in the unit of the limits cannot be placed inside them
+        if x is None:
+            return False
         return x >= min(limits) and x <= max(limits)

@@ -11,6 +11,7 @@
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidDataHandling/InstrumentSpectraMapping.h"
 #include "MantidDataHandling/LoadLog.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -117,10 +118,11 @@ void LoadRaw3::exec() {
 
   // Only run the Child Algorithms once
   loadRunParameters(localWorkspace);
-  const SpectrumDetectorMapping detectorMapping(isisRaw().spec, isisRaw().udet, isisRaw().i_det);
+  SpectrumDetectorMapping detectorMapping(isisRaw().spec, isisRaw().udet, isisRaw().i_det);
   localWorkspace->updateSpectraUsing(detectorMapping);
 
   runLoadInstrument(m_filename, localWorkspace, 0.0, 0.4);
+
   m_prog_start = 0.4;
   Run &run = localWorkspace->mutableRun();
   if (bLoadlogFiles) {
@@ -276,8 +278,12 @@ void LoadRaw3::exec() {
     }
 
   } // loop over periods
-  // Clean up
 
+  // Map spectra whose file detector IDs the instrument does not define onto the detector of the same ID; a no-op
+  // unless the instrument definition enables it. Left until here so every period and monitor workspace are populated.
+  correctLoadedWorkspaces(*this, g_log);
+
+  // Clean up
   reset();
   fclose(file);
 }

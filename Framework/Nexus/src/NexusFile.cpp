@@ -2,7 +2,6 @@
 #include "MantidNexus/H5Util.h"
 #include "MantidNexus/NexusException.h"
 #include "MantidNexus/hdf5_type_helper.h"
-#include "MantidNexus/inverted_napi.h"
 #include "MantidTypes/Core/DateAndTime.h"
 #include <H5Cpp.h>
 #include <Poco/Logger.h>
@@ -15,6 +14,7 @@
 #include <iostream>
 #include <numeric>
 #include <sstream>
+#include <type_traits>
 #include <typeinfo>
 
 using std::string;
@@ -1272,9 +1272,14 @@ template <typename NumT> void File::writeData(std::string const &name, vector<Nu
 
 template <typename NumT>
 void File::writeData(std::string const &name, vector<NumT> const &value, DimVector const &dims) {
-  this->makeData(name, getType<NumT>(), dims, true);
-  this->putData(value);
-  this->closeData();
+  if constexpr (std::is_same_v<NumT, long> && !std::is_same_v<long, int64_t>) {
+    // long is not one of the fixed-width types on Windows (32-bit) or macOS (64-bit), so it is always written as INT64
+    this->writeData(name, vector<int64_t>(value.begin(), value.end()), dims);
+  } else {
+    this->makeData(name, getType<NumT>(), dims, true);
+    this->putData(value);
+    this->closeData();
+  }
 }
 
 template <typename NumT> void File::writeExtendibleData(std::string const &name, vector<NumT> const &value) {
@@ -1881,6 +1886,14 @@ template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<u
                                                DimVector const &dims);
 template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<char> const &value,
                                                DimVector const &dims);
+// long is distinct from int64_t on Windows and macOS; on Linux it is int64_t and is instantiated above
+#if defined(_WIN32) || defined(__APPLE__)
+static_assert(!std::is_same_v<long, int64_t>);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, long const &value);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<long> const &value);
+template MANTID_NEXUS_DLL void File::writeData(std::string const &name, vector<long> const &value,
+                                               DimVector const &dims);
+#endif
 
 template MANTID_NEXUS_DLL void File::readData(const std::string &dataName, vector<float> &data);
 template MANTID_NEXUS_DLL void File::readData(const std::string &dataName, vector<double> &data);

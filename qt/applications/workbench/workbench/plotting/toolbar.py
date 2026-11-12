@@ -154,13 +154,13 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
             self.sig_plot_help_triggered.emit()
 
     def print_figure(self):
-        printer = QtPrintSupport.QPrinter(QtPrintSupport.QPrinter.HighResolution)
-        printer.setOrientation(QtPrintSupport.QPrinter.Landscape)
+        printer = QtPrintSupport.QPrinter(QtPrintSupport.QPrinter.PrinterMode.HighResolution)
+        printer.setPageOrientation(QtGui.QPageLayout.Orientation.Landscape)
         print_dlg = QtPrintSupport.QPrintDialog(printer)
         if print_dlg.exec() == QtWidgets.QDialog.Accepted:
             painter = QtGui.QPainter(printer)
-            page_size = printer.pageRect()
-            pixmap = self.canvas.grab().scaled(page_size.width(), page_size.height(), QtCore.Qt.KeepAspectRatio)
+            page_size = printer.pageRect(QtPrintSupport.QPrinter.Unit.DevicePixel)
+            pixmap = self.canvas.grab().scaled(int(page_size.width()), int(page_size.height()), QtCore.Qt.KeepAspectRatio)
             painter.drawPixmap(0, 0, pixmap)
             painter.end()
 
@@ -309,6 +309,9 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
                 break
 
     def set_buttons_visibility(self, fig):
+        if not fig.get_axes():
+            return
+
         #  check if fitting and superplot should be enabled
         if figure_type(fig) not in [FigureType.Line, FigureType.Errorbar] or len(fig.get_axes()) > 1:
             self.set_fit_enabled(False)

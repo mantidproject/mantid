@@ -42,28 +42,22 @@ void adjustUpSampleAndSourcePositions(const double L0, const V3D &newSampPos, Co
 }
 
 /**
- * Updates ComponentInfo for newInstrument to reflect the changes in the
- *associated panel information
+ * Updates ComponentInfo to reflect the changes in the associated panel
+ *information
  *
  * @param bankNames The names of the banks (panels) that will be updated
- * @param newInstrument The instrument whose parameter map will be changed to
- *reflect the new values below
- * @param pos The quantity to be added to the current relative position, from
- *old NewInstrument, of the banks in bankNames.
- * @param rot The quantity to be added to the current relative rotations, from
- *old NewInstrument, of the banks in bankNames.
- * @param detWScale The factor to multiply the current detector width, from old
- *NewInstrument, by to get the new detector width for the banks in bankNames.
- * @param detHtScale The factor to multiply the current detector height, from
- *old NewInstrument, by to get the new detector height for the banks in
- *bankNames.
+ * @param pos The quantity to be added to the current relative position of the
+ *banks in bankNames.
+ * @param rot The quantity to be added to the current relative rotations of the
+ *banks in bankNames.
+ * @param detWScale The factor to multiply the current detector width by to get
+ *the new detector width for the banks in bankNames.
+ * @param detHtScale The factor to multiply the current detector height by to
+ *get the new detector height for the banks in bankNames.
  * @param componentInfo ComponentInfo object for the modifications
  */
-void adjustBankPositionsAndSizes(const std::vector<std::string> &bankNames, const Instrument &newInstrument,
-                                 const V3D &pos, const Quat &rot, const double detWScale, const double detHtScale,
-                                 ComponentInfo &componentInfo) {
-  std::shared_ptr<ParameterMap> pmap = newInstrument.getParameterMap();
-
+void adjustBankPositionsAndSizes(const std::vector<std::string> &bankNames, const V3D &pos, const Quat &rot,
+                                 const double detWScale, const double detHtScale, ComponentInfo &componentInfo) {
   for (const auto &bankName : bankNames) {
     const size_t bankComponentIndex = componentInfo.indexOfAny(bankName);
     const size_t parentIndex = componentInfo.parent(bankComponentIndex);
@@ -79,9 +73,8 @@ void adjustBankPositionsAndSizes(const std::vector<std::string> &bankNames, cons
 
     componentInfo.setPosition(bankComponentIndex, rotatedPos + componentInfo.position(bankComponentIndex));
 
-    const std::string &resolvedBankName = componentInfo.name(bankComponentIndex);
-    std::vector<double> oldScalex = pmap->getDouble(resolvedBankName, std::string("scalex"));
-    std::vector<double> oldScaley = pmap->getDouble(resolvedBankName, std::string("scaley"));
+    std::vector<double> oldScalex = componentInfo.getNumberParameter(bankComponentIndex, "scalex", false);
+    std::vector<double> oldScaley = componentInfo.getNumberParameter(bankComponentIndex, "scaley", false);
 
     double scalex, scaley;
     if (!oldScalex.empty())
@@ -94,12 +87,11 @@ void adjustBankPositionsAndSizes(const std::vector<std::string> &bankNames, cons
     else
       scaley = detHtScale;
 
-    auto *bankComponentID = const_cast<IComponent *>(componentInfo.componentID(bankComponentIndex));
-    pmap->addDouble(bankComponentID, std::string("scalex"), scalex);
-    pmap->addDouble(bankComponentID, std::string("scaley"), scaley);
+    componentInfo.addDouble(bankComponentIndex, "scalex", scalex);
+    componentInfo.addDouble(bankComponentIndex, "scaley", scaley);
 
     if (detWScale != 1.0 || detHtScale != 1.0)
-      applyRectangularDetectorScaleToComponentInfo(componentInfo, bankComponentID, detWScale, detHtScale);
+      applyRectangularDetectorScaleToComponentInfo(componentInfo, bankComponentIndex, detWScale, detHtScale);
   }
 }
 

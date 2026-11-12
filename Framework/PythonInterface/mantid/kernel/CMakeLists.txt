@@ -129,6 +129,7 @@ target_include_directories(
 generate_mantid_export_header(
   PythonKernelModule
   FALSE
+  GENERATE_UNUSED_ARG
   BASE_NAME
   MANTID_PYTHON_KERNEL
   EXPORT_MACRO_NAME

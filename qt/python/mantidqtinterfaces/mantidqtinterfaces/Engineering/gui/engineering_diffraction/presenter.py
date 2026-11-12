@@ -32,7 +32,7 @@ from .tabs.common.rb_scope import RbScope
 from .tabs.common.instrument_scope import InstrumentScope
 
 from mantidqt.interfacemanager import InterfaceManager
-from mantidqt.utils.observer_pattern import GenericObservable
+from mantidqt.utils.observer_pattern import GenericObservable, GenericObserver
 
 from typing import TYPE_CHECKING
 
@@ -85,6 +85,15 @@ class EngineeringDiffractionPresenter(object):
     def setup_calibration_notifier(self) -> None:
         self.calibration_presenter.calibration_notifier.add_subscriber(self.focus_presenter.calibration_observer)
         self.calibration_presenter.calibration_notifier.add_subscriber(self.calibration_observer)
+
+    def setup_reference_frame_notifier(self) -> None:
+        """Let the settings dialog know when a loaded reference workspace has rewritten the sample
+        directions, so its cached copy does not overwrite them on the next Apply.
+
+        Wired here rather than in setup_correction because it needs both presenters to exist."""
+        self.correction_presenter.reference_frame_notifier.add_subscriber(
+            GenericObserver(self.settings_presenter.reload_settings_from_file)
+        )
 
     def setup_correction(self, view: "EngineeringDiffractionGui") -> None:
         correction_model = CorrectionModel()

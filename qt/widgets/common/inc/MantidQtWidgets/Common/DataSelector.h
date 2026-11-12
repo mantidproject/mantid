@@ -113,6 +113,8 @@ public:
   void setAlwaysLoadAsGroup(bool const loadAsGroup);
   /// Set an extra property on the load algorithm before execution
   void setLoadProperty(std::string const &propertyName, bool const value);
+  /// Set an extra string-valued property on the load algorithm before execution
+  void setLoadProperty(std::string const &propertyName, std::string const &value);
 
   // These are accessors/modifiers of the child FileFinderWidget
   /**
@@ -368,9 +370,9 @@ private slots:
 
 private:
   /// Attempt to automatically load a file
-  void autoLoadFile(const QString &filenames);
+  bool autoLoadFile(const QString &filenames);
   /// Execute load algorithm
-  void executeLoadAlgorithm(std::string const &filename, std::string const &outputWorkspace);
+  bool executeLoadAlgorithm(std::string const &filename, std::string const &outputWorkspace);
   /// Member containing the widgets child widgets.
   Ui::DataSelector m_uiForm;
   /// Extra load properties to set on the load algorithm before execution

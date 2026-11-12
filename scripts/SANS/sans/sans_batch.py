@@ -18,7 +18,14 @@ class SANSBatchReduction(object):
         super(SANSBatchReduction, self).__init__()
 
     def __call__(
-        self, states, use_optimizations=True, output_mode=OutputMode.PUBLISH_TO_ADS, plot_results=False, output_graph="", save_can=False
+        self,
+        states,
+        use_optimizations=True,
+        output_mode=OutputMode.PUBLISH_TO_ADS,
+        plot_results=False,
+        output_graph="",
+        save_can=False,
+        output_diagnostic_names=False,
     ):
         """
         This is the start of any reduction.
@@ -32,20 +39,37 @@ class SANSBatchReduction(object):
         """
         self.validate_inputs(states, use_optimizations, output_mode, plot_results, output_graph)
 
-        return self._execute(states, use_optimizations, output_mode, plot_results, output_graph, save_can=save_can)
+        return self._execute(
+            states,
+            use_optimizations,
+            output_mode,
+            plot_results,
+            output_graph,
+            save_can=save_can,
+            output_diagnostic_names=output_diagnostic_names,
+        )
 
     @staticmethod
-    def _execute(states, use_optimizations, output_mode, plot_results, output_graph, save_can=False):
+    def _execute(states, use_optimizations, output_mode, plot_results, output_graph, save_can=False, output_diagnostic_names=False):
         # Iterate over each state, load the data and perform the reduction
         out_scale_factors_list = []
         out_shift_factors_list = []
+        clean_up_names = []
         for state in states:
-            out_scale_factors, out_shift_factors = single_reduction_for_batch(
-                state, use_optimizations, output_mode, plot_results, output_graph, save_can=save_can
+            out_scale_factors, out_shift_factors, new_clean_names = single_reduction_for_batch(
+                state,
+                use_optimizations,
+                output_mode,
+                plot_results,
+                output_graph,
+                save_can=save_can,
+                output_diagnostic_names=output_diagnostic_names,
             )
             out_shift_factors_list.append(out_shift_factors)
             out_scale_factors_list.append(out_scale_factors)
-        return out_scale_factors_list, out_shift_factors_list
+            if output_diagnostic_names:
+                clean_up_names.extend(new_clean_names)
+        return out_scale_factors_list, out_shift_factors_list, clean_up_names
 
     def validate_inputs(self, states, use_optimizations, output_mode, plot_results, output_graph):
         # We are strict about the types here.

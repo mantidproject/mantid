@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/DllConfig.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidGeometry/Instrument_fwd.h"
@@ -36,6 +37,7 @@ class IDetector;
 class InstrumentMetadata;
 class ParameterMap;
 class PositionAndRotationAccumulator;
+class ReferenceFrame;
 class XMLInstrumentParameter;
 } // namespace Geometry
 
@@ -170,6 +172,8 @@ public:
 
   std::string getInstrumentName() const;
 
+  std::shared_ptr<Geometry::ReferenceFrame const> getReferenceFrame() const;
+
   void invalidateSpectrumDefinition(const size_t index);
   void updateSpectrumDefinitionIfNecessary(const size_t index) const;
 
@@ -248,3 +252,6 @@ using ExperimentInfo_const_sptr = std::shared_ptr<const ExperimentInfo>;
 
 } // namespace API
 } // namespace Mantid
+
+// Instantiated and exported by API/src/PropertyWithValue.cpp
+MANTID_API_EXTERN_TEMPLATE(Mantid::Kernel::PropertyWithValue<std::shared_ptr<Mantid::API::ExperimentInfo>>);

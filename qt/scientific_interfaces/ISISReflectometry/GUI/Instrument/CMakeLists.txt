@@ -1,9 +1,17 @@
-set(INSTRUMENT_SRC_FILES QtInstrumentView.cpp InstrumentPresenter.cpp InstrumentOptionDefaults.cpp)
+set(INSTRUMENT_SRC_FILES QtInstrumentView.cpp InstrumentPresenter.cpp InstrumentOptionDefaults.cpp
+                         InstrumentSettingsViewState.cpp
+)
 
 # Include files aren't required, but this makes them appear in Visual Studio IMPORTANT: Include files are required in
 # the MOC_FILES set. Scroll down to find it.
-set(INSTRUMENT_INC_FILES InstrumentPresenter.h IInstrumentPresenter.h IInstrumentView.h QtInstrumentView.h
-                         InstrumentPresenter.h InstrumentOptionDefaults.h
+set(INSTRUMENT_INC_FILES
+    InstrumentPresenter.h
+    IInstrumentPresenter.h
+    IInstrumentView.h
+    QtInstrumentView.h
+    InstrumentPresenter.h
+    InstrumentOptionDefaults.h
+    InstrumentSettingsViewState.h
 )
 
 set(INSTRUMENT_MOC_FILES QtInstrumentView.h)

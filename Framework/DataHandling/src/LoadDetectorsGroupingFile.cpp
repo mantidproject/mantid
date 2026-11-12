@@ -219,8 +219,7 @@ void LoadDetectorsGroupingFile::setByComponents() {
       // b) get all detectors in the subtree of this component
       const auto detectorIndices = componentInfo.detectorsInSubtree(componentIndex);
 
-      g_log.debug() << "Component Name = " << componentName
-                    << "  Component ID = " << componentInfo.componentID(componentIndex)
+      g_log.debug() << "Component Name = " << componentName << "  Component index = " << componentIndex
                     << "  Number of Children = " << detectorIndices.size() << '\n';
 
       for (const auto &detIndex : detectorIndices) {

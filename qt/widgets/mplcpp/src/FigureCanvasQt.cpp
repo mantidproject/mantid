@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/MplCpp/FigureCanvasQt.h"
+#include "MantidQtWidgets/Common/ColorTheme.h"
 #include "MantidQtWidgets/Common/Python/Sip.h"
 #include "MantidQtWidgets/MplCpp/BackendQt.h"
 #include "MantidQtWidgets/MplCpp/Figure.h"
@@ -13,6 +14,8 @@
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidPythonInterface/core/NDArray.h"
 
+#include <QGuiApplication>
+#include <QStyleHints>
 #include <QVBoxLayout>
 
 using Mantid::PythonInterface::GlobalInterpreterLock;
@@ -22,7 +25,8 @@ using namespace MantidQt::Widgets::Common;
 namespace MantidQt::Widgets::MplCpp {
 namespace {
 
-const char *DEFAULT_FACECOLOR = "w";
+const char *DEFAULT_FACECOLOR_LIGHT = "w";
+const char *DEFAULT_FACECOLOR_DARK = "#1d1d1d";
 
 /**
  * @param fig An existing matplotlib Figure instance
@@ -41,7 +45,8 @@ Python::Object createPyCanvasFromFigure(const Figure &fig) {
  */
 Python::Object createPyCanvas(const int subplotspec, const QString &projection) {
   Figure fig{true};
-  fig.setFaceColor(DEFAULT_FACECOLOR);
+  const bool dark = MantidQt::MantidWidgets::isDarkMode();
+  fig.setFaceColor(dark ? DEFAULT_FACECOLOR_DARK : DEFAULT_FACECOLOR_LIGHT);
 
   if (subplotspec > 0)
     fig.addSubPlot(subplotspec, projection);
@@ -126,8 +131,8 @@ QPointF FigureCanvasQt::toDataCoords(QPoint pos) const {
   // matplotlib's coordinate system, (0,0) is bottom left,
   // and then to the data coordinates
   GlobalInterpreterLock lock;
-  const int dpiRatio(static_cast<int>(
-      PyFloat_AsDouble(Python::Object(m_figure.pyobj().attr("canvas").attr("device_pixel_ratio")).ptr())));
+  const double dpiRatio(
+      PyFloat_AsDouble(Python::Object(m_figure.pyobj().attr("canvas").attr("device_pixel_ratio")).ptr()));
   const double xPosPhysical = pos.x() * dpiRatio;
   // Y=0 is at the bottom
   double height = PyFloat_AsDouble(Python::Object(m_figure.pyobj().attr("bbox").attr("height")).ptr());

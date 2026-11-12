@@ -1,1 +1,0 @@
-- On WISH the :ref:`Back2BackExponential <func-BackToBackExponential>` starting parameter values have been updated post upgrade, late 2025

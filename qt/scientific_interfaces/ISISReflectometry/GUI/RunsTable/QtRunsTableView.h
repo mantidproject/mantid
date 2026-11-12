@@ -60,6 +60,7 @@ private slots:
   void onFillDownPressed(bool);
 
 private:
+  void setInstrumentColumnsVisible(std::string const &instrumentName);
   void addToolbarActions();
   QAction *addToolbarItem(Action action, std::string const &iconPath, std::string const &description);
   void showAlgorithmPropertyHintsInOptionsColumn();

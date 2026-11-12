@@ -931,6 +931,12 @@ std::string ExperimentInfo::getInstrumentName() const {
   return compInfo.name(compInfo.root());
 }
 
+/** Return the instrument's reference frame from the ComponentInfo object */
+std::shared_ptr<Geometry::ReferenceFrame const> ExperimentInfo::getReferenceFrame() const {
+  populateIfNotLoaded();
+  return componentInfo().referenceFrame();
+}
+
 /** Notifies the ExperimentInfo that a spectrum definition has changed.
  *
  * ExperimentInfo will rebuild its spectrum definitions before the next use. In

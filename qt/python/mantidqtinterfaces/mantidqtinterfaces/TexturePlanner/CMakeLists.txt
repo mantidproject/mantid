@@ -13,6 +13,7 @@ set(TEST_PY_FILES
     test/test_model.py
     test/test_presenter.py
     test/test_view_functional.py
+    tutorial/test/test_chapters.py
 )
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})

@@ -39,7 +39,7 @@ BatchPresenter *Encoder::findBatchPresenter(const QtBatchView *gui, const IMainW
 }
 
 QMap<QString, QVariant> Encoder::encode(const QWidget *gui, const std::string &directory) {
-  UNUSED_ARG(directory)
+  UNUSED_ARG(directory);
   auto mwv = dynamic_cast<const QtMainWindowView *>(gui);
   QMap<QString, QVariant> topLevelMap;
   topLevelMap.insert(QString("tag"), QVariant(QString("ISIS Reflectometry")));
@@ -132,8 +132,12 @@ QMap<QString, QVariant> Encoder::encodeGroup(const MantidQt::CustomInterfaces::I
   QMap<QString, QVariant> groupMap;
   groupMap.insert(QString("name"), QVariant(QString::fromStdString(group.m_name)));
   groupMap.insert(QString("itemState"), QVariant(static_cast<int>(group.state())));
-  groupMap.insert(QString("postprocessedWorkspaceName"),
-                  QVariant(QString::fromStdString(group.m_postprocessedWorkspaceName)));
+  QList<QVariant> postprocessedWorkspaceNames;
+  std::for_each(group.m_postprocessedWorkspaceNames.cbegin(), group.m_postprocessedWorkspaceNames.cend(),
+                [&postprocessedWorkspaceNames](auto const &postprocessedWsName) {
+                  postprocessedWorkspaceNames.append(QVariant(QString::fromStdString(postprocessedWsName)));
+                });
+  groupMap.insert(QString("postprocessedWorkspaceNames"), QVariant(postprocessedWorkspaceNames));
   groupMap.insert(QString("rows"), QVariant(encodeRows(group)));
   return groupMap;
 }
@@ -187,12 +191,25 @@ QMap<QString, QVariant> Encoder::encodeReductionWorkspace(const ReductionWorkspa
   for (const auto &inputRunNum : redWs.m_inputRunNumbers) {
     inputRunNumbers.append(QVariant(QString::fromStdString(inputRunNum)));
   }
+  QList<QVariant> iVsLambdas;
+  for (const auto &iVsLambda : redWs.m_iVsLambda) {
+    iVsLambdas.append(QVariant(QString::fromStdString(iVsLambda)));
+  }
+  QList<QVariant> iVsQs;
+  for (const auto &iVsQ : redWs.m_iVsQ) {
+    iVsQs.append(QVariant(QString::fromStdString(iVsQ)));
+  }
+  QList<QVariant> iVsQBinneds;
+  for (const auto &iVsQBinned : redWs.m_iVsQBinned) {
+    iVsQBinneds.append(QVariant(QString::fromStdString(iVsQBinned)));
+  }
+
   QMap<QString, QVariant> reductionMap;
   reductionMap.insert(QString("inputRunNumbers"), QVariant(inputRunNumbers));
   reductionMap.insert(QString("transPair"), QVariant(encodeTransmissionRunPair(redWs.m_transmissionRuns)));
-  reductionMap.insert(QString("iVsLambda"), QVariant(QString::fromStdString(redWs.m_iVsLambda)));
-  reductionMap.insert(QString("iVsQ"), QVariant(QString::fromStdString(redWs.m_iVsQ)));
-  reductionMap.insert(QString("iVsQBinned"), QVariant(QString::fromStdString(redWs.m_iVsQBinned)));
+  reductionMap.insert(QString("iVsLambda"), QVariant(iVsLambdas));
+  reductionMap.insert(QString("iVsQ"), QVariant(iVsQs));
+  reductionMap.insert(QString("iVsQBinned"), QVariant(iVsQBinneds));
   return reductionMap;
 }
 
@@ -213,6 +230,10 @@ QMap<QString, QVariant> Encoder::encodeRow(const MantidQt::CustomInterfaces::ISI
   }
   rowMap.insert(QString("runNumbers"), QVariant(runNumbers));
   rowMap.insert(QString("theta"), QVariant(row.m_theta));
+  if (row.m_nominalSpecularPixel)
+    rowMap.insert("nominalSpecularPixel", row.m_nominalSpecularPixel.value());
+  if (row.m_actualSpecularPixel)
+    rowMap.insert("actualSpecularPixel", row.m_actualSpecularPixel.value());
   rowMap.insert(QString("qRange"), QVariant(encodeRangeInQ(row.m_qRange)));
   rowMap.insert(QString("qRangeOutput"), QVariant(encodeRangeInQ(row.m_qRangeOutput)));
   rowMap.insert(QString("scaleFactorPresent"), QVariant(static_cast<bool>(row.m_scaleFactor)));
@@ -242,6 +263,7 @@ QMap<QString, QVariant> Encoder::encodeSearchResult(const SearchResult &row) {
   searchResultMap.insert(QString("error"), QVariant(QString::fromStdString(row.error())));
   searchResultMap.insert(QString("excludeReason"), QVariant(QString::fromStdString(row.excludeReason())));
   searchResultMap.insert(QString("comment"), QVariant(QString::fromStdString(row.comment())));
+  searchResultMap.insert(QString("model"), QVariant(QString::fromStdString(row.model())));
   return searchResultMap;
 }
 
@@ -280,6 +302,7 @@ QMap<QString, QVariant> Encoder::encodeInstrument(const QtInstrumentView *gui) {
   instrumentMap.insert(QString("detectorCorrectionTypeComboBox"),
                        QVariant(gui->m_ui.detectorCorrectionTypeComboBox->currentIndex()));
   instrumentMap.insert(QString("calibrationPathEdit"), QVariant(gui->m_ui.calibrationPathEdit->text()));
+  instrumentMap.insert(QString("specularPixelEdit"), QVariant(gui->m_ui.specularPixelEdit->text()));
   return instrumentMap;
 }
 

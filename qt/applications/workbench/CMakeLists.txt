@@ -86,6 +86,7 @@ set(TEST_FILES
     workbench/plugins/test/test_workspacewidget.py
     workbench/utils/test/test_workspacehistorygeneration.py
     workbench/widgets/about/test/test_about_presenter.py
+    workbench/widgets/about/test/test_about_view.py
     workbench/widgets/plotselector/test/test_plotselector_model.py
     workbench/widgets/plotselector/test/test_plotselector_presenter.py
     workbench/widgets/plotselector/test/test_plotselector_view.py
@@ -109,6 +110,7 @@ set(TEST_FILES
     workbench/projectrecovery/recoverygui/test/test_projectrecoverypresenter.py
     workbench/projectrecovery/recoverygui/test/test_projectrecoverywidgetview.py
     workbench/projectrecovery/recoverygui/test/test_recoveryfailureview.py
+    workbench/widgets/update_notification/test/test_mantid_update_notification.py
 )
 
 set(PYUNITTEST_RUN_SERIAL ON)

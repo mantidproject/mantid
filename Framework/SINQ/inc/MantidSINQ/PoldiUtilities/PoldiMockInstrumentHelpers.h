@@ -96,8 +96,8 @@ public:
 
   ~MockChopper() override = default;
 
-  void loadConfiguration(Instrument_const_sptr poldiInstrument) override{
-      UNUSED_ARG(poldiInstrument)} GNU_DIAG_OFF_SUGGEST_OVERRIDE MOCK_METHOD0(rotationSpeed, double());
+  void loadConfiguration(Instrument_const_sptr poldiInstrument) override { UNUSED_ARG(poldiInstrument); }
+  GNU_DIAG_OFF_SUGGEST_OVERRIDE MOCK_METHOD0(rotationSpeed, double());
   MOCK_METHOD0(cycleTime, double());
   MOCK_METHOD0(zeroOffset, double());
   MOCK_METHOD0(distanceFromSample, double());

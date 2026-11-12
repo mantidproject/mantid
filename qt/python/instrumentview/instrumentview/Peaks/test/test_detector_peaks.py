@@ -131,6 +131,25 @@ class TestWorkspaceDetectorPeaks(unittest.TestCase):
         self.assertEqual(1, len(wdp._detector_peaks))
         self.assertEqual(1, wdp._detector_peaks[0].detector_id)
 
+    @mock.patch("instrumentview.Peaks.WorkspaceDetectorPeaks.AnalysisDataService")
+    def test_peaks_with_no_location_in_the_limits_unit_are_excluded(self, peaks_mock_ads):
+        """A peak cannot be placed within limits in a unit it has no position in, e.g. Energy,
+        so it must not be drawn or deleted as though it were."""
+        mock_peaks_ws = mock.MagicMock()
+        mock_peaks_ws.toDict.return_value = {
+            "DetID": [1],
+            "h": [1],
+            "k": [0],
+            "l": [0],
+            "DSpacing": [5],
+            "Wavelength": [5],
+            "TOF": [50],
+        }
+        peaks_mock_ads.retrieve.return_value = mock_peaks_ws
+
+        wdp = WorkspaceDetectorPeaks("dummy", "Energy", (0, 100))
+        self.assertEqual([], wdp.detector_peaks)
+
 
 if __name__ == "__main__":
     unittest.main()

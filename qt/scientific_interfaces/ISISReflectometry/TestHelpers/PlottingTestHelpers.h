@@ -14,6 +14,7 @@
 #include <ostream>
 #include <string>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
@@ -54,8 +55,6 @@ inline char const *toString(PlottingWorkspaceTreeSelectionMode mode) {
   switch (mode) {
   case PlottingWorkspaceTreeSelectionMode::None:
     return "None";
-  case PlottingWorkspaceTreeSelectionMode::Direct:
-    return "Direct";
   case PlottingWorkspaceTreeSelectionMode::ParentOnly:
     return "ParentOnly";
   case PlottingWorkspaceTreeSelectionMode::DirectAndParent:
@@ -80,15 +79,71 @@ inline void printStringVector(std::vector<std::string> const &values, std::ostre
   *os << "]";
 }
 
+inline bool operator==(PlottingWorkspaceScopeItem const &lhs, PlottingWorkspaceScopeItem const &rhs) {
+  return lhs.path == rhs.path && lhs.workspaceName == rhs.workspaceName;
+}
+
+inline bool operator==(PlottingWorkspaceContext const &lhs, PlottingWorkspaceContext const &rhs) {
+  return lhs.scopeItems == rhs.scopeItems && lhs.origin == rhs.origin;
+}
+
+inline void PrintTo(PlottingWorkspaceContext const &context, std::ostream *os) {
+  *os << "{origin: " << static_cast<int>(context.origin) << ", scopeItems: [";
+  for (auto const &[scope, scopeItem] : context.scopeItems) {
+    PrintTo(scope, os);
+    *os << ": {path: [";
+    for (auto const row : scopeItem.path) {
+      *os << row << ", ";
+    }
+    *os << "], workspaceName: \"" << scopeItem.workspaceName << "\"}, ";
+  }
+  *os << "]}";
+}
+
+inline PlottingWorkspaceContext runOutputContext(std::string const &workspaceName,
+                                                 PlottingWorkspaceTreePath const &workspacePath,
+                                                 std::string const &workspaceGroupName = "") {
+  auto context = PlottingWorkspaceContext{};
+  context.origin = PlottingWorkspaceOrigin::RunOutput;
+  context.scopeItems = {{PlotSelectionScope::ReductionGroup, {{workspacePath.at(0)}, ""}},
+                        {PlotSelectionScope::Run, {{workspacePath.at(0), workspacePath.at(1)}, ""}},
+                        {PlotSelectionScope::Workspace, {workspacePath, workspaceName}}};
+  if (!workspaceGroupName.empty()) {
+    auto groupPath = workspacePath;
+    groupPath.pop_back();
+    context.scopeItems.emplace(PlotSelectionScope::WorkspaceGroup,
+                               PlottingWorkspaceScopeItem{std::move(groupPath), workspaceGroupName});
+  }
+  return context;
+}
+
+inline void populateTreeItemContexts(std::vector<PlottingWorkspaceTreeItem> &items,
+                                     PlottingWorkspaceContext const &parentContext = {},
+                                     PlottingWorkspaceTreePath const &parentPath = {}) {
+  for (size_t row = 0; row < items.size(); ++row) {
+    auto &item = items[row];
+    auto path = parentPath;
+    path.emplace_back(static_cast<int>(row));
+    item.context.scopeItems = parentContext.scopeItems;
+    item.context.scopeItems[item.itemType] = {path, item.workspaceName};
+    if (item.context.origin == PlottingWorkspaceOrigin::None) {
+      item.context.origin = parentContext.origin;
+    }
+    populateTreeItemContexts(item.children, item.context, path);
+  }
+}
+
 inline void PrintTo(PlottingWorkspace const &workspace, std::ostream *os) {
   *os << "{workspaceName: \"" << workspace.workspaceName << "\", runNumbers: ";
   printStringVector(workspace.runNumbers, os);
-  *os << ", containingWorkspaceGroupName: \"" << workspace.containingWorkspaceGroupName << "\", periodNumber: ";
+  *os << ", periodNumber: ";
   if (workspace.periodNumber) {
     *os << *workspace.periodNumber;
   } else {
     *os << "none";
   }
+  *os << ", context: ";
+  PrintTo(workspace.context, os);
   *os << "}";
 }
 
@@ -180,7 +235,7 @@ inline bool operator!=(PlotActionState const &lhs, PlotActionState const &rhs) {
 
 inline bool operator==(PlottingWorkspaceTreeItem const &lhs, PlottingWorkspaceTreeItem const &rhs) {
   return lhs.label == rhs.label && lhs.itemType == rhs.itemType && lhs.reducedOutputType == rhs.reducedOutputType &&
-         lhs.workspaceName == rhs.workspaceName && lhs.children == rhs.children;
+         lhs.workspaceName == rhs.workspaceName && lhs.children == rhs.children && lhs.context == rhs.context;
 }
 
 inline bool operator!=(PlottingWorkspaceTreeItem const &lhs, PlottingWorkspaceTreeItem const &rhs) {
@@ -199,7 +254,7 @@ inline bool operator!=(PlottingWorkspaceTreeItemState const &lhs, PlottingWorksp
 
 inline bool operator==(PlottingWorkspace const &lhs, PlottingWorkspace const &rhs) {
   return lhs.workspaceName == rhs.workspaceName && lhs.runNumbers == rhs.runNumbers &&
-         lhs.containingWorkspaceGroupName == rhs.containingWorkspaceGroupName && lhs.periodNumber == rhs.periodNumber;
+         lhs.periodNumber == rhs.periodNumber && lhs.context == rhs.context;
 }
 
 inline bool operator!=(PlottingWorkspace const &lhs, PlottingWorkspace const &rhs) { return !(lhs == rhs); }

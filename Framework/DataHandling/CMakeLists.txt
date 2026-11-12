@@ -32,6 +32,7 @@ set(SRC_FILES
     src/ISISDataArchive.cpp
     src/ISISJournal.cpp
     src/ISISJournalGetExperimentRuns.cpp
+    src/InstrumentSpectraMapping.cpp
     src/JoinISISPolarizationEfficiencies.cpp
     src/Load.cpp
     src/LoadANSTOHelper.cpp
@@ -253,6 +254,7 @@ set(INC_FILES
     inc/MantidDataHandling/ISISDataArchive.h
     inc/MantidDataHandling/ISISJournal.h
     inc/MantidDataHandling/ISISJournalGetExperimentRuns.h
+    inc/MantidDataHandling/InstrumentSpectraMapping.h
     inc/MantidDataHandling/JoinISISPolarizationEfficiencies.h
     inc/MantidDataHandling/Load.h
     inc/MantidDataHandling/LoadANSTOEventFile.h
@@ -477,6 +479,7 @@ set(TEST_FILES
     ISISJournalGetExperimentRunsTest.h
     ISISJournalTest.h
     InstrumentRayTracerTest.h
+    InstrumentSpectraMappingTest.h
     JoinISISPolarizationEfficienciesTest.h
     LoadAscii2Test.h
     LoadAsciiStlTest.h
@@ -702,7 +705,7 @@ target_link_libraries(
          Mantid::Geometry
          Mantid::Kernel
          Mantid::Indexing
-  PRIVATE Mantid::Json Boost::filesystem Mantid::NexusGeometry Mantid::LegacyNexus
+  PRIVATE Mantid::Json Mantid::NexusGeometry Mantid::LegacyNexus
 )
 
 # Lib3mf is technically a public dependency as it is in our public headers. We are assuming here that it won't be used.

@@ -697,7 +697,7 @@ public:
     bc->getFileIO()->closeFile();
     do_deleteNexusFile("MDBoxBinningxest.nxs");
     // suppress unused variable when built without openmp
-    UNUSED_ARG(parallel_condition)
+    UNUSED_ARG(parallel_condition);
   }
 
   void test_fileBackEnd_integrationOperations() { do_test_fileBackEnd_integrationOperations(false); }

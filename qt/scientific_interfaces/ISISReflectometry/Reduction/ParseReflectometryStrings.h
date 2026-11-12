@@ -11,9 +11,9 @@
 #include <Common/ValidationResult.h>
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
-#include <boost/variant.hpp>
 #include <map>
 #include <optional>
+#include <variant>
 #include <vector>
 
 namespace MantidQt {
@@ -37,12 +37,15 @@ MANTIDQT_ISISREFLECTOMETRY_DLL std::optional<double> parseTheta(std::string cons
 MANTIDQT_ISISREFLECTOMETRY_DLL std::optional<boost::regex> parseTitleMatcher(std::string const &titleMatcher);
 
 MANTIDQT_ISISREFLECTOMETRY_DLL
-boost::variant<TransmissionRunPair, std::vector<int>> parseTransmissionRuns(std::string const &firstTransmissionRun,
-                                                                            std::string const &secondTransmissionRun);
+std::variant<TransmissionRunPair, std::vector<int>> parseTransmissionRuns(std::string const &firstTransmissionRun,
+                                                                          std::string const &secondTransmissionRun);
 
 MANTIDQT_ISISREFLECTOMETRY_DLL
-boost::variant<RangeInQ, std::vector<int>> parseQRange(std::string const &min, std::string const &max,
-                                                       std::string const &step);
+std::variant<RangeInQ, std::vector<int>> parseQRange(std::string const &min, std::string const &max,
+                                                     std::string const &step);
+
+MANTIDQT_ISISREFLECTOMETRY_DLL
+TaggedOptional<double> parseSpecularPixel(std::string const &pixel);
 
 MANTIDQT_ISISREFLECTOMETRY_DLL
 TaggedOptional<double> parseScaleFactor(std::string const &scaleFactor);

@@ -256,6 +256,9 @@ public:
   /// setting the child end progress
   void setChildEndProgress(const double endProgress) const override { m_endChildProgress = endProgress; }
 
+  /// enable flag to scan output StringArrayProperties for workspace names
+  void enableCheckForStringArrayWorkspaceOutputs(const bool on);
+
   /** @name Serialization functions */
   //@{
   /// Serialize an object to a string
@@ -485,6 +488,8 @@ private:
   bool m_isChildAlgorithm;                                  ///< Algorithm is a child algorithm
   bool m_recordHistoryForChild;                             ///< Flag to indicate whether history should be
                                                             /// recorded. Applicable to child algs only
+  bool m_checkForStringArrayWorkspaceOutputs;               ///< Flag to indicate checking of output StringArrayProperty
+                                                            /// outputs for valid workspaces.
   bool m_alwaysStoreInADS;                                  ///< Always store in the ADS, even for child algos
   std::atomic_bool m_runningAsync;                          ///< Algorithm is scheduled or running asynchronously
   bool m_rethrow;                                           ///< Algorithm should rethrow exceptions while executing

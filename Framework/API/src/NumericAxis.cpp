@@ -74,12 +74,12 @@ NumericAxis::NumericAxis(std::span<double const> centres) : Axis(), m_values(cen
  * called
  */
 Axis *NumericAxis::clone(const MatrixWorkspace *const parentWorkspace) {
-  UNUSED_ARG(parentWorkspace)
+  UNUSED_ARG(parentWorkspace);
   return new NumericAxis(*this);
 }
 
 Axis *NumericAxis::clone(const std::size_t length, const MatrixWorkspace *const parentWorkspace) {
-  UNUSED_ARG(parentWorkspace)
+  UNUSED_ARG(parentWorkspace);
   auto newAxis = new NumericAxis(*this);
   newAxis->m_values.clear();
   newAxis->m_values.resize(length);
@@ -94,7 +94,7 @@ Axis *NumericAxis::clone(const std::size_t length, const MatrixWorkspace *const 
  *  @throw  IndexError If the index requested is not in the range of this axis
  */
 double NumericAxis::operator()(const std::size_t &index, const std::size_t &verticalIndex) const {
-  UNUSED_ARG(verticalIndex)
+  UNUSED_ARG(verticalIndex);
   if (index >= length()) {
     throw Kernel::Exception::IndexError(index, length() - 1, "NumericAxis: Index out of range.");
   }

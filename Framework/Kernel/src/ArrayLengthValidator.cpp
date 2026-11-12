@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/ArrayLengthValidator.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include <cstdint>
 #include <memory>
@@ -164,6 +165,13 @@ template <typename TYPE> std::string ArrayLengthValidator<TYPE>::checkValidity(c
 }
 
 // Required explicit instantiations
+/// @cond
+// TypedValidator.h declares this with MANTID_KERNEL_EXTERN_TEMPLATE, which already carries the export attribute, so gcc
+// warns that the one here is ignored.
+GNU_DIAG_OFF("attributes")
+template class MANTID_KERNEL_DLL TypedValidator<std::vector<double>>;
+GNU_DIAG_ON("attributes")
+/// @endcond
 template class ArrayLengthValidator<double>;
 template class ArrayLengthValidator<int32_t>;
 template class ArrayLengthValidator<int64_t>;

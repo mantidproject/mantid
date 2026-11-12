@@ -71,6 +71,8 @@ void updateRowProperties(AlgorithmRuntimeProps &properties, Row const &row) {
   AlgorithmProperties::update("ThetaIn", row.theta(), properties);
   AlgorithmProperties::update("ScaleFactor", row.scaleFactor(), properties);
   AlgorithmProperties::updateFromMap(properties, row.reductionOptions());
+  AlgorithmProperties::update("NominalSpecularPixelSpectrumNo", row.nominalSpecularPixel(), properties);
+  AlgorithmProperties::update("ActualSpecularPixelSpectrumNo", row.actualSpecularPixel(), properties);
 }
 
 void updateTransmissionStitchProperties(AlgorithmRuntimeProps &properties, TransmissionStitchOptions const &options) {
@@ -151,6 +153,8 @@ void updateLookupRowProperties(AlgorithmRuntimeProps &properties, LookupRow cons
   AlgorithmProperties::update("BackgroundProcessingInstructions", lookupRow.backgroundProcessingInstructions(),
                               properties);
   AlgorithmProperties::update("ROIDetectorIDs", lookupRow.roiDetectorIDs(), properties);
+  AlgorithmProperties::update("NominalSpecularPixelSpectrumNo", lookupRow.nominalSpecularPixel(), properties);
+  AlgorithmProperties::update("ActualSpecularPixelSpectrumNo", lookupRow.actualSpecularPixel(), properties);
 }
 
 void updateWavelengthRangeProperties(AlgorithmRuntimeProps &properties,
@@ -191,12 +195,13 @@ void updatePreviewInstrumentProperties(AlgorithmRuntimeProps &properties, Instru
 void updateInstrumentProperties(AlgorithmRuntimeProps &properties, Instrument const &instrument) {
   updatePreviewInstrumentProperties(properties, instrument);
   AlgorithmProperties::update("CalibrationFile", instrument.calibrationFilePath(), properties);
+  AlgorithmProperties::update("NominalSpecularPixelSpectrumNo", instrument.specularPixel(), properties);
 }
 
-class UpdateEventPropertiesVisitor : public boost::static_visitor<> {
+class UpdateEventPropertiesVisitor {
 public:
   explicit UpdateEventPropertiesVisitor(AlgorithmRuntimeProps &properties) : m_properties(properties) {}
-  void operator()(boost::blank const &) const {
+  void operator()(std::monostate const &) const {
     // No slicing specified so there is nothing to do
   }
   void operator()(InvalidSlicing const &) const {
@@ -232,7 +237,7 @@ private:
 };
 
 void updateEventProperties(AlgorithmRuntimeProps &properties, Slicing const &slicing) {
-  boost::apply_visitor(UpdateEventPropertiesVisitor(properties), slicing);
+  std::visit(UpdateEventPropertiesVisitor(properties), slicing);
 }
 
 std::optional<double> getDouble(const IAlgorithm_sptr &algorithm, std::string const &property) {
@@ -243,10 +248,24 @@ std::optional<double> getDouble(const IAlgorithm_sptr &algorithm, std::string co
 void updateRowFromOutputProperties(const IAlgorithm_sptr &algorithm, Item &item) {
   auto &row = dynamic_cast<Row &>(item);
 
+  std::vector<std::string> iVsLams;
+  std::vector<std::string> iVsQs;
+  std::vector<std::string> iVsQBins;
+
   auto const iVsLam = AlgorithmProperties::getOutputWorkspace(algorithm, "OutputWorkspaceWavelength");
   auto const iVsQ = AlgorithmProperties::getOutputWorkspace(algorithm, "OutputWorkspace");
   auto const iVsQBin = AlgorithmProperties::getOutputWorkspace(algorithm, "OutputWorkspaceBinned");
-  row.setOutputNames(std::vector<std::string>{iVsLam, iVsQ, iVsQBin});
+  if (iVsQ.empty() || iVsLam.empty() || iVsQBin.empty()) {
+    iVsLams = AlgorithmProperties::getMultipleOutputWorkspaces(algorithm, "OutputWorkspacesWavelength");
+    iVsQs = AlgorithmProperties::getMultipleOutputWorkspaces(algorithm, "OutputWorkspaces");
+    iVsQBins = AlgorithmProperties::getMultipleOutputWorkspaces(algorithm, "OutputWorkspacesBinned");
+  } else {
+    iVsLams = {iVsLam};
+    iVsQs = {iVsQ};
+    iVsQBins = {iVsQBin};
+  }
+
+  row.setOutputNames(std::vector<std::vector<std::string>>{iVsLams, iVsQs, iVsQBins});
 
   auto qRange = RangeInQ(getDouble(algorithm, "MomentumTransferMin"), getDouble(algorithm, "MomentumTransferStep"),
                          getDouble(algorithm, "MomentumTransferMax"));

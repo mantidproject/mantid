@@ -102,6 +102,8 @@ void ALFPythonInstrumentView::ensureCallbackRelay(QWidget *instrumentView) {
     m_callbackRelay = existingRelay != nullptr ? existingRelay : new ALFPythonCallbackRelay(instrumentView);
   }
   m_callbackRelay->setCallback("notify_whole_tube_selected", [this]() { notifyWholeTubeSelected(); });
+  m_callbackRelay->setCallback("notify_instrument_actor_reset",
+                               [this]() { m_presenter->notifyInstrumentActorReset(); });
 }
 
 MantidWidgets::IInstrumentActor const &ALFPythonInstrumentView::getInstrumentActor() const {

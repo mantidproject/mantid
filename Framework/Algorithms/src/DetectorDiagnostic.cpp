@@ -9,6 +9,7 @@
 #include "MantidDataObjects/EventWorkspaceHelpers.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Exception.h"
@@ -490,14 +491,9 @@ std::vector<std::vector<size_t>> DetectorDiagnostic::makeInstrumentMap(const API
  *
  */
 std::vector<std::vector<size_t>> DetectorDiagnostic::makeMap(const API::MatrixWorkspace_sptr &countsWS) {
-  std::multimap<Mantid::Geometry::ComponentID, size_t> mymap;
+  std::multimap<size_t, size_t> mymap;
 
-  Geometry::Instrument_const_sptr instrument = countsWS->getInstrument();
   if (m_parents == 0) {
-    return makeInstrumentMap(*countsWS);
-  }
-  if (!instrument) {
-    g_log.warning("Workspace has no instrument. LevelsUP is ignored");
     return makeInstrumentMap(*countsWS);
   }
 
@@ -508,23 +504,28 @@ std::vector<std::vector<size_t>> DetectorDiagnostic::makeMap(const API::MatrixWo
   }
 
   const SpectrumInfo &spectrumInfo = countsWS->spectrumInfo();
+  const auto &componentInfo = countsWS->componentInfo();
 
   for (size_t i = 0; i < countsWS->getNumberHistograms(); ++i) {
-
-    auto anc = spectrumInfo.detector(i).getAncestors();
-    if (anc.size() < static_cast<size_t>(m_parents)) {
-      g_log.warning("Too many levels up. Will ignore LevelsUp");
-      m_parents = 0;
-      return makeInstrumentMap(*countsWS);
+    if (!spectrumInfo.hasDetectors(i))
+      throw Kernel::Exception::NotFoundError("SpectrumInfo: No detectors for this workspace index.", std::to_string(i));
+    auto ancestor = spectrumInfo.spectrumDefinition(i)[0].first;
+    for (int level = 0; level < m_parents; ++level) {
+      if (!componentInfo.hasParent(ancestor)) {
+        g_log.warning("Too many levels up. Will ignore LevelsUp");
+        m_parents = 0;
+        return makeInstrumentMap(*countsWS);
+      }
+      ancestor = componentInfo.parent(ancestor);
     }
-    mymap.emplace(anc[m_parents - 1]->getComponentID(), i);
+    mymap.emplace(ancestor, i);
   }
 
   std::vector<std::vector<size_t>> speclist;
 
-  std::multimap<Mantid::Geometry::ComponentID, size_t>::iterator m_it, s_it;
+  std::multimap<size_t, size_t>::iterator m_it, s_it;
   for (m_it = mymap.begin(); m_it != mymap.end(); m_it = s_it) {
-    Mantid::Geometry::ComponentID theKey = m_it->first;
+    auto const theKey = m_it->first;
     auto keyRange = mymap.equal_range(theKey);
     // Iterate over all map elements with key == theKey
     std::vector<size_t> speclistsingle;

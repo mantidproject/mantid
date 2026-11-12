@@ -27,6 +27,7 @@ from mantid.simpleapi import (
 )
 
 from IndirectCommon import get_run_number
+from IndirectReductionCommon import remove_edge_pixels, exclude_low_calibration_spectra
 
 import os.path
 
@@ -141,6 +142,8 @@ class IndirectCalibration(DataProcessorAlgorithm):
             calib_ws_name = runs[0]
             merge_prog.report()
 
+        remove_edge_pixels(calib_ws_name)
+
         workflow_prog = Progress(self, start=0.40, end=0.90, nreports=10)
         workflow_prog.report("Calculating flat background")
         CalculateFlatBackground(
@@ -148,7 +151,7 @@ class IndirectCalibration(DataProcessorAlgorithm):
         )
 
         workflow_prog.report("Masking detectors")
-        number_historgrams = mtd[calib_ws_name].getNumberHistograms()
+        number_histograms = mtd[calib_ws_name].getNumberHistograms()
         ws_mask, num_zero_spectra = FindDetectorsOutsideLimits(InputWorkspace=calib_ws_name, OutputWorkspace="__temp_ws_mask")
         DeleteWorkspace(ws_mask)
 
@@ -163,13 +166,16 @@ class IndirectCalibration(DataProcessorAlgorithm):
         DeleteWorkspace(temp_sum)
 
         if self._intensity_scale is None:
-            self._intensity_scale = 1 / (total / (number_historgrams - num_zero_spectra))
+            self._intensity_scale = 1 / (total / (number_histograms - num_zero_spectra))
 
         workflow_prog.report("Scaling calibration")
         Scale(InputWorkspace=calib_ws_name, OutputWorkspace=self._out_ws, Factor=self._intensity_scale, Operation="Multiply")
 
+        exclude_low_calibration_spectra(self._out_ws)
+
         # Remove old workspaces
         if len(runs) > 1:
+            DeleteWorkspace(Workspace=calib_ws_name)
             for run in runs:
                 DeleteWorkspace(Workspace=run)
                 workflow_prog.report("Deleting workspaces")

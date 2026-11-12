@@ -9,7 +9,9 @@
 import re
 
 import numpy as np
+from matplotlib import rcParams
 from matplotlib.container import ErrorbarContainer
+from matplotlib.layout_engine import TightLayoutEngine, ConstrainedLayoutEngine
 
 
 def round_to_sig_figs(number, sig_figs):
@@ -81,3 +83,24 @@ def sorted_lines_in(ax, artists):
         if line in artists:
             sorted_lines.append(line)
     return sorted_lines
+
+
+def get_figure_layout(fig):
+    layout_engine = fig.get_layout_engine()
+    layout = None
+    match layout_engine:
+        case TightLayoutEngine():
+            layout = "tight"
+        case ConstrainedLayoutEngine():
+            layout = "constrained"
+        case _:
+            pass
+    return layout
+
+
+def get_default_layout():
+    if rcParams["figure.autolayout"]:
+        return "tight"
+    elif rcParams["figure.constrained_layout.use"]:
+        return "constrained"
+    return None

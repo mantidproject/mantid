@@ -8,7 +8,7 @@
 #include "Common/Parse.h"
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/tokenizer.hpp>
-#include <boost/variant.hpp>
+#include <variant>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
@@ -24,11 +24,13 @@ enum ColumnNumber {
   QMAX_COLUMN = 5,
   QSTEP_COLUMN = 6,
   SCALE_COLUMN = 7,
-  OPTIONS_COLUMN = 8
+  OPTIONS_COLUMN = 8,
+  NOMINAL_SPECULAR_PIXEL_COLUMN = 11,
+  ACTUAL_SPECULAR_PIXEL_COLUMN = 12
 };
 }
 
-template <typename T> class AppendErrorIfNotType : public boost::static_visitor<std::optional<T>> {
+template <typename T> class AppendErrorIfNotType {
 public:
   AppendErrorIfNotType(std::vector<int> &invalidParams, int baseColumn)
       : m_invalidParams(invalidParams), m_baseColumn(baseColumn) {}
@@ -70,14 +72,14 @@ std::optional<double> RowValidator::parseTheta(std::vector<std::string> const &c
 std::optional<TransmissionRunPair> RowValidator::parseTransmissionRuns(std::vector<std::string> const &cellText) {
   auto transmissionRunsOrError =
       ISISReflectometry::parseTransmissionRuns(cellText[FIRST_TRANS_COLUMN], cellText[SECOND_TRANS_COLUMN]);
-  return boost::apply_visitor(AppendErrorIfNotType<TransmissionRunPair>(m_invalidColumns, FIRST_TRANS_COLUMN),
-                              transmissionRunsOrError);
+  return std::visit(AppendErrorIfNotType<TransmissionRunPair>(m_invalidColumns, FIRST_TRANS_COLUMN),
+                    transmissionRunsOrError);
 }
 
 std::optional<RangeInQ> RowValidator::parseQRange(std::vector<std::string> const &cellText) {
   auto qRangeOrError = ::MantidQt::CustomInterfaces::ISISReflectometry::parseQRange(
       cellText[QMIN_COLUMN], cellText[QMAX_COLUMN], cellText[QSTEP_COLUMN]);
-  return boost::apply_visitor(AppendErrorIfNotType<RangeInQ>(m_invalidColumns, QMIN_COLUMN), qRangeOrError);
+  return std::visit(AppendErrorIfNotType<RangeInQ>(m_invalidColumns, QMIN_COLUMN), qRangeOrError);
 }
 
 std::optional<double> RowValidator::parseScaleFactor(std::vector<std::string> const &cellText) {
@@ -98,6 +100,13 @@ std::optional<ReductionOptionsMap> RowValidator::parseOptions(std::vector<std::s
   return options;
 }
 
+std::optional<double> RowValidator::parsePixel(std::vector<std::string> const &cellText, size_t column) {
+  auto [value, valid] = parseSpecularPixel(column < cellText.size() ? cellText[column] : "");
+  if (!valid)
+    m_invalidColumns.emplace_back(static_cast<int>(column));
+  return value;
+}
+
 ValidationResult<Row, std::vector<int>> RowValidator::operator()(std::vector<std::string> const &cellText) {
   auto optionalRunNumbers = parseRunNumbers(cellText);
   auto optionalTheta = parseTheta(cellText);
@@ -106,13 +115,16 @@ ValidationResult<Row, std::vector<int>> RowValidator::operator()(std::vector<std
   auto optionalScaleFactor = parseScaleFactor(cellText);
   auto optionalOptions = parseOptions(cellText);
 
+  auto nominalPixel = parsePixel(cellText, NOMINAL_SPECULAR_PIXEL_COLUMN);
+  auto actualPixel = parsePixel(cellText, ACTUAL_SPECULAR_PIXEL_COLUMN);
+
   if (!m_invalidColumns.empty()) {
     return RowValidationResult(m_invalidColumns);
   }
   auto wsNames = workspaceNames(optionalRunNumbers.value(), optionalTransmissionRuns.value());
-  auto optionalRow =
-      Row(optionalRunNumbers.value(), optionalTheta.value(), optionalTransmissionRuns.value(), optionalQRange.value(),
-          optionalScaleFactor, optionalOptions.value(), ReductionWorkspaces(std::move(wsNames)));
+  auto optionalRow = Row(optionalRunNumbers.value(), optionalTheta.value(), optionalTransmissionRuns.value(),
+                         optionalQRange.value(), optionalScaleFactor, optionalOptions.value(),
+                         ReductionWorkspaces(std::move(wsNames)), nominalPixel, actualPixel);
   return RowValidationResult(optionalRow);
 }
 

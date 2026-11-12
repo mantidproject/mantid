@@ -74,6 +74,41 @@ public:
 
   } // End test_TwoInputWorkspaces
 
+  void test_OutOfPlaceOperationPreservesCustomDetectorMapping() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    auto ws1 = std::make_shared<Mantid::DataObjects::MaskWorkspace>(instrument);
+    auto ws2 = std::make_shared<Mantid::DataObjects::MaskWorkspace>(instrument);
+
+    const auto firstDetectorIDs = ws1->getSpectrum(0).getDetectorIDs();
+    const auto secondDetectorIDs = ws1->getSpectrum(1).getDetectorIDs();
+    ws1->getSpectrum(0).setDetectorIDs(secondDetectorIDs);
+    ws1->getSpectrum(1).setDetectorIDs(firstDetectorIDs);
+    ws2->getSpectrum(0).setDetectorIDs(secondDetectorIDs);
+    ws2->getSpectrum(1).setDetectorIDs(firstDetectorIDs);
+
+    ws1->setMaskedIndex(0);
+    ws2->setMaskedIndex(0);
+    ws1->setMaskedIndex(1);
+
+    BinaryOperateMasks algorithm;
+    algorithm.initialize();
+    algorithm.setProperty("InputWorkspace1", ws1);
+    algorithm.setProperty("InputWorkspace2", ws2);
+    algorithm.setPropertyValue("OperationType", "AND");
+    algorithm.setPropertyValue("OutputWorkspace", "BinaryOperateMasksCustomMappingOutput");
+
+    TS_ASSERT(algorithm.execute());
+
+    auto output = AnalysisDataService::Instance().retrieveWS<Mantid::DataObjects::MaskWorkspace>(
+        "BinaryOperateMasksCustomMappingOutput");
+    TS_ASSERT(output->getSpectrum(0).getDetectorIDs() == ws1->getSpectrum(0).getDetectorIDs());
+    TS_ASSERT(output->isMaskedIndex(0));
+    TS_ASSERT(!output->isMaskedIndex(1));
+    TS_ASSERT(ws1->isMaskedIndex(1));
+
+    AnalysisDataService::Instance().remove("BinaryOperateMasksCustomMappingOutput");
+  }
+
   void test_NOTOperation() {
     this->binoperator.initialize();
 

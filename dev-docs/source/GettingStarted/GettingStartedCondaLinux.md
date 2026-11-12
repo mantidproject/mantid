@@ -1,4 +1,4 @@
-# Develop with conda on Linux
+# Develop on Linux
 
 ## Install [Git](https://git-scm.com/)
 
@@ -11,17 +11,17 @@ heading-offset: 1
 ---
 ```
 
-## Install [Miniforge](https://github.com/conda-forge/miniforge/releases)
-
-- Choose the latest version of `Miniforge3-Linux-x86_64.sh`
-- Run your downloaded script from the terminal using `bash Miniforge3-Linux-x86_64.sh`.
-  If it asks whether or not you want to initialise conda with conda init, choose to do so.
-- Restart your terminal.
-
 ## (ILL) Setup proxy
 
-- Open ~/.condarc.
-- Add the following lines :
+For pixi, add the following to `~/.pixi/config.toml` (create the file if it does not exist):
+
+```toml
+[proxy-config]
+http = "http://proxy.ill.fr:8888"
+https = "http://proxy.ill.fr:8888"
+```
+
+For conda, open `~/.condarc` and add the following lines:
 
 ```text
 proxy_servers:
@@ -29,21 +29,33 @@ proxy_servers:
   https: http://proxy.ill.fr:8888
 ```
 
-## Setup the mantid conda environment
-
-```{include} MantidDeveloperCondaSetup.md
-```
-
-## Setup the mantid pixi environment
+## Setup the mantid pixi environment (recommended)
 
 ```{include} MantidDeveloperPixiSetup.md
+```
+
+## Alternative: setup a mantid conda environment
+
+### Install [Miniforge](https://github.com/conda-forge/miniforge/releases)
+
+- Choose the latest version of `Miniforge3-Linux-x86_64.sh`
+- Run your downloaded script from the terminal using `bash Miniforge3-Linux-x86_64.sh`.
+  If it asks whether or not you want to initialise conda with conda init, choose to do so.
+- Restart your terminal.
+
+### Create the conda environment
+
+```{include} MantidDeveloperCondaSetup.md
 ```
 
 ## Configure CMake and generate build files
 
 - Still using the terminal.
 
-- If not already activated in the previous step, run `conda activate mantid-developer` to activate your conda environment.
+- If not already activated in the previous step, activate your environment:
+
+  - For pixi, run `pixi shell` from your mantid source directory, or prefix the commands below with `pixi run` if your build folder is a subdirectory of the source directory.
+  - For conda, run `conda activate mantid-developer`.
 
 - Navigate back to your mantid source directory using `cd mantid` if you used the default name during cloning from git.
 
@@ -68,7 +80,7 @@ This option can be passed to CMake on the command line using -DCONDA_BUILD=True.
 
 ## Debugging with `gdb`
 
-If you wish to use `gdb` to debug Mantid, then you can use:
+If you wish to use `gdb` to debug Mantid, first make sure `gdb` is available in your environment (`conda` or `pixi`), and your development environment is active, then you can use:
 
 `./build/bin/launch_mantidworkbench.sh --debug`
 

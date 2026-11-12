@@ -13,10 +13,15 @@
 
 #include "MantidDataObjects/MDEventFactory.h"
 
+#include <string>
+
 namespace Mantid {
 namespace MDAlgorithms {
 
 namespace MDAlgorithmsTestHelper {
+
+/// Returns an ID suitable for filenames shared between concurrent test processes.
+std::string makeUniqueId();
 
 DataObjects::MDEventWorkspace3Lean::sptr makeFileBackedMDEW(const std::string &wsName, bool fileBacked,
                                                             long numEvents = 10000,

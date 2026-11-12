@@ -354,7 +354,7 @@ public:
       const auto &spec = ws1->getSpectrum(i);
       const auto &detIDs = spec.getDetectorIDs();
       detid_t oneDetId = *detIDs.begin();
-      UNUSED_ARG(oneDetId)
+      UNUSED_ARG(oneDetId);
     }
     std::cout << tim << " to get detector ID's for " << nhist << " spectra using the ISpectrum method.\n";
   }

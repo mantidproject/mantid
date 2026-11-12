@@ -27,6 +27,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidNexus/NexusFile.h"
 
 #include <algorithm>
@@ -1205,7 +1206,7 @@ Getter for the reference frame.
 */
 std::shared_ptr<const ReferenceFrame> Instrument::getReferenceFrame() const {
   if (m_map) {
-    return m_instr->getReferenceFrame();
+    ALLOW_DEPRECATED(return m_instr->getReferenceFrame())
   } else {
     return m_referenceFrame;
   }
@@ -1503,7 +1504,7 @@ Instrument::makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo,
   compInfo->m_parameterInfo = pmap.rekey(compInfo->m_componentIds, compInfo->m_compIDToIndex);
   detInfo->m_parameterInfo = compInfo->m_parameterInfo;
   // Take the frame from the instrument rather than the cached copy, in case it was set after the cache was built.
-  compInfo->m_referenceFrame = getReferenceFrame();
+  ALLOW_DEPRECATED(compInfo->m_referenceFrame = getReferenceFrame());
   detInfo->m_referenceFrame = compInfo->m_referenceFrame;
   const auto parInstrument = ParComponentFactory::createInstrument(
       std::shared_ptr<const Instrument>(this, NoDeleting()), std::shared_ptr<ParameterMap>(&pmap, NoDeleting()));

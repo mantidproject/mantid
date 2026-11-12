@@ -107,3 +107,21 @@
 #else
 #define GNU_UNUSED
 #endif
+
+/**
+ * Function arguments are sometimes unused in certain implementations
+ * but are required for documentation purposes.
+ * This is a macro to silence compiler warnings about the subject
+ */
+#ifndef UNUSED_ARG
+#define UNUSED_ARG(...) (void)(__VA_ARGS__)
+#endif
+
+#ifndef ALLOW_DEPRECATED
+#define ALLOW_DEPRECATED(command)                                                                                      \
+  GNU_DIAG_OFF("deprecated-declarations")                                                                              \
+  MSVC_DIAG_OFF(4996)                                                                                                  \
+  command;                                                                                                             \
+  MSVC_DIAG_ON(4996)                                                                                                   \
+  GNU_DIAG_ON("deprecated-declarations")
+#endif

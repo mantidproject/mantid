@@ -13,6 +13,8 @@
 #include "MantidAPI/ITableWorkspace.h"
 
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/Logger.h"
+#include "MantidQtWidgets/Common/ColorTheme.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
@@ -28,11 +30,13 @@ using namespace MantidQt::API;
 using namespace MantidQt::MantidWidgets;
 
 namespace {
+constexpr int BIN_WARNING_THRESHOLD = 5;
+Mantid::Kernel::Logger g_log("Iqt");
 
 /**
  * Calculate the number of bins in the sample & resolution workspaces
  * @param wsName The sample workspace name
- * @param resName the resolution woskapce name
+ * @param resName the resolution workspace name
  * @param energyMin Minimum energy for chosen bin range
  * @param energyMax Maximum energy for chosen bin range
  * @param binReductionFactor The factor by which to reduce the number of bins
@@ -81,6 +85,8 @@ namespace MantidQt::CustomInterfaces {
 
 IqtView::IqtView(QWidget *parent) : QWidget(parent), m_presenter(), m_iqtTree(nullptr) {
   m_uiForm.setupUi(parent);
+  m_uiForm.ppPlot->setCanvasColour(MantidQt::MantidWidgets::isDarkMode() ? QColor(DARK_CANVAS_COLOUR)
+                                                                         : QColor(255, 255, 255));
   m_dblEdFac = new DoubleEditorFactory(this);
   m_dblManager = new QtDoublePropertyManager();
 }
@@ -159,6 +165,10 @@ void IqtView::setup() {
 
   m_uiForm.dsInput->isOptional(true);
   m_uiForm.dsResolution->isOptional(true);
+  // Text files loaded via LoadAscii default to Unit="Energy"; these workspaces are
+  // always in energy transfer, so label them correctly regardless of the input format.
+  m_uiForm.dsInput->setLoadProperty("Unit", std::string("DeltaE"));
+  m_uiForm.dsResolution->setLoadProperty("Unit", std::string("DeltaE"));
   notifyIterationsChanged(m_uiForm.spIterations->value());
   notifyErrorsClicked(1);
   notifyEnableNormalizationClicked(1);
@@ -386,7 +396,7 @@ void IqtView::updateDisplayedBinParameters() {
   auto const sampleName = m_uiForm.dsInput->getCurrentDataName().toStdString();
   auto const resolutionName = m_uiForm.dsResolution->getCurrentDataName().toStdString();
 
-  auto &ads = AnalysisDataService::Instance();
+  const auto &ads = AnalysisDataService::Instance();
   if (!ads.doesExist(sampleName) || !ads.doesExist(resolutionName))
     return;
 
@@ -415,9 +425,10 @@ void IqtView::updateDisplayedBinParameters() {
     connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &IqtView::notifyUpdateRangeSelector);
 
     // Warn for low number of resolution bins
-    if (resolutionBins < 5)
-      showMessageBox("Results may be inaccurate as ResolutionBins is "
-                     "less than 5.\nLower the SampleBinning.");
+    if (resolutionBins < BIN_WARNING_THRESHOLD) {
+      g_log.warning("Results may be inaccurate as ResolutionBins is "
+                    "less than 5.\nLower the SampleBinning.");
+    }
   }
 }
 

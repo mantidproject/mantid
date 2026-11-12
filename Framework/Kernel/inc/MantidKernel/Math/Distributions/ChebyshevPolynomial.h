@@ -11,6 +11,8 @@
 //-----------------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
 
+#include <cstddef>
+
 namespace Mantid {
 namespace Kernel {
 

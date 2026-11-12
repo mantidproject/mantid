@@ -10,6 +10,7 @@
 
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/LogFilter.h"
+#include "MantidKernel/TimeROI.h"
 #include <ctime>
 
 using namespace Mantid::Kernel;
@@ -350,7 +351,60 @@ public:
     TS_ASSERT_DELTA(positiveFilterLog->timeAverageValue(), MEAN_EXP, .001);
   }
 
+  void test_open_ended_filter_combined_with_mask() {
+    LogFilter filter(*createFilter({{0, false}, {10, true}}));
+    TS_ASSERT_THROWS_NOTHING(filter.addFilter(*createFilter({{0, true}, {20, true}, {40, true}})));
+    assertFilterEquals(filter, {{10, true}});
+  }
+
+  void test_filter_combined_with_mask_with_single_valid_time() {
+    LogFilter filter(*createFilter({{0, true}, {60, false}}));
+    TS_ASSERT_THROWS_NOTHING(filter.addFilter(*createFilter({{20, true}})));
+    assertFilterEquals(filter, {{20, true}, {60, false}});
+  }
+
+  void test_filter_combined_with_mask_with_single_valid_time_at_filter_end() {
+    LogFilter filter(*createFilter({{0, true}, {60, false}}));
+    TS_ASSERT_THROWS_NOTHING(filter.addFilter(*createFilter({{60, true}})));
+    // the intersection is empty so nothing is valid
+    TS_ASSERT(TimeROI(filter.filter()).useNone());
+  }
+
+  void test_open_ended_filter_combined_with_mask_with_single_valid_time() {
+    LogFilter filter(*createFilter({{0, false}, {10, true}}));
+    TS_ASSERT_THROWS_NOTHING(filter.addFilter(*createFilter({{20, true}})));
+    assertFilterEquals(filter, {{20, true}});
+  }
+
+  void test_open_ended_filter() {
+    std::unique_ptr<LogFilter> filter;
+    TS_ASSERT_THROWS_NOTHING(filter = std::make_unique<LogFilter>(*createFilter({{0, false}, {10, true}})));
+    assertFilterEquals(*filter, {{10, true}});
+  }
+
 private:
+  /// Creates a boolean filter from (seconds after 2007-11-30T16:17:00, value) pairs
+  std::shared_ptr<TimeSeriesProperty<bool>> createFilter(const std::vector<std::pair<int, bool>> &entries) {
+    auto filter = std::make_shared<TimeSeriesProperty<bool>>("filter");
+    for (const auto &[seconds, value] : entries)
+      filter->addValue(START_TIME + static_cast<double>(seconds), value);
+    return filter;
+  }
+
+  /// Checks the combined filter against (seconds after 2007-11-30T16:17:00, value) pairs
+  void assertFilterEquals(const LogFilter &filter, const std::vector<std::pair<int, bool>> &expected) {
+    const auto *result = filter.filter();
+    TS_ASSERT_EQUALS(result->size(), static_cast<int>(expected.size()));
+    if (result->size() != static_cast<int>(expected.size()))
+      return;
+    for (size_t i = 0; i < expected.size(); ++i) {
+      TS_ASSERT_EQUALS(result->nthTime(static_cast<int>(i)), START_TIME + static_cast<double>(expected[i].first));
+      TS_ASSERT_EQUALS(result->nthValue(static_cast<int>(i)), expected[i].second);
+    }
+  }
+
+  const Mantid::Types::Core::DateAndTime START_TIME{"2007-11-30T16:17:00"};
+
   /// Creates a test boolean filter
   /// @param type :: Which variant to create
   std::shared_ptr<TimeSeriesProperty<bool>> createTestFilter(const int type) {

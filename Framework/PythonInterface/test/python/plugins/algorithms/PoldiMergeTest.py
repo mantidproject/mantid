@@ -81,6 +81,14 @@ class PoldiMergeTest(unittest.TestCase):
 
         DeleteWorkspace("PoldiMergeOutput")
 
+    def test_noTemporaryWorkspaceLeftInADS(self):
+        # A leftover __TMP alias of the output can be picked up in place by a later child algorithm
+        self.__runMerge__("Base,GoodTiming")
+
+        self.assertEqual([name for name in AnalysisDataService.getObjectNames() if name.startswith("__TMP")], [])
+
+        DeleteWorkspace("PoldiMergeOutput")
+
     def test_timingDelta(self):
         self.assertRaisesRegex(
             RuntimeError, "Workspaces can not be merged. Timings don't match. Aborting.", lambda: self.__runMerge__("Base,BadTimingDelta")

@@ -13,6 +13,8 @@ from mantid.simpleapi import CreateSampleWorkspace
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.widgets.workspacedisplay.matrix.presenter import MatrixWorkspaceDisplay
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
+from qtpy.QtCore import Qt
+from qtpy.QtGui import QColor, QPalette
 from qtpy.QtWidgets import QApplication
 
 
@@ -48,6 +50,19 @@ class MatrixWorkspaceDisplayViewTest(unittest.TestCase, QtWidgetFinder):
         self.assertEqual(None, p.ads_observer)
         self.assert_widget_not_present("work")
         self.assert_no_toplevel_widgets()
+
+    def test_table_text_is_black_so_it_is_readable_on_the_light_background(self):
+        ws = CreateSampleWorkspace()
+        p = MatrixWorkspaceDisplay(ws)
+
+        for table in (p.view.table_y, p.view.table_x, p.view.table_e):
+            self.assertEqual(QColor(Qt.black), table.palette().color(QPalette.Text))
+            self.assertEqual(QColor(128, 255, 255), table.viewport().palette().color(QPalette.Base))
+            # the frame and scrollbars around the cells keep the theme background
+            self.assertEqual(p.view.palette().color(QPalette.Base), table.palette().color(QPalette.Base))
+
+        p.force_close()
+        QApplication.sendPostedEvents()
 
     def test_context_has_expected_function_when_plotting(self):
         ws = CreateSampleWorkspace()

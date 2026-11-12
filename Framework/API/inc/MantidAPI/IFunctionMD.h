@@ -16,7 +16,6 @@
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #ifndef Q_MOC_RUN
 #include <boost/scoped_array.hpp>
-#include <boost/variant.hpp>
 #endif
 #include <memory>
 #include <string>

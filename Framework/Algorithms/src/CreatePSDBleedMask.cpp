@@ -8,7 +8,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/NullValidator.h"
@@ -89,12 +89,13 @@ void CreatePSDBleedMask::exec() {
   // with respect to spectra number
   const auto numSpectra = static_cast<int>(inputWorkspace->getNumberHistograms());
   // Keep track of a map of tubes to lists of indices
-  using TubeIndex = std::map<Geometry::ComponentID, std::vector<int>>;
+  using TubeIndex = std::map<size_t, std::vector<int>>;
   TubeIndex tubeMap;
 
   API::Progress progress(this, 0.0, 1.0, numSpectra);
 
   const auto &spectrumInfo = inputWorkspace->spectrumInfo();
+  const auto &componentInfo = inputWorkspace->componentInfo();
 
   // NOTE: This loop is intentionally left unparallelized as the majority of the
   // work requires a lock around it which actually slows down the loop.
@@ -110,28 +111,12 @@ void CreatePSDBleedMask::exec() {
     if (spectrumInfo.isMonitor(i))
       continue;
 
-    auto &det = spectrumInfo.detector(i);
-    std::shared_ptr<const Geometry::IComponent> parent;
-
-    if (!spectrumInfo.hasUniqueDetector(i)) {
-      const auto &group = dynamic_cast<const Geometry::DetectorGroup &>(det);
-      parent = group.getDetectors().front()->getParent();
-    } else {
-      parent = det.getParent();
-    }
-
-    if (!parent)
+    // For a group, use the detector with the lowest ID
+    const auto detIndex = spectrumInfo.spectrumDefinition(i)[0].first;
+    if (!componentInfo.hasParent(detIndex))
       continue;
 
-    Geometry::ComponentID parentID = parent->getComponentID();
-    // Already have this component
-    if (tubeMap.find(parentID) != tubeMap.end()) {
-      tubeMap[parentID].emplace_back(i);
-    }
-    // New tube
-    else {
-      tubeMap.emplace(parentID, TubeIndex::mapped_type(1, i));
-    }
+    tubeMap[componentInfo.parent(detIndex)].emplace_back(i);
 
     progress.report();
   }

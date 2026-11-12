@@ -13,6 +13,8 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include <format>
+
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -26,16 +28,16 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  void test_exec_InMemory() { do_test(false); }
+  void test_exec_InMemory() { do_test(false, MDAlgorithmsTestHelper::makeUniqueId()); }
 
-  void test_exec_FileBacked() { do_test(true); }
+  void test_exec_FileBacked() { do_test(true, MDAlgorithmsTestHelper::makeUniqueId()); }
 
-  void test_exec_InMemory_InPlace() { do_test(false, true); }
+  void test_exec_InMemory_InPlace() { do_test(false, MDAlgorithmsTestHelper::makeUniqueId(), true); }
 
-  void do_test(bool fileBacked, bool inPlace = false) {
+  void do_test(bool fileBacked, const std::string &uniqueId, bool inPlace = false) {
     // Name of the output workspace.
     std::string outWSName("TransformMDTest_OutputWS");
-    std::string inWSName("TransformMDTest_ws");
+    const std::string inWSName = std::format("TransformMDTest_ws_{}", uniqueId);
     if (inPlace)
       outWSName = inWSName;
 

@@ -140,12 +140,6 @@ class MainWindow(QMainWindow):
         self.interface_list = None
 
         self.could_restore_state = False
-        self._shutdown_accepted = False
-
-    @property
-    def shutdown_accepted(self):
-        """Return whether the main window completed and accepted its shutdown sequence."""
-        return self._shutdown_accepted
 
     def setup(self):
         # menus must be done first so they can be filled by the
@@ -482,10 +476,6 @@ class MainWindow(QMainWindow):
         algorithm_selector = self.algorithm_selector
         plot_selector = self.plot_selector
         workspacecalculator = self.workspacecalculator
-        # If more than two rows are needed in a column,
-        # arrange_layout function needs to be revisited.
-        # In the first column, there are three widgets in two rows
-        # as the algorithm_selector and plot_selector are tabified.
         default_layout = {
             "widgets": [
                 # column 0
@@ -625,7 +615,6 @@ class MainWindow(QMainWindow):
                 # after a month
                 self.project_recovery.remove_current_pid_folder(ignore_errors=True)
 
-            self._shutdown_accepted = True
             event.accept()
         else:
             # Cancel was pressed when closing an editor

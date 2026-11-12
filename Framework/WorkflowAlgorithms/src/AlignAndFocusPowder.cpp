@@ -27,6 +27,8 @@
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerDataService.h"
 
+#include <tuple>
+
 using Mantid::Geometry::Instrument_const_sptr;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -83,7 +85,7 @@ void getTofRange(const MatrixWorkspace_const_sptr &wksp, double &tmin, double &t
   if (const auto eventWksp = std::dynamic_pointer_cast<const EventWorkspace>(wksp)) {
     eventWksp->getEventXMinMax(tmin, tmax);
   } else {
-    wksp->getXMinMax(tmin, tmax);
+    std::tie(tmin, tmax) = wksp->getXMinMax();
   }
 }
 

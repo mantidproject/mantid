@@ -170,7 +170,11 @@ std::deque<IConfiguredAlgorithm_sptr> BatchJobManager::getAlgorithms() {
       algorithms = algorithmsForProcessingRowsInGroup(group, false);
     } else if (isSelected(group) && group.requiresPostprocessing(m_reprocessFailed)) {
       // If the group's requires postprocessing, do it
-      algorithms = algorithmForPostprocessingGroup(group);
+      try {
+        algorithms = algorithmForPostprocessingGroup(group);
+      } catch (std::runtime_error &err) {
+        group.setError(err.what());
+      }
     }
     // If we have valid algorithms, return now; otherwise continue to the next group
     if (algorithms.size() > 0) {
@@ -185,9 +189,28 @@ std::deque<IConfiguredAlgorithm_sptr> BatchJobManager::getAlgorithms() {
  * @returns : the list of configured algorithms
  */
 std::deque<IConfiguredAlgorithm_sptr> BatchJobManager::algorithmForPostprocessingGroup(Group &group) {
-  auto algorithm = GroupProcessing::createConfiguredAlgorithm(m_batch, group);
+  if (group.rows().size() < 2) {
+    throw std::runtime_error("Must have at least two rows for post-processing a group.");
+  }
+
+  auto const nSlices = group.rows()[0]->reducedWorkspaceNames().iVsQ().size();
+  std::for_each(std::next(group.rows().cbegin()), group.rows().cend(), [nSlices](auto const &row) -> void {
+    if (row->reducedWorkspaceNames().iVsQ().size() != nSlices) {
+      throw std::runtime_error("All rows must have equal numbers of slices to perform stitching post-processing.");
+    }
+  });
+
   auto algorithms = std::deque<IConfiguredAlgorithm_sptr>();
-  algorithms.emplace_back(std::move(algorithm));
+  for (size_t i = 0; i < nSlices; i++) {
+    auto workspaces = std::vector<std::string>{};
+    std::for_each(group.rows().cbegin(), group.rows().cend(), [&workspaces, i](auto const &row) -> void {
+      workspaces.emplace_back(row->reducedWorkspaceNames().iVsQ()[i]);
+    });
+    // We only want to reset the group's outputs on the first of the slices. The rest get appended.
+    auto algorithm = i == 0 ? GroupProcessing::createConfiguredAlgorithm(m_batch, group, std::move(workspaces), true)
+                            : GroupProcessing::createConfiguredAlgorithm(m_batch, group, std::move(workspaces), false);
+    algorithms.emplace_back(std::move(algorithm));
+  }
   return algorithms;
 }
 
@@ -244,7 +267,10 @@ void BatchJobManager::algorithmStarted(IConfiguredAlgorithm_sptr algorithm) {
   auto item = getRunsTableItem(algorithm);
   assert(item);
   Item &itemRef = item->get();
-  itemRef.resetOutputs();
+  auto jobAlgorithm = std::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
+  if (jobAlgorithm->resetOutputsOnStart()) {
+    itemRef.resetOutputs();
+  }
   itemRef.setRunning();
 }
 
@@ -290,13 +316,15 @@ std::vector<std::string> BatchJobManager::algorithmOutputWorkspacesToSave(IConfi
 }
 
 std::vector<std::string> BatchJobManager::getWorkspacesToSave(Group const &group, bool includeRows) const {
-  auto workspaces = std::vector<std::string>{group.postprocessedWorkspaceName()};
+  auto workspaces = group.postprocessedWorkspaceNames();
 
   if (includeRows) {
     auto const &rows = group.rows();
     for (auto &row : rows) {
       if (row) {
-        workspaces.emplace_back(row.value().reducedWorkspaceNames().iVsQBinned());
+        auto const &binnedWorkspaces = row.value().reducedWorkspaceNames().iVsQBinned();
+        workspaces.reserve(workspaces.size() + binnedWorkspaces.size());
+        workspaces.insert(workspaces.end(), binnedWorkspaces.cbegin(), binnedWorkspaces.cend());
       }
     }
   }
@@ -313,8 +341,9 @@ std::vector<std::string> BatchJobManager::getWorkspacesToSave(Row const &row) co
   if (group && group->hasPostprocessing())
     return workspaces;
 
-  // We currently only save the binned workspace in Q
-  workspaces.emplace_back(row.reducedWorkspaceNames().iVsQBinned());
+  auto const &binnedWorkspaces = row.reducedWorkspaceNames().iVsQBinned();
+  workspaces.reserve(workspaces.size() + std::distance(binnedWorkspaces.cbegin(), binnedWorkspaces.cend()));
+  workspaces.insert(workspaces.end(), binnedWorkspaces.cbegin(), binnedWorkspaces.cend());
   return workspaces;
 }
 

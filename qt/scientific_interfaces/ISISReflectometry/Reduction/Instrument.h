@@ -26,13 +26,15 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL Instrument {
 public:
   Instrument();
   Instrument(std::optional<RangeInLambda> wavelengthRange, MonitorCorrections monitorCorrections,
-             DetectorCorrections detectorCorrections, std::string calibrationFilePath);
+             DetectorCorrections detectorCorrections, std::string calibrationFilePath,
+             std::optional<double> specularPixel = std::nullopt);
 
   std::optional<RangeInLambda> const &wavelengthRange() const;
   bool integratedMonitors() const;
   MonitorCorrections const &monitorCorrections() const;
   DetectorCorrections const &detectorCorrections() const;
   std::string const &calibrationFilePath() const;
+  std::optional<double> specularPixel() const;
 
   size_t monitorIndex() const;
   std::optional<RangeInLambda> monitorIntegralRange() const;
@@ -45,10 +47,9 @@ private:
   MonitorCorrections m_monitorCorrections;
   DetectorCorrections m_detectorCorrections;
   std::string m_calibrationFilePath;
+  std::optional<double> m_specularPixel;
 };
 
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(Instrument const &lhs, Instrument const &rhs);
-MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(Instrument const &lhs, Instrument const &rhs);
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

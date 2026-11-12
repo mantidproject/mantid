@@ -86,6 +86,38 @@ The MD5 checksum of the RAW file itself is not affected by the presence of the a
 If the RAW file is copied to a filesystem that does not support the alternate stream then
 the stream is dropped.
 
+.. _raw-spectra-map-source:
+
+Correcting the spectrum-detector table
+######################################
+
+The spectrum-detector table is used exactly as the file records it, unless the instrument definition asks
+otherwise. Some data acquisition electronics address a bank at a finer granularity than the instrument definition
+describes, summing several hardware elements into one spectrum but still recording each element's own number in
+the file's table. Those numbers are drawn from a numbering space the instrument definition does not use, so
+applied as they are the spectra end up with no detector, and therefore no position, no scattering angle and no
+``Efixed``.
+
+An instrument enables the correction by setting ``spectra-map-source`` to ``instrument`` in its
+:ref:`parameter file <InstrumentParameterFile>`:
+
+.. code-block:: xml
+
+   <parameter name="spectra-map-source" type="string">
+     <value val="instrument"/>
+   </parameter>
+
+Where it is set, any spectrum whose file detectors are not all defined by the instrument is mapped instead to the
+detector whose ID equals its spectrum number, and a spectrum with no such detector keeps its histogram and is left
+without detectors. Spectra whose file detectors are all known are not touched, so a mapping the file got right
+survives even where it is not one-to-one. Nothing is changed at all unless the file's table really does reference
+unknown detectors, so a run recorded before the electronics were subdivided, and any run recorded once they agree
+with the instrument definition again, are left exactly as the file describes them.
+
+The OSIRIS silicon analyser is the case this was added for. Its 1560 pixels are each read out as eight hardware
+elements, which the electronics sum into one spectrum, and the OSIRIS mask and detector grouping files are written
+in the instrument definition's detector IDs. :ref:`LoadISISNexus <algm-LoadISISNexus-v2>` applies the same correction.
+
 Previous Versions
 -----------------
 

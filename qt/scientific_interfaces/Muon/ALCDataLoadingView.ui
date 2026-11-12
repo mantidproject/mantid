@@ -718,7 +718,7 @@
      </widget>
      <widget class="QGroupBox" name="groupBox">
       <property name="styleSheet">
-       <string notr="true">background-color: rgb(240, 240, 240);</string>
+       <string notr="true">background-color: rgb(240, 240, 240); color: black;</string>
       </property>
       <property name="title">
        <string>Loaded data</string>

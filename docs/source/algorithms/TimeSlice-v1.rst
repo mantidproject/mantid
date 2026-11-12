@@ -17,7 +17,8 @@ spectra range, the output workspace will contain the result of the
 integration against the spectrum number.
 
 Optionally a calibration workspace can be provided which will be
-applied to the raw data before the integration is performed.
+applied to matching raw spectra before the integration is performed. Raw spectra without a matching calibration entry
+use a factor of 1.0, allowing them to remain visible in the diagnostic output.
 
 A background range can also be provided which will first calculate
 and subtract a flat background from the raw data before the

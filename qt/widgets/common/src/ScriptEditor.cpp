@@ -616,3 +616,32 @@ void ScriptEditor::replaceAll(const QString &searchString, const QString &replac
 }
 
 int ScriptEditor::getZoom() const { return static_cast<int>(SendScintilla(SCI_GETZOOM)); }
+
+/**
+ * Apply dark/light theme to the editor.
+ * @param isDarkTheme :: If true, apply dark theme, otherwise light theme.
+ */
+void ScriptEditor::applyTheme(bool isDarkTheme) {
+  if (!lexer())
+    return;
+
+  if (auto *csLexer = dynamic_cast<AlternateCSPythonLexer *>(lexer())) {
+    csLexer->setDarkMode(isDarkTheme);
+    SendScintilla(SCI_STYLESETBACK, STYLE_DEFAULT, csLexer->defaultPaper(QsciLexerPython::Default));
+  }
+
+  if (isDarkTheme) {
+    setCaretForegroundColor(QColor("white"));
+    setCaretLineBackgroundColor(QColor(0, 52, 110));
+    setMarginsBackgroundColor(QColor("#3c3c3c"));
+    setMarginsForegroundColor(QColor("#c8c8c8"));
+  } else {
+    setCaretForegroundColor(QColor("black"));
+    setCaretLineBackgroundColor(QColor(247, 236, 248));
+    setMarginsBackgroundColor(QColor("#f0f0f0"));
+    setMarginsForegroundColor(QColor("black"));
+  }
+  setCaretLineVisible(true);
+  setCaretWidth(5);
+  update();
+}

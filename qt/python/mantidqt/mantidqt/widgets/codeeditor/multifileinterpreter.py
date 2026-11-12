@@ -106,6 +106,9 @@ class MultiPythonFileInterpreter(QWidget):
         self.completion_enabled = config.get("Editors", "completion_enabled", type=bool)
         self.on_completion_change()
 
+        for idx in range(self.editor_count):
+            self.editor_at(idx).apply_theme()
+
     def file_changed_event(self, filename):
         timestamp = osp.getmtime(filename) if osp.exists(filename) else None
         duplicate_notfication = filename in self.files_changed_unhandled and self.files_changed_unhandled[filename] == timestamp

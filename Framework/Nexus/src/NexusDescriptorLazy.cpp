@@ -10,7 +10,7 @@
 #include "MantidNexus/NexusException.h"
 #include "MantidNexus/UniqueID.h"
 
-#include "MantidNexus/NexusFile_fwd.h"
+#include "MantidNexus/NexusFile.h"
 #include <H5Cpp.h>
 #include <hdf5.h>
 
@@ -33,9 +33,9 @@ namespace {
 template <herr_t (*H5Xclose)(hid_t)> std::string readNXClass(Mantid::Nexus::UniqueID<H5Xclose> const &oid) {
   std::string nxClass = UNKNOWN_CLASS;
   if (H5Aexists(oid, Mantid::Nexus::GROUP_CLASS_SPEC.c_str()) > 0) {
-    Mantid::Nexus::UniqueID<&H5Aclose> attrID = H5Aopen(oid, Mantid::Nexus::GROUP_CLASS_SPEC.c_str(), H5P_DEFAULT);
+    Mantid::Nexus::AttributeID attrID = H5Aopen(oid, Mantid::Nexus::GROUP_CLASS_SPEC.c_str(), H5P_DEFAULT);
     if (attrID.isValid()) {
-      Mantid::Nexus::UniqueID<&H5Tclose> atype(H5Aget_type(attrID));
+      Mantid::Nexus::DataTypeID atype(H5Aget_type(attrID));
       if (H5Tis_variable_str(atype)) {
         // variable length string
         char *rdata = nullptr;
@@ -162,7 +162,7 @@ std::string NexusDescriptorLazy::getStrData(std::string const &address) {
   if (isEntry(address, SCIENTIFIC_DATA_SET)) {
     // open the data set and get its string data
     // using H5Cpp interface because trying to read string data is an absolute nightmare with the C API
-    UniqueID<&H5Dclose> did(H5Dopen(m_fileID, address.c_str(), H5P_DEFAULT));
+    DataSetID did(H5Dopen(m_fileID, address.c_str(), H5P_DEFAULT));
     H5::DataSet dataset(did);
     H5::DataType dtype = dataset.getDataType();
     if (dtype.isVariableStr() || dtype.getClass() == H5T_STRING) {
@@ -176,7 +176,7 @@ std::string NexusDescriptorLazy::getStrData(std::string const &address) {
 
 void NexusDescriptorLazy::loadGroups(std::map<std::string, std::string> &allEntries, std::string const &address,
                                      unsigned int depth, const unsigned int maxDepth) {
-  UniqueID<&H5Gclose> groupID(H5Gopen(m_fileID, address.c_str(), H5P_DEFAULT));
+  GroupID groupID(H5Gopen(m_fileID, address.c_str(), H5P_DEFAULT));
   if (!groupID.isValid()) {
     return;
   }
@@ -263,5 +263,78 @@ std::map<std::string, std::string> NexusDescriptorLazy::initAllEntries() {
   // rely on move semantics for single return
   return allEntries;
 }
+
+using CRS_t = NexusDescriptorLazy::CacheReturnStatus_t;
+
+const NexusDescriptorLazy::CacheValue_t NexusDescriptorLazy::_getDataValue(const std::string &datasetAddress) const {
+
+  // check if the address exists (exploiting the caching provided by this class)
+  if (!isEntry(datasetAddress))
+    return CRS_t::NXDATASET_NOT_FOUND;
+
+  // check if the address points to a dataset and not a group (exploiting the caching provided by this class)
+  if (!isEntry(datasetAddress, SCIENTIFIC_DATA_SET))
+    return CRS_t::NXNOT_DATASET;
+
+  DataSetID entryID(H5Dopen(m_fileID, datasetAddress.c_str(), H5P_DEFAULT));
+  H5::DataSet dataset(entryID);
+  H5::DataType dtype = dataset.getDataType();
+
+  // Case of a string (fixed or variable length) type
+  if (dtype.isVariableStr() || dtype.getClass() == H5T_STRING) {
+    std::string strData;
+    dataset.read(strData, dtype, dataset.getSpace());
+    return strData;
+  } else if (dtype.getClass() == H5T_FLOAT) { // only simple floats for the moment
+    float value = 0.0;
+    dataset.read(&value, H5T_NATIVE_FLOAT);
+    return value;
+  } else if (dtype.getClass() == H5T_INTEGER) { // only simple integers for the moment
+    int value = 0;
+    dataset.read(&value, H5T_NATIVE_INT);
+    return value;
+  } else
+    return CRS_t::NXWRONG_TYPE;
+
+  return CRS_t::NXERROR;
+}
+
+template <typename T>
+std::pair<T, NexusDescriptorLazy::CacheReturnStatus_t>
+NexusDescriptorLazy::getDataValue(const std::string &entryName) const {
+
+  T value = T{};
+  NexusDescriptorLazy::CacheReturnStatus_t returnStatus = NexusDescriptorLazy::CacheReturnStatus_t::NXCACHED;
+  // Checks if the entry is cached and if so compare the value with the cached one
+  auto it = m_readEntries.find(entryName);
+  if (it == m_readEntries.end()) {
+    auto result = _getDataValue(entryName);
+
+    std::tie(it, std::ignore) = m_readEntries.insert(std::pair{entryName, result});
+    returnStatus = NexusDescriptorLazy::CacheReturnStatus_t::NXFOUND;
+  }
+
+  // value not found or not available
+  if (auto ptr = std::get_if<NexusDescriptorLazy::CacheReturnStatus_t>(&it->second))
+    returnStatus = *ptr;
+  else if (auto ptr = std::get_if<T>(&it->second))
+    value = *ptr;
+  else
+    returnStatus = NexusDescriptorLazy::CacheReturnStatus_t::NXWRONG_TYPE;
+
+  // the value type is wrong
+  return std::pair<T, NexusDescriptorLazy::CacheReturnStatus_t>{value, returnStatus};
+}
+
+template MANTID_NEXUS_DLL std::pair<std::string, NexusDescriptorLazy::CacheReturnStatus_t>
+NexusDescriptorLazy::getDataValue<std::string>(const std::string &) const;
+
+// only simple int (not uint nor 64bits) are supported by the _getDataValue reading
+template MANTID_NEXUS_DLL std::pair<int, NexusDescriptorLazy::CacheReturnStatus_t>
+NexusDescriptorLazy::getDataValue<int>(const std::string &) const;
+
+// only simple floats (not doubles) are supported by the _getDataValue reading
+template MANTID_NEXUS_DLL std::pair<float, NexusDescriptorLazy::CacheReturnStatus_t>
+NexusDescriptorLazy::getDataValue<float>(const std::string &) const;
 
 } // namespace Mantid::Nexus

@@ -35,10 +35,9 @@ public:
     ws.initialize(pixels * pixels, 1, 1);
     ws.setInstrument(ComponentCreationHelper::createTestInstrumentRectangular(1, pixels, pitch, distanceFromSample));
     auto &componentInfo = ws.mutableComponentInfo();
-    const auto bank = ws.getInstrument()->getComponentByName("bank1");
-    const auto bankIndex = componentInfo.indexOf(bank->getComponentID());
-    const auto oldPos = bank->getPos();
-    const auto oldRot = bank->getRotation();
+    const auto bankIndex = componentInfo.indexOfAny("bank1");
+    const auto oldPos = componentInfo.position(bankIndex);
+    const auto oldRot = componentInfo.rotation(bankIndex);
     const V3D newPos(1, 2, 3);
     const V3D axis(3, 2, 1);
     const Quat newRot(13.4, axis);
@@ -48,7 +47,7 @@ public:
 
     double scaleX = 7.3;
     double scaleY = 1.3;
-    applyRectangularDetectorScaleToComponentInfo(componentInfo, bank->getComponentID(), scaleX, scaleY);
+    applyRectangularDetectorScaleToComponentInfo(componentInfo, bankIndex, scaleX, scaleY);
 
     // Shift/rotate back for easy test of updated pixel positions
     componentInfo.setRotation(bankIndex, oldRot);

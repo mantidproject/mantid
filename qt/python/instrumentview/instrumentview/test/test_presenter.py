@@ -33,6 +33,8 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view._RENDER_MODE_POINTS = "Points (Fastest)"
         self._mock_view._RENDER_MODE_SHAPES_FAST = "Approximated Shapes (Fast)"
         self._mock_view._RENDER_MODE_RAW_SHAPES = "Raw Shapes (Slowest)"
+        self._mock_view.u_offset_degrees.return_value = 0
+        self._mock_view.is_rotate_180_checkbox_checked.return_value = False
         self._mock_view.is_select_peaks_checked.return_value = False
         self._mock_view.is_select_bank_tube_checked.return_value = False
         self._mock_view.get_contour_limits.return_value = (0.0, 1.0)
@@ -188,6 +190,8 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._model.projection_type = ProjectionType.CYLINDRICAL_X
         self._presenter._update_interactor_style = MagicMock()
         self._mock_view.is_hover_pick_mode_toggled.return_value = True
+        self._mock_view.is_hover_pick_mode_checked.return_value = True
+        self._model._detector_is_picked = np.full(self._ws.getNumberHistograms(), True)
 
         self._presenter.on_hover_pick_toggled(True)
 
@@ -201,7 +205,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.end_peak_selection_in_lineplot.assert_called_once()
         self._mock_view.set_clear_point_picked_detectors_disabled.assert_called_once_with(True)
         self._mock_view.set_sum_spectra_checkbox_disabled.assert_called_once_with(True)
-        self._mock_view.set_select_bank_tube_disabled.assert_called_once_with(True)
+        self._mock_view.set_select_bank_tube_disabled.assert_not_called()
         self._mock_view.set_export_workspace_button_disabled.assert_called_once_with(True)
         self._mock_view.set_overlaid_shape_controls_enabled.assert_called_once_with(False)
         self._presenter._update_interactor_style.assert_called_once()
@@ -215,23 +219,115 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
 
         self._mock_view.set_clear_point_picked_detectors_disabled.assert_called_once_with(False)
         self._mock_view.set_sum_spectra_checkbox_disabled.assert_called_once_with(False)
-        self._mock_view.set_select_bank_tube_disabled.assert_called_once_with(False)
-        self._mock_view.set_export_workspace_button_disabled.assert_called_once_with(False)
+        self._mock_view.set_select_bank_tube_disabled.assert_not_called()
         self._mock_view.set_overlaid_shape_controls_enabled.assert_called_once_with(True)
         self._presenter._update_interactor_style.assert_called_once()
         self._presenter.update_picked_detectors_on_view.assert_called_once()
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._update_line_plot_ws_and_draw")
+    def test_on_hover_pick_toggled_off_enables_export_workspace_with_picked_detectors(self, _):
+        self._presenter._update_interactor_style = MagicMock()
+        self._model._detector_is_picked = np.full(self._ws.getNumberHistograms(), False)
+        self._model._detector_is_picked[0] = True
+
+        self._presenter.on_hover_pick_toggled(False)
+
+        self._mock_view.set_export_workspace_button_disabled.assert_called_once_with(False)
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.extract_spectra_for_line_plot")
+    def test_update_hover_pick_plot_single_detector(self, mock_extract_spectra):
+        self._mock_view.current_selected_lineplot_unit.return_value = "TOF"
+
+        self._presenter._update_hover_pick_plot(3)
+
+        mock_extract_spectra.assert_called_once_with("TOF", True, mock.ANY)
+        np.testing.assert_array_equal(mock_extract_spectra.call_args.args[2], [3])
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.extract_spectra_for_line_plot")
+    def test_update_hover_pick_plot_sums_bank_tube(self, mock_extract_spectra):
+        self._mock_view.current_selected_lineplot_unit.return_value = "TOF"
+        self._mock_view.is_select_bank_tube_checked.return_value = True
+        expanded = np.zeros(np.count_nonzero(self._model.is_pickable), dtype=bool)
+        expanded[[2, 3, 4]] = True
+        self._model.expand_pickable_mask_to_parent_subtrees = MagicMock(return_value=expanded)
+
+        self._presenter._update_hover_pick_plot(3)
+
+        hovered_mask = self._model.expand_pickable_mask_to_parent_subtrees.call_args.args[0]
+        np.testing.assert_array_equal(np.flatnonzero(hovered_mask), [3])
+        mock_extract_spectra.assert_called_once_with("TOF", True, mock.ANY)
+        np.testing.assert_array_equal(mock_extract_spectra.call_args.args[2], [2, 3, 4])
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.on_integration_limits_reset_clicked")
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_integration_units")
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.extract_spectra_for_line_plot")
     def test_unit_option_selected(self, mock_extract_spectra, mock_set_integration_units, mock_reset_integration):
-        self._mock_view.sum_spectra_selected.return_value = True
+        unit = self._presenter._UNIT_OPTIONS[1]
+        self._mock_view.current_selected_sliders_unit.return_value = unit
         self._presenter.on_sliders_unit_selected(1)
-        mock_set_integration_units.assert_called_once_with(self._presenter._UNIT_OPTIONS[1])
-        self._mock_view.show_plot_for_detectors.assert_called_once()
-        self._mock_view.set_selected_detector_info.assert_called_once()
-        mock_extract_spectra.assert_called_once_with(self._presenter._UNIT_OPTIONS[1], True)
+        mock_set_integration_units.assert_called_once_with(unit)
         mock_reset_integration.assert_called_once()
+        # The reset redraws the line plot, so drawing it here as well would only repeat that
+        mock_extract_spectra.assert_not_called()
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.on_integration_limits_reset_clicked")
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_integration_units")
+    @mock.patch.object(FullInstrumentViewModel, "workspace_base_unit", new_callable=PropertyMock)
+    def test_sliders_unit_selected_accepts_a_workspace_unit_we_do_not_list(
+        self, mock_base_unit, mock_set_integration_units, _mock_reset_integration
+    ):
+        mock_base_unit.return_value = "Energy"
+        self._mock_view.current_selected_sliders_unit.return_value = "Energy"
+        self._presenter.on_sliders_unit_selected(4)
+        mock_set_integration_units.assert_called_once_with("Energy")
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.on_integration_limits_reset_clicked")
+    def test_sliders_unit_combo_put_back_to_the_workspace_unit_when_conversion_fails(self, _mock_reset_integration):
+        """The model falls back to showing the workspace unit, so the combos must say so."""
+        self._model._convert_units = MagicMock(side_effect=lambda _ws, unit: self._model._units_failed_to_convert.add(unit))
+        self._mock_view.current_selected_sliders_unit.return_value = "dSpacing"
+        self._mock_view.current_selected_lineplot_unit.return_value = "Wavelength"
+
+        self._presenter.on_sliders_unit_selected(1)
+
+        self._mock_view.set_unit_combo_options.assert_called_once_with(
+            self._presenter.available_unit_options(), self._model.workspace_base_unit, "Wavelength"
+        )
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._update_line_plot_ws_and_draw")
+    def test_lineplot_unit_combo_put_back_to_the_workspace_unit_when_conversion_fails(self, _mock_update_line_plot):
+        self._model._units_failed_to_convert.add("Wavelength")
+        self._mock_view.current_selected_sliders_unit.return_value = "dSpacing"
+        self._mock_view.current_selected_lineplot_unit.return_value = "Wavelength"
+
+        self._presenter.on_lineplot_unit_selected(2)
+
+        self._mock_view.set_unit_combo_options.assert_called_once_with(
+            self._presenter.available_unit_options(), "dSpacing", self._model.workspace_base_unit
+        )
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._update_line_plot_ws_and_draw")
+    def test_unit_combos_left_alone_when_conversion_succeeds(self, _mock_update_line_plot):
+        self._mock_view.current_selected_sliders_unit.return_value = "dSpacing"
+        self._mock_view.current_selected_lineplot_unit.return_value = "Wavelength"
+
+        self._presenter.on_lineplot_unit_selected(2)
+
+        self._mock_view.set_unit_combo_options.assert_not_called()
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.set_integration_units")
+    def test_sliders_unit_selected_ignores_the_no_units_placeholder(self, mock_set_integration_units):
+        """The combo holds a single placeholder when the units cannot be converted. Going by
+        index rather than by text would map that placeholder onto the first real unit."""
+        self._mock_view.current_selected_sliders_unit.return_value = self._presenter._NO_UNITS
+        self._presenter.on_sliders_unit_selected(0)
+        mock_set_integration_units.assert_not_called()
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._update_line_plot_ws_and_draw")
+    def test_lineplot_unit_selected_ignores_the_no_units_placeholder(self, mock_update_line_plot):
+        self._mock_view.current_selected_lineplot_unit.return_value = self._presenter._NO_UNITS
+        self._presenter.on_lineplot_unit_selected(0)
+        mock_update_line_plot.assert_not_called()
 
     @mock.patch("instrumentview.FullInstrumentViewModel.FullInstrumentViewModel.save_line_plot_workspace_to_ads")
     def test_export_workspace_clicked(self, mock_save_line_plot_workspace_to_ads):
@@ -244,19 +340,110 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._presenter.on_sum_spectra_checkbox_clicked()
         mock_update_line_plot_ws_and_draw.assert_called_once_with("dSpacing")
 
-    @mock.patch.object(FullInstrumentViewModel, "has_unit", new_callable=mock.PropertyMock)
-    def test_available_units_no_units(self, mock_has_unit):
-        mock_has_unit.return_value = False
+    @mock.patch.object(FullInstrumentViewModel, "workspace_base_unit", new_callable=mock.PropertyMock)
+    @mock.patch.object(FullInstrumentViewModel, "can_convert_units", new_callable=mock.PropertyMock)
+    def test_available_units_no_units(self, mock_can_convert_units, mock_base_unit):
+        mock_can_convert_units.return_value = False
+        mock_base_unit.return_value = "Empty"
         units = self._presenter.available_unit_options()
-        mock_has_unit.assert_called_once()
-        self.assertEqual(["No units"], units)
+        mock_can_convert_units.assert_called_once()
+        self.assertEqual([self._presenter._NO_UNITS], units)
 
-    @mock.patch.object(FullInstrumentViewModel, "has_unit", new_callable=mock.PropertyMock)
-    def test_available_units_has_units(self, mock_has_unit):
-        mock_has_unit.return_value = True
+    @mock.patch.object(FullInstrumentViewModel, "can_convert_units", new_callable=mock.PropertyMock)
+    def test_available_units_shows_a_unit_that_cannot_be_converted(self, mock_can_convert_units):
+        """e.g. DeltaE, or Degrees, has a unit even though it cannot be converted elastically."""
+        mock_can_convert_units.return_value = False
         units = self._presenter.available_unit_options()
-        mock_has_unit.assert_called_once()
+        self.assertEqual([self._model.workspace_x_unit_display], units)
+
+    @mock.patch.object(FullInstrumentViewModel, "can_convert_units", new_callable=mock.PropertyMock)
+    def test_available_units_has_units(self, mock_can_convert_units):
+        mock_can_convert_units.return_value = True
+        units = self._presenter.available_unit_options()
+        mock_can_convert_units.assert_called_once()
         self.assertEqual(self._presenter._UNIT_OPTIONS, units)
+
+    @mock.patch.object(FullInstrumentViewModel, "workspace_base_unit", new_callable=mock.PropertyMock)
+    @mock.patch.object(FullInstrumentViewModel, "can_convert_units", new_callable=mock.PropertyMock)
+    def test_available_units_include_a_workspace_unit_we_do_not_list(self, mock_can_convert_units, mock_base_unit):
+        """Otherwise the combo would show the first unit we list, e.g. TOF, over data in Energy."""
+        mock_can_convert_units.return_value = True
+        mock_base_unit.return_value = "Energy"
+        units = self._presenter.available_unit_options()
+        self.assertEqual(self._presenter._UNIT_OPTIONS + ["Energy"], units)
+
+    @mock.patch.object(FullInstrumentViewModel, "can_convert_units", new_callable=mock.PropertyMock)
+    def test_unit_combo_boxes_disabled_when_units_cannot_be_converted(self, mock_can_convert_units):
+        mock_can_convert_units.return_value = False
+        self._presenter._populate_unit_combo_boxes()
+        self._mock_view.set_unit_combo_options.assert_called_once_with([self._model.workspace_x_unit_display], None, None)
+        self._mock_view.set_unit_combo_boxes_enabled.assert_called_once_with(False)
+        # AddPeak converts the clicked position to TOF, so it would fail too
+        self._mock_view.set_start_adding_peaks_enabled.assert_called_once_with(False)
+        # Peaks from elsewhere can still be shown on a workspace in TOF
+        self._mock_view.set_peaks_workspaces_enabled.assert_called_once_with(True)
+
+    @mock.patch.object(FullInstrumentViewModel, "can_convert_units", new_callable=mock.PropertyMock)
+    def test_unit_combo_boxes_enabled_when_units_can_be_converted(self, mock_can_convert_units):
+        mock_can_convert_units.return_value = True
+        self._presenter._populate_unit_combo_boxes()
+        self._mock_view.set_unit_combo_options.assert_called_once_with(self._presenter._UNIT_OPTIONS, None, None)
+        self._mock_view.set_unit_combo_boxes_enabled.assert_called_once_with(True)
+        self._mock_view.set_start_adding_peaks_enabled.assert_called_once_with(True)
+        self._mock_view.set_peaks_workspaces_enabled.assert_called_once_with(True)
+
+    @mock.patch.object(FullInstrumentViewModel, "workspace_base_unit", new_callable=mock.PropertyMock)
+    @mock.patch.object(FullInstrumentViewModel, "can_convert_units", new_callable=mock.PropertyMock)
+    def test_adding_peaks_disabled_in_a_unit_peaks_have_no_location_in(self, mock_can_convert_units, mock_base_unit):
+        """Peaks added to an Energy workspace could not be drawn, even though its units convert."""
+        mock_can_convert_units.return_value = True
+        mock_base_unit.return_value = "Energy"
+        self._presenter._populate_unit_combo_boxes()
+        self._mock_view.set_unit_combo_boxes_enabled.assert_called_once_with(True)
+        self._mock_view.set_start_adding_peaks_enabled.assert_called_once_with(False)
+        self._mock_view.set_peaks_workspaces_enabled.assert_called_once_with(False)
+
+    @mock.patch.object(FullInstrumentViewModel, "get_peak_lineplot_overlay_arguments", return_value=([], [], []))
+    @mock.patch.object(FullInstrumentViewModel, "get_peak_overlay_arguments", return_value=([], [], []))
+    @mock.patch.object(FullInstrumentViewModel, "workspace_base_unit", new_callable=mock.PropertyMock)
+    def test_no_peaks_overlaid_in_a_unit_peaks_have_no_location_in(self, mock_base_unit, mock_overlay_args, mock_lineplot_overlay_args):
+        """The disabled list keeps its ticks, but the projection would still draw them if the
+        sliders were switched to a unit peaks do have a location in."""
+        mock_base_unit.return_value = "Energy"
+        self._mock_view.selected_peaks_workspaces.return_value = ["peaks"]
+
+        self._presenter.on_peaks_workspace_selected()
+
+        mock_overlay_args.assert_called_once_with([])
+        mock_lineplot_overlay_args.assert_called_once_with([])
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._setup_component_tree")
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.AnalysisDataService")
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.update_plotter")
+    def test_unit_combo_boxes_refreshed_on_ws_replace(self, _mock_update_plotter, mock_ads, _mock_setup_component_tree):
+        """The replacement may have different units, or none that can be converted, so the
+        combos cannot keep the entries built for the workspace that has just gone."""
+        mock_ads.retrieve.return_value = MagicMock()
+        self._model.setup = MagicMock()
+        self._mock_view.current_selected_lineplot_unit.return_value = "Wavelength"
+        self._mock_view.set_unit_combo_options.reset_mock()
+
+        self._presenter._reset_model_workspace(self._model.workspace.name())
+
+        self._mock_view.set_unit_combo_options.assert_called_once_with(
+            self._presenter.available_unit_options(), self._model.workspace_base_unit, "Wavelength"
+        )
+        self._mock_view.set_unit_combo_boxes_enabled.assert_called_once()
+        self._mock_view.set_start_adding_peaks_enabled.assert_called_once()
+
+    def test_setup_selects_the_workspace_unit_while_filling_the_unit_combos(self):
+        """Selecting it after the combos are connected would put the presenter through a unit
+        change, integrating the whole workspace again for nothing."""
+        presenter = self._create_test_presenter()
+        try:
+            self._mock_view.set_unit_combo_options.assert_called_once_with(presenter.available_unit_options(), "TOF", None)
+        finally:
+            presenter.handle_close()
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._setup_component_tree")
     @mock.patch("instrumentview.FullInstrumentViewPresenter.AnalysisDataService")
@@ -534,6 +721,39 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
 
         self._mock_view.set_create_from_selection_buttons_enabled.assert_called_once_with(False)
 
+    def test_export_workspace_enabled_only_while_detectors_are_selected(self):
+        self._model._detector_is_picked = np.full(self._ws.getNumberHistograms(), False)
+        self._presenter.refresh_export_workspace_enabled()
+        self._mock_view.set_export_workspace_button_disabled.assert_called_once_with(True)
+
+        self._mock_view.reset_mock()
+        self._model._detector_is_picked[0] = True
+        self._presenter.refresh_export_workspace_enabled()
+        self._mock_view.set_export_workspace_button_disabled.assert_called_once_with(False)
+
+    def test_export_workspace_disabled_in_hover_pick_mode(self):
+        self._model._detector_is_picked = np.full(self._ws.getNumberHistograms(), True)
+        self._mock_view.is_hover_pick_mode_checked.return_value = True
+
+        self._presenter.refresh_export_workspace_enabled()
+
+        self._mock_view.set_export_workspace_button_disabled.assert_called_once_with(True)
+
+    @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._update_line_plot_ws_and_draw")
+    def test_export_workspace_disabled_after_clearing_picked_detectors(self, _):
+        self._model.update_point_picked_detectors(0, False, False)
+
+        self._presenter._on_clear_point_picked_detectors_clicked()
+
+        self._mock_view.set_export_workspace_button_disabled.assert_called_once_with(True)
+
+    def test_update_plotter_refreshes_export_workspace_enabled(self):
+        self._model._detector_is_picked = np.full(self._ws.getNumberHistograms(), False)
+
+        self._presenter.update_plotter()
+
+        self._mock_view.set_export_workspace_button_disabled.assert_called_with(True)
+
     def test_adding_a_shape_forces_summed_spectra(self):
         """A shape covers too many detectors to plot individually, so the choice is taken away."""
         self._mock_view.sum_spectra_selected.return_value = False
@@ -666,6 +886,43 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         with mock.patch("instrumentview.FullInstrumentViewPresenter.InteractorStyles") as mock_styles:
             self._presenter.reload_interactor_styles()
         self.assertEqual(self._presenter.on_camera_changed, mock_styles.call_args.kwargs["camera_changed_callback"])
+
+    def test_reload_interactor_styles_cleans_up_the_previous_styles(self):
+        previous_styles = MagicMock()
+        self._presenter._interactor_styles = previous_styles
+        with mock.patch("instrumentview.FullInstrumentViewPresenter.InteractorStyles"):
+            self._presenter.reload_interactor_styles()
+        previous_styles.cleanup.assert_called_once()
+        self.assertIsNot(self._presenter._interactor_styles, previous_styles)
+
+    def test_handle_close_cleans_up_interactor_styles(self):
+        interactor_styles = MagicMock()
+        self._presenter._interactor_styles = interactor_styles
+
+        self._presenter.handle_close()
+
+        interactor_styles.cleanup.assert_called_once()
+        self.assertIsNone(self._presenter._interactor_styles)
+
+    def test_handle_close_releases_renderers_and_meshes(self):
+        self._presenter._detector_mesh = MagicMock()
+        self._presenter._masked_mesh = MagicMock()
+
+        self._presenter.handle_close()
+
+        for attribute in (
+            "_renderer",
+            "_point_cloud_renderer",
+            "_shape_renderer",
+            "_shape_renderer_full",
+            "_sbs_shape_renderer",
+            "_sbs_shape_renderer_full",
+            "_detector_mesh",
+            "_masked_mesh",
+            "_component_tree_presenter",
+            "_model",
+        ):
+            self.assertIsNone(getattr(self._presenter, attribute), attribute)
 
     def test_removing_shape_restores_the_line_plot_for_the_committed_selection(self):
         self._presenter._shape_preview_active = True
@@ -814,6 +1071,93 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
         self._mock_view.is_flip_beam_checkbox_checked.return_value = True
         self._presenter.update_plotter()
         self.assertTrue(self._model.flip_beam)
+
+    def test_u_offset_slider_enabled_disabled(self):
+        for projection_type in (ProjectionType.THREE_D, ProjectionType.SIDE_BY_SIDE):
+            self._mock_view.current_selected_projection.return_value = projection_type
+            self._presenter._on_projection_option_changed()
+            self._mock_view.set_u_offset_slider_enabled.assert_called_with(False)
+        self._mock_view.current_selected_projection.return_value = ProjectionType.CYLINDRICAL_Y
+        self._presenter._on_projection_option_changed()
+        self._mock_view.set_u_offset_slider_enabled.assert_called_with(True)
+
+    def test_on_u_offset_changed_stores_option_and_redraws(self):
+        self._mock_view.get_contour_limits.return_value = (0, 100)
+        self._presenter.on_u_offset_changed(90)
+        self._mock_view.store_u_offset_option.assert_called_once()
+        self._presenter._renderer.add_detector_mesh_to_plotter.assert_called_once()
+
+    def test_rotate_180_box_disables_the_slider(self):
+        self._mock_view.current_selected_projection.return_value = ProjectionType.CYLINDRICAL_Y
+        self._mock_view.is_rotate_180_checkbox_checked.return_value = True
+        self._presenter._on_projection_option_changed()
+        self._mock_view.set_rotate_180_box_enabled.assert_called_with(True)
+        self._mock_view.set_u_offset_slider_enabled.assert_called_with(False)
+        self._mock_view.is_rotate_180_checkbox_checked.return_value = False
+        self._presenter._on_projection_option_changed()
+        self._mock_view.set_u_offset_slider_enabled.assert_called_with(True)
+
+    def test_rotate_180_overrides_the_slider(self):
+        self._mock_view.u_offset_degrees.return_value = 90
+        self._mock_view.is_rotate_180_checkbox_checked.return_value = True
+        self._presenter.update_plotter()
+        self.assertAlmostEqual(self._model.u_offset, np.pi)
+
+    def test_on_rotate_180_stores_option_and_redraws(self):
+        self._mock_view.get_contour_limits.return_value = (0, 100)
+        self._mock_view.is_rotate_180_checkbox_checked.return_value = True
+        self._presenter.on_rotate_180_check_box_clicked()
+        self._mock_view.store_rotate_180_option.assert_called_once()
+        self._mock_view.set_u_offset_slider_enabled.assert_called_with(False)
+        self._presenter._renderer.add_detector_mesh_to_plotter.assert_called_once()
+
+    def test_rotation_controls_set_on_opening_with_rotate_180_ticked(self):
+        self._mock_view.current_selected_projection.return_value = ProjectionType.CYLINDRICAL_Y
+        self._mock_view.is_rotate_180_checkbox_checked.return_value = True
+        self._mock_view.reset_mock()
+        presenter = self._create_test_presenter()
+        try:
+            self._mock_view.set_rotate_180_box_enabled.assert_called_with(True)
+            self._mock_view.set_u_offset_slider_enabled.assert_called_with(False)
+        finally:
+            presenter.handle_close()
+
+    def test_rotation_controls_disabled_on_opening_in_3d(self):
+        self._mock_view.current_selected_projection.return_value = ProjectionType.THREE_D
+        self._mock_view.reset_mock()
+        presenter = self._create_test_presenter()
+        try:
+            self._mock_view.set_flip_beam_box_enabled.assert_called_with(False)
+            self._mock_view.set_rotate_180_box_enabled.assert_called_with(False)
+            self._mock_view.set_u_offset_slider_enabled.assert_called_with(False)
+        finally:
+            presenter.handle_close()
+
+    def test_flip_beam_disabled_in_side_by_side(self):
+        self._mock_view.current_selected_projection.return_value = ProjectionType.SIDE_BY_SIDE
+        self._presenter._on_projection_option_changed()
+        self._mock_view.set_flip_beam_box_enabled.assert_called_with(False)
+
+    def test_flip_beam_enabled_in_flat_projection(self):
+        self._mock_view.current_selected_projection.return_value = ProjectionType.CYLINDRICAL_Y
+        self._presenter._on_projection_option_changed()
+        self._mock_view.set_flip_beam_box_enabled.assert_called_with(True)
+
+    def test_on_reset_projection_clears_the_rotation(self):
+        self._mock_view.get_contour_limits.return_value = (0, 100)
+        self._presenter.on_reset_projection_clicked()
+        self._mock_view.reset_rotation_controls.assert_called_once()
+        self._mock_view.store_u_offset_option.assert_called_once()
+        self._mock_view.store_rotate_180_option.assert_called_once()
+        self.assertEqual(self._model.u_offset, 0.0)
+
+    def test_u_offset_state_propagated_to_model_in_radians(self):
+        self._mock_view.u_offset_degrees.return_value = 180
+        self._presenter.update_plotter()
+        self.assertAlmostEqual(self._model.u_offset, np.pi)
+        self._mock_view.u_offset_degrees.return_value = 0
+        self._presenter.update_plotter()
+        self.assertEqual(self._model.u_offset, 0.0)
 
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter._update_transform")
     def test_transform_updated_on_redraw(self, mock_update_transform):

@@ -1,0 +1,1 @@
+- :ref:`CopyInstrumentParameters <algm-CopyInstrumentParameters>` no longer fails when the input workspace has masked detectors and its instrument differs from that of the output workspace. The masking is now copied along with the other parameters.

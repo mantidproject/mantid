@@ -6,7 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "PlottingPresenter.h"
 #include "GUI/Batch/IBatchPresenter.h"
+#include "PlotOutputTypeProperties.h"
 
+#include <map>
+#include <unordered_set>
 #include <utility>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
@@ -17,12 +20,8 @@ auto constexpr multiplePlotItemWarningThreshold = 5;
 /// Presenter-local request state collected from the view before model evaluation.
 struct PresenterPlotRequest {
   PlotOutputSelection outputSelection;
-  PlotLayout layout;
+  PlotRequestSettings settings;
   QWidget *plotParent;
-  bool addToExistingPlot;
-  bool tiledVertically;
-  bool shareXAxisWhenTiled;
-  bool shareYAxisWhenTiled;
 };
 
 /// Collect selected output controls and plotting target options from the view.
@@ -30,20 +29,47 @@ PresenterPlotRequest plotRequestFor(IPlottingView &view, std::string const &inst
   auto outputSelection = view.selectedPlotOutputSelection();
   outputSelection.instrumentName = instrumentName;
   return {std::move(outputSelection),
-          layout,
-          view.plotParent(),
-          view.shouldAddToExistingPlot(),
-          layout == PlotLayout::Tiled && view.shouldPlotTiledVertically(),
-          layout == PlotLayout::Tiled && view.shouldShareXAxisWhenTiled(),
-          layout == PlotLayout::Tiled && view.shouldShareYAxisWhenTiled()};
+          {layout, view.shouldAddToExistingPlot(), layout == PlotLayout::Tiled && view.shouldPlotTiledVertically(),
+           layout == PlotLayout::Tiled && view.shouldShareXAxisWhenTiled(),
+           layout == PlotLayout::Tiled && view.shouldShareYAxisWhenTiled()},
+          view.plotParent()};
+}
+
+/// Keep the selection together unless the output requires a separate request sequence for each scope path.
+std::vector<std::vector<PlottingWorkspace>>
+workspaceBatchesForPlotting(std::vector<PlottingWorkspace> const &selectedWorkspaces, PlotSelectionScope selectionScope,
+                            bool splitBySelectionScope) {
+  if (!splitBySelectionScope) {
+    return {selectedWorkspaces};
+  }
+
+  auto batches = std::vector<std::vector<PlottingWorkspace>>{};
+  auto batchIndexByScopePath = std::map<PlottingWorkspaceTreePath, size_t>{};
+  auto seenWorkspaceNames = std::unordered_set<std::string>{};
+  for (auto const &workspace : selectedWorkspaces) {
+    auto const scopeItemEntry = workspace.context.scopeItems.find(selectionScope);
+    if (scopeItemEntry == workspace.context.scopeItems.cend()) {
+      continue;
+    }
+    if (!seenWorkspaceNames.emplace(workspace.workspaceName).second) {
+      continue;
+    }
+    auto const [batchEntry, isNewBatch] =
+        batchIndexByScopePath.try_emplace(scopeItemEntry->second.path, batches.size());
+    if (isNewBatch) {
+      batches.emplace_back();
+    }
+    batches[batchEntry->second].emplace_back(workspace);
+  }
+  return batches;
 }
 } // namespace
 
 PlottingPresenter::PlottingPresenter(IPlottingView *view)
     : m_defaultActiveFigureMonitor(), m_view(view), m_mainPresenter(nullptr), m_plotter(&m_defaultPlotter),
       m_plotOptionsProvider(&m_defaultPlotOptionsProvider), m_plottingModel(&m_defaultPlottingModel),
-      m_activeFigureMonitor(&m_defaultActiveFigureMonitor), m_outputSelectionEnabled(false),
-      m_hasActiveReflectometryFigure(false), m_activePlotOverplotCompatible(false) {
+      m_activeFigureMonitor(&m_defaultActiveFigureMonitor), m_plottingWorkspaceTreePresenter(view->workspaceTreeView()),
+      m_outputSelectionEnabled(false), m_hasActiveReflectometryFigure(false), m_activePlotOverplotCompatible(false) {
   initialise();
 }
 
@@ -52,13 +78,14 @@ PlottingPresenter::PlottingPresenter(IPlottingView *view, IPlotter const &plotte
                                      IPlottingModel const &plottingModel)
     : m_defaultActiveFigureMonitor(), m_view(view), m_mainPresenter(nullptr), m_plotter(&plotter),
       m_plotOptionsProvider(&plotOptionsProvider), m_plottingModel(&plottingModel),
-      m_activeFigureMonitor(&m_defaultActiveFigureMonitor), m_outputSelectionEnabled(false),
-      m_hasActiveReflectometryFigure(false), m_activePlotOverplotCompatible(false) {
+      m_activeFigureMonitor(&m_defaultActiveFigureMonitor), m_plottingWorkspaceTreePresenter(view->workspaceTreeView()),
+      m_outputSelectionEnabled(false), m_hasActiveReflectometryFigure(false), m_activePlotOverplotCompatible(false) {
   initialise();
 }
 
 void PlottingPresenter::initialise() {
   m_view->subscribe(this);
+  updateWorkspaceFilter();
   m_activeFigureMonitor->subscribe([this]() { notifyActiveFigureChanged(); });
   updateWidgetEnabledState();
 }
@@ -95,6 +122,7 @@ void PlottingPresenter::notifyPlotIndividualClicked() { plotSelectedWorkspaces(P
 void PlottingPresenter::notifyAddToExistingPlotChanged() { updatePlotActionState(); }
 
 void PlottingPresenter::notifyPlotOutputTypeChanged() {
+  m_plottingWorkspaceTreePresenter.clearSelection();
   updatePlottingWorkspaceTreeItemStates();
   updatePlotOutputControlsState();
   updatePlotActionState();
@@ -102,47 +130,70 @@ void PlottingPresenter::notifyPlotOutputTypeChanged() {
 
 void PlottingPresenter::notifyPlottingWorkspaceTreeSelectionChanged() { updatePlotActionState(); }
 
+void PlottingPresenter::notifyWorkspaceFilterChanged() { updateWorkspaceFilter(); }
+
+void PlottingPresenter::updateWorkspaceFilter() {
+  m_plottingWorkspaceTreePresenter.filterWorkspaces(m_view->workspaceFilterText(),
+                                                    m_view->workspaceFilterOutputTypes());
+}
+
 void PlottingPresenter::notifyActiveFigureChanged() { updateActivePlotCompatibility(); }
 
 void PlottingPresenter::plotSelectedWorkspaces(PlotLayout layout) {
-  auto const selectedPlottingWorkspaces =
-      m_plottingWorkspaceTree.plottingWorkspacesForNames(m_view->selectedPlottingWorkspaceNames());
-  if (selectedPlottingWorkspaces.empty()) {
-    return;
-  }
-  if (!m_view->selectedPlotOutputType()) {
+  auto const selectedWorkspaceNames = m_plottingWorkspaceTreePresenter.selectedPlottingWorkspaceNames();
+  if (selectedWorkspaceNames.empty() || !m_view->selectedPlotOutputType()) {
     return;
   }
 
+  auto const selectedWorkspaces = m_plottingWorkspaceTree.plottingWorkspacesForNames(selectedWorkspaceNames);
+  if (selectedWorkspaces.empty()) {
+    return;
+  }
   auto const request = plotRequestFor(*m_view, m_instrumentName, layout);
-  auto const workspacesToPlot =
-      m_plottingModel->workspacesForPlotting(selectedPlottingWorkspaces, request.outputSelection);
-  if (workspacesToPlot.empty()) {
+  auto const &properties = plotOutputTypeProperties(request.outputSelection.outputType);
+  auto const batches = workspaceBatchesForPlotting(selectedWorkspaces, properties.selectionScope(),
+                                                   properties.splitPlotRequestByPlotSelectionScope());
+  if (batches.empty()) {
     return;
   }
-
-  auto const options = m_plotOptionsProvider->optionsFor(request.outputSelection, request.layout);
-  if (workspacesToPlot.size() >= multiplePlotItemWarningThreshold &&
-      !m_view->confirmPlottingMultipleItems(workspacesToPlot.size())) {
-    return;
-  }
-
-  if (request.layout == PlotLayout::Individual) {
-    for (auto const &workspace : workspacesToPlot) {
-      m_plotter->plot({{workspace},
-                       options,
-                       request.plotParent,
-                       request.addToExistingPlot,
-                       request.tiledVertically,
-                       request.shareXAxisWhenTiled,
-                       request.shareYAxisWhenTiled});
+  auto preparedRequests = std::vector<PlotRequest>{};
+  auto plotItemCount = size_t{0};
+  for (auto const &batch : batches) {
+    for (auto const &definition : properties.plotRequests()) {
+      auto outputSelection = request.outputSelection;
+      outputSelection.outputType = definition.outputType;
+      auto const settings = definition.settingsOverride.value_or(request.settings);
+      auto workspaces = m_plottingModel->workspacesForPlotting(batch, outputSelection);
+      if (workspaces.empty()) {
+        return;
+      }
+      plotItemCount += workspaces.size();
+      auto const options = m_plotOptionsProvider->optionsFor(outputSelection, settings.layout);
+      auto plotRequest = PlotRequest{{},
+                                     options,
+                                     request.plotParent,
+                                     settings.addToExistingPlot,
+                                     settings.tiledVertically,
+                                     settings.shareXAxisWhenTiled,
+                                     settings.shareYAxisWhenTiled};
+      if (settings.layout == PlotLayout::Individual) {
+        for (auto const &workspace : workspaces) {
+          plotRequest.workspaces = {workspace};
+          preparedRequests.emplace_back(plotRequest);
+        }
+      } else {
+        plotRequest.workspaces = std::move(workspaces);
+        preparedRequests.emplace_back(std::move(plotRequest));
+      }
     }
-    updateActivePlotCompatibility();
-    return;
   }
 
-  m_plotter->plot({workspacesToPlot, options, request.plotParent, request.addToExistingPlot, request.tiledVertically,
-                   request.shareXAxisWhenTiled, request.shareYAxisWhenTiled});
+  if (plotItemCount >= multiplePlotItemWarningThreshold && !m_view->confirmPlottingMultipleItems(plotItemCount)) {
+    return;
+  }
+  for (auto const &plotRequest : preparedRequests) {
+    m_plotter->plot(plotRequest);
+  }
   updateActivePlotCompatibility();
 }
 
@@ -169,11 +220,11 @@ void PlottingPresenter::updateAvailablePlotOutputTypes(std::string const &instru
 void PlottingPresenter::updatePlottingWorkspaceTreeItemStates() {
   auto const selectedOutputType = m_view->selectedPlotOutputType();
   if (!selectedOutputType) {
-    m_view->setPlottingWorkspaceTreeItemStates({});
+    m_plottingWorkspaceTreePresenter.setPlottingWorkspaceTreeItemStates({});
     return;
   }
 
-  m_view->setPlottingWorkspaceTreeItemStates(
+  m_plottingWorkspaceTreePresenter.setPlottingWorkspaceTreeItemStates(
       m_viewStateProvider.plottingWorkspaceTreeItemStates(m_plottingWorkspaceTree.items(), *selectedOutputType));
 }
 
@@ -185,9 +236,9 @@ void PlottingPresenter::updatePlotActionState() const {
   }
 
   m_view->setPlotActionState(m_viewStateProvider.plotActionState(
-      m_outputSelectionEnabled, m_view->selectedPlottingWorkspaceNames().size(),
-      m_view->selectedPlottingWorkspaceGroupCount(), *selectedOutputType, m_view->shouldAddToExistingPlot(),
-      m_hasActiveReflectometryFigure, m_activePlotOverplotCompatible));
+      m_outputSelectionEnabled, m_plottingWorkspaceTreePresenter.selectedPlottingWorkspaceNames().size(),
+      m_plottingWorkspaceTreePresenter.selectedPlottingWorkspaceGroupCount(), *selectedOutputType,
+      m_view->shouldAddToExistingPlot(), m_hasActiveReflectometryFigure, m_activePlotOverplotCompatible));
 }
 
 void PlottingPresenter::updatePlotOutputControlsState() const {

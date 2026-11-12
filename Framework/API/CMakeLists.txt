@@ -528,12 +528,7 @@ add_library(Mantid::API ALIAS API)
 
 # Add a precompiled header where they are supported
 target_precompile_headers(
-  API
-  PRIVATE
-  <MantidGeometry/IComponent.h>
-  <MantidGeometry/IDetector.h>
-  <MantidGeometry/Instrument.h>
-  <boost/variant.hpp>
+  API PRIVATE <MantidGeometry/IComponent.h> <MantidGeometry/IDetector.h> <MantidGeometry/Instrument.h>
   <Poco/DOM/DOMParser.h>
 )
 
@@ -565,7 +560,7 @@ add_subdirectory(test)
 target_include_directories(
   API PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/API> $<INSTALL_INTERFACE:include/Mantid>
 )
-generate_mantid_export_header(API TRUE)
+generate_mantid_export_header(API TRUE GENERATE_UNUSED_ARG)
 
 # Installation settings
 set(TARGET_EXPORT_NAME "MantidAPITargets")

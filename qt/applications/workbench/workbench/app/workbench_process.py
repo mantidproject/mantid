@@ -7,15 +7,13 @@
 #  This file is part of the mantid workbench.
 import argparse
 import atexit
-from dataclasses import dataclass
 import os
 import sys
-from pathlib import Path
 from sys import setswitchinterval
 from functools import partial
 
 from mantid.api import FrameworkManagerImpl
-from mantid.kernel import ConfigService, Logger, UsageService, version_str as mantid_version_str
+from mantid.kernel import ConfigService, UsageService, version_str as mantid_version_str, amend_config
 from mantidqt.utils.qt import plugins
 import mantidqt.utils.qt as qtutils
 import mantid.kernel.environment as mtd_env
@@ -23,7 +21,7 @@ import mantid.kernel.environment as mtd_env
 # Find Qt plugins for development builds on some platforms
 plugins.setup_library_paths()
 
-from qtpy.QtGui import QIcon, QSurfaceFormat  # noqa: E402
+from qtpy.QtGui import QIcon, QSurfaceFormat, QColor, QPalette  # noqa: E402
 from qtpy.QtWidgets import QApplication  # noqa: E402
 from qtpy.QtCore import QCoreApplication, Qt  # noqa: E402
 
@@ -37,127 +35,6 @@ from workbench.identity import APPNAME, ORG_DOMAIN, ORGANIZATION  # noqa: E402
 # Constants
 SYSCHECK_INTERVAL = 50
 ORIGINAL_SYS_EXIT = sys.exit
-_QSETTINGS_STAGING_WARNING_EMITTED = False
-
-
-@dataclass(frozen=True)
-class WorkbenchLaunchResult:
-    exit_code: int
-    clean_shutdown: bool
-
-
-def _evaluate_qsettings_staging():
-    """Evaluate staging lazily so importing this module has no settings side effects."""
-    from mantidqt.utils.qt.qsettings_staging import evaluate_qsettings_staging
-
-    return evaluate_qsettings_staging()
-
-
-def _prepare_and_activate_qsettings_staging(eligibility):
-    """Prepare and activate a staged QSettings session for this process."""
-    from mantidqt.utils.qt.qsettings_staging_session import QSettingsStagingSessionManager, StagingPreparationError
-
-    try:
-        session = QSettingsStagingSessionManager(eligibility).prepare()
-    except StagingPreparationError as error:
-        return None, error
-
-    session.activate()
-    return session, None
-
-
-def _warn_about_qsettings_staging(message):
-    global _QSETTINGS_STAGING_WARNING_EMITTED
-    if _QSETTINGS_STAGING_WARNING_EMITTED:
-        return
-
-    Logger("Mantid Workbench").warning(message)
-    _QSETTINGS_STAGING_WARNING_EMITTED = True
-
-
-def _prepare_qsettings_staging():
-    """Activate eligible QSettings staging, otherwise retain the canonical path."""
-    eligibility = _evaluate_qsettings_staging()
-    if not eligibility.active:
-        reason = eligibility.reason.value
-        if reason == "cache_is_nfs":
-            _warn_about_qsettings_staging(
-                "QSettings staging was requested, but the XDG cache directory is also on NFS. "
-                "Workbench will use the canonical configuration directory. Use a user-owned local "
-                "XDG_CACHE_HOME or unset MANTID_QSETTINGS_STAGING."
-            )
-        elif reason not in {"disabled", "unsupported_platform", "config_not_nfs"}:
-            _warn_about_qsettings_staging(
-                f"QSettings staging was requested but is unavailable ({reason}). Workbench will use the canonical configuration directory."
-            )
-        return None
-
-    session, error = _prepare_and_activate_qsettings_staging(eligibility)
-    if error is not None:
-        _warn_about_qsettings_staging(
-            f"QSettings staging preparation failed ({error}). Workbench will use the canonical configuration directory."
-        )
-    return session
-
-
-def _verify_qsettings_filename(session, filename):
-    expected = (session.staging_root / "mantidproject" / "mantidworkbench.ini").resolve(strict=False)
-    actual = Path(filename).resolve(strict=False)
-    if actual != expected:
-        raise RuntimeError(f"QSettings staging activation selected {actual}, expected {expected}")
-
-
-def _verify_qsettings_staging(session):
-    # Import only after QSettings.setPath has redirected UserScope IniFormat.
-    from workbench.config import CONF
-
-    _verify_qsettings_filename(session, CONF.filename)
-
-
-def _abort_qsettings_staging(session, reason):
-    """Release the staging coordinator and retain the session for recovery."""
-    try:
-        session.abort()
-    except Exception as error:
-        reason = f"{reason}; coordinator release also failed: {error}"
-    _warn_about_qsettings_staging(
-        f"QSettings staging was not copied back ({reason}). Recoverable files remain under {session.staging_root}."
-    )
-
-
-def _sync_and_finalize_qsettings_staging(session):
-    """Synchronize Workbench settings and copy a clean staged session back."""
-    from qtpy.QtCore import QSettings
-    from workbench.config import CONF
-
-    try:
-        CONF.qsettings.sync()
-        status = CONF.qsettings.status()
-        if status != QSettings.NoError:
-            _abort_qsettings_staging(session, f"QSettings sync failed with status {status}")
-            return
-    except Exception as error:
-        _abort_qsettings_staging(session, f"QSettings sync failed: {error}")
-        return
-
-    try:
-        finalization = session.finalize()
-    except Exception as error:
-        _abort_qsettings_staging(session, f"copy-back failed: {error}")
-        return
-
-    if not finalization.successful:
-        failed_paths = ", ".join(
-            f"{result.relative_path} ({result.status.value})"
-            for result in finalization.files
-            if result.status.value in {"conflict", "failed"}
-        )
-        detail = finalization.error or failed_paths or "unknown finalization error"
-        _warn_about_qsettings_staging(
-            f"QSettings staging copy-back was incomplete ({detail}). Recoverable files remain under {session.staging_root}."
-        )
-
-
 ORIGINAL_STDERR = sys.stderr
 STACKTRACE_FILE = "workbench_stacktrace.txt"
 
@@ -187,6 +64,15 @@ def qapplication():
         # Don't try to use the system GTK palette instead apply the standard theme palette
         if mtd_env.is_linux():
             app.setPalette(app.style().standardPalette())
+        elif mtd_env.is_windows():
+            from qtpy.QtCore import Qt as QtCore_Qt  # Qt.ColorScheme lives here
+
+            if app.styleHints().colorScheme() == QtCore_Qt.ColorScheme.Dark:
+                app.setStyle("Fusion")
+                palette = app.palette()
+                if hasattr(QPalette.ColorRole, "Accent"):
+                    palette.setColor(QPalette.ColorRole.Accent, QColor("#9a9a9a"))  # ticked fill
+                app.setPalette(palette)
         app.setOrganizationName(ORGANIZATION)
         app.setOrganizationDomain(ORG_DOMAIN)
         app.setApplicationName(APPNAME)
@@ -230,18 +116,17 @@ def initialize():
     return app
 
 
-def create_and_launch_workbench(app, command_line_options, qsettings_staging_session=None):
+def create_and_launch_workbench(app, command_line_options):
     """Given an application instance create the MainWindow,
     show it and start the main event loop
-
-    The optional staging session remains referenced by this stack frame for the
-    lifetime of the event loop. Clean-shutdown finalization is wired separately.
     """
+    exit_value = 0
     try:
         # MainWindow needs to be imported locally to ensure the matplotlib
         # backend is not imported too early.
         from workbench.app.mainwindow import MainWindow
         from workbench.widgets.about.presenter import AboutPresenter
+        from workbench.widgets.update_notification.presenter import UpdateNotificationPresenter
 
         # The ordering here is very delicate. Test thoroughly when
         # changing anything!
@@ -268,9 +153,15 @@ def create_and_launch_workbench(app, command_line_options, qsettings_staging_ses
         # Setup widget layouts etc. mantid.simple cannot be used before this
         # or the log messages don't get through to the widget
         main_window.setup()
+
+        notify_update_popup = ConfigService.getString("CheckMantidVersion.NotifyUpdateOnStartup").lower() in ("1", "on", "true")
+        update_check_popup = ConfigService.getString("CheckMantidVersion.OnStartup").lower() in ("1", "on", "true")
+        config_overrides = {"CheckMantidVersion.OnStartup": "0"} if notify_update_popup and update_check_popup else {}
+
         # start mantid
         main_window.set_splash("Initializing mantid framework")
-        FrameworkManagerImpl.Instance()
+        with amend_config(**config_overrides):
+            FrameworkManagerImpl.Instance()
         main_window.post_mantid_init()
 
         if main_window.splash:
@@ -290,8 +181,7 @@ def create_and_launch_workbench(app, command_line_options, qsettings_staging_ses
                 main_window.close()
 
                 # for task exit code descriptions see the classes AsyncTask and TaskExitCode
-                exit_code = int(editor_task.exit_code) if editor_task else 0
-                return WorkbenchLaunchResult(exit_code, main_window.shutdown_accepted)
+                return int(editor_task.exit_code) if editor_task else 0
 
         main_window.show()
         main_window.setWindowIcon(QIcon(":/images/MantidIcon.ico"))
@@ -306,9 +196,12 @@ def create_and_launch_workbench(app, command_line_options, qsettings_staging_ses
             if AboutPresenter.should_show_on_startup():
                 AboutPresenter(main_window).show()
 
+            if notify_update_popup:
+                main_window.update_notifier = UpdateNotificationPresenter(main_window)
+                main_window.update_notifier.check_for_update()
+
         # lift-off!
-        exit_code = app.exec()
-        return WorkbenchLaunchResult(exit_code, main_window.shutdown_accepted)
+        exit_value = app.exec()
     except BaseException:
         # We count this as a crash
         import traceback
@@ -323,50 +216,34 @@ def create_and_launch_workbench(app, command_line_options, qsettings_staging_ses
                 traceback.print_exc(file=print_file)
         except OSError:
             pass
-        return WorkbenchLaunchResult(-1, False)
+        exit_value = -1
+    finally:
+        ORIGINAL_SYS_EXIT(exit_value)
 
 
 def initialise_qapp_and_launch_workbench(command_line_options):
-    # QSettings staging must be active before anything can import workbench.config.
-    qsettings_staging_session = _prepare_qsettings_staging()
+    # Set the global figure manager in matplotlib. Very important this happens first.
+    from workbench.plotting.config import init_mpl_gcf
 
-    try:
-        # Set the global figure manager before any other matplotlib initialization.
-        from workbench.plotting.config import init_mpl_gcf
+    init_mpl_gcf()
 
-        init_mpl_gcf()
+    # cleanup static resources at exit
+    atexit.register(cleanup_resources)
 
-        # cleanup static resources at exit
-        atexit.register(cleanup_resources)
+    # fix/validate arguments
+    if command_line_options.script is not None:
+        # convert into absolute path
+        command_line_options.script = os.path.abspath(os.path.expanduser(command_line_options.script))
+        if not os.path.exists(command_line_options.script):
+            print('script "{}" does not exist'.format(command_line_options.script))
+            command_line_options.script = None
 
-        # fix/validate arguments
-        if command_line_options.script is not None:
-            # convert into absolute path
-            command_line_options.script = os.path.abspath(os.path.expanduser(command_line_options.script))
-            if not os.path.exists(command_line_options.script):
-                print('script "{}" does not exist'.format(command_line_options.script))
-                command_line_options.script = None
+    app = initialize()
+    # the default sys check interval leads to long lags
+    # when request scripts to be aborted
+    setswitchinterval(SYSCHECK_INTERVAL)
 
-        app = initialize()
-        if qsettings_staging_session is not None:
-            _verify_qsettings_staging(qsettings_staging_session)
-
-        # the default sys check interval leads to long lags
-        # when request scripts to be aborted
-        setswitchinterval(SYSCHECK_INTERVAL)
-
-        result = create_and_launch_workbench(app, command_line_options, qsettings_staging_session)
-    except BaseException:
-        if qsettings_staging_session is not None:
-            _abort_qsettings_staging(qsettings_staging_session, "Workbench startup failed")
-        raise
-
-    if qsettings_staging_session is not None:
-        if result.clean_shutdown:
-            _sync_and_finalize_qsettings_staging(qsettings_staging_session)
-        else:
-            _abort_qsettings_staging(qsettings_staging_session, "Workbench did not complete a clean shutdown")
-    ORIGINAL_SYS_EXIT(result.exit_code)
+    create_and_launch_workbench(app, command_line_options)
 
 
 if __name__ == "__main__":

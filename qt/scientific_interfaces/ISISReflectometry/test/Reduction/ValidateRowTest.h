@@ -176,46 +176,67 @@ public:
     TS_ASSERT_EQUALS(0.1, parseScaleFactor("0.1").first.value());
   }
 
+  void testParseSpecularPixel() {
+    TS_ASSERT_EQUALS(280.5, parseSpecularPixel("280.5").first.value());
+    TS_ASSERT(parseSpecularPixel("280.5").second);
+    TS_ASSERT(parseSpecularPixel("").second);
+    TS_ASSERT_EQUALS(std::nullopt, parseSpecularPixel("").first);
+    TS_ASSERT(parseSpecularPixel(" ").second);
+    TS_ASSERT_EQUALS(std::nullopt, parseSpecularPixel(" ").first);
+    TS_ASSERT(!parseSpecularPixel("bad").second);
+    TS_ASSERT(!parseSpecularPixel("-1").second);
+    TS_ASSERT(!parseSpecularPixel("inf").second);
+    TS_ASSERT(!parseSpecularPixel("nan").second);
+  }
+
+  void testParseSpecularPixelsError() {
+    RowValidator validator;
+    auto result = validator({"12345", "0.5", "", "", "", "", "", "", "", "", "", "bad", "-1"});
+    std::vector<int> errorCells = {11, 12};
+    TS_ASSERT(result.isError());
+    TS_ASSERT_EQUALS(result.assertError(), errorCells);
+  }
+
   void testParsesFirstTransmissionRun() {
     auto const expected = TransmissionRunPair({"1000"}, std::vector<std::string>());
-    auto const result = boost::get<TransmissionRunPair>(parseTransmissionRuns("1000", ""));
+    auto const result = std::get<TransmissionRunPair>(parseTransmissionRuns("1000", ""));
     TS_ASSERT_EQUALS(expected, result);
   }
 
   void testParsesTwoTransmissionRuns() {
     auto const expected = TransmissionRunPair("1000", "2010");
-    auto const result = boost::get<TransmissionRunPair>(parseTransmissionRuns("1000", "2010"));
+    auto const result = std::get<TransmissionRunPair>(parseTransmissionRuns("1000", "2010"));
     TS_ASSERT_EQUALS(expected, result);
   }
 
   void testParsesNoTransmissionRuns() {
     auto const expected = TransmissionRunPair();
-    auto const result = boost::get<TransmissionRunPair>(parseTransmissionRuns("", ""));
+    auto const result = std::get<TransmissionRunPair>(parseTransmissionRuns("", ""));
     TS_ASSERT_EQUALS(expected, result);
   }
 
   void testParsesMultipleTransmissionRunNumbersSeparatedByPlus() {
     auto const expected =
         TransmissionRunPair(std::vector<std::string>{"100", "1002"}, std::vector<std::string>{"2200", "2255"});
-    auto const result = boost::get<TransmissionRunPair>(parseTransmissionRuns("100+1002", "2200 + 2255"));
+    auto const result = std::get<TransmissionRunPair>(parseTransmissionRuns("100+1002", "2200 + 2255"));
     TS_ASSERT_EQUALS(expected, result);
   }
 
   void testParsesMultipleTransmissionRunNumbersSeparatedByComma() {
     auto const expected =
         TransmissionRunPair(std::vector<std::string>{"100", "1002"}, std::vector<std::string>{"2200", "2255"});
-    auto const result = boost::get<TransmissionRunPair>(parseTransmissionRuns("100,1002", "2200, 2255"));
+    auto const result = std::get<TransmissionRunPair>(parseTransmissionRuns("100,1002", "2200, 2255"));
     TS_ASSERT_EQUALS(expected, result);
   }
 
   void testFailsForOnlySecondTransmissionRun() {
-    TS_ASSERT_EQUALS(std::vector<int>({0}), boost::get<std::vector<int>>(parseTransmissionRuns("", "1000")));
+    TS_ASSERT_EQUALS(std::vector<int>({0}), std::get<std::vector<int>>(parseTransmissionRuns("", "1000")));
   }
 
   void testParsesWorkspaceNamesForTransmissionRuns() {
     auto const expected = TransmissionRunPair(std::vector<std::string>{"trans1a", "trans1b"},
                                               std::vector<std::string>{"trans2 a", "trans2 b"});
-    auto const result = boost::get<TransmissionRunPair>(parseTransmissionRuns("trans1a,trans1b", "trans2 a, trans2 b"));
+    auto const result = std::get<TransmissionRunPair>(parseTransmissionRuns("trans1a,trans1b", "trans2 a, trans2 b"));
     TS_ASSERT_EQUALS(expected, result);
   }
 };

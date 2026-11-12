@@ -14,6 +14,7 @@ from mantidqt.utils.async_qt_adaptor import qt_async_task, IQtAsync
 from mantidqt.utils.asynchronous import AsyncTaskSuccess, AsyncTaskFailure
 from sans.algorithm_detail.batch_execution import load_workspaces_from_states
 from sans.common.enums import ReductionMode, RowState
+from sans.common.general_functions import delete_workspaces
 from sans.data_objects.row_entries import RowEntries
 from sans.sans_batch import SANSBatchReduction
 
@@ -43,7 +44,10 @@ class SansRunTabAsync(IQtAsync):
         self.notify_error(str(result))
 
     @qt_async_task
-    def process_states_on_thread(self, row_index_pairs, get_states_func, use_optimizations, output_mode, output_graph, save_can=False):
+    def process_states_on_thread(
+        self, row_index_pairs, get_states_func, use_optimizations, output_mode, output_graph, save_can=False, clean_up_ads=False
+    ):
+        clean_up_names = []
         for row, index in row_index_pairs:
             try:
                 states, errors = get_states_func(row_entries=[row])
@@ -61,9 +65,16 @@ class SansRunTabAsync(IQtAsync):
 
             try:
                 plot_results = False
-                out_scale_factors, out_shift_factors = self.batch_processor(
-                    [state.all_states], use_optimizations, output_mode, plot_results, output_graph, save_can
+                out_scale_factors, out_shift_factors, new_cleanup_names = self.batch_processor(
+                    [state.all_states],
+                    use_optimizations,
+                    output_mode,
+                    plot_results,
+                    output_graph,
+                    save_can,
+                    output_diagnostic_names=clean_up_ads,
                 )
+                clean_up_names.extend(new_cleanup_names)
             except Exception as e:
                 self._mark_row_error(row, e)
                 continue
@@ -77,6 +88,8 @@ class SansRunTabAsync(IQtAsync):
                 out_shift_factors = []
                 out_scale_factors = []
             self._notify_progress_signal.signal.emit(index, out_shift_factors, out_scale_factors)
+        if clean_up_ads:
+            delete_workspaces(set(clean_up_names), use_names=True)
 
     @qt_async_task
     def load_workspaces_on_thread(self, row_index_pairs: List[Tuple[RowEntries, int]], get_states_func):

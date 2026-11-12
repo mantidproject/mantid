@@ -13,7 +13,6 @@
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
-#include "MantidKernel/Cache.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidNexus/NexusFile.h"
@@ -64,10 +63,7 @@ void checkIsNotMaskingParameter(const std::string &name) {
 /**
  * Default constructor
  */
-ParameterMap::ParameterMap()
-    : m_parameterInfo(std::make_shared<ParameterInfo>()),
-      m_cacheLocMap(std::make_unique<Kernel::Cache<const ComponentID, Kernel::V3D>>()),
-      m_cacheRotMap(std::make_unique<Kernel::Cache<const ComponentID, Kernel::Quat>>()) {}
+ParameterMap::ParameterMap() : m_parameterInfo(std::make_shared<ParameterInfo>()) {}
 
 ParameterMap::ParameterMap(const ParameterMap &other)
     // The store is deep-copied, not shared: a copied ParameterMap is an independent map, and
@@ -75,8 +71,6 @@ ParameterMap::ParameterMap(const ParameterMap &other)
     : m_parameterFileNames(other.m_parameterFileNames),
       m_parameterInfo(std::make_shared<ParameterInfo>(*other.m_parameterInfo)), m_domainIds(other.m_domainIds),
       m_domainIndices(other.m_domainIndices), m_stagedIndices(other.m_stagedIndices), m_stagedIds(other.m_stagedIds),
-      m_cacheLocMap(std::make_unique<Kernel::Cache<const ComponentID, Kernel::V3D>>(*other.m_cacheLocMap)),
-      m_cacheRotMap(std::make_unique<Kernel::Cache<const ComponentID, Kernel::Quat>>(*other.m_cacheRotMap)),
       m_instrument(other.m_instrument) {
   // Deliberately does NOT rebuild the beamline. That is now ExperimentInfo's job, via rebuildBeamlineFrom()
 }
@@ -420,9 +414,6 @@ void ParameterMap::clearParametersByName(const std::string &name) {
   checkIsNotMaskingParameter(name);
   // The erase is guarded at whole operation granularity rather than per element.
   PARALLEL_CRITICAL(unsafe_erase) { m_parameterInfo->clearParametersByName(name); }
-  // Check if the caches need invalidating
-  if (name == pos() || name == rot())
-    clearPositionSensitiveCaches();
 }
 
 /**
@@ -435,10 +426,6 @@ void ParameterMap::clearParametersByName(const std::string &name, const ICompone
   const size_t index = indexOf(comp);
   if (index != ComponentInfo::invalidIndex) {
     PARALLEL_CRITICAL(unsafe_erase) { m_parameterInfo->clearParametersByName(index, name); }
-
-    // Check if the caches need invalidating
-    if (name == pos() || name == rot())
-      clearPositionSensitiveCaches();
   }
 }
 
@@ -573,8 +560,6 @@ void ParameterMap::addPositionCoordinate(const IComponent *comp, const std::stri
     return;
   }
 
-  // clear the position cache
-  clearPositionSensitiveCaches();
   // finally add or update "pos" parameter
   addV3D(comp, pos(), position, pDescription);
 }
@@ -625,9 +610,6 @@ void ParameterMap::addRotationParam(const IComponent *comp, const std::string &n
     g_log.warning() << "addRotationParam() called with unrecognized coordinate symbol: " << name;
     return;
   }
-
-  // clear the position cache
-  clearPositionSensitiveCaches();
 
   // finally add or update "pos" parameter
   addQuat(comp, rot(), quat, pDescription);
@@ -759,7 +741,6 @@ void ParameterMap::addString(const IComponent *comp, const std::string &name, co
 void ParameterMap::addV3D(const IComponent *comp, const std::string &name, const std::string &value,
                           const std::string *const pDescription) {
   add(pV3D(), comp, name, value, pDescription);
-  clearPositionSensitiveCaches();
 }
 
 /**
@@ -773,7 +754,6 @@ void ParameterMap::addV3D(const IComponent *comp, const std::string &name, const
 void ParameterMap::addV3D(const IComponent *comp, const std::string &name, const V3D &value,
                           const std::string *const pDescription) {
   add(pV3D(), comp, name, value, pDescription);
-  clearPositionSensitiveCaches();
 }
 
 /**
@@ -787,7 +767,6 @@ void ParameterMap::addV3D(const IComponent *comp, const std::string &name, const
 void ParameterMap::addQuat(const IComponent *comp, const std::string &name, const Quat &value,
                            const std::string *const pDescription) {
   add(pQuat(), comp, name, value, pDescription);
-  clearPositionSensitiveCaches();
 }
 
 /**
@@ -1050,44 +1029,6 @@ std::string ParameterMap::asStringEntry(const std::string &component, const Para
 }
 
 /**
- * Clears the location, rotation & bounding box caches
- */
-void ParameterMap::clearPositionSensitiveCaches() {
-  m_cacheLocMap->clear();
-  m_cacheRotMap->clear();
-}
-
-/// Sets a cached location on the location cache
-/// @param comp :: The Component to set the location of
-/// @param location :: The location
-void ParameterMap::setCachedLocation(const IComponent *comp, const V3D &location) const {
-  m_cacheLocMap->setCache(comp->getComponentID(), location);
-}
-
-/// Attempts to retrieve a location from the location cache
-/// @param comp :: The Component to find the location of
-/// @param location :: If the location is found it's value will be set here
-/// @returns true if the location is in the map, otherwise false
-bool ParameterMap::getCachedLocation(const IComponent *comp, V3D &location) const {
-  return m_cacheLocMap->getCache(comp->getComponentID(), location);
-}
-
-/// Sets a cached rotation on the rotation cache
-/// @param comp :: The Component to set the rotation of
-/// @param rotation :: The rotation as a quaternion
-void ParameterMap::setCachedRotation(const IComponent *comp, const Quat &rotation) const {
-  m_cacheRotMap->setCache(comp->getComponentID(), rotation);
-}
-
-/// Attempts to retrieve a rotation from the rotation cache
-/// @param comp :: The Component to find the rotation of
-/// @param rotation :: If the rotation is found it's value will be set here
-/// @returns true if the rotation is in the map, otherwise false
-bool ParameterMap::getCachedRotation(const IComponent *comp, Quat &rotation) const {
-  return m_cacheRotMap->getCache(comp->getComponentID(), rotation);
-}
-
-/**
  * Copy pairs (oldComp->id,Parameter) to the m_map
  * assigning the new newComp->id
  * @param oldComp :: Old component
@@ -1289,17 +1230,12 @@ size_t ParameterMap::getMemorySize() const {
   const size_t fileNamesMem = m_parameterFileNames.size() * sizeof(std::string) +
                               std::accumulate(m_parameterFileNames.cbegin(), m_parameterFileNames.cend(), size_t{0},
                                               [](size_t acc, const auto &s) { return acc + s.capacity(); });
-  // m_cacheLocMap and m_cacheRotMap: count the heap Cache objects; the internal std::map entries are not
-  // counted because Kernel::Cache::size() is non-const and cannot be called here.
-  const size_t cacheLocMem = m_cacheLocMap ? sizeof(*m_cacheLocMap) : 0;
-  const size_t cacheRotMem = m_cacheRotMap ? sizeof(*m_cacheRotMap) : 0;
   // m_detectorInfo and m_componentInfo: owned by ParameterMap for parametrized instruments
   const size_t detectorInfoMem = m_detectorInfo ? m_detectorInfo->getMemorySize() : 0;
   const size_t componentInfoMem = m_componentInfo ? m_componentInfo->getMemorySize() : 0;
   // m_instrument is a non-owning raw pointer to the base Instrument; its memory is counted in
   // Instrument::getMemorySize() and excluded here to avoid double-counting.
-  return sizeof(*this) + mapMem + translationMem + fileNamesMem + cacheLocMem + cacheRotMem + detectorInfoMem +
-         componentInfoMem;
+  return sizeof(*this) + mapMem + translationMem + fileNamesMem + detectorInfoMem + componentInfoMem;
 }
 
 } // namespace Mantid::Geometry

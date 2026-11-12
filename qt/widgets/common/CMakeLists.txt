@@ -349,6 +349,7 @@ set(QT${MANTID_QT_VERSION}_INC_FILES
     inc/MantidQtWidgets/Common/Python/Sip.h
     inc/MantidQtWidgets/Common/Python/Object.h
     inc/MantidQtWidgets/Common/Python/QHashToDict.h
+    inc/MantidQtWidgets/Common/ColorTheme.h
 )
 
 set(QT${MANTID_QT_VERSION}_UI_FILES
@@ -691,6 +692,7 @@ mtd_add_qt_library(
 generate_mantid_export_header(
   MantidQtWidgetsCommonQt${MANTID_QT_VERSION}
   TRUE
+  GENERATE_UNUSED_ARG
   BASE_NAME
   MANTIDQT_COMMON
   EXPORT_MACRO_NAME
@@ -711,6 +713,7 @@ set(QT${MANTID_QT_VERSION}_TEST_FILES
     test/BatchAlgorithmRunnerTest.h
     test/ConvolutionFunctionModelTest.h
     test/ConfigurableSettingsTest.h
+    test/DataSelectorTest.h
     test/FileDialogHandlerTest.h
     test/FileFinderSettingsTest.h
     test/FindFilesThreadPoolManagerTest.h

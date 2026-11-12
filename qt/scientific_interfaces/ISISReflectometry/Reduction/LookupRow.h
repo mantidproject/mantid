@@ -27,7 +27,7 @@ namespace ISISReflectometry {
  */
 class MANTIDQT_ISISREFLECTOMETRY_DLL LookupRow {
 public:
-  static auto constexpr OPTIONS_TABLE_COLUMN_COUNT = 12;
+  static auto constexpr OPTIONS_TABLE_COLUMN_COUNT = 14;
   using ValueArray = std::array<std::string, OPTIONS_TABLE_COLUMN_COUNT>;
 
   enum Column {
@@ -44,14 +44,18 @@ public:
     SCALE = 8,
     RUN_SPECTRA = 9,
     BACKGROUND_SPECTRA = 10,
-    ROI_DETECTOR_IDS = 11
+    ROI_DETECTOR_IDS = 11,
+    NOMINAL_SPECULAR_PIXEL = 12,
+    ACTUAL_SPECULAR_PIXEL = 13
   };
 
   LookupRow(std::optional<double> theta, std::optional<boost::regex> titleMatcher, TransmissionRunPair tranmissionRuns,
             std::optional<ProcessingInstructions> transmissionProcessingInstructions, RangeInQ qRange,
             std::optional<double> scaleFactor, std::optional<ProcessingInstructions> processingInstructions,
             std::optional<ProcessingInstructions> backgroundProcessingInstructions,
-            std::optional<ProcessingInstructions> roiDetectorIDs);
+            std::optional<ProcessingInstructions> roiDetectorIDs,
+            std::optional<double> nominalSpecularPixel = std::nullopt,
+            std::optional<double> actualSpecularPixel = std::nullopt);
 
   TransmissionRunPair const &transmissionWorkspaceNames() const;
   bool isWildcard() const;
@@ -59,6 +63,8 @@ public:
   std::optional<boost::regex> titleMatcher() const;
   RangeInQ const &qRange() const;
   std::optional<double> scaleFactor() const;
+  std::optional<double> nominalSpecularPixel() const;
+  std::optional<double> actualSpecularPixel() const;
   std::optional<ProcessingInstructions> transmissionProcessingInstructions() const;
   std::optional<ProcessingInstructions> processingInstructions() const;
   std::optional<ProcessingInstructions> backgroundProcessingInstructions() const;
@@ -76,6 +82,8 @@ private:
   TransmissionRunPair m_transmissionRuns;
   RangeInQ m_qRange;
   std::optional<double> m_scaleFactor;
+  std::optional<double> m_nominalSpecularPixel;
+  std::optional<double> m_actualSpecularPixel;
   std::optional<ProcessingInstructions> m_transmissionProcessingInstructions;
   std::optional<ProcessingInstructions> m_processingInstructions;
   std::optional<ProcessingInstructions> m_backgroundProcessingInstructions;

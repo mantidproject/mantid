@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../../../ISISReflectometry/GUI/Plotting/model/PlottingModel.h"
+#include "../../../ISISReflectometry/TestHelpers/PlottingTestHelpers.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -216,7 +217,7 @@ public:
 
   void testAlignmentCreatesOnePlotWorkspaceGroupPerSelectedWorkspace() {
     createConstantWorkspace("IvsQ_12345", -100.0);
-    createConstantWorkspace("IvsQ_22345", -100.0);
+    createConstantWorkspace("IvsQ_22345", -100.0, "22345");
     createAlignmentInputWorkspace("raw_input_name_1", "12345", alignmentYValues(100, 7.0));
     createAlignmentInputWorkspace("raw_input_name_2", "22345", alignmentYValues(110, 9.0));
     createTOFGroup({"raw_input_name_1", "raw_input_name_2"});
@@ -235,7 +236,7 @@ public:
   }
 
   void testAlignmentCreatesWorkspaceForAddedRuns() {
-    createConstantWorkspace("IvsQ_12345+12346", -100.0);
+    createConstantWorkspace("IvsQ_12345+12346", -100.0, "12345+12346");
     createAlignmentInputWorkspace("TOF_12345+12346", "12345+12346", alignmentYValues(100, 10.0));
     createAlignmentInputWorkspace("TOF_12345", "12345", alignmentYValues(100, 3.0));
     createAlignmentInputWorkspace("TOF_12346", "12346", alignmentYValues(100, 7.0));
@@ -249,6 +250,7 @@ public:
   }
 
   void testAlignmentFindsSummedRunLogOutsideTOFGroup() {
+    createConstantWorkspace("IvsQ_12345+12346", -100.0, "12345+12346");
     createAlignmentInputWorkspace("TOF_12345+12346", "12345+12346", alignmentYValues(100, 10.0));
     auto const workspaces = std::vector<PlottingWorkspace>{plottingWorkspace("IvsQ_12345+12346", {"12345+12346"})};
     auto const outputs = PlottingModel{}.workspacesForPlotting(workspaces, alignmentOutputSelection());
@@ -257,6 +259,7 @@ public:
   }
 
   void testDetectorMapFindsSummedWorkspaceOutsideTOFGroup() {
+    createConstantWorkspace("IvsQ_12345+12346", -100.0, "12345+12346");
     createDetectorMapInputWorkspace("TOF_12345", "12345", 10.0);
     createDetectorMapInputWorkspace("TOF_12346", "12346", 20.0);
     createTOFGroup({"TOF_12345", "TOF_12346"});
@@ -268,6 +271,7 @@ public:
   }
 
   void testBothPlotTypesFindHiddenSummedWorkspace() {
+    createConstantWorkspace("IvsQ_12345+12346", -100.0, "12345+12346");
     createAlignmentInputWorkspace("__TOF_12345+12346", "12345+12346", alignmentYValues(100, 10.0));
     auto const workspaces = std::vector<PlottingWorkspace>{plottingWorkspace("IvsQ_12345+12346", {"12345+12346"})};
     TS_ASSERT_EQUALS(PlottingModel{}.workspacesForPlotting(workspaces, alignmentOutputSelection()).size(), 1);
@@ -277,6 +281,7 @@ public:
   }
 
   void testBothPlotTypesFindSelectedPeriodInSummedWorkspaceGroup() {
+    createConstantWorkspace("IvsQ_12345+12346_2", -100.0, "12345+12346");
     createAlignmentInputWorkspace("TOF_12345+12346_1", "12345+12346", alignmentYValues(100, 3.0), 1);
     createAlignmentInputWorkspace("TOF_12345+12346_2", "12345+12346", alignmentYValues(100, 10.0), 2);
     createTOFGroup({"TOF_12345+12346_1", "TOF_12345+12346_2"}, "TOF_12345+12346");
@@ -349,7 +354,7 @@ public:
 
   void testDetectorMapCreatesOnePlotWorkspacePerSelectedWorkspace() {
     createConstantWorkspace("IvsQ_12345", -100.0);
-    createConstantWorkspace("IvsQ_22345", -100.0);
+    createConstantWorkspace("IvsQ_22345", -100.0, "22345");
     createDetectorMapInputWorkspace("raw_input_name_1", "12345", 10.0);
     createDetectorMapInputWorkspace("raw_input_name_2", "22345", 20.0);
     createTOFGroup({"raw_input_name_1", "raw_input_name_2"});
@@ -426,8 +431,8 @@ public:
   }
 
   void testGeneratedWorkspaceNamesPreservePlusPlusAndMinusMinusSuffixes() {
-    createConstantWorkspace("IvsQ_12345++", -100.0);
-    createConstantWorkspace("IvsQ_12345--", -100.0);
+    createConstantWorkspace("IvsQ_12345++", -100.0, "12345++");
+    createConstantWorkspace("IvsQ_12345--", -100.0, "12345--");
     createDetectorMapInputWorkspace("raw_input_name_plus", "12345++", 10.0);
     createDetectorMapInputWorkspace("raw_input_name_minus", "12345--", 20.0);
     createTOFGroup({"raw_input_name_plus", "raw_input_name_minus"});
@@ -481,24 +486,31 @@ private:
 
   PlottingWorkspace plottingWorkspace(std::string workspaceName, std::vector<std::string> runNumbers,
                                       std::optional<int> periodNumber = std::nullopt,
-                                      std::string const &containingWorkspaceGroupName = "") {
-    return {std::move(workspaceName), std::move(runNumbers), containingWorkspaceGroupName, periodNumber};
+                                      std::string const &workspaceGroupName = "") {
+    auto context = runOutputContext(workspaceName,
+                                    workspaceGroupName.empty() ? PlottingWorkspaceTreePath{0, 0, 0}
+                                                               : PlottingWorkspaceTreePath{0, 0, 0, 0},
+                                    workspaceGroupName);
+    return {std::move(workspaceName), std::move(runNumbers), periodNumber, std::move(context)};
   }
 
   std::vector<PlottingWorkspace> plottingWorkspaces(std::vector<std::string> workspaceNames,
-                                                    std::string const &containingWorkspaceGroupName = "") {
+                                                    std::string const &workspaceGroupName = "") {
     auto plottingWorkspaces = std::vector<PlottingWorkspace>{};
     plottingWorkspaces.reserve(workspaceNames.size());
     for (auto const &workspaceName : workspaceNames) {
-      plottingWorkspaces.push_back(
-          plottingWorkspace(workspaceName, {"12345"}, std::nullopt, containingWorkspaceGroupName));
+      auto workspace = plottingWorkspace(workspaceName, {"12345"}, std::nullopt, workspaceGroupName);
+      workspace.context.scopeItems.at(PlotSelectionScope::Workspace).path.back() =
+          static_cast<int>(plottingWorkspaces.size());
+      plottingWorkspaces.emplace_back(std::move(workspace));
     }
     return plottingWorkspaces;
   }
 
-  void createConstantWorkspace(std::string const &name, double yValue) {
-    Mantid::API::AnalysisDataService::Instance().addOrReplace(
-        name, WorkspaceCreationHelper::create1DWorkspaceConstant(1, yValue, 0.0, false));
+  void createConstantWorkspace(std::string const &name, double yValue, std::string const &runNumber = "12345") {
+    auto workspace = WorkspaceCreationHelper::create1DWorkspaceConstant(1, yValue, 0.0, false);
+    workspace->mutableRun().addProperty("run_number", runNumber);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(name, workspace);
   }
 
   void createAlignmentInputWorkspace(std::string const &name, std::string const &runNumber,

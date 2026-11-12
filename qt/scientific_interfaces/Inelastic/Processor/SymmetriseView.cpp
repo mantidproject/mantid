@@ -14,6 +14,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Common/ColorTheme.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidQtWidgets/Plotting/SingleSelector.h"
 
@@ -38,8 +39,13 @@ SymmetriseView::SymmetriseView(QWidget *parent) : QWidget(parent), m_presenter()
   m_grpManager = new QtGroupPropertyManager();
   m_enumManager = new QtEnumPropertyManager(); // "Suggestion"
 
-  m_uiForm.ppRawPlot->setCanvasColour(QColor(240, 240, 240));
-  m_uiForm.ppPreviewPlot->setCanvasColour(QColor(240, 240, 240));
+  if (MantidQt::MantidWidgets::isDarkMode()) {
+    m_uiForm.ppRawPlot->setCanvasColour(QColor(MantidQt::MantidWidgets::DARK_CANVAS_COLOUR));
+    m_uiForm.ppPreviewPlot->setCanvasColour(QColor(MantidQt::MantidWidgets::DARK_CANVAS_COLOUR));
+  } else {
+    m_uiForm.ppRawPlot->setCanvasColour(QColor(240, 240, 240));
+    m_uiForm.ppPreviewPlot->setCanvasColour(QColor(240, 240, 240));
+  }
 
   int numDecimals = 6;
 
@@ -161,6 +167,9 @@ void SymmetriseView::setDefaults() {
 
   // Allows empty workspace selector when initially selected
   m_uiForm.dsInput->isOptional(true);
+  // Text files loaded via LoadAscii default to Unit="Energy"; this workspace is
+  // always in energy transfer, so label it correctly regardless of the input format.
+  m_uiForm.dsInput->setLoadProperty("Unit", std::string("DeltaE"));
 
   // Disables searching for run files in the data archive
   m_uiForm.dsInput->isForRunFiles(false);

@@ -24,6 +24,20 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 namespace {
 using PlottingWorkspacesByName = std::unordered_map<std::string, PlottingWorkspace>;
 
+/// Inherit the parent's scope items and origin, then record the next child's actual position in the tree.
+PlottingWorkspaceContext contextForChildItem(PlottingWorkspaceTreeItem const &parentItem,
+                                             PlottingWorkspaceTreeItemType childItemType,
+                                             std::string const &childWorkspaceName) {
+  auto childPath = parentItem.context.scopeItems.at(parentItem.itemType).path;
+  childPath.emplace_back(static_cast<int>(parentItem.children.size()));
+
+  auto childContext = PlottingWorkspaceContext{};
+  childContext.scopeItems = parentItem.context.scopeItems;
+  childContext.scopeItems[childItemType] = PlottingWorkspaceScopeItem{std::move(childPath), childWorkspaceName};
+  childContext.origin = parentItem.context.origin;
+  return childContext;
+}
+
 /// Return the ADS workspace if the name is non-empty and exists.
 Mantid::API::Workspace_sptr findWorkspace(std::string const &workspaceName) {
   if (workspaceName.empty()) {
@@ -72,22 +86,25 @@ std::vector<std::string> runNumbersForWorkspace(Mantid::API::Workspace const &wo
 
 /// Store a plotting workspace by its ADS name.
 void storePlottingWorkspace(PlottingWorkspacesByName &plottingWorkspacesByName, std::string const &workspaceName,
-                            std::vector<std::string> runNumbers, std::string containingWorkspaceGroupName,
-                            std::optional<int> periodNumber) {
+                            std::vector<std::string> runNumbers, std::optional<int> periodNumber,
+                            PlottingWorkspaceContext const &context) {
   plottingWorkspacesByName[workspaceName] =
-      PlottingWorkspace{workspaceName, std::move(runNumbers), std::move(containingWorkspaceGroupName), periodNumber};
+      PlottingWorkspace{workspaceName, std::move(runNumbers), periodNumber, context};
 }
 
 /// Add a workspace-group tree item if it has named child workspaces.
 void appendWorkspaceGroupItem(PlottingWorkspaceTreeItem &parent, std::string const &workspaceName,
                               Mantid::API::WorkspaceGroup_const_sptr const &workspaceGroup,
-                              ReducedWorkspaceOutputType reducedOutputType,
+                              ReducedWorkspaceOutputType reducedOutputType, PlottingWorkspaceOrigin outputOrigin,
                               PlottingWorkspacesByName &plottingWorkspacesByName) {
   auto workspaceGroupItem = PlottingWorkspaceTreeItem{workspaceName,
                                                       PlottingWorkspaceTreeItemType::WorkspaceGroup,
                                                       ReducedWorkspaceOutputType::None,
                                                       workspaceName,
                                                       {}};
+  workspaceGroupItem.context =
+      contextForChildItem(parent, PlottingWorkspaceTreeItemType::WorkspaceGroup, workspaceName);
+  workspaceGroupItem.context.origin = outputOrigin;
   for (auto index = 0u; index < workspaceGroup->size(); ++index) {
     auto const memberWorkspace = workspaceGroup->getItem(index);
     if (memberWorkspace && !memberWorkspace->getName().empty()) {
@@ -96,9 +113,11 @@ void appendWorkspaceGroupItem(PlottingWorkspaceTreeItem &parent, std::string con
                                              reducedOutputType,
                                              memberWorkspace->getName(),
                                              {}};
+      child.context =
+          contextForChildItem(workspaceGroupItem, PlottingWorkspaceTreeItemType::Workspace, child.workspaceName);
       storePlottingWorkspace(plottingWorkspacesByName, memberWorkspace->getName(),
-                             runNumbersForWorkspace(*memberWorkspace), workspaceName,
-                             periodNumberForWorkspace(*memberWorkspace));
+                             runNumbersForWorkspace(*memberWorkspace), periodNumberForWorkspace(*memberWorkspace),
+                             child.context);
       workspaceGroupItem.children.emplace_back(std::move(child));
     }
   }
@@ -112,7 +131,7 @@ void appendWorkspaceGroupItem(PlottingWorkspaceTreeItem &parent, std::string con
 
 /// Add a workspace or workspace-group item for a named ADS workspace if it exists.
 void appendWorkspaceItemIfPresent(PlottingWorkspaceTreeItem &parent, std::string const &workspaceName,
-                                  ReducedWorkspaceOutputType reducedOutputType,
+                                  ReducedWorkspaceOutputType reducedOutputType, PlottingWorkspaceOrigin outputOrigin,
                                   PlottingWorkspacesByName &plottingWorkspacesByName) {
   auto const workspace = findWorkspace(workspaceName);
   if (!workspace) {
@@ -121,14 +140,17 @@ void appendWorkspaceItemIfPresent(PlottingWorkspaceTreeItem &parent, std::string
 
   if (auto const workspaceGroup = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup const>(workspace);
       workspaceGroup) {
-    appendWorkspaceGroupItem(parent, workspaceName, workspaceGroup, reducedOutputType, plottingWorkspacesByName);
+    appendWorkspaceGroupItem(parent, workspaceName, workspaceGroup, reducedOutputType, outputOrigin,
+                             plottingWorkspacesByName);
     return;
   }
 
   auto item = PlottingWorkspaceTreeItem{
       workspaceName, PlottingWorkspaceTreeItemType::Workspace, reducedOutputType, workspaceName, {}};
-  storePlottingWorkspace(plottingWorkspacesByName, workspaceName, runNumbersForWorkspace(*workspace), "",
-                         periodNumberForWorkspace(*workspace));
+  item.context = contextForChildItem(parent, PlottingWorkspaceTreeItemType::Workspace, workspaceName);
+  item.context.origin = outputOrigin;
+  storePlottingWorkspace(plottingWorkspacesByName, workspaceName, runNumbersForWorkspace(*workspace),
+                         periodNumberForWorkspace(*workspace), item.context);
   parent.children.emplace_back(std::move(item));
 }
 
@@ -140,9 +162,13 @@ void PlottingWorkspaceTree::rebuild(RunsTable const &runsTable) {
   for (auto const &group : runsTable.reductionJobs().groups()) {
     auto groupItem = PlottingWorkspaceTreeItem{
         group.name(), PlottingWorkspaceTreeItemType::ReductionGroup, ReducedWorkspaceOutputType::None, "", {}};
+    groupItem.context.scopeItems[PlotSelectionScope::ReductionGroup] =
+        PlottingWorkspaceScopeItem{{static_cast<int>(m_items.size())}, groupItem.workspaceName};
     if (group.success()) {
-      appendWorkspaceItemIfPresent(groupItem, group.postprocessedWorkspaceName(),
-                                   ReducedWorkspaceOutputType::IvsQBinned, m_plottingWorkspacesByName);
+      for (auto const &workspaceName : group.postprocessedWorkspaceNames()) {
+        appendWorkspaceItemIfPresent(groupItem, workspaceName, ReducedWorkspaceOutputType::IvsQBinned,
+                                     PlottingWorkspaceOrigin::PostprocessedGroupOutput, m_plottingWorkspacesByName);
+      }
     }
 
     for (auto const &maybeRow : group.rows()) {
@@ -156,13 +182,17 @@ void PlottingWorkspaceTree::rebuild(RunsTable const &runsTable) {
                                                ReducedWorkspaceOutputType::None,
                                                "",
                                                {}};
+      runItem.context = contextForChildItem(groupItem, PlottingWorkspaceTreeItemType::Run, runItem.workspaceName);
       auto const &outputs = row.reducedWorkspaceNames();
-      appendWorkspaceItemIfPresent(runItem, outputs.iVsLambda(), ReducedWorkspaceOutputType::IvsLambda,
-                                   m_plottingWorkspacesByName);
-      appendWorkspaceItemIfPresent(runItem, outputs.iVsQ(), ReducedWorkspaceOutputType::IvsQ,
-                                   m_plottingWorkspacesByName);
-      appendWorkspaceItemIfPresent(runItem, outputs.iVsQBinned(), ReducedWorkspaceOutputType::IvsQBinned,
-                                   m_plottingWorkspacesByName);
+
+      for (size_t i = 0; i < outputs.iVsQ().size(); ++i) {
+        appendWorkspaceItemIfPresent(runItem, outputs.iVsLambda()[i], ReducedWorkspaceOutputType::IvsLambda,
+                                     PlottingWorkspaceOrigin::RunOutput, m_plottingWorkspacesByName);
+        appendWorkspaceItemIfPresent(runItem, outputs.iVsQ()[i], ReducedWorkspaceOutputType::IvsQ,
+                                     PlottingWorkspaceOrigin::RunOutput, m_plottingWorkspacesByName);
+        appendWorkspaceItemIfPresent(runItem, outputs.iVsQBinned()[i], ReducedWorkspaceOutputType::IvsQBinned,
+                                     PlottingWorkspaceOrigin::RunOutput, m_plottingWorkspacesByName);
+      }
 
       if (!runItem.children.empty()) {
         groupItem.children.emplace_back(std::move(runItem));
