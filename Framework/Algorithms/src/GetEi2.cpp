@@ -273,10 +273,9 @@ double GetEi2::getDistanceFromSource(size_t ws_index, const SpectrumInfo &spectr
     msg << "A detector for monitor at workspace index " << ws_index << " cannot be found. ";
     throw std::runtime_error(msg.str());
   }
-  auto const &detectorPos = spectrumInfo.position(ws_index);
-  auto const &sourcePos = spectrumInfo.sourcePosition();
-  g_log.debug() << "Detector position = " << detectorPos << ", Source position = " << sourcePos << "\n";
-  const double dist = detectorPos.distance(sourcePos);
+  g_log.debug() << "Detector position = " << spectrumInfo.position(ws_index)
+                << ", Source position = " << spectrumInfo.sourcePosition() << "\n";
+  double const dist = spectrumInfo.meanDistance(ws_index, spectrumInfo.sourcePosition());
   g_log.debug() << "Distance = " << dist << " metres\n";
   return dist;
 }

@@ -64,6 +64,7 @@ public:
   bool isMonitor(const size_t index) const;
   bool isMasked(const size_t index) const;
   double l2(const size_t index) const;
+  double meanDistance(std::size_t const index, Kernel::V3D const &point) const;
   double twoTheta(const size_t index) const;
   double signedTwoTheta(const size_t index) const;
   double azimuthal(const size_t index) const;

@@ -214,8 +214,8 @@ void GetAllEi::exec() {
   auto monitorWS = buildWorkspaceToFit(inputWS, det1WSIndex);
 
   // recalculate delay time from chopper position to monitor position
-  auto const &detector1 = inputWS->spectrumInfo().position(det1WSIndex);
-  double mon1Distance = detector1.distance(moderator->getPos());
+  auto const &spectrumInfo = inputWS->spectrumInfo();
+  double const mon1Distance = spectrumInfo.meanDistance(det1WSIndex, spectrumInfo.sourcePosition());
   double TOF0 = mon1Distance / velocity;
 
   //--->> below is reserved until full chopper's implementation is available;

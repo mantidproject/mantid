@@ -79,6 +79,22 @@ double SpectrumInfo::l2(const size_t index) const {
   return l2 / static_cast<double>(spectrumDef.size());
 }
 
+/** Returns the mean distance from the given point to the detector(s) of the spectrum.
+ *
+ * For a spectrum with more than one detector this is the mean of the distances
+ * of the individual detectors, not the distance to their mean position.
+ * @param index :: the workspace index of the spectrum
+ * @param point :: the point to measure the distances from
+ */
+double SpectrumInfo::meanDistance(std::size_t const index, Kernel::V3D const &point) const {
+  auto const &spectrumDef = checkAndGetSpectrumDefinition(index);
+  auto const sum = std::accumulate(spectrumDef.cbegin(), spectrumDef.cend(), 0.0,
+                                   [this, &point](double const x, std::pair<std::size_t, std::size_t> const &detIndex) {
+                                     return x + m_detectorInfo.position(detIndex).distance(point);
+                                   });
+  return sum / static_cast<double>(spectrumDef.size());
+}
+
 /** Returns the scattering angle 2 theta in radians (angle w.r.t. to beam
  *direction).
  *
