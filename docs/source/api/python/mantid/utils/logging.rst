@@ -15,22 +15,8 @@ It replaces the console channel with ``PythonLoggingChannel``; see the logging s
 It does not configure Python's logging system. You must still add handlers and set levels on the Python side,
 for example with :py:func:`logging.basicConfig`.
 
-Mantid message priorities map to Python logging levels as follows:
-
-+-------------------------------+-----------------------+
-| Mantid priority               | Python level          |
-+===============================+=======================+
-| ``fatal``, ``critical``       | ``CRITICAL``          |
-+-------------------------------+-----------------------+
-| ``error``                     | ``ERROR``             |
-+-------------------------------+-----------------------+
-| ``warning``                   | ``WARNING``           |
-+-------------------------------+-----------------------+
-| ``notice``, ``information``   | ``INFO``              |
-+-------------------------------+-----------------------+
-| ``debug``, ``trace``          | ``DEBUG``             |
-+-------------------------------+-----------------------+
-
+Mantid message priorities are mapped to Python logging levels as described in
+:ref:`Logging priorities <mantid.kernel.Logger.priorities>`.
 A message must pass Mantid's logging level before it is forwarded, and then pass the level of the
 Python logger and its handlers before it is shown.
 To let Python decide which messages to keep, set a low Mantid level with the ``level`` argument.
