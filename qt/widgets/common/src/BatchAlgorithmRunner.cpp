@@ -277,14 +277,12 @@ bool BatchAlgorithmRunner::executeAlgo(const IConfiguredAlgorithm_sptr &algorith
   }
   // If a property name was given that does not match a property
   catch (Mantid::Kernel::Exception::NotFoundError &notFoundEx) {
-    UNUSED_ARG(notFoundEx);
     g_log.warning("Algorithm property does not exist.\nStopping queue execution.");
     postNotification(new AlgorithmErrorNotification(algorithm, notFoundEx.what()));
     return false;
   }
   // If a property was assigned a value of the wrong type
   catch (std::invalid_argument &invalidArgEx) {
-    UNUSED_ARG(invalidArgEx);
     g_log.warning("Algorithm property given value of incorrect type.\nStopping "
                   "queue execution.");
     postNotification(new AlgorithmErrorNotification(algorithm, invalidArgEx.what()));
