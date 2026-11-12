@@ -62,6 +62,7 @@ public:
   }
   double volume() const override { return m_shape->volume(); }
   const BoundingBox &getBoundingBox() const override { return m_shape->getBoundingBox(); }
+  const Kernel::Matrix<double> &getAppliedRotation() const override { return m_shape->getAppliedRotation(); }
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin,
                       double &zmin) const override {
     m_shape->getBoundingBox(xmax, ymax, zmax, xmin, ymin, zmin);

@@ -17,6 +17,16 @@ using Geometry::BoundingBox;
 using Geometry::Track;
 using Kernel::V3D;
 
+namespace {
+void requireOwnFrame(const IObject &component) {
+  if (component.getAppliedRotation() != Kernel::Matrix<double>(3, 3, true)) {
+    throw std::invalid_argument("Sample environment component '" + component.id() +
+                                "' carries a goniometer rotation. Environments are kept as defined, with the "
+                                "goniometer at zero, and turned only when used. Use rotate-all to orient it.");
+  }
+}
+} // namespace
+
 //------------------------------------------------------------------------------
 // Public methods
 //------------------------------------------------------------------------------
@@ -26,9 +36,13 @@ using Kernel::V3D;
  * required by various other users of it
  * @param name A human-readable name for the kit
  * @param container The object that represents the can
+ * @param containerOnGoniometer Whether the can turns with the sample when a goniometer is set
  */
-SampleEnvironment::SampleEnvironment(std::string name, const Container_const_sptr &container)
-    : m_name(std::move(name)), m_components(1, container) {}
+SampleEnvironment::SampleEnvironment(std::string name, const Container_const_sptr &container,
+                                     const bool containerOnGoniometer)
+    : m_name(std::move(name)), m_components(1, container), m_onGoniometer(1, containerOnGoniometer) {
+  requireOwnFrame(*container);
+}
 
 const IObject &SampleEnvironment::getComponent(const size_t index) const {
   if (index > this->nelements()) {
@@ -82,6 +96,11 @@ int SampleEnvironment::interceptSurfaces(Track &track) const {
 
 /**
  * @param component An object defining some component of the environment
+ * @param onGoniometer Whether it turns with the sample when a goniometer is set
  */
-void SampleEnvironment::add(const IObject_const_sptr &component) { m_components.emplace_back(component); }
+void SampleEnvironment::add(const IObject_const_sptr &component, const bool onGoniometer) {
+  requireOwnFrame(*component);
+  m_components.emplace_back(component);
+  m_onGoniometer.emplace_back(onGoniometer);
+}
 } // namespace Mantid::Geometry

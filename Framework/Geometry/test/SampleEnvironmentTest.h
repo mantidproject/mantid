@@ -88,6 +88,31 @@ public:
     TS_ASSERT_DELTA(0.2, widths.Z(), 1e-12);
   }
 
+  void test_The_Container_Turns_With_The_Goniometer_And_Other_Components_Do_Not_By_Default() {
+    auto kit = createTestKit();
+    TS_ASSERT(kit->isOnGoniometer(0));
+    TS_ASSERT(!kit->isOnGoniometer(1));
+  }
+
+  void test_Each_Component_Can_Say_Whether_It_Is_On_The_Goniometer() {
+    using Mantid::Geometry::Container;
+    SampleEnvironment kit("TestKit", std::make_shared<Container>(""), false);
+    kit.add(ComponentCreationHelper::createSphere(0.1), true);
+    TS_ASSERT(!kit.isOnGoniometer(0));
+    TS_ASSERT(kit.isOnGoniometer(1));
+  }
+
+  void test_A_Component_Carrying_A_Goniometer_Rotation_Is_Rejected() {
+    using namespace Mantid::Geometry;
+    auto kit = createTestKit();
+    auto baked = ShapeFactory().createShape(ShapeFactory().addGoniometerTag(
+        ShapeFactory::generateXRotation(M_PI / 2), ComponentCreationHelper::sphereXML(0.1, {0, 0, 0}, "baked")));
+
+    TS_ASSERT_THROWS(kit->add(baked), const std::invalid_argument &);
+    // and through a container, which reports its shape's rotation
+    TS_ASSERT_THROWS(SampleEnvironment("TestKit", std::make_shared<Container>(baked)), const std::invalid_argument &);
+  }
+
 private:
   std::shared_ptr<SampleEnvironment> createTestKit() {
     using namespace Mantid::Geometry;
