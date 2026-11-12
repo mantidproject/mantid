@@ -109,7 +109,7 @@ class TestShowSampleModel_PlotSampleDirections(unittest.TestCase):
 
         sample = MagicMock()
         shape = MagicMock()
-        ws.sample.return_value = sample
+        ws.getLabFrameSample.return_value = sample
         sample.getShape.return_value = shape
         shape.getMesh.return_value = "mesh"
 
@@ -125,6 +125,7 @@ class TestShowSampleModel_PlotSampleDirections(unittest.TestCase):
         # used goniometer rotation
         args, kwargs = mock_get_dirs.call_args
         self.assertTrue(np.all(args[1] == R))  # rotation_matrix argument
+        self.assertEqual(args[2], "mesh")  # the lab-frame sample's mesh
 
         # quiver/text called with scaled vectors
         expected_quiver_calls = [
@@ -153,7 +154,7 @@ class TestShowSampleModel_PlotSampleDirections(unittest.TestCase):
 
         sample = MagicMock()
         shape = MagicMock()
-        ws.sample.return_value = sample
+        ws.getLabFrameSample.return_value = sample
         sample.getShape.return_value = shape
         shape.getMesh.return_value = "mesh"
 
