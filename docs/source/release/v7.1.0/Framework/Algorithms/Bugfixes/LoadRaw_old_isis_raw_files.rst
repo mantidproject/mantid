@@ -1,0 +1,1 @@
+- :ref:`algm-LoadRaw` and :ref:`algm-Load` now read older ISIS RAW files, such as some old TFXA runs, that previously failed to load: files whose counts are stored uncompressed, and files that were wrongly rejected as text files because the start of the file contained only text-like values.
