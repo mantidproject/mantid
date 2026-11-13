@@ -60,9 +60,8 @@ private:
    * @param eventsPerPulse : number of events
    * @param eventType : one of enum EventType {TOF, WEIGHTED, WEIGHTED_NOTIME}
    */
-  EventList generateEvents(const DateAndTime &startTime, double pulsePeriod, size_t nPulses, size_t eventsPerPulse,
-                           EventType eventType = EventType::TOF) {
-    UNUSED_ARG(eventsPerPulse);
+  EventList generateEvents(const DateAndTime &startTime, double pulsePeriod, size_t nPulses,
+                           [[maybe_unused]] size_t eventsPerPulse, EventType eventType = EventType::TOF) {
     static constexpr int64_t nanosecInsec{1000000000};
     static constexpr double microsecInsec{1000000.0};
     int64_t pulsePeriodInNanosec = static_cast<int64_t>(pulsePeriod * nanosecInsec);

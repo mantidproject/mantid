@@ -49,7 +49,7 @@ void WorkspaceSingleValue::init(const std::size_t &NVectors, const std::size_t &
   (void)YLength; // Avoid compiler warning
 }
 
-void WorkspaceSingleValue::init(const HistogramData::Histogram &histogram) { UNUSED_ARG(histogram); }
+void WorkspaceSingleValue::init([[maybe_unused]] const HistogramData::Histogram &histogram) {}
 
 /// Return the underlying Histogram1D at the given workspace index.
 Histogram1D &WorkspaceSingleValue::getSpectrumWithoutInvalidation(const size_t /*index*/) {
@@ -58,13 +58,9 @@ Histogram1D &WorkspaceSingleValue::getSpectrumWithoutInvalidation(const size_t /
 }
 
 /// Rebin the workspace. Not implemented for this workspace.
-void WorkspaceSingleValue::generateHistogram(const std::size_t index, std::span<double const> X, MantidVec &Y,
-                                             MantidVec &E, bool skipError) const {
-  UNUSED_ARG(index);
-  UNUSED_ARG(X);
-  UNUSED_ARG(Y);
-  UNUSED_ARG(E);
-  UNUSED_ARG(skipError);
+void WorkspaceSingleValue::generateHistogram([[maybe_unused]] const std::size_t index,
+                                             [[maybe_unused]] std::span<double const> X, [[maybe_unused]] MantidVec &Y,
+                                             [[maybe_unused]] MantidVec &E, [[maybe_unused]] bool skipError) const {
   throw std::runtime_error("generateHistogram() not implemented for WorkspaceSingleValue.");
 }
 

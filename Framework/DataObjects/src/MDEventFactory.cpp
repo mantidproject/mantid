@@ -267,13 +267,10 @@ MDEventFactory::createMDWorkspaceND(const std::string &eventType,
  * derived histo workspace
  */
 template <>
-API::IMDEventWorkspace *
-MDEventFactory::createMDWorkspaceND<0>(const std::string &eventType,
-                                       const Mantid::API::MDNormalization &preferredNormalization,
-                                       const Mantid::API::MDNormalization &preferredNormalizationHisto) {
-  UNUSED_ARG(eventType);
-  UNUSED_ARG(preferredNormalization);
-  UNUSED_ARG(preferredNormalizationHisto);
+API::IMDEventWorkspace *MDEventFactory::createMDWorkspaceND<0>(
+    [[maybe_unused]] const std::string &eventType,
+    [[maybe_unused]] const Mantid::API::MDNormalization &preferredNormalization,
+    [[maybe_unused]] const Mantid::API::MDNormalization &preferredNormalizationHisto) {
   throw std::invalid_argument("Workspace can not have 0 dimensions");
 }
 
