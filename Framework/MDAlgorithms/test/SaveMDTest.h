@@ -24,6 +24,15 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::MDAlgorithms;
 
+namespace {
+/// Delete a file written by the test. On Windows a freshly written file can be held open briefly by
+/// another process (e.g. a virus scanner), so a failed removal must not fail the test.
+void removeTestFile(const std::string &path) {
+  std::error_code ec;
+  std::filesystem::remove(path, ec);
+}
+} // namespace
+
 /** Note: See the LoadMDTest class
  * for a more thorough test that does
  * a round-trip.
@@ -75,8 +84,7 @@ public:
     // clean up possible rubbish from the previous runs
     std::string fullName = alg.getPropertyValue("Filename");
     if (fullName != "")
-      if (std::filesystem::exists(fullName))
-        std::filesystem::remove(fullName);
+      removeTestFile(fullName);
 
     alg.execute();
     TS_ASSERT(alg.isExecuted());
@@ -96,8 +104,7 @@ public:
       do_test_OtherFileName(ws, this_filename);
     } else {
       ws->clearFileBacked(false);
-      if (std::filesystem::exists(this_filename))
-        std::filesystem::remove(this_filename);
+      removeTestFile(this_filename);
     }
   }
 
@@ -135,8 +142,7 @@ public:
     // Clean up file
     ws->clearFileBacked(false);
     std::string fullPath = alg.getPropertyValue("Filename");
-    if (std::filesystem::exists(fullPath))
-      std::filesystem::remove(fullPath);
+    removeTestFile(fullPath);
   }
 
   void do_test_OtherFileName(const MDEventWorkspace1Lean::sptr &ws, const std::string &originalFileName) {
@@ -182,11 +188,9 @@ public:
     // Clean up file and other file
     ws->clearFileBacked(false);
     std::string fullPath = algSave->getProperty("Filename");
-    if (std::filesystem::exists(fullPath))
-      std::filesystem::remove(fullPath);
+    removeTestFile(fullPath);
 
-    if (std::filesystem::exists(originalFileName))
-      std::filesystem::remove(originalFileName);
+    removeTestFile(originalFileName);
   }
 
   void test_saveExpInfo() {
@@ -226,8 +230,7 @@ public:
     TS_ASSERT(alg.isExecuted());
     std::string this_filename = alg.getProperty("Filename");
     ws->clearFileBacked(false);
-    if (std::filesystem::exists(this_filename))
-      std::filesystem::remove(this_filename);
+    removeTestFile(this_filename);
   }
 
   void test_saveAffine() {
@@ -257,9 +260,7 @@ public:
     TS_ASSERT(alg.isExecuted());
     std::string this_filename = alg.getProperty("Filename");
     ws->clearFileBacked(false);
-    if (std::filesystem::exists(this_filename)) {
-      std::filesystem::remove(this_filename);
-    }
+    removeTestFile(this_filename);
   }
 
   /** Run SaveMD with the MDHistoWorkspace */
@@ -276,8 +277,7 @@ public:
 
     filename = alg.getPropertyValue("Filename");
     TSM_ASSERT("File was indeed created", std::filesystem::exists(filename));
-    if (std::filesystem::exists(filename))
-      std::filesystem::remove(filename);
+    removeTestFile(filename);
   }
 
   void test_histo2() {

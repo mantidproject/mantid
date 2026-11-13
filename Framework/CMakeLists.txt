@@ -76,6 +76,43 @@ set(FRAMEWORK_LIBS
 
 add_custom_target(Framework DEPENDS ${FRAMEWORK_LIBS})
 
+# ######################################################################################################################
+# mantid.simpleapi type stub
+# ######################################################################################################################
+# Regenerate the committed PythonInterface/mantid/simpleapi.pyi with `ninja simpleapi_stubs`. It is not part of "all"
+# because it rewrites a file in the source tree. Note that `clean` deletes the stub; restore it with git or rerun the
+# target.
+set(_simpleapi_stub ${CMAKE_CURRENT_SOURCE_DIR}/PythonInterface/mantid/simpleapi.pyi)
+set(_simpleapi_stub_generator ${CMAKE_SOURCE_DIR}/tools/python_typing/generate_simpleapi_stubs.py)
+# Python algorithms and the mantid package are read from the source tree
+file(GLOB_RECURSE _simpleapi_stub_python_sources ${CMAKE_CURRENT_SOURCE_DIR}/PythonInterface/mantid/*.py
+     ${CMAKE_CURRENT_SOURCE_DIR}/PythonInterface/plugins/*.py
+)
+if(CMAKE_GENERATOR MATCHES "Visual Studio" OR CMAKE_GENERATOR MATCHES "Xcode")
+  set(_simpleapi_stub_module_dir ${CMAKE_BINARY_DIR}/bin/$<CONFIG>)
+else()
+  set(_simpleapi_stub_module_dir ${CMAKE_BINARY_DIR}/bin)
+endif()
+# Depending on the library targets (rather than the Framework utility target, which only orders the build) re-runs the
+# generator whenever one is relinked. The Python extension modules are the dependencies of PythonInterface.
+get_target_property(_simpleapi_stub_python_modules PythonInterface MANUALLY_ADDED_DEPENDENCIES)
+# An empty user properties directory (HOME on Linux/macOS, APPDATA on Windows) keeps settings such as default.facility
+# out of the stub
+set(_simpleapi_stub_home ${CMAKE_CURRENT_BINARY_DIR}/simpleapi_stubs_home)
+
+add_custom_command(
+  OUTPUT ${_simpleapi_stub}
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${_simpleapi_stub_home}
+  COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${_simpleapi_stub_module_dir}" "HOME=${_simpleapi_stub_home}"
+          "APPDATA=${_simpleapi_stub_home}" ${Python_EXECUTABLE} ${_simpleapi_stub_generator} --all
+  DEPENDS ${FRAMEWORK_LIBS} ${_simpleapi_stub_python_modules} ${_simpleapi_stub_generator}
+          ${_simpleapi_stub_python_sources}
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  VERBATIM
+)
+add_custom_target(simpleapi_stubs DEPENDS ${_simpleapi_stub})
+set_property(TARGET simpleapi_stubs PROPERTY FOLDER "MantidFramework/Python")
+
 # Installation settings These need to be here so that a Framework only install will pick them up
 #
 # N.B. INBUNDLE variable is empty except on Mac (set in DarwinSetup.cmake)

@@ -136,6 +136,7 @@ outputs:
     tests:
       - script:
           - test ! -f $PREFIX/plugins/libMantidMPIAlgorithms.so
+          - python -c "from pathlib import Path; import mantid.simpleapi; assert Path(mantid.simpleapi.__file__).with_suffix('.pyi').is_file(), 'simpleapi.pyi is missing from the installed package'"
       - python:
           imports:
             - mantid
