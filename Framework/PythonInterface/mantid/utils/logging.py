@@ -69,12 +69,15 @@ def log_to_python(level=None, pattern=None) -> None:
 
     Note that this function does not configure Python's logging system.
 
-    @param str level: Logging level for the *Mantid* logger. Should be set to a low value
+    :param str level: Logging level for the *Mantid* logger. Should be set to a low value
         to forward all potentially relevant messages to Python and let *Python's* logger
-        filter out undesired messages. Possible values: 'trace', 'debug',
-        'information', 'notice', 'warning', 'error', 'critical', 'fatal'.
-    @param str pattern: A logging pattern to format messages before forwarding them (example: '[%s] %t')
-        See https://github.com/pocoproject/poco/wiki/Poco::Util::Application-Logging-Configuration#logging-format-placeholders
+        filter out undesired messages. Possible values: ``'trace'``, ``'debug'``,
+        ``'information'``, ``'notice'``, ``'warning'``, ``'error'``, ``'critical'``, ``'fatal'``.
+        If ``None``, the current level is unchanged.
+    :param str pattern: A logging pattern to format messages before forwarding them (example: ``'[%s] %t'``).
+        See the `Poco logging format placeholders
+        <https://github.com/pocoproject/poco/wiki/Poco::Util::Application-Logging-Configuration#logging-format-placeholders>`_.
+        If ``None``, the current formatter is unchanged.
     """
     config = ConfigService.Instance()
     if level is not None:
