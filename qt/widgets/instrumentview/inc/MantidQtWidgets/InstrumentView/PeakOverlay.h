@@ -77,8 +77,8 @@ public:
 
 protected:
   /// Returns the base style unmodified.
-  PeakMarker2D::Style getScaledMarker(double intensity, const PeakMarker2D::Style &baseStyle) const override {
-    UNUSED_ARG(intensity);
+  PeakMarker2D::Style getScaledMarker([[maybe_unused]] double intensity,
+                                      const PeakMarker2D::Style &baseStyle) const override {
 
     return baseStyle;
   }

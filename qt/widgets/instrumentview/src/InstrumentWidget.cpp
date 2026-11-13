@@ -1045,8 +1045,7 @@ void InstrumentWidget::set3DAxesState(bool on) {
   }
 }
 
-void InstrumentWidget::finishHandle(const Mantid::API::IAlgorithm *alg) {
-  UNUSED_ARG(alg);
+void InstrumentWidget::finishHandle([[maybe_unused]] const Mantid::API::IAlgorithm *alg) {
   emit needSetIntegrationRange(m_instrumentActor->minBinValue(), m_instrumentActor->maxBinValue());
   // m_instrumentActor->update();
   // m_instrumentDisplay->getGLDisplay()->refreshView();

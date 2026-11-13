@@ -151,13 +151,9 @@ void PanelsSurface::project(const size_t detIndex, double &u, double &v, double 
   uscale = vscale = 1.0;
 }
 
-void PanelsSurface::project(const Mantid::Kernel::V3D &position, double &u, double &v, double &uscale,
-                            double &vscale) const {
-  UNUSED_ARG(position);
-  UNUSED_ARG(u);
-  UNUSED_ARG(v);
-  UNUSED_ARG(uscale);
-  UNUSED_ARG(vscale);
+void PanelsSurface::project([[maybe_unused]] const Mantid::Kernel::V3D &position, [[maybe_unused]] double &u,
+                            [[maybe_unused]] double &v, [[maybe_unused]] double &uscale,
+                            [[maybe_unused]] double &vscale) const {
   throw std::runtime_error("A detector ID is required to project with a PanelsSurface.");
 }
 
