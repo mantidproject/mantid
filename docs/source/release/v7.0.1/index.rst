@@ -14,6 +14,7 @@ The changes are:
 - Fixed a large temporary rise in memory use, and the long pause that came with it, in the new Instrument View for workspaces whose spectra do not all share the same bin edges, such as data in d-spacing. It occurred when changing the projection, masking detectors, or opening the view. `#42675 <https://github.com/mantidproject/mantid/pull/42675>`_
 - The legacy ISIS SANS reduction no longer supports the ``UNWRAP`` user file command, following the removal of UnwrapMonitorsInTOF. ``UNWRAP ON`` is now ignored with a warning. `#42540 <https://github.com/mantidproject/mantid/pull/42540>`_
 - Removed UnwrapMonitorsInTOF and UnwrapSNS (deprecated since release 6.13.0). `#42540 <https://github.com/mantidproject/mantid/pull/42540>`_
+- In algorithm dialogs, when a workspace input is preset to a hidden workspace (one whose name starts with ``__``) and ``Show Invisible Workspaces`` is off in the :ref:`General settings <GeneralSettings>`, the dialog now keeps that workspace selected. Previously it silently switched to the first workspace in the list, so the algorithm could run on the wrong data `#42746 <https://github.com/mantidproject/mantid/pull/42746>`_
 
 Citation
 --------
