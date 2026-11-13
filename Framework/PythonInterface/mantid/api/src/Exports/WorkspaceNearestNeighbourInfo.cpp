@@ -9,6 +9,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/api/RegisterWorkspacePtrToPython.h"
 #include "MantidPythonInterface/core/GetPointer.h"
 #include <boost/python/class.hpp>
@@ -39,9 +40,15 @@ boost::python::dict mapToDict(const std::map<Mantid::specnum_t, Mantid::Kernel::
   return result;
 }
 
-boost::python::dict getNeighboursByDetector(const WorkspaceNearestNeighbourInfo &self,
-                                            const Mantid::Geometry::IDetector *comp, double radius = 0.0) {
-  auto result = self.getNeighbours(comp, radius);
+boost::python::dict getNeighboursByDetectorDeprecated(const WorkspaceNearestNeighbourInfo &self,
+                                                      const Mantid::Geometry::IDetector *comp, double radius = 0.0) {
+  if (PyErr_Warn(PyExc_DeprecationWarning,
+                 "'WorkspaceNearestNeighbourInfo.getNeighbours' with a detector is deprecated in Mantid 7.1. "
+                 "Use the faster 'getNeighbours' with a spectrum number instead. "
+                 "For more information, see the instrument access layers concept page: "
+                 "https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html") < 0)
+    throw boost::python::error_already_set();
+  ALLOW_DEPRECATED(auto const result = self.getNeighbours(comp, radius));
   return mapToDict(result);
 }
 
@@ -62,7 +69,7 @@ void export_WorkspaceNearestNeighbourInfo() {
   class_<WorkspaceNearestNeighbourInfo, boost::noncopyable>("WorkspaceNearestNeighbourInfo", no_init)
       .def("__init__", make_constructor(&createWorkspaceNearestNeighbourInfo, default_call_policies(),
                                         (arg("workspace"), arg("ignoreMaskedDetectors"), arg("nNeighbours") = 8)))
-      .def("getNeighbours", &getNeighboursByDetector, (arg("self"), arg("comp"), arg("radius") = 0.0))
+      .def("getNeighbours", &getNeighboursByDetectorDeprecated, (arg("self"), arg("comp"), arg("radius") = 0.0))
       .def("getNeighbours", &getNeighboursBySpec, (arg("self"), arg("spec_num"), arg("radius")))
       .def("getNeighboursExact", &getNeighboursExact, (arg("self"), arg("spec_num")));
 }
