@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CropWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Progress.h"
 #include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid::Algorithms {
@@ -32,6 +33,7 @@ void CropWorkspace::init() {
                   "An X value that is in the highest X "
                   "value bin to be retained (default: max "
                   "X)");
+
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty("StartWorkspaceIndex", 0, mustBePositive,
@@ -52,6 +54,7 @@ void CropWorkspace::init() {
  */
 void CropWorkspace::exec() {
 
+  auto progress = Progress(this, 0.0, 1.0, 2);
   auto extract = createChildAlgorithm("ExtractSpectra", 0, 1);
   extract->initialize();
   extract->setRethrows(true);
@@ -61,13 +64,14 @@ void CropWorkspace::exec() {
 
   MatrixWorkspace_sptr outputWorkspace = getProperty("OutputWorkspace");
   extract->setProperty("OutputWorkspace", outputWorkspace);
-
+  progress.report("Cropping Xmin-max");
   double xmin = getProperty("XMin");
   extract->setProperty("XMin", xmin);
 
   double xmax = getProperty("XMax");
   extract->setProperty("XMax", xmax);
 
+  progress.report("Cropping workspace index");
   int start = getProperty("StartWorkspaceIndex");
   extract->setProperty("StartWorkspaceIndex", start);
 
