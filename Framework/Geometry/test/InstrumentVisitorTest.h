@@ -163,32 +163,16 @@ public:
     // Visit everything
     visitor.walkInstrument();
 
-    std::set<Mantid::Geometry::ComponentID> componentIds(visitor.componentIds()->begin(),
-                                                         visitor.componentIds()->end());
+    TSM_ASSERT_EQUALS("Expect 4 components", visitor.size(), 4);
 
-    auto componentIdToIndexMap = visitor.componentIdToIndexMap();
+    auto const detector = visitee->getComponentByName("point-detector");
+    TSM_ASSERT_EQUALS("Detectors are guaranteed to occupy the lowest component range", detector->index(), 0);
 
-    TSM_ASSERT_EQUALS("Expect 4 component Ids", componentIds.size(), 4);
-    TSM_ASSERT_EQUALS("Expect 4 component Ids in map", componentIdToIndexMap->size(), 4);
-
-    TSM_ASSERT_EQUALS("Should contain the instrument id", 1, componentIds.count(visitee->getComponentID()));
-    TSM_ASSERT_EQUALS("Should contain the sample id", 1,
-                      componentIds.count(visitee->getComponentByName("some-surface-holder")->getComponentID()));
-    TSM_ASSERT_EQUALS("Should contain the source id", 1,
-                      componentIds.count(visitee->getComponentByName("source")->getComponentID()));
-
-    auto detectorComponentId = visitee->getComponentByName("point-detector")->getComponentID();
-    TSM_ASSERT_EQUALS("Should contain the detector id", 1, componentIds.count(detectorComponentId));
-    TSM_ASSERT_EQUALS("Detectors are guaranteed to occupy the lowest component range",
-                      componentIdToIndexMap->at(detectorComponentId), 0);
-
-    std::set<size_t> uniqueIndices;
-    for (auto id : componentIds) {
-      uniqueIndices.insert(componentIdToIndexMap->at(id));
-    }
-    TSM_ASSERT_EQUALS("We should have unique index values in our map", uniqueIndices.size(), componentIds.size());
-    TSM_ASSERT_EQUALS("Indices are out of range", *std::max_element(uniqueIndices.begin(), uniqueIndices.end()),
-                      componentIds.size() - 1);
+    // The walk of an unparametrized instrument gives each component its index
+    std::set<size_t> uniqueIndices{visitee->index(), visitee->getComponentByName("some-surface-holder")->index(),
+                                   visitee->getComponentByName("source")->index(), detector->index()};
+    TSM_ASSERT_EQUALS("We should have unique indices", uniqueIndices.size(), visitor.size());
+    TSM_ASSERT_EQUALS("Indices are out of range", *uniqueIndices.rbegin(), visitor.size() - 1);
   }
 
   void test_visitor_detector_ranges_check() {
@@ -428,8 +412,12 @@ public:
     TS_ASSERT_EQUALS(componentInfo->indexOfAny("basic_rect"), componentInfo->root());
 
     // Check all names are the same in old instrument and component info
-    for (size_t index = 0; index < componentInfo->size(); ++index) {
-      TS_ASSERT_EQUALS(componentInfo->componentID(index)->getName(), componentInfo->name(index));
+    std::vector<IComponent_const_sptr> components;
+    static_cast<ICompAssembly const &>(*instrument).getChildren(components, true);
+    components.emplace_back(instrument);
+    TS_ASSERT_EQUALS(components.size(), componentInfo->size());
+    for (auto const &component : components) {
+      TS_ASSERT_EQUALS(component->getName(), componentInfo->name(component->index()));
     }
   }
 

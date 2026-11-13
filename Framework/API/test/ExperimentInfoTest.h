@@ -80,7 +80,7 @@ public:
 
     // But the base instrument does!
     const auto &baseComponentInfo = ws.baseComponentInfo();
-    TS_ASSERT_EQUALS(baseComponentInfo.componentID(baseComponentInfo.root()), inst1->getComponentID());
+    TS_ASSERT(baseComponentInfo.hasSameBase(*inst1->makeBaseBeamline().first));
     TS_ASSERT_EQUALS(baseComponentInfo.name(baseComponentInfo.root()), "MyTestInst");
   }
 
@@ -356,6 +356,20 @@ public:
       TS_ASSERT_EQUALS(baseComponentInfo.position(index), componentInfo.position(index));
       TS_ASSERT_EQUALS(baseComponentInfo.rotation(index), componentInfo.rotation(index));
     }
+  }
+
+  void test_workspaces_of_one_instrument_share_its_base() {
+    auto const instrument = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    ExperimentInfo first;
+    first.setInstrument(instrument);
+    ExperimentInfo second;
+    second.setInstrument(instrument);
+    ExperimentInfo other;
+    other.setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(1));
+
+    TS_ASSERT(first.componentInfo().hasSameBase(second.componentInfo()));
+    TS_ASSERT(first.componentInfo().hasSameBase(first.baseComponentInfo()));
+    TS_ASSERT(!first.componentInfo().hasSameBase(other.componentInfo()));
   }
 
   void test_baseComponentInfo_is_unaffected_by_moves_and_rotations() {
@@ -753,7 +767,7 @@ public:
     // Test the single bank
     auto bank = inst->getComponentByName("bank1");
     auto bankID = bank->getComponentID();
-    auto allBankDetectorIndexes = compInfo.detectorsInSubtree(compInfo.indexOf(bankID));
+    auto allBankDetectorIndexes = compInfo.detectorsInSubtree(bankID->index());
 
     TSM_ASSERT_EQUALS("Should have all detectors under this bank", allBankDetectorIndexes.size(),
                       detInfo.size()); //
@@ -761,7 +775,7 @@ public:
     // Test one of the bank rows
     auto bankRowID =
         std::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(bank)->getChild(0)->getComponentID();
-    auto allRowDetectorIndexes = compInfo.detectorsInSubtree(compInfo.indexOf(bankRowID));
+    auto allRowDetectorIndexes = compInfo.detectorsInSubtree(bankRowID->index());
 
     TSM_ASSERT_EQUALS("Should have all detectors under this row", allRowDetectorIndexes.size(),
                       10); //
@@ -802,11 +816,11 @@ public:
     // Test non-detector, non-assembly components
     auto sampleId = inst->getComponentByName("sample")->getComponentID();
     TSM_ASSERT_EQUALS("Sample should not report any nested detector indexes",
-                      compInfo.detectorsInSubtree(compInfo.indexOf(sampleId)).size(), 0);
+                      compInfo.detectorsInSubtree(sampleId->index()).size(), 0);
 
     auto sourceId = inst->getComponentByName("source")->getComponentID();
     TSM_ASSERT_EQUALS("Source should not report any nested detector indexes",
-                      compInfo.detectorsInSubtree(compInfo.indexOf(sourceId)).size(), 0);
+                      compInfo.detectorsInSubtree(sourceId->index()).size(), 0);
   }
 
   void test_component_info_source_sample_l1() {
@@ -837,14 +851,14 @@ public:
 
     // Test non-detector, non-assembly components
     auto sampleId = inst->getComponentByName("sample")->getComponentID();
-    TS_ASSERT_EQUALS(compInfo.componentsInSubtree(compInfo.indexOf(sampleId)).size(), 1);
+    TS_ASSERT_EQUALS(compInfo.componentsInSubtree(sampleId->index()).size(), 1);
 
     auto sourceId = inst->getComponentByName("source")->getComponentID();
-    TS_ASSERT_EQUALS(compInfo.componentsInSubtree(compInfo.indexOf(sourceId)).size(), 1);
+    TS_ASSERT_EQUALS(compInfo.componentsInSubtree(sourceId->index()).size(), 1);
 
     auto bankId = inst->getComponentByName("bank1")->getComponentID();
     TSM_ASSERT_EQUALS("Bank should yield entire sub-tree of component indices",
-                      compInfo.componentsInSubtree(compInfo.indexOf(bankId)).size(), (nPixels * nPixels) + nPixels + 1);
+                      compInfo.componentsInSubtree(bankId->index()).size(), (nPixels * nPixels) + nPixels + 1);
 
     auto instrumentId = inst->getComponentID();
     size_t nComponents = nPixels * nPixels;
@@ -854,9 +868,9 @@ public:
     nComponents += 1;       // sample
     nComponents += 1;       // self
     TSM_ASSERT_EQUALS("Instrument should yield entire tree of component indices",
-                      compInfo.componentsInSubtree(compInfo.indexOf(instrumentId)).size(), nComponents);
+                      compInfo.componentsInSubtree(instrumentId->index()).size(), nComponents);
 
-    TS_ASSERT_EQUALS(compInfo.indexOf(inst->getComponentID()), compInfo.parent(compInfo.indexOf(bankId)));
+    TS_ASSERT_EQUALS(inst->index(), compInfo.parent(bankId->index()));
   }
 
   void test_readParameterMap_semicolons_in_value() {
@@ -952,7 +966,7 @@ public:
     expt.setInstrument(inst);
 
     const auto &componentInfo = expt.componentInfo();
-    const auto compIndex = componentInfo.indexOf(comp->getComponentID());
+    const auto compIndex = comp->index();
     const auto &logfileParameters = componentInfo.logfileParameters();
     TS_ASSERT_EQUALS(logfileParameters.size(), 1);
     TS_ASSERT_EQUALS(logfileParameters.begin()->first, std::make_pair(compIndex, std::string("a-double")));
@@ -968,7 +982,7 @@ public:
     withParameter.setInstrument(inst);
     ExperimentInfo without;
     without.setInstrument(inst);
-    const auto compIndex = withParameter.componentInfo().indexOf(comp->getComponentID());
+    const auto compIndex = comp->index();
 
     withParameter.mutableComponentInfo().addLogfileParameter(compIndex, "a-double",
                                                              makeLogfileParameter("a-double", "1.5", comp));
@@ -987,7 +1001,7 @@ public:
     const auto comp = inst->getChild(0).get();
     ExperimentInfo original;
     original.setInstrument(inst);
-    const auto compIndex = original.componentInfo().indexOf(comp->getComponentID());
+    const auto compIndex = comp->index();
     original.mutableComponentInfo().addLogfileParameter(compIndex, "a-double",
                                                         makeLogfileParameter("a-double", "1.5", comp));
 

@@ -40,20 +40,6 @@ using namespace Mantid::Geometry;
 
 namespace {
 
-/*
- Helper function to create an ID -> index map from an ordered collection of IDs.
- First ID gets index of 0, subsequent ID entries increment index by 1.
-*/
-std::shared_ptr<const std::unordered_map<Mantid::Geometry::IComponent const *, size_t>>
-makeComponentIDMap(const std::shared_ptr<const std::vector<Mantid::Geometry::ComponentID>> &componentIds) {
-  auto idMap = std::make_shared<std::unordered_map<Mantid::Geometry::IComponent const *, size_t>>();
-
-  for (size_t i = 0; i < componentIds->size(); ++i) {
-    (*idMap.get())[(*componentIds)[i]] = i;
-  }
-  return idMap;
-}
-
 std::shared_ptr<CSGObject> createCappedCylinder() {
   std::string C31 = "cx 0.5"; // cylinder x-axis radius 0.5
   std::string C32 = "px 1.2";
@@ -125,50 +111,6 @@ public:
   static ComponentInfoTest *createSuite() { return new ComponentInfoTest(); }
   static void destroySuite(ComponentInfoTest *suite) { delete suite; }
 
-  void test_indexOf() {
-    auto detectorIndices = std::make_shared<std::vector<size_t>>(); // No detectors in this
-                                                                    // example
-    auto detectorRanges = std::make_shared<std::vector<std::pair<size_t, size_t>>>();
-    detectorRanges->emplace_back(std::make_pair(0, 0)); // One component with no detectors
-    detectorRanges->emplace_back(std::make_pair(0, 0)); // Another component with no detectors
-
-    auto componentIndices =
-        std::make_shared<std::vector<size_t>>(std::vector<size_t>{0, 1}); // No detectors in this example
-    auto componentRanges = std::make_shared<std::vector<std::pair<size_t, size_t>>>();
-    componentRanges->emplace_back(std::make_pair(0, 0)); // One component with no sub-components
-    componentRanges->emplace_back(std::make_pair(0, 0)); // Another component with no subcomponents
-
-    auto parentIndices =
-        std::make_shared<const std::vector<size_t>>(std::vector<size_t>{9, 9, 9}); // These indices are invalid, but
-                                                                                   // that's ok as not being tested here
-
-    auto positions = std::make_shared<std::vector<Eigen::Vector3d>>(2);
-    auto rotations = std::make_shared<std::vector<Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>>(2);
-    auto scaleFactors = std::make_shared<std::vector<Eigen::Vector3d>>(2);
-    auto names = std::make_shared<std::vector<std::string>>(2);
-    using Mantid::Beamline::ComponentType;
-    auto isRectBank = std::make_shared<std::vector<ComponentType>>(2, ComponentType::Generic);
-    auto children = std::make_shared<std::vector<std::vector<size_t>>>(1, std::vector<size_t>(1));
-    auto sideBySideViewPositions = std::make_shared<std::map<size_t, Eigen::Vector2d>>();
-    auto pixelGridComponents = std::make_shared<std::map<size_t, Beamline::PixelGridComponent>>();
-    auto internalInfo = std::make_unique<Beamline::ComponentInfo>(
-        detectorIndices, detectorRanges, componentIndices, componentRanges, parentIndices, children, positions,
-        rotations, scaleFactors, isRectBank, names, sideBySideViewPositions, pixelGridComponents, -1, -1);
-    Mantid::Geometry::ObjComponent comp1("component1");
-    Mantid::Geometry::ObjComponent comp2("component2");
-
-    auto componentIds = std::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
-        std::vector<Mantid::Geometry::ComponentID>{&comp1, &comp2});
-
-    auto shapes = std::make_shared<std::vector<std::shared_ptr<const Geometry::IObject>>>();
-    shapes->emplace_back(std::make_shared<const Geometry::CSGObject>());
-    shapes->emplace_back(std::make_shared<const Geometry::CSGObject>());
-
-    ComponentInfo info(std::move(internalInfo), componentIds, makeComponentIDMap(componentIds), shapes);
-    TS_ASSERT_EQUALS(info.indexOf(comp1.getComponentID()), 0);
-    TS_ASSERT_EQUALS(info.indexOf(comp2.getComponentID()), 1);
-  }
-
   void test_side_by_side_view_position() {
     auto detectorIndices = std::make_shared<std::vector<size_t>>(); // No detectors in this example
     auto detectorRanges = std::make_shared<std::vector<std::pair<size_t, size_t>>>();
@@ -200,31 +142,22 @@ public:
     auto internalInfo = std::make_unique<Beamline::ComponentInfo>(
         detectorIndices, detectorRanges, componentIndices, componentRanges, parentIndices, children, positions,
         rotations, scaleFactors, isRectBank, names, sideBySideViewPositions, pixelGridComponents, -1, -1);
-
-    Mantid::Geometry::ObjComponent comp1("component1");
-    Mantid::Geometry::ObjComponent comp2("component2");
-    auto componentIds = std::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
-        std::vector<Mantid::Geometry::ComponentID>{&comp1, &comp2});
     auto shapes = std::make_shared<std::vector<std::shared_ptr<const Geometry::IObject>>>();
     shapes->emplace_back(std::make_shared<const Geometry::CSGObject>());
     shapes->emplace_back(std::make_shared<const Geometry::CSGObject>());
 
-    ComponentInfo info(std::move(internalInfo), componentIds, makeComponentIDMap(componentIds), shapes);
+    ComponentInfo info(std::move(internalInfo), shapes);
     TS_ASSERT_EQUALS(info.sideBySideViewPosition(0), Kernel::V2D(2.0, 3.5));
     TSM_ASSERT_EQUALS("Not set for component 1", info.sideBySideViewPosition(1), Kernel::V2D(EMPTY_DBL(), EMPTY_DBL()));
   }
 
   void test_partial_copy() {
     auto internalInfo = makeSingleBeamlineComponentInfo();
-    Mantid::Geometry::ObjComponent comp1("component1", createCappedCylinder());
-
-    auto componentIds = std::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
-        std::vector<Mantid::Geometry::ComponentID>{&comp1});
 
     auto shapes = std::make_shared<std::vector<std::shared_ptr<const Geometry::IObject>>>();
     shapes->emplace_back(createCappedCylinder());
 
-    ComponentInfo a(std::move(internalInfo), componentIds, makeComponentIDMap(componentIds), shapes);
+    ComponentInfo a(std::move(internalInfo), shapes);
 
     // Make the copy
     auto b = a.cloneWithoutDetectorInfo();
@@ -233,22 +166,16 @@ public:
     TS_ASSERT_EQUALS(b->size(), a.size());
     // Shapes are the same
     TS_ASSERT_EQUALS(&b->shape(0), &a.shape(0));
-    // IDs are the same
-    TS_ASSERT_EQUALS(b->indexOf(&comp1), a.indexOf(&comp1));
     TS_ASSERT(!b->hasDetectorInfo());
   }
 
   void test_hasValidShape() {
     auto internalInfo = makeSingleBeamlineComponentInfo();
-    Mantid::Geometry::ObjComponent comp1("component1", createCappedCylinder());
-
-    auto componentIds = std::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
-        std::vector<Mantid::Geometry::ComponentID>{&comp1});
 
     auto shapes = std::make_shared<std::vector<std::shared_ptr<const Geometry::IObject>>>();
     shapes->emplace_back(createCappedCylinder());
 
-    ComponentInfo compInfo(std::move(internalInfo), componentIds, makeComponentIDMap(componentIds), shapes);
+    ComponentInfo compInfo(std::move(internalInfo), shapes);
 
     TS_ASSERT(compInfo.hasValidShape(0));
     // Nullify the shape of the component
@@ -264,15 +191,11 @@ public:
     auto rotation = Eigen::Quaterniond(Eigen::Affine3d::Identity().rotation());
 
     auto internalInfo = makeSingleBeamlineComponentInfo(position, rotation);
-    Mantid::Geometry::ObjComponent comp1("component1", createCappedCylinder());
-
-    auto componentIds = std::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
-        std::vector<Mantid::Geometry::ComponentID>{&comp1});
 
     auto shapes = std::make_shared<std::vector<std::shared_ptr<const Geometry::IObject>>>();
     shapes->emplace_back(ComponentCreationHelper::createSphere(radius));
 
-    ComponentInfo info(std::move(internalInfo), componentIds, makeComponentIDMap(componentIds), shapes);
+    ComponentInfo info(std::move(internalInfo), shapes);
 
     double satol = 1e-9; // tolerance for solid angle
 
@@ -294,15 +217,11 @@ public:
     auto position = Eigen::Vector3d{10, 0, 0};
     auto rotation = Eigen::Quaterniond(Eigen::AngleAxisd(M_PI / 2, Eigen::Vector3d::UnitZ()));
     auto internalInfo = makeSingleBeamlineComponentInfo(position, rotation);
-    Mantid::Geometry::ObjComponent comp1("component1", createCappedCylinder());
-
-    auto componentIds = std::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
-        std::vector<Mantid::Geometry::ComponentID>{&comp1});
 
     auto shapes = std::make_shared<std::vector<std::shared_ptr<const Geometry::IObject>>>();
     shapes->emplace_back(createCappedCylinder());
 
-    ComponentInfo info(std::move(internalInfo), componentIds, makeComponentIDMap(componentIds), shapes);
+    ComponentInfo info(std::move(internalInfo), shapes);
 
     double satol = 2e-2; // tolerance for solid angle
     TS_ASSERT_DELTA(info.solidAngle(0, V3D(10, 1.7, 0)), 1.840302, satol);
@@ -313,15 +232,11 @@ public:
     const double radius = 2;
     Eigen::Vector3d position{1, 1, 1};
     auto internalInfo = makeSingleBeamlineComponentInfo(position);
-    Mantid::Geometry::ObjComponent comp1("component1", ComponentCreationHelper::createSphere(radius));
-
-    auto componentIds = std::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
-        std::vector<Mantid::Geometry::ComponentID>{&comp1});
 
     auto shapes = std::make_shared<std::vector<std::shared_ptr<const Geometry::IObject>>>();
     shapes->emplace_back(ComponentCreationHelper::createSphere(radius));
 
-    ComponentInfo componentInfo(std::move(internalInfo), componentIds, makeComponentIDMap(componentIds), shapes);
+    ComponentInfo componentInfo(std::move(internalInfo), shapes);
 
     BoundingBox boundingBox = componentInfo.boundingBox(0 /*componentIndex*/);
 
@@ -348,16 +263,11 @@ public:
 
     Eigen::Vector3d position{1., 1., 1.};
     auto internalInfo = makeSingleBeamlineComponentInfo(position);
-    Mantid::Geometry::ObjComponent comp1(
-        "component1", ComponentCreationHelper::createCappedCylinder(radius, height, baseCentre, axis, id));
-
-    auto componentIds = std::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
-        std::vector<Mantid::Geometry::ComponentID>{&comp1});
 
     auto shapes = std::make_shared<std::vector<std::shared_ptr<const Geometry::IObject>>>();
     shapes->push_back(ComponentCreationHelper::createCappedCylinder(radius, height, baseCentre, axis, id));
 
-    ComponentInfo componentInfo(std::move(internalInfo), componentIds, makeComponentIDMap(componentIds), shapes);
+    ComponentInfo componentInfo(std::move(internalInfo), shapes);
 
     BoundingBox boundingBox = componentInfo.boundingBox(0 /*componentIndex*/);
 
@@ -912,7 +822,7 @@ public:
 
     auto wrappers = InstrumentVisitor::makeWrappers(*instrument, &pmap);
     const auto &componentInfo = std::get<0>(wrappers);
-    const size_t bankIndex = componentInfo->indexOf(bank->getComponentID());
+    const size_t bankIndex = bank->index();
 
     // The rekey carried the existing parameter across...
     TS_ASSERT_EQUALS(componentInfo->getNumberParameter(bankIndex, "from_the_map").at(0), 1.0);
@@ -1025,7 +935,7 @@ public:
     pmap.addString(bank.get(), "a_string", "hello");
     auto wrappers = InstrumentVisitor::makeWrappers(*instrument, &pmap);
     auto const &componentInfo = *std::get<0>(wrappers);
-    auto const bankIndex = componentInfo.indexOf(bank->getComponentID());
+    auto const bankIndex = bank->index();
     auto const detectorIndex = componentInfo.children(componentInfo.children(bankIndex)[0])[0];
     auto const parametrizedBank = ParComponentFactory::create(bank, &pmap);
 
@@ -1083,7 +993,7 @@ public:
     ParameterMap pmap;
     auto wrappers = InstrumentVisitor::makeWrappers(*instrument, &pmap);
     auto &componentInfo = *std::get<0>(wrappers);
-    auto const bankIndex = componentInfo.indexOf(bank->getComponentID());
+    auto const bankIndex = bank->index();
     auto const detectorIndex = componentInfo.children(componentInfo.children(bankIndex)[0])[0];
 
     TS_ASSERT_EQUALS(componentInfo.getDescription(bankIndex), "");
@@ -1122,7 +1032,8 @@ public:
     TS_ASSERT_EQUALS(componentInfo.getParameterAsString(detectorIndex, "a_string"), "hello");
     TS_ASSERT_EQUALS(componentInfo.getParameterAsString(detectorIndex, "a_string", false), "");
     TS_ASSERT_EQUALS(componentInfo.getParameterAsString(detectorIndex, "a_string"),
-                     pmap.getString(componentInfo.componentID(detectorIndex), "a_string", true));
+                     pmap.getString(instrument->getDetector(std::get<1>(wrappers)->detectorIDs()[detectorIndex]).get(),
+                                    "a_string", true));
   }
 
   /// The whole point of writing through ComponentInfo: it lands in the same store the owning
@@ -1133,7 +1044,7 @@ public:
     ParameterMap pmap;
     auto wrappers = InstrumentVisitor::makeWrappers(*instrument, &pmap);
     auto &componentInfo = *std::get<0>(wrappers);
-    const size_t bankIndex = componentInfo.indexOf(bank->getComponentID());
+    const size_t bankIndex = bank->index();
 
     componentInfo.addDouble(bankIndex, "written_via_2_0", 42.0);
 
@@ -1210,6 +1121,27 @@ public:
     TS_ASSERT_EQUALS(std::get<0>(wrappers)->referenceFrame(), frame);
   }
 
+  void test_hasSameBase_for_clones_of_the_cached_beamline() {
+    auto const instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 2);
+    auto const [base, baseDetectorInfo] = instrument->makeBaseBeamline();
+    ParameterMap pmap;
+    auto const [attached, attachedDetectorInfo] = instrument->makeBeamline(pmap);
+    auto const copy = attached->cloneWithoutDetectorInfo();
+
+    TS_ASSERT(base->hasSameBase(*attached));
+    TS_ASSERT(attached->hasSameBase(*base));
+    TS_ASSERT(copy->hasSameBase(*base));
+  }
+
+  void test_hasSameBase_is_false_for_another_instrument() {
+    auto const instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 2);
+    auto const other = ComponentCreationHelper::createTestInstrumentRectangular2(1, 2);
+    auto const [base, baseDetectorInfo] = instrument->makeBaseBeamline();
+    auto const [otherBase, otherDetectorInfo] = other->makeBaseBeamline();
+
+    TS_ASSERT(!base->hasSameBase(*otherBase));
+  }
+
   void test_referenceFrame_is_kept_by_a_copy() {
     auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 2);
     const auto frame = std::make_shared<ReferenceFrame>(X, Y, Left, "source");
@@ -1225,7 +1157,7 @@ public:
     InstrumentVisitor visitor(instrument);
     visitor.walkInstrument();
     // built without a frame, as by a caller that passes none
-    ComponentInfo componentInfo(visitor.componentInfo(), visitor.componentIds(), visitor.componentIdToIndexMap(),
+    ComponentInfo componentInfo(visitor.componentInfo(),
                                 std::make_shared<std::vector<std::shared_ptr<const IObject>>>(visitor.size()));
 
     TS_ASSERT(componentInfo.referenceFrame());
@@ -1293,7 +1225,7 @@ public:
     for (size_t i = 0; i < componentInfo.size(); ++i) {
       auto const &name = componentInfo.name(i);
       auto const legacy = instrument->getComponentByName(name);
-      TSM_ASSERT_EQUALS(name, componentInfo.indexOfAny(name), componentInfo.indexOf(legacy.get()));
+      TSM_ASSERT_EQUALS(name, componentInfo.indexOfAny(name), legacy->index());
     }
   }
 
@@ -1307,9 +1239,12 @@ public:
 
     // Every component must agree with IComponent::getFullName(), which is the identifier
     // ParameterMap serialization writes for non-detector components.
-    for (size_t i = 0; i < componentInfo->size(); ++i) {
-      const auto *component = componentInfo->componentID(i);
-      TS_ASSERT_EQUALS(componentInfo->fullName(i), component->getFullName());
+    std::vector<IComponent_const_sptr> components;
+    static_cast<ICompAssembly const &>(*instrument).getChildren(components, true);
+    components.emplace_back(instrument);
+    TS_ASSERT_EQUALS(components.size(), componentInfo->size());
+    for (auto const &component : components) {
+      TS_ASSERT_EQUALS(componentInfo->fullName(component->index()), component->getFullName());
     }
   }
 

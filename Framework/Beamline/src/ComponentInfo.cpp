@@ -524,6 +524,26 @@ bool ComponentInfo::hasSource() const { return m_sourceIndex >= 0; }
  *
  * @returns true if sources are equivalent
  */
+/// True if both were cloned from the same base, i.e. they describe the same instrument. Clones share the
+/// structure arrays, which are never written after construction.
+bool ComponentInfo::hasSameBase(ComponentInfo const &other) const { return m_parentIndices == other.m_parentIndices; }
+
+/// Shares the base's tree structure when it matches this one's, so that hasSameBase() holds for a ComponentInfo built
+/// by a separate walk of the same tree.
+void ComponentInfo::shareBase(ComponentInfo const &base) {
+  if (*m_parentIndices != *base.m_parentIndices || *m_detectorRanges != *base.m_detectorRanges ||
+      *m_componentRanges != *base.m_componentRanges ||
+      *m_assemblySortedDetectorIndices != *base.m_assemblySortedDetectorIndices ||
+      *m_assemblySortedComponentIndices != *base.m_assemblySortedComponentIndices) {
+    return;
+  }
+  m_parentIndices = base.m_parentIndices;
+  m_detectorRanges = base.m_detectorRanges;
+  m_componentRanges = base.m_componentRanges;
+  m_assemblySortedDetectorIndices = base.m_assemblySortedDetectorIndices;
+  m_assemblySortedComponentIndices = base.m_assemblySortedComponentIndices;
+}
+
 bool ComponentInfo::hasEquivalentSource(const ComponentInfo &other) const {
   if (this->hasSource() && other.hasSource()) {
     return (this->sourcePosition() - other.sourcePosition()).norm() < 1e-9;

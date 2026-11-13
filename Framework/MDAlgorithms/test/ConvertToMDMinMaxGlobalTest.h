@@ -63,12 +63,11 @@ Mantid::API::MatrixWorkspace_sptr MakeWorkspace(double xmin, double dx, bool del
 
   ws->setInstrument(testInst);
 
-  auto &pmap = ws->instrumentParameters();
+  auto &componentInfo = ws->mutableComponentInfo();
   const auto &specInfo = ws->spectrumInfo();
-  auto const &componentInfo = ws->componentInfo();
   if (Ef > 0) {
     for (int i = 0; i < nHist; i++) {
-      pmap.addDouble(componentInfo.componentID(specInfo.firstDetectorIndex(i)), "Efixed", Ef);
+      componentInfo.addDouble(specInfo.firstDetectorIndex(i), "Efixed", Ef);
     }
   }
 

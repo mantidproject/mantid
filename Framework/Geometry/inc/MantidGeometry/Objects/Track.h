@@ -18,6 +18,7 @@
 #include <boost/container/small_vector.hpp>
 
 #include <iosfwd>
+#include <limits>
 #include <list>
 
 namespace Mantid {
@@ -29,6 +30,9 @@ class Logger;
 }
 
 namespace Geometry {
+
+/// Component index of a track point or link that is not part of an instrument (ComponentInfo::invalidIndex)
+constexpr size_t noComponent = std::numeric_limits<size_t>::max();
 
 /**
 \struct Link
@@ -43,20 +47,20 @@ struct MANTID_GEOMETRY_DLL Link {
    * @param exit :: Kernel::V3D point to end track
    * @param totalDistance :: Total distance from start of track
    * @param obj :: A reference to the object that was intersected
-   * @param compID :: An optional component identifier for the physical object
-   * hit. (Default=NULL)
+   * @param compIndex :: An optional component index of the physical object
+   * hit. (Default=noComponent)
    */
   inline Link(const Kernel::V3D &entry, const Kernel::V3D &exit, const double totalDistance, const IObject &obj,
-              const ComponentID compID = nullptr)
+              const size_t compIndex = noComponent)
       : entryPoint(entry), exitPoint(exit), distFromStart(totalDistance),
-        distInsideObject(entryPoint.distance(exitPoint)), object(&obj), componentID(compID) {}
+        distInsideObject(entryPoint.distance(exitPoint)), object(&obj), componentIndex(compIndex) {}
   /// Less than operator
   inline bool operator<(const Link &other) const { return distFromStart < other.distFromStart; }
   /// Less than operator
   inline bool operator<(const double &other) const { return distFromStart < other; }
 
   inline bool operator==(const Link &other) const {
-    if (componentID != other.componentID) {
+    if (componentIndex != other.componentIndex) {
       return false;
     }
 
@@ -82,7 +86,7 @@ struct MANTID_GEOMETRY_DLL Link {
   double distFromStart;    ///< Total distance from track beginning
   double distInsideObject; ///< Total distance covered inside object
   const IObject *object;   ///< The object that was intersected
-  ComponentID componentID; ///< ComponentID of the intersected component
+  size_t componentIndex;   ///< Component index of the intersected component
                            //@}
 };
 
@@ -98,7 +102,7 @@ MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &os, const TrackDirect
 
 /**
  * Stores a point of intersection along a track. The component intersected
- * is linked using its ComponentID.
+ * is linked using its component index.
  *
  * Ordering for IntersectionPoint is special since we need that when dist is
  * close that the +/- flag is taken into account.
@@ -110,13 +114,14 @@ struct IntersectionPoint {
    * respect to the object: +1 is entering, -1 is leaving.
    * @param end :: The end point for this partial segment
    * @param distFromStartOfTrack :: Total distance from start of track
-   * @param compID :: An optional unique ID marking the component intersected.
-   * (Default=NULL)
    * @param obj :: A reference to the object that was intersected
+   * @param compIndex :: An optional component index of the component intersected.
+   * (Default=noComponent)
    */
   inline IntersectionPoint(const TrackDirection direction, const Kernel::V3D &end, const double distFromStartOfTrack,
-                           const IObject &obj, const ComponentID compID = nullptr)
-      : direction(direction), endPoint(end), distFromStart(distFromStartOfTrack), object(&obj), componentID(compID) {}
+                           const IObject &obj, const size_t compIndex = noComponent)
+      : direction(direction), endPoint(end), distFromStart(distFromStartOfTrack), object(&obj),
+        componentIndex(compIndex) {}
 
   /**
    * A IntersectionPoint is less-than another if either
@@ -152,7 +157,7 @@ struct IntersectionPoint {
   Kernel::V3D endPoint;     ///< Point
   double distFromStart;     ///< Total distance from track begin
   const IObject *object;    ///< The object that was intersected
-  ComponentID componentID;  ///< Unique component ID
+  size_t componentIndex;    ///< Component index of the intersected component
                             //@}
 };
 
@@ -175,10 +180,10 @@ public:
   virtual ~Track() = default;
   /// Adds a point of intersection to the track
   void addPoint(const TrackDirection direction, const Kernel::V3D &endPoint, const IObject &obj,
-                const ComponentID compID = nullptr);
+                const size_t compIndex = noComponent);
   /// Adds a link to the track
   int addLink(const Kernel::V3D &firstPoint, const Kernel::V3D &secondPoint, const double distanceAlongTrack,
-              const IObject &obj, const ComponentID compID = nullptr);
+              const IObject &obj, const size_t compIndex = noComponent);
   /// Remove touching Links that have identical components
   void removeCojoins();
   /// Construct links between added points

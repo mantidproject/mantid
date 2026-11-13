@@ -544,6 +544,40 @@ public:
     TS_ASSERT_EQUALS(instr->findRectDetectors(), expectedDetectors);
   }
 
+  void test_component_index_is_set_when_the_beamline_is_cached() {
+    auto const instrument = ComponentCreationHelper::createTestInstrumentRectangular2(2, 2);
+    auto const [componentInfo, detectorInfo] = instrument->makeBaseBeamline();
+
+    auto const bank = instrument->getComponentByName("bank2");
+    TS_ASSERT_EQUALS(componentInfo->name(bank->index()), "bank2");
+    auto const detector = instrument->getDetector(detectorInfo->detectorIDs()[1]);
+    TS_ASSERT_EQUALS(detector->index(), 1);
+
+    // A parametrized component has the index of its base component
+    auto const parametrized = std::make_shared<Instrument>(instrument, std::make_shared<ParameterMap>());
+    TS_ASSERT_EQUALS(parametrized->getComponentByName("bank2")->index(), bank->index());
+    TS_ASSERT_EQUALS(parametrized->getDetector(detectorInfo->detectorIDs()[1])->index(), 1);
+  }
+
+  void test_beamline_walked_with_a_detached_map_has_the_same_base() {
+    auto const instrument = ComponentCreationHelper::createTestInstrumentRectangular2(2, 2);
+    auto const [baseComponentInfo, baseDetectorInfo] = instrument->makeBaseBeamline();
+    auto const bank = instrument->getComponentByName("bank2");
+    ParameterMap pmap;
+    pmap.addDouble(bank.get(), "a", 1.0);
+    auto const [componentInfo, detectorInfo] = instrument->makeBeamline(pmap);
+    TS_ASSERT(componentInfo->hasSameBase(*baseComponentInfo));
+    TS_ASSERT(pmap.get(bank.get(), "a"));
+  }
+
+  void test_ignored_mark_as_source_keeps_the_cached_beamline() {
+    auto const instrument = ComponentCreationHelper::createTestInstrumentRectangular2(2, 2);
+    auto const [componentInfo, detectorInfo] = instrument->makeBaseBeamline();
+    // The source is already marked, so this is ignored
+    instrument->markAsSource(instrument->getSource().get());
+    TS_ASSERT(instrument->makeBaseBeamline().first->hasSameBase(*componentInfo));
+  }
+
   void test_detectorIndex() {
     auto i = ComponentCreationHelper::createTestInstrumentRectangular(1, 2);
     TS_ASSERT_EQUALS(i->detectorIndex(4), 0);
@@ -581,7 +615,7 @@ public:
     TS_ASSERT(toVector3d(detInfo.position(9)).isApprox(toVector3d(bankEpsilon + V3D{-0.008, -0.0002, 0.0}), 1e-12));
     // bank 3
     TS_ASSERT(toVector3d(detInfo.position(18)).isApprox(Eigen::Vector3d(0.0002, -0.008, 15.0), 1e-12));
-    TS_ASSERT_EQUALS(compInfo.scaleFactor(compInfo.indexOf(bank3->getComponentID())), bankScale);
+    TS_ASSERT_EQUALS(compInfo.scaleFactor(bank3->index()), bankScale);
 
     const V3D detOffset{0.2, 0.3, 0.4};
     const V3D detEpsilon{5e-10, 5e-10, 5e-10};
@@ -598,7 +632,7 @@ public:
     detInfo.setRotation(19, detRotEps * detInfo.rotation(19));
     // Set a new scale factor
     const V3D newScaleFactor{2, 2, 2};
-    compInfo.setScaleFactor(compInfo.indexOf(bank3->getComponentID()), newScaleFactor);
+    compInfo.setScaleFactor(bank3->index(), newScaleFactor);
 
     // All position information should be purged
     TS_ASSERT_EQUALS(pmap->size(), 0);
@@ -606,7 +640,7 @@ public:
     const auto legacy = instr->legacyParameters();
     // 3 bank parameters + 2 det parameters + 1 scale parameter
     TS_ASSERT_EQUALS(legacy.size(), 6);
-    Instrument legacyInstrument(baseInstrument, mapOf(legacy, compInfo));
+    Instrument legacyInstrument(baseInstrument, mapOf(legacy, compInfo, *baseInstrument));
 
     TS_ASSERT_EQUALS(legacyInstrument.getDetector(1)->getPos(), bankOffset + V3D(-0.008, -0.0002, 0.0) + detOffset);
     // Was shifted by something less than epsilon so this is the default
@@ -660,7 +694,7 @@ public:
 
     // 2 bank parameters + 0 det parameters
     TS_ASSERT_EQUALS(legacy.size(), 2);
-    Instrument legacyInstrument(baseInstrument, mapOf(legacy, pmap->componentInfo()));
+    Instrument legacyInstrument(baseInstrument, mapOf(legacy, pmap->componentInfo(), *baseInstrument));
 
     TS_ASSERT_EQUALS(legacyInstrument.getDetector(4)->getPos(), V3D(0.0, 0.0, 5.0));
     TS_ASSERT_EQUALS(legacyInstrument.getDetector(5)->getPos(), V3D(0.0, scaley * pitch, 5.0));
@@ -731,10 +765,10 @@ public:
 private:
   /// A map holding the given legacy parameters, so that an instrument built on it reads its positions from them
   static std::shared_ptr<ParameterMap> mapOf(const std::vector<ParameterMap::Entry> &entries,
-                                             const ComponentInfo &componentInfo) {
+                                             const ComponentInfo &componentInfo, const Instrument &instrument) {
     auto pmap = std::make_shared<ParameterMap>();
     for (auto const &[index, parameter] : entries) {
-      pmap->add(componentInfo.componentID(index), parameter);
+      pmap->add(instrument.getComponentByName(componentInfo.fullName(index)).get(), parameter);
     }
     return pmap;
   }

@@ -65,7 +65,7 @@ public:
     // DetectorInfo but in ComponentInfo
     const auto &componentInfo = output1->componentInfo();
     const auto &linearDetector = output1->getInstrument()->getComponentByName("linear-detector")->getComponentID();
-    const auto pos2 = componentInfo.position(componentInfo.indexOf(linearDetector));
+    const auto pos2 = componentInfo.position(linearDetector->index());
     std::vector<V3D> ret2 = paramMap.getV3D("linear-detector", "pos");
     TS_ASSERT_EQUALS(static_cast<int>(ret2.size()), 0);
     TS_ASSERT_DELTA(pos2.Y(), 0.0, 0.0001);

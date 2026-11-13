@@ -45,16 +45,12 @@ class ObjCompAssembly;
   This visitor ensures only minimal changes are required to any of the
   IComponent/Instrument1.0 hierachy in order to fully process it. It also
   eliminates the need for any dynamic casting. Note that InstrumentVisitor
-  provides accessors for the client to extract visited information such as
-  ComponentIDs.
+  provides accessors for the client to extract visited information.
 */
 class MANTID_GEOMETRY_DLL InstrumentVisitor : public Mantid::Geometry::ComponentVisitor {
 private:
   /// Detector indices
   std::shared_ptr<std::vector<detid_t>> m_orderedDetectorIds;
-
-  /// Detectors components always specified first
-  std::shared_ptr<std::vector<Mantid::Geometry::IComponent *>> m_componentIds;
 
   /// Detector indexes sorted by assembly
   std::shared_ptr<std::vector<size_t>> m_assemblySortedDetectorIndices;
@@ -73,9 +69,6 @@ private:
 
   /// Component ranges.
   std::shared_ptr<std::vector<std::pair<size_t, size_t>>> m_componentRanges;
-
-  /// Component ID -> Component Index map
-  std::shared_ptr<std::unordered_map<Mantid::Geometry::IComponent const *, size_t>> m_componentIdToIndexMap;
 
   /// Detector ID -> index mappings
   std::shared_ptr<const std::unordered_map<detid_t, size_t>> m_detectorIdToIndexMap;
@@ -145,6 +138,8 @@ private:
   /// Extract the common aspects relevant to all component types
   size_t commonRegistration(const Mantid::Geometry::IComponent &component);
 
+  void recordIndex(const Mantid::Geometry::IComponent &component, const size_t componentIndex) const;
+
 public:
   InstrumentVisitor(std::shared_ptr<const Instrument> instrument);
 
@@ -170,10 +165,6 @@ public:
 
   virtual size_t registerObjComponentAssembly(const ObjCompAssembly &obj) override;
 
-  std::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>> componentIds() const;
-
-  std::shared_ptr<const std::unordered_map<Mantid::Geometry::IComponent const *, size_t>> componentIdToIndexMap() const;
-
   std::shared_ptr<const std::unordered_map<detid_t, size_t>> detectorIdToIndexMap() const;
   size_t size() const;
 
@@ -190,6 +181,9 @@ public:
 
   static std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
   makeWrappers(const Instrument &instrument, ParameterMap *pmap = nullptr);
+
+  static std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
+  makeWrappersWithMap(const Instrument &instrument, ParameterMap &pmap);
 };
 } // namespace Geometry
 } // namespace Mantid

@@ -96,7 +96,9 @@ void Track::removeCojoins() {
   auto nextNode = m_links.begin();
   ++nextNode;
   while (nextNode != m_links.end()) {
-    if (prevNode->componentID == nextNode->componentID) {
+    // Links of components with no index can only be told apart by their objects
+    if (prevNode->componentIndex == nextNode->componentIndex &&
+        (prevNode->componentIndex != noComponent || prevNode->object == nextNode->object)) {
       prevNode->exitPoint = nextNode->exitPoint;
       prevNode->distFromStart = prevNode->entryPoint.distance(prevNode->exitPoint);
       prevNode->distInsideObject = nextNode->distInsideObject;
@@ -119,11 +121,10 @@ void Track::removeCojoins() {
  * an object. +1 is entering, -1 is leaving.
  * @param endPoint :: Point of intersection
  * @param obj :: A reference to the object that was intersected
- * @param compID :: ID of the component that this link is about (Default=NULL)
+ * @param compIndex :: Component index of the component that this link is about (Default=noComponent)
  */
-void Track::addPoint(const TrackDirection direction, const V3D &endPoint, const IObject &obj,
-                     const ComponentID compID) {
-  IntersectionPoint newPoint(direction, endPoint, endPoint.distance(m_line.getOrigin()), obj, compID);
+void Track::addPoint(const TrackDirection direction, const V3D &endPoint, const IObject &obj, const size_t compIndex) {
+  IntersectionPoint newPoint(direction, endPoint, endPoint.distance(m_line.getOrigin()), obj, compIndex);
   if (m_surfPoints.empty()) {
     m_surfPoints.push_back(newPoint);
   } else {
@@ -146,13 +147,13 @@ void Track::addPoint(const TrackDirection direction, const V3D &endPoint, const 
  * @param secondPoint :: second Point
  * @param distanceAlongTrack :: Distance along track
  * @param obj :: A reference to the object that was intersected
- * @param compID :: ID of the component that this link is about (Default=NULL)
+ * @param compIndex :: Component index of the component that this link is about (Default=noComponent)
  * @retval Index of link within the track
  */
 int Track::addLink(const V3D &firstPoint, const V3D &secondPoint, const double distanceAlongTrack, const IObject &obj,
-                   const ComponentID compID) {
+                   const size_t compIndex) {
   // Process First Point
-  Link newLink(firstPoint, secondPoint, distanceAlongTrack, obj, compID);
+  Link newLink(firstPoint, secondPoint, distanceAlongTrack, obj, compIndex);
   int index(0);
   if (m_links.empty()) {
     m_links.emplace_back(newLink);
@@ -197,7 +198,7 @@ void Track::buildLink() {
   {
     if (ac->direction == TrackDirection::LEAVING) {
       addLink(m_line.getOrigin(), ac->endPoint, ac->distFromStart, *ac->object,
-              ac->componentID); // from the void
+              ac->componentIndex); // from the void
     }
     ++ac;
     if (bc != m_surfPoints.end()) {
@@ -220,11 +221,11 @@ void Track::buildLink() {
       // Touching surface / identical surface
       if (fabs(ac->distFromStart - bc->distFromStart) > Tolerance) {
         // track leave ac into bc.
-        addLink(ac->endPoint, bc->endPoint, bc->distFromStart, *ac->object, ac->componentID);
+        addLink(ac->endPoint, bc->endPoint, bc->distFromStart, *ac->object, ac->componentIndex);
       }
       // Points with intermediate void
       else {
-        addLink(workPt, ac->endPoint, ac->distFromStart, *ac->object, ac->componentID);
+        addLink(workPt, ac->endPoint, ac->distFromStart, *ac->object, ac->componentIndex);
       }
       workPt = bc->endPoint;
 

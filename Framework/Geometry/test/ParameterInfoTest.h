@@ -215,7 +215,7 @@ public:
 
     auto wrappers = InstrumentVisitor::makeWrappers(*instrument, &pmap);
     auto const &componentInfo = *std::get<0>(wrappers);
-    size_t const bankIndex = componentInfo.indexOf(bank->getComponentID());
+    size_t const bankIndex = bank->index();
 
     TS_ASSERT_EQUALS(componentInfo.getNumberParameter(bankIndex, "my_double").at(0), 42.0);
     TS_ASSERT_EQUALS(componentInfo.getStringParameter(bankIndex, "my_string").at(0), "hello");

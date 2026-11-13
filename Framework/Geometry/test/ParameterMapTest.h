@@ -487,7 +487,7 @@ public:
     TS_ASSERT(pmap.empty());
 
     // A write by component index after clearing must still be visible through the component
-    const auto index = componentInfo->indexOf(comp->getComponentID());
+    const auto index = comp->index();
     componentInfo->addInt(index, "P2", 2);
     const auto parameter = pmap.get(comp.get(), "P2");
     TS_ASSERT(parameter);
@@ -501,8 +501,7 @@ public:
     const auto comp = m_testInstrument->getChild(0);
     pmap.addInt(comp.get(), "P", 3);
 
-    TS_ASSERT_EQUALS(componentInfo->getIntParameter(componentInfo->indexOf(comp->getComponentID()), "P", false),
-                     std::vector<int>{3});
+    TS_ASSERT_EQUALS(componentInfo->getIntParameter(comp->index(), "P", false), std::vector<int>{3});
   }
 
   void test_attached_map_rejects_components_of_another_instrument() {
@@ -545,7 +544,7 @@ public:
 
     const auto entries = pmap.entries();
     TS_ASSERT_EQUALS(entries.size(), 1);
-    TS_ASSERT_EQUALS(entries[0].first, componentInfo->indexOf(comp->getComponentID()));
+    TS_ASSERT_EQUALS(entries[0].first, comp->index());
     TS_ASSERT_EQUALS(entries[0].second->value<int>(), 3);
   }
 
@@ -565,8 +564,7 @@ public:
     const auto comp = instrument->getChild(0);
     pmap.addInt(comp.get(), "P", 4);
 
-    TS_ASSERT_EQUALS(componentInfo->getIntParameter(componentInfo->indexOf(comp->getComponentID()), "P", false),
-                     std::vector<int>{4});
+    TS_ASSERT_EQUALS(componentInfo->getIntParameter(comp->index(), "P", false), std::vector<int>{4});
   }
 
   void test_asString_names_components_of_an_attached_map() {

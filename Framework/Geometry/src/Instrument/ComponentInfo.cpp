@@ -54,32 +54,16 @@ const Kernel::V3D toShapeFrame(const Kernel::V3D &point, const Beamline::Compone
 /**
  * Constructor.
  * @param componentInfo : Internal Beamline ComponentInfo
- * @param componentIds : ComponentIDs ordered by component
- * @param componentIdToIndexMap : ID -> index translation map
  * @param shapes : Shapes for each component
  * @param parameterInfo : Index-keyed parameter store
  * @param referenceFrame: A reference frame
  * */
-ComponentInfo::ComponentInfo(
-    std::unique_ptr<Beamline::ComponentInfo> componentInfo,
-    std::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>> componentIds,
-    std::shared_ptr<const std::unordered_map<Geometry::IComponent const *, size_t>> componentIdToIndexMap,
-    std::shared_ptr<std::vector<std::shared_ptr<const Geometry::IObject>>> shapes,
-    std::shared_ptr<ParameterInfo> parameterInfo, std::shared_ptr<const ReferenceFrame> referenceFrame)
-    : m_componentInfo(std::move(componentInfo)), m_componentIds(std::move(componentIds)),
-      m_compIDToIndex(std::move(componentIdToIndexMap)), m_shapes(std::move(shapes)),
-      m_parameterInfo(std::move(parameterInfo)), m_referenceFrame(std::move(referenceFrame)) {
-
-  if (m_componentIds->size() != m_compIDToIndex->size()) {
-    throw std::invalid_argument("Inconsistent ID and Mapping input containers "
-                                "for Geometry::ComponentInfo");
-  }
-  if (m_componentIds->size() != m_componentInfo->size()) {
-    throw std::invalid_argument("Inconsistent ID and base "
-                                "Beamline::ComponentInfo sizes for "
-                                "Geometry::ComponentInfo");
-  }
-}
+ComponentInfo::ComponentInfo(std::unique_ptr<Beamline::ComponentInfo> componentInfo,
+                             std::shared_ptr<std::vector<std::shared_ptr<const Geometry::IObject>>> shapes,
+                             std::shared_ptr<ParameterInfo> parameterInfo,
+                             std::shared_ptr<const ReferenceFrame> referenceFrame)
+    : m_componentInfo(std::move(componentInfo)), m_shapes(std::move(shapes)), m_parameterInfo(std::move(parameterInfo)),
+      m_referenceFrame(std::move(referenceFrame)) {}
 
 /**
  * Clone current instance but not the DetectorInfo non-owned parts
@@ -95,9 +79,8 @@ std::unique_ptr<Geometry::ComponentInfo> ComponentInfo::cloneWithoutDetectorInfo
  * Should not be public since proper links between DetectorInfo and
  * ComponentInfo must be set up. */
 ComponentInfo::ComponentInfo(const ComponentInfo &other)
-    : m_componentInfo(other.m_componentInfo->cloneWithoutDetectorInfo()), m_componentIds(other.m_componentIds),
-      m_compIDToIndex(other.m_compIDToIndex), m_shapes(other.m_shapes), m_parameterInfo(other.m_parameterInfo),
-      m_referenceFrame(other.m_referenceFrame) {}
+    : m_componentInfo(other.m_componentInfo->cloneWithoutDetectorInfo()), m_shapes(other.m_shapes),
+      m_parameterInfo(other.m_parameterInfo), m_referenceFrame(other.m_referenceFrame) {}
 
 // Defined as default in source for forward declaration with std::unique_ptr.
 ComponentInfo::~ComponentInfo() = default;
@@ -136,13 +119,6 @@ ComponentInfo::QuadrilateralComponent ComponentInfo::quadrilateralComponent(cons
   corners.bottomRight = lastCol.front();
 
   return corners;
-}
-
-size_t ComponentInfo::indexOf(Geometry::IComponent const *id) const { return m_compIDToIndex->at(id); }
-
-size_t ComponentInfo::indexOfOrInvalid(Geometry::IComponent const *id) const {
-  auto const found = m_compIDToIndex->find(id);
-  return found == m_compIDToIndex->end() ? invalidIndex : found->second;
 }
 
 size_t ComponentInfo::indexOfAny(const std::string &name) const { return m_componentInfo->indexOfAny(name); }
@@ -218,6 +194,11 @@ bool ComponentInfo::hasSource() const { return m_componentInfo->hasSource(); }
  *
  * @returns true if sources are equivalent
  */
+/// True if both were cloned from the same base instrument's cached beamline
+bool ComponentInfo::hasSameBase(ComponentInfo const &other) const {
+  return m_componentInfo->hasSameBase(*other.m_componentInfo);
+}
+
 bool ComponentInfo::hasEquivalentSource(const ComponentInfo &other) const {
   return m_componentInfo->hasEquivalentSource(*(other.m_componentInfo));
 }
@@ -925,20 +906,13 @@ double ComponentInfo::getFittingParameter(const size_t componentIndex, const std
  * @return bytes used.
  */
 size_t ComponentInfo::getMemorySize() const {
-  const size_t n = size();
   // Beamline::ComponentInfo holds all the per-component arrays
   const size_t beamlineMem = m_componentInfo->getMemorySize();
-  // m_componentIds: shared_ptr<const vector<IComponent*>> — count the heap-allocated vector object + its buffer
-  const size_t componentIdsMem = sizeof(std::vector<Geometry::IComponent *>) + n * sizeof(Geometry::IComponent *);
-  // m_compIDToIndex: shared_ptr<const unordered_map<IComponent const*, size_t>>
-  // Count the heap-allocated map object + each node (key + value + ~2 pointers for bucket/chain overhead)
-  const size_t compIDToIndexMem = sizeof(std::unordered_map<Geometry::IComponent const *, size_t>) +
-                                  n * (sizeof(Geometry::IComponent const *) + sizeof(size_t) + 2 * sizeof(void *));
   // m_shapes: shared_ptr<vector<shared_ptr<const IObject>>>
   // IObject shapes are shared; count the vector object + buffer of shared_ptrs, not the shapes themselves
   const size_t shapesMem =
       m_shapes ? sizeof(*m_shapes) + m_shapes->capacity() * sizeof(std::shared_ptr<const Geometry::IObject>) : 0;
-  return sizeof(*this) + beamlineMem + componentIdsMem + compIDToIndexMem + shapesMem;
+  return sizeof(*this) + beamlineMem + shapesMem;
 }
 
 } // namespace Mantid::Geometry
