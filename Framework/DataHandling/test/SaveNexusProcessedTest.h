@@ -19,6 +19,7 @@
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/LoadNexus.h"
+#include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataHandling/SaveNexusProcessed.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -32,6 +33,8 @@
 #include "MantidNexus/NexusFile.h"
 
 #include <boost/lexical_cast.hpp>
+
+#include <H5Cpp.h>
 
 #include <cxxtest/TestSuite.h>
 #include <filesystem>
@@ -83,6 +86,14 @@ public:
 
     // Clean up
     AnalysisDataService::Instance().remove("testSpace");
+  }
+
+  void test_histogram_save_options_round_trip() {
+    for (const bool ragged : {false, true}) {
+      for (const bool compress : {false, true})
+        for (const int blockSize : {1, 2, 8})
+          checkHistogramSaveOptions(ragged, compress, blockSize);
+    }
   }
 
   void testExecWithXErrors() {
@@ -1087,6 +1098,63 @@ public:
   }
 
 private:
+  void checkHistogramSaveOptions(bool ragged, bool compress, int blockSize) {
+    FileResource outputFile("SaveNexusProcessedTest_histogram_options.nxs", false, true);
+    auto workspace = WorkspaceCreationHelper::create2DWorkspaceBinned(5, 4);
+    if (ragged)
+      workspace->resizeHistogram(0, 2);
+    for (size_t i = 0; i < 5; ++i) {
+      auto &y = workspace->mutableY(i);
+      auto &e = workspace->mutableE(i);
+      for (size_t j = 0; j < y.size(); ++j) {
+        y[j] = 10.0 * static_cast<double>(i) + static_cast<double>(j);
+        e[j] = 0.25 * static_cast<double>(i + j + 1);
+      }
+      workspace->setPointStandardDeviations(i, std::vector<double>(y.size(), static_cast<double>(i) + 0.125));
+    }
+
+    // Non-contiguous selection, reversed ordering and a partial final block for blockSize=2.
+    const std::vector<int> indices{4, 0, 2};
+    SaveNexusProcessed save;
+    save.initialize();
+    save.setChild(true);
+    TS_ASSERT_EQUALS(save.getPropertyValue("CompressHistogramData"), "1");
+    TS_ASSERT_EQUALS(save.getPropertyValue("HistogramWriteBlockSize"), "1");
+    save.setProperty("InputWorkspace", workspace);
+    save.setPropertyValue("Filename", outputFile.fullPath());
+    save.setProperty("WorkspaceIndexList", indices);
+    save.setProperty("CompressHistogramData", compress);
+    save.setProperty("HistogramWriteBlockSize", blockSize);
+    TS_ASSERT(save.execute());
+
+    {
+      H5::H5File file(outputFile.fullPath(), H5F_ACC_RDONLY);
+      auto values = file.openDataSet("/mantid_workspace_1/workspace/values");
+      TS_ASSERT_EQUALS(values.getCreatePlist().getNfilters() > 0, compress);
+      auto errors = file.openDataSet("/mantid_workspace_1/workspace/errors");
+      TS_ASSERT_EQUALS(errors.getCreatePlist().getNfilters() > 0, compress);
+    }
+
+    LoadNexusProcessed load;
+    load.initialize();
+    load.setChild(true);
+    load.setPropertyValue("Filename", outputFile.fullPath());
+    load.setPropertyValue("OutputWorkspace", "unused");
+    TS_ASSERT(load.execute());
+    Workspace_sptr output = load.getProperty("OutputWorkspace");
+    const auto loaded = std::dynamic_pointer_cast<MatrixWorkspace>(output);
+    TS_ASSERT(loaded);
+    TS_ASSERT_EQUALS(loaded->getNumberHistograms(), indices.size());
+    for (size_t i = 0; i < indices.size(); ++i) {
+      const auto source = indices[i];
+      TS_ASSERT_EQUALS(loaded->y(i), workspace->y(source));
+      TS_ASSERT_EQUALS(loaded->x(i), workspace->x(source));
+      TS_ASSERT_EQUALS(loaded->dx(i), workspace->dx(source));
+      for (size_t j = 0; j < workspace->y(source).size(); ++j)
+        TS_ASSERT_EQUALS(loaded->e(i)[j], workspace->e(source)[j]);
+    }
+  }
+
   void doTestColumnInfo(Mantid::Nexus::File &file, NXnumtype type, const std::string &interpret_as,
                         const std::string &name) {
     Mantid::Nexus::Info columnInfo = file.getInfo();
