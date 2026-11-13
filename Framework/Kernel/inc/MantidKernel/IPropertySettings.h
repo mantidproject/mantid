@@ -34,22 +34,15 @@ public:
   virtual ~IPropertySettings() = default;
 
   /** Is the property to be shown as "enabled" in the GUI. Default true. */
-  virtual bool isEnabled(const IPropertyManager *algo) const {
-    UNUSED_ARG(algo);
-    return true;
-  }
+  virtual bool isEnabled([[maybe_unused]] const IPropertyManager *algo) const { return true; }
 
   /** Is the property to be shown in the GUI? Default true. */
-  virtual bool isVisible(const IPropertyManager *algo) const {
-    UNUSED_ARG(algo);
-    return true;
-  }
+  virtual bool isVisible([[maybe_unused]] const IPropertyManager *algo) const { return true; }
 
   /** to verify if the properties, this one depends on have changed
       or other special condition occurs which needs the framework to react to */
-  virtual bool isConditionChanged(const IPropertyManager *algo, const std::string &changedPropName = "") const {
-    UNUSED_ARG(algo);
-    UNUSED_ARG(changedPropName);
+  virtual bool isConditionChanged([[maybe_unused]] const IPropertyManager *algo,
+                                  [[maybe_unused]] const std::string &changedPropName = "") const {
     return false;
   }
 
@@ -58,9 +51,8 @@ public:
    *
    *  @return: whether or not the current property was changed.
    */
-  virtual bool applyChanges(const IPropertyManager *algo, const std::string &currentPropName) const {
-    UNUSED_ARG(algo);
-    UNUSED_ARG(currentPropName);
+  virtual bool applyChanges([[maybe_unused]] const IPropertyManager *algo,
+                            [[maybe_unused]] const std::string &currentPropName) const {
     return false;
   }
 

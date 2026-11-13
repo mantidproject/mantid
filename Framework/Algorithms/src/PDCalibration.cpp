@@ -40,6 +40,7 @@
 #include <gsl/gsl_multimin.h>
 #include <limits>
 #include <numeric>
+#include <ranges>
 
 namespace Mantid::Algorithms {
 
@@ -1449,8 +1450,7 @@ void PDCalibration::createInformationWorkspaces() {
     newWidthRow << detId;
     newHeightRow << detId;
 
-    for (double dSpacing : m_peaksInDspacing) {
-      UNUSED_ARG(dSpacing);
+    for ([[maybe_unused]] const auto i : std::views::iota(size_t{0}, m_peaksInDspacing.size())) {
       newPosRow << std::nan("");
       newWidthRow << std::nan("");
       newHeightRow << std::nan("");

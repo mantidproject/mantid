@@ -13,9 +13,7 @@ using namespace boost::gregorian;
 
 PoldiDetectorFactory::PoldiDetectorFactory() : m_newDetectorDate(from_string(std::string("2016/01/01"))) {}
 
-PoldiAbstractDetector *PoldiDetectorFactory::createDetector(std::string detectorType) {
-  UNUSED_ARG(detectorType);
-
+PoldiAbstractDetector *PoldiDetectorFactory::createDetector([[maybe_unused]] std::string detectorType) {
   return new PoldiHeliumDetector();
 }
 

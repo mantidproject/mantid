@@ -52,8 +52,7 @@ public:
   /// by centre() is constant during fitting.
   /// @param isDefault :: If true fix centre by default:
   ///    don't show it in ties
-  virtual void fixCentre(bool isDefault = false) {
-    UNUSED_ARG(isDefault);
+  virtual void fixCentre([[maybe_unused]] bool isDefault = false) {
     throw std::runtime_error("Generic centre fixing isn't implemented for this function.");
   }
 

@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/WarningSuppressions.h"
+#include <concepts>
 
 #include "MantidIndexing/DetectorID.h"
 
@@ -22,8 +22,5 @@ public:
   static DetectorIDTest *createSuite() { return new DetectorIDTest(); }
   static void destroySuite(DetectorIDTest *suite) { delete suite; }
 
-  void test_has_correct_mixins() {
-    DetectorID data(0);
-    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(dynamic_cast<detail::IndexType<DetectorID, int32_t> &>(data)));
-  }
+  void test_has_correct_mixins() { TS_ASSERT((std::derived_from<DetectorID, detail::IndexType<DetectorID, int32_t>>)); }
 };

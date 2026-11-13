@@ -83,8 +83,7 @@ public:
    * std::invalid_argument
    *    is the given alias is invalid.
    */
-  virtual std::string getValueForAlias(const std::string &alias) const {
-    UNUSED_ARG(alias);
+  virtual std::string getValueForAlias([[maybe_unused]] const std::string &alias) const {
     throw std::invalid_argument("Validator does'n support value aliasing.");
   }
 

@@ -24,7 +24,7 @@ public:
   /** Constructor. Does nothing.
    * @param i :: Takes an int and does nothing with it
    */
-  inline RegistrationHelper(int i) { UNUSED_ARG(i); }
+  inline RegistrationHelper([[maybe_unused]] int i) {}
 };
 // clang-format on
 } // namespace Kernel
