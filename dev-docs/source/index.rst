@@ -29,6 +29,7 @@ Guides
    NewStarterC++
    NewStarterPython
    PythonAlgorithmsInExternalProjects
+   PythonTypeStubs
 
 :doc:`DeveloperAccounts`
    Details of the accounts required for developers.
@@ -62,6 +63,9 @@ Guides
 
 :doc:`NewStarterPython`
    Exercises for learning Python.
+
+:doc:`PythonTypeStubs`
+   Generate, review, and validate Mantid's Python type stubs.
 
 ===================
 Development Process
