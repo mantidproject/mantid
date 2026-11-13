@@ -149,7 +149,7 @@ class GenerateSimpleAPIStubsTest(unittest.TestCase):
 
         self.assertIn("InputWorkspace: MatrixWorkspace | str", stub)
         self.assertIn("Target: Literal['DeltaE', 'Wavelength']", stub)
-        self.assertIn("EMode: Literal['Elastic', 'Direct', 'Indirect'] | None = ...", stub)
+        self.assertIn("EMode: Literal['Direct', 'Elastic', 'Indirect'] | None = ...", stub)
         self.assertIn("OutputWorkspace: MatrixWorkspace | str | None = ...", stub)
         self.assertIn(") -> MatrixWorkspace: ...", stub)
         self.assertNotIn("Target: Literal['DeltaE', 'Wavelength'] =", stub)
@@ -352,6 +352,16 @@ class GenerateSimpleAPIStubsTest(unittest.TestCase):
 
         self.assertEqual(records, [])
         self.assertTrue(stub.endswith("-> Any: ..."))
+
+    def test_mpi_algorithms_are_excluded(self):
+        descriptors = [
+            types.SimpleNamespace(name="BroadcastWorkspace", category="MPI"),
+            types.SimpleNamespace(name="GatherWorkspaces", category="Transforms\\Grouping;MPI"),
+            types.SimpleNamespace(name="ConvertUnits", category="Transforms\\Units"),
+        ]
+        algorithm_factory = types.SimpleNamespace(getDescriptors=lambda _include_hidden: descriptors)
+
+        self.assertEqual(generator._mpi_algorithm_names(algorithm_factory), {"BroadcastWorkspace", "GatherWorkspaces"})
 
     def test_check_detects_stale_stub(self):
         with tempfile.TemporaryDirectory() as temporary_directory, patch.dict(sys.modules, _mantid_modules()):

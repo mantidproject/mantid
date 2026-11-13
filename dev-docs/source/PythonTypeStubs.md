@@ -44,15 +44,38 @@ be configured directly in `extraPaths`.
 
 ## Generate the declarations
 
-From the repository root, in the configured build environment, run:
+From the build directory, run:
+
+```sh
+ninja simpleapi_stubs
+```
+
+This builds the framework libraries and Python plugins that register
+algorithms, then writes `Framework/PythonInterface/mantid/simpleapi.pyi` in the
+source tree. The target is not part of the default build because it changes a
+committed file. It is re-run only when a framework library, Python extension
+module, Python algorithm, the `mantid` package, or the generator has changed.
+It runs the generator with an empty Mantid user properties directory, so local
+settings such as `default.facility` do not end up in the committed stub.
+Because the stub is the target's output, `ninja clean` deletes it; restore it
+with `git checkout` or by running the target again.
+
+To run the generator directly instead, from the repository root in the
+configured build environment, with the build's `bin` directory on
+`PYTHONPATH`:
 
 ```sh
 python tools/python_typing/generate_simpleapi_stubs.py --all
 ```
 
-This writes `Framework/PythonInterface/mantid/simpleapi.pyi`. To generate a
-small subset while developing the generator, pass algorithm names instead of
-`--all`. The committed file should be generated with `--all`.
+Settings in your `Mantid.user.properties` affect the output of a direct run.
+To generate a small subset while developing the generator, pass algorithm names
+instead of `--all`. The committed file should be generated with `--all`.
+
+Algorithms in the `MPI` category (`BroadcastWorkspace`, `GatherWorkspaces`)
+are left out of the stub. They are only registered when Mantid is built with
+`MPI_BUILD` on Linux, and including them would make the committed stub depend
+on where it was generated.
 
 Do not format the stub by hand. The generator runs Ruff on the generated file.
 When formatting or output needs correction, update the generator or its

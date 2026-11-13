@@ -56,6 +56,18 @@ _FITTING_ALGORITHMS = {
     "IqtFitSimultaneous",
 }
 _CUSTOM_ALGORITHMS = {"Load", "StartLiveData", "CutMD", "RenameWorkspace"}
+_MPI_CATEGORY = "MPI"
+
+
+def _mpi_algorithm_names(algorithm_factory) -> set[str]:
+    """Return the algorithms in the MPI category.
+
+    MPIAlgorithms (BroadcastWorkspace, GatherWorkspaces) is an optional,
+    Linux-only plugin built when MPI_BUILD is enabled, so whether these are
+    registered depends on the build. They are left out on every platform so
+    that the committed stub does not depend on where it was generated.
+    """
+    return {descriptor.name for descriptor in algorithm_factory.getDescriptors(True) if _MPI_CATEGORY in descriptor.category.split(";")}
 
 
 def _property_type(prop) -> str:
@@ -87,7 +99,9 @@ def _type_for(prop) -> str:
         # allowedValues() holds the accepted file extensions, not the accepted values.
         return "str"
     if prop_type == "string":
-        allowed = list(prop.allowedValues)
+        # CompositeValidator::allowedValues() comes from an unordered_set, so its
+        # order is compiler-specific; sort to keep the stub the same everywhere.
+        allowed = sorted(prop.allowedValues)
         if allowed and len(allowed) <= 30:
             return f"Literal[{', '.join(repr(value) for value in allowed)}]"
         return "str"
@@ -500,7 +514,8 @@ def main() -> int:
         parser.error("Use either --all or explicit algorithm names")
     if args.all:
         specialized = set(mantid.simpleapi.__SPECIALIZED_FUNCTIONS__)
-        algorithm_names = sorted((set(registered) - specialized) | _FITTING_ALGORITHMS | _CUSTOM_ALGORITHMS)
+        mpi_only = _mpi_algorithm_names(AlgorithmFactory)
+        algorithm_names = sorted((set(registered) - specialized - mpi_only) | _FITTING_ALGORITHMS | _CUSTOM_ALGORITHMS)
     else:
         algorithm_names = sorted(set(args.algorithms or ["ConvertUnits"]))
 
