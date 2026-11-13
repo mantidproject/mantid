@@ -179,18 +179,6 @@ bool EnabledWhenProperty::isEnabled(const IPropertyManager *algo) const {
   }
 }
 
-/**
- * Always returns true as EnabledWhenProperty always sets the visibility
- * on while altering whether the property is Enabled or disabled
- *
- * @param algo :: Pointer to the algorithm containing the property
- * @return :: True always
- */
-bool EnabledWhenProperty::isVisible([[maybe_unused]] const IPropertyManager *algo) const {
-  // VisibleWhenProperty uses algo so we have to keep it to match interface
-  return true;
-}
-
 /// Other properties that this property depends on.
 std::vector<std::string> EnabledWhenProperty::dependsOn(const std::string &thisProp) const {
   if (m_propertyDetails) {

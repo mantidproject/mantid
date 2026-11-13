@@ -91,9 +91,6 @@ public:
   /// criterion
   bool isEnabled(const IPropertyManager *algo) const override;
 
-  /// Return true always
-  bool isVisible(const IPropertyManager *algo) const override;
-
   /// Other properties that this property depends on.
   std::vector<std::string> dependsOn(const std::string &thisProp) const override;
 
