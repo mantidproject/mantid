@@ -272,17 +272,6 @@ NXRoot::NXRoot(std::string fname) : m_filename(std::move(fname)) {
   readAllInfo();
 }
 
-/**  Constructor.
- *   Creates a new Nexus file. The first root entry will be also created.
- *   @param fname :: The file name to create
- *   @param entry :: The name of the first entry in the new file
- */
-NXRoot::NXRoot(std::string fname, const std::string &entry) : m_filename(std::move(fname)) {
-  UNUSED_ARG(entry);
-  // Open Nexus file
-  m_fileID = std::make_shared<File>(m_filename, NXaccess::CREATE5);
-}
-
 NXRoot::~NXRoot() {
   try {
     m_fileID->close();

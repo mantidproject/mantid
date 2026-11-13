@@ -18,7 +18,6 @@
 
 namespace Poco {
 namespace XML {
-class Attributes;
 class XMLWriter;
 } // namespace XML
 } // namespace Poco
@@ -296,7 +295,6 @@ public:
   /** Returns the bare pointer to the IComponent parent */
   const IComponent *getBareParent() const override { return m_parent; }
 
-  virtual void readXMLAttributes(const Poco::XML::Attributes &attr);
   virtual void writeXML(Poco::XML::XMLWriter &writer) const;
   virtual void appendXML(std::ostream &xmlStream) const;
 
