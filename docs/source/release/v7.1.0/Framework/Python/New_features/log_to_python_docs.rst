@@ -1,0 +1,1 @@
+- Added documentation for :ref:`log_to_python <mantid.utils.logging>`, which forwards Mantid's log messages to Python's ``logging`` framework.

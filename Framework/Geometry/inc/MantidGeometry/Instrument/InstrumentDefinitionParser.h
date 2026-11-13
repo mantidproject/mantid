@@ -195,8 +195,7 @@ private:
   /// elements with \<cuboid\>'s
   /// (note for now this will only work for \<cuboid\>'s and when necessary this
   /// can be extended).
-  void adjust(Poco::XML::Element *pElem, const std::map<std::string, bool> &isTypeAssembly,
-              std::map<std::string, Poco::XML::Element *> &getTypeElement);
+  void adjust(Poco::XML::Element *pElem, std::map<std::string, Poco::XML::Element *> &getTypeElement);
 
   /// Take as input a \<locations\> element. Such an element is a short-hand
   /// notation for a sequence of \<location\> elements.

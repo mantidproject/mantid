@@ -478,7 +478,7 @@ void InstrumentDefinitionParser::adjustTypesContainingCombineComponentsElement(S
     getTypeElement[typeName] = pTypeElem;
 
     InstrumentDefinitionParser helper;
-    helper.adjust(pTypeElem, isTypeAssembly, getTypeElement);
+    helper.adjust(pTypeElem, getTypeElement);
 
     isTypeAssembly[typeName] = false;
 
@@ -2674,17 +2674,14 @@ void InstrumentDefinitionParser::createNeutronicInstrument() {
  * can be extended).
  *
  *  @param pElem ::  Poco::XML \<type\> element that we want to adjust
- *  @param isTypeAssembly [in] :: tell whether any other type, but the special
- * one treated here, is assembly or not
  *  @param getTypeElement [in] :: contain pointers to all types but the onces
  * treated here
  *
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML
  * instrument file
  */
-void InstrumentDefinitionParser::adjust(Poco::XML::Element *pElem, const std::map<std::string, bool> &isTypeAssembly,
+void InstrumentDefinitionParser::adjust(Poco::XML::Element *pElem,
                                         std::map<std::string, Poco::XML::Element *> &getTypeElement) {
-  UNUSED_ARG(isTypeAssembly);
   // check if pElem is an element with tag name 'type'
   if (pElem->tagName() != "type")
     throw Exception::InstrumentDefinitionError("Argument to function adjust() "

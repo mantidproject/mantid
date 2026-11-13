@@ -8,6 +8,8 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include <concepts>
+
 #include "MantidHistogramData/Addable.h"
 #include "MantidHistogramData/FixedLengthVector.h"
 #include "MantidHistogramData/HistogramE.h"
@@ -28,9 +30,8 @@ public:
   // have the expected mixins.
 
   void test_has_correct_mixins() {
-    HistogramE e;
-    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(dynamic_cast<detail::FixedLengthVector<HistogramE> &>(e)));
-    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(dynamic_cast<detail::Addable<HistogramE> &>(e)));
-    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(dynamic_cast<detail::Scalable<HistogramE> &>(e)));
+    TS_ASSERT((std::derived_from<HistogramE, detail::FixedLengthVector<HistogramE>>));
+    TS_ASSERT((std::derived_from<HistogramE, detail::Addable<HistogramE>>));
+    TS_ASSERT((std::derived_from<HistogramE, detail::Scalable<HistogramE>>));
   }
 };

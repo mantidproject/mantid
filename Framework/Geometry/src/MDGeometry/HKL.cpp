@@ -71,14 +71,5 @@ Mantid::Kernel::SpecialCoordinateSystem HKL::equivalientSpecialCoordinateSystem(
 
 bool HKL::isQ() const { return true; }
 
-bool HKL::isSameType(const MDFrame &frame) const {
-  auto isSameType = true;
-  try {
-    const auto &tmp = dynamic_cast<const HKL &>(frame);
-    UNUSED_ARG(tmp);
-  } catch (std::bad_cast &) {
-    isSameType = false;
-  }
-  return isSameType;
-}
+bool HKL::isSameType(const MDFrame &frame) const { return (dynamic_cast<const HKL *>(&frame) != nullptr); }
 } // namespace Mantid::Geometry
