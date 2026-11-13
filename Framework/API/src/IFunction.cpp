@@ -1179,11 +1179,8 @@ void IFunction::setStepSizeMethod(const StepSizeMethod method) { m_stepSizeMetho
  * @param startX :: The lower bin index
  * @param endX :: The upper bin index
  */
-void IFunction::setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi, double startX,
-                                   double endX) {
-  UNUSED_ARG(startX);
-  UNUSED_ARG(endX);
-
+void IFunction::setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi,
+                                   [[maybe_unused]] double startX, [[maybe_unused]] double endX) {
   if (!workspace)
     return; // unset the workspace
 

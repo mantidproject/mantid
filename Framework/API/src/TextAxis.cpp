@@ -23,13 +23,9 @@ TextAxis::TextAxis(const std::size_t &length) : Axis() { m_values.resize(length)
  *  @param parentWorkspace :: The workspace is not used in this implementation
  *  @return A pointer to a copy of the TextAxis on which the method is called
  */
-Axis *TextAxis::clone(const MatrixWorkspace *const parentWorkspace) {
-  UNUSED_ARG(parentWorkspace);
-  return new TextAxis(*this);
-}
+Axis *TextAxis::clone([[maybe_unused]] const MatrixWorkspace *const parentWorkspace) { return new TextAxis(*this); }
 
-Axis *TextAxis::clone(const std::size_t length, const MatrixWorkspace *const parentWorkspace) {
-  UNUSED_ARG(parentWorkspace);
+Axis *TextAxis::clone(const std::size_t length, [[maybe_unused]] const MatrixWorkspace *const parentWorkspace) {
   auto newAxis = new TextAxis(*this);
   newAxis->m_values.clear();
   newAxis->m_values.resize(length);
@@ -43,8 +39,7 @@ Axis *TextAxis::clone(const std::size_t length, const MatrixWorkspace *const par
  *  @return The value of the axis as a double
  *  @throw  IndexError If the index requested is not in the range of this axis
  */
-double TextAxis::operator()(const std::size_t &index, const std::size_t &verticalIndex) const {
-  UNUSED_ARG(verticalIndex);
+double TextAxis::operator()(const std::size_t &index, [[maybe_unused]] const std::size_t &verticalIndex) const {
   if (index >= length()) {
     throw Kernel::Exception::IndexError(index, length() - 1, "TextAxis: Index out of range.");
   }
@@ -57,9 +52,7 @@ double TextAxis::operator()(const std::size_t &index, const std::size_t &vertica
  *  @param value :: The new value
  *  @throw  IndexError If the index requested is not in the range of this axis
  */
-void TextAxis::setValue(const std::size_t &index, const double &value) {
-  UNUSED_ARG(index);
-  UNUSED_ARG(value);
+void TextAxis::setValue([[maybe_unused]] const std::size_t &index, [[maybe_unused]] const double &value) {
   throw std::domain_error("setValue method cannot be used on a TextAxis.");
 }
 /**

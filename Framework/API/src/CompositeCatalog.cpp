@@ -24,12 +24,10 @@ void CompositeCatalog::add(const ICatalog_sptr &catalog) { m_catalogs.emplace_ba
  * @param endpoint :: The endpoint url of the catalog to log in to.
  * @param facility :: The facility of the catalog to log in to.
  */
-CatalogSession_sptr CompositeCatalog::login(const std::string &username, const std::string &password,
-                                            const std::string &endpoint, const std::string &facility) {
-  UNUSED_ARG(username);
-  UNUSED_ARG(password);
-  UNUSED_ARG(endpoint);
-  UNUSED_ARG(facility);
+CatalogSession_sptr CompositeCatalog::login([[maybe_unused]] const std::string &username,
+                                            [[maybe_unused]] const std::string &password,
+                                            [[maybe_unused]] const std::string &endpoint,
+                                            [[maybe_unused]] const std::string &facility) {
   throw std::runtime_error("You cannot log into multiple catalogs at the same time.");
 }
 

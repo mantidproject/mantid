@@ -186,15 +186,12 @@ PropertyManagerOwner::TypedValue GenericDataProcessorAlgorithm<Base>::getPropert
 }
 
 template <class Base>
-ITableWorkspace_sptr GenericDataProcessorAlgorithm<Base>::determineChunk(const std::string &filename) {
-  UNUSED_ARG(filename);
-
+ITableWorkspace_sptr GenericDataProcessorAlgorithm<Base>::determineChunk([[maybe_unused]] const std::string &filename) {
   throw std::runtime_error("DataProcessorAlgorithm::determineChunk is not implemented");
 }
 
-template <class Base> MatrixWorkspace_sptr GenericDataProcessorAlgorithm<Base>::loadChunk(const size_t rowIndex) {
-  UNUSED_ARG(rowIndex);
-
+template <class Base>
+MatrixWorkspace_sptr GenericDataProcessorAlgorithm<Base>::loadChunk([[maybe_unused]] const size_t rowIndex) {
   throw std::runtime_error("DataProcessorAlgorithm::loadChunk is not implemented");
 }
 
@@ -290,8 +287,7 @@ GenericDataProcessorAlgorithm<Base>::getProcessProperties(const std::string &pro
 }
 
 template <class Base>
-std::vector<std::string> GenericDataProcessorAlgorithm<Base>::splitInput(const std::string &input) {
-  UNUSED_ARG(input);
+std::vector<std::string> GenericDataProcessorAlgorithm<Base>::splitInput([[maybe_unused]] const std::string &input) {
   throw std::runtime_error("DataProcessorAlgorithm::splitInput is not implemented");
 }
 

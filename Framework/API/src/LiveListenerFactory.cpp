@@ -124,8 +124,7 @@ std::shared_ptr<ILiveListener> LiveListenerFactoryImpl::create(const Kernel::Liv
  * @returns Never
  * @throws Exception::NotImplementedError every time!
  */
-ILiveListener *LiveListenerFactoryImpl::createUnwrapped(const std::string &className) const {
-  UNUSED_ARG(className);
+ILiveListener *LiveListenerFactoryImpl::createUnwrapped([[maybe_unused]] const std::string &className) const {
   throw Kernel::Exception::NotImplementedError("Don't use this method - use the safe one!!!");
 }
 
