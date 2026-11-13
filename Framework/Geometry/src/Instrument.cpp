@@ -9,7 +9,6 @@
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ComponentInfoBankHelpers.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/GridDetectorPixel.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
@@ -641,25 +640,6 @@ bool Instrument::isMonitor(const std::set<detid_t> &detector_ids) const {
 
   return std::any_of(detector_ids.cbegin(), detector_ids.cend(),
                      [this](const auto detector_id) { return isMonitor(detector_id); });
-}
-
-/**
- * Returns a pointer to the geometrical object for the given set of IDs
- * @param det_ids :: A list of detector ids
- *  @returns A pointer to the detector object
- *  @throw   NotFoundError If no detector is found for the detector ID given
- */
-IDetector_const_sptr Instrument::getDetectorG(const std::set<detid_t> &det_ids) const {
-  const size_t ndets(det_ids.size());
-  if (ndets == 1) {
-    return this->getDetector(*det_ids.begin());
-  } else {
-    std::shared_ptr<DetectorGroup> det_group = std::make_shared<DetectorGroup>();
-    for (const auto detID : det_ids) {
-      det_group->addDetector(this->getDetector(detID));
-    }
-    return det_group;
-  }
 }
 
 /**
@@ -1492,7 +1472,7 @@ Instrument::makeBeamlineNew(ParameterMap &pmap) const {
   return InstrumentVisitor::makeWrappers(*this, &pmap);
 }
 
-/// Sets up links between m_detectorInfo, m_componentInfo, and m_instrument.
+/// Sets up links between m_detectorInfo and m_componentInfo.
 std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
 Instrument::makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo,
                          const DetectorInfo &detectorInfo) const {
@@ -1506,9 +1486,6 @@ Instrument::makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo,
   // Take the frame from the instrument rather than the cached copy, in case it was set after the cache was built.
   ALLOW_DEPRECATED(compInfo->m_referenceFrame = getReferenceFrame());
   detInfo->m_referenceFrame = compInfo->m_referenceFrame;
-  const auto parInstrument = ParComponentFactory::createInstrument(
-      std::shared_ptr<const Instrument>(this, NoDeleting()), std::shared_ptr<ParameterMap>(&pmap, NoDeleting()));
-  detInfo->m_instrument = parInstrument;
   return {std::move(compInfo), std::move(detInfo)};
 }
 

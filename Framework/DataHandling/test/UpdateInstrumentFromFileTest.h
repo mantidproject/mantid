@@ -18,11 +18,11 @@
 #include "MantidDataHandling/UpdateInstrumentFromFile.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidIndexing/IndexInfo.h"
 
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/ScopedFileHelper.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 
 using Mantid::DataHandling::UpdateInstrumentFromFile;
 
@@ -148,28 +148,21 @@ public:
 
     auto output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
     const auto &spectrumInfo = output->spectrumInfo();
-    const auto &detector = spectrumInfo.detector(0);
+    auto const &componentInfo = output->componentInfo();
 
-    auto canCastToGroup(true);
-    try {
-      const auto &group = dynamic_cast<const DetectorGroup &>(detector);
-      double expectedR(0.6708), expectedTheta(130.4653), expectedPhi(-90.0);
-      const auto dets = group.getDetectors();
-      for (const auto &comp : dets) {
-        double r(-1.0), theta(-1.0), phi(-1.0);
-        comp->getPos().getSpherical(r, theta, phi);
-        TS_ASSERT_DELTA(expectedR, r, 1e-4);
-        TS_ASSERT_DELTA(expectedTheta, theta, 1e-4);
-        TS_ASSERT_DELTA(expectedPhi, phi, 1e-4);
+    TS_ASSERT(!spectrumInfo.hasUniqueDetector(0));
+    double expectedR(0.6708), expectedTheta(130.4653), expectedPhi(-90.0);
+    for (auto const &specDefItem : spectrumInfo.spectrumDefinition(0)) {
+      double r(-1.0), theta(-1.0), phi(-1.0);
+      componentInfo.position(specDefItem.first).getSpherical(r, theta, phi);
+      TS_ASSERT_DELTA(expectedR, r, 1e-4);
+      TS_ASSERT_DELTA(expectedTheta, theta, 1e-4);
+      TS_ASSERT_DELTA(expectedPhi, phi, 1e-4);
 
-        std::vector<double> par = comp->getNumberParameter("t0");
-        TSM_ASSERT_EQUALS("Expected a single t0 parameter", 1, par.size());
-        TS_ASSERT_DELTA(par[0], -0.4157, 1e-4)
-      }
-    } catch (const std::bad_cast &) {
-      canCastToGroup = false;
+      std::vector<double> par = componentInfo.getNumberParameter(specDefItem.first, "t0");
+      TSM_ASSERT_EQUALS("Expected a single t0 parameter", 1, par.size());
+      TS_ASSERT_DELTA(par[0], -0.4157, 1e-4)
     }
-    TS_ASSERT(canCastToGroup);
 
     AnalysisDataService::Instance().remove(wsName);
   }
@@ -211,14 +204,15 @@ private:
     TS_ASSERT_DELTA(131.9319, theta, 1e-4);
     TS_ASSERT_DELTA(180.0, phi, 1e-4);
 
-    const auto &det4 = spectrumInfo.detector(3);
-    std::vector<double> par = det4.getNumberParameter("t0");
+    auto const &componentInfo = output->componentInfo();
+    auto const det4Index = spectrumInfo.firstDetectorIndex(3);
+    std::vector<double> par = componentInfo.getNumberParameter(det4Index, "t0");
     TS_ASSERT_EQUALS(1, par.size());
     if (par.size() == 1) {
       TS_ASSERT_DELTA(par[0], -0.5338, 1e-4)
     }
     // Check that the "-" column was skipped
-    par = det4.getNumberParameter("-");
+    par = componentInfo.getNumberParameter(det4Index, "-");
     TS_ASSERT_EQUALS(0, par.size());
 
     AnalysisDataService::Instance().remove(wsName);

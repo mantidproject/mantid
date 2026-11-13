@@ -15,6 +15,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -172,13 +173,12 @@ void ConvertToMDMinMaxGlobal::exec() {
       } else // indirect
       {
         double Ef = -DBL_MAX, Eftemp = Ef;
-        const auto &pmap = ws->constInstrumentParameters();
+        auto const &componentInfo = ws->componentInfo();
         const auto &specInfo = ws->spectrumInfo();
         for (size_t i = 0; i < ws->getNumberHistograms(); i++) {
           if (!specInfo.hasDetectors(i))
             continue;
-          const auto &det = specInfo.detector(i);
-          const auto &par = pmap.getRecursive(det.getComponentID(), "eFixed");
+          auto const par = componentInfo.parameter(specInfo.firstDetectorIndex(i), "eFixed");
           Eftemp = (par) ? par->value<double>() : Eftemp;
           Ef = (Eftemp > Ef) ? Eftemp : Ef;
           if (Ef <= 0)

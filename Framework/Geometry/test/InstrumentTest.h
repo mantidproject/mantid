@@ -9,7 +9,6 @@
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -251,23 +250,6 @@ public:
     TS_ASSERT_EQUALS(dets.size(), ndets);
     for (size_t i = 0; i < ndets; ++i) {
       TS_ASSERT_EQUALS(dets[i]->getID(), detIDs[i]);
-    }
-  }
-
-  void test_GetDetector_With_A_List_Returns_A_Group() {
-    const size_t ndets(3);
-    std::set<detid_t> detIDs{1, 10, 11};
-    std::vector<detid_t> detIDsVec(detIDs.begin(), detIDs.end());
-
-    IDetector_const_sptr det;
-    TS_ASSERT_THROWS_NOTHING(det = instrument.getDetectorG(detIDs));
-    std::shared_ptr<const DetectorGroup> detGroup = std::dynamic_pointer_cast<const DetectorGroup>(det);
-    TS_ASSERT(detGroup);
-
-    TS_ASSERT_EQUALS(detGroup->nDets(), ndets);
-    std::vector<detid_t> memberIDs = detGroup->getDetectorIDs();
-    for (size_t i = 0; i < ndets; ++i) {
-      TS_ASSERT_EQUALS(memberIDs[i], detIDsVec[i]);
     }
   }
 

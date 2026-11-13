@@ -146,6 +146,37 @@ public:
     // Other lengths are not sensible since the detectors include monitors
   }
 
+  void test_meanDistance() {
+    auto const &spectrumInfo = m_workspace.spectrumInfo();
+    auto const &detectorInfo = m_workspace.detectorInfo();
+    auto const sourcePos = spectrumInfo.sourcePosition();
+    auto const point = V3D(1.0, -2.0, 3.0);
+    for (std::size_t i = 0; i < spectrumInfo.size(); ++i) {
+      TS_ASSERT_EQUALS(spectrumInfo.meanDistance(i, sourcePos), detectorInfo.position(i).distance(sourcePos));
+      TS_ASSERT_EQUALS(spectrumInfo.meanDistance(i, point), detectorInfo.position(i).distance(point));
+    }
+    // Monitors
+    TS_ASSERT_EQUALS(spectrumInfo.meanDistance(3, sourcePos), 11.0);
+    TS_ASSERT_EQUALS(spectrumInfo.meanDistance(4, sourcePos), 18.0);
+  }
+
+  void test_grouped_meanDistance_is_mean_of_detector_distances() {
+    auto const &spectrumInfo = m_grouped.spectrumInfo();
+    auto const &detectorInfo = m_grouped.detectorInfo();
+    auto const sourcePos = spectrumInfo.sourcePosition();
+    auto const expected =
+        (detectorInfo.position(1).distance(sourcePos) + detectorInfo.position(2).distance(sourcePos)) / 2.0;
+    TS_ASSERT_DELTA(spectrumInfo.meanDistance(GroupOfDets2And3, sourcePos), expected, 1e-15);
+    // This is not the same as the distance to the mean position of the group
+    TS_ASSERT_LESS_THAN(spectrumInfo.position(GroupOfDets2And3).distance(sourcePos) + 1e-9,
+                        spectrumInfo.meanDistance(GroupOfDets2And3, sourcePos));
+  }
+
+  void test_meanDistance_no_detectors() {
+    TS_ASSERT_THROWS(m_workspaceNoInstrument.spectrumInfo().meanDistance(0, V3D(0.0, 0.0, 0.0)),
+                     const Kernel::Exception::NotFoundError &);
+  }
+
   void test_twoTheta() {
     const auto &spectrumInfo = m_workspace.spectrumInfo();
     TS_ASSERT_DELTA(spectrumInfo.twoTheta(0), 0.0199973, 1e-6);
@@ -447,26 +478,25 @@ public:
     spectrumInfo.setMasked(GroupOfDets1And4, true);
   }
 
-  void test_detector() {
+  void test_firstDetectorID() {
     const auto &spectrumInfo = m_workspace.spectrumInfo();
-    TS_ASSERT_THROWS_NOTHING(spectrumInfo.detector(0));
-    TS_ASSERT_EQUALS(spectrumInfo.detector(0).getID(), 1);
-    TS_ASSERT_EQUALS(spectrumInfo.detector(1).getID(), 2);
-    TS_ASSERT_EQUALS(spectrumInfo.detector(2).getID(), 3);
-    TS_ASSERT_EQUALS(spectrumInfo.detector(3).getID(), 4);
-    TS_ASSERT_EQUALS(spectrumInfo.detector(4).getID(), 5);
+    TS_ASSERT_EQUALS(spectrumInfo.firstDetectorID(0), 1);
+    TS_ASSERT_EQUALS(spectrumInfo.firstDetectorID(1), 2);
+    TS_ASSERT_EQUALS(spectrumInfo.firstDetectorID(2), 3);
+    TS_ASSERT_EQUALS(spectrumInfo.firstDetectorID(3), 4);
+    TS_ASSERT_EQUALS(spectrumInfo.firstDetectorID(4), 5);
   }
 
   void test_no_detector() {
     const auto &spectrumInfo = m_workspaceNoInstrument.spectrumInfo();
-    TS_ASSERT_THROWS(spectrumInfo.detector(0), const Kernel::Exception::NotFoundError &);
+    TS_ASSERT_THROWS(spectrumInfo.firstDetectorIndex(0), const Kernel::Exception::NotFoundError &);
   }
 
   void test_no_detector_twice() {
     // Regression test: Make sure that *repeated* access also fails.
     const auto &spectrumInfo = m_workspaceNoInstrument.spectrumInfo();
-    TS_ASSERT_THROWS(spectrumInfo.detector(0), const Kernel::Exception::NotFoundError &);
-    TS_ASSERT_THROWS(spectrumInfo.detector(0), const Kernel::Exception::NotFoundError &);
+    TS_ASSERT_THROWS(spectrumInfo.firstDetectorIndex(0), const Kernel::Exception::NotFoundError &);
+    TS_ASSERT_THROWS(spectrumInfo.firstDetectorIndex(0), const Kernel::Exception::NotFoundError &);
   }
 
   void test_ExperimentInfo_basics() {

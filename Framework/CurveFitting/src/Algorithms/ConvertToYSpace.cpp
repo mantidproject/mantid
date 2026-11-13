@@ -15,7 +15,6 @@
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -82,9 +81,7 @@ DetectorParams ConvertToYSpace::getDetectorParameters(const API::MatrixWorkspace
 }
 
 /**
- * If a DetectorGroup is encountered then the parameters are averaged over the
- * group
- * @param comp A pointer to the component that should contain the parameter
+ * @param comp A reference to the component that should contain the parameter
  * @param pmap A reference to the ParameterMap that stores the parameters
  * @param name The name of the parameter
  * @returns The value of the parameter if it exists
@@ -92,28 +89,10 @@ DetectorParams ConvertToYSpace::getDetectorParameters(const API::MatrixWorkspace
  */
 double ConvertToYSpace::getComponentParameter(const Geometry::IComponent &comp, const Geometry::ParameterMap &pmap,
                                               const std::string &name) {
-  double result(0.0);
-  if (const auto &group = dynamic_cast<const Geometry::DetectorGroup *>(&comp)) {
-    double avg(0.0);
-    for (const auto &det : group->getDetectors()) {
-      auto param = pmap.getRecursive(det->getComponentID(), name);
-      if (param)
-        avg += param->value<double>();
-      else
-        throw std::invalid_argument("ComptonProfile - Unable to find "
-                                    "DetectorGroup component parameter \"" +
-                                    name + "\".");
-    }
-    result = avg / static_cast<double>(group->nDets());
-  } else {
-    auto param = pmap.getRecursive(comp.getComponentID(), name);
-    if (param) {
-      result = param->value<double>();
-    } else {
-      throw std::invalid_argument("ComptonProfile - Unable to find component parameter \"" + name + "\".");
-    }
-  }
-  return result;
+  auto const param = pmap.getRecursive(comp.getComponentID(), name);
+  if (!param)
+    throw std::invalid_argument("ComptonProfile - Unable to find component parameter \"" + name + "\".");
+  return param->value<double>();
 }
 
 /**

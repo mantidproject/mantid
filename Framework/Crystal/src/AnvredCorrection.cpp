@@ -215,8 +215,8 @@ void AnvredCorrection::exec() {
 
     std::string bankName;
     if (m_useScaleFactors) {
-      const auto &det = spectrumInfo.detector(i);
-      bankName = det.getParent()->getParent()->getName();
+      std::size_t const index = spectrumInfo.firstDetectorIndex(i);
+      bankName = componentInfo.name(componentInfo.parent(componentInfo.parent(index)));
       pathlength = slantPathLength(inst, componentInfo, bankName, L2, depth);
     }
 
@@ -321,8 +321,8 @@ void AnvredCorrection::execEvent() {
     double pathlength = 0.0;
     std::string bankName;
     if (m_useScaleFactors) {
-      const auto &det = spectrumInfo.detector(i);
-      bankName = det.getParent()->getParent()->getName();
+      std::size_t const detIndex = spectrumInfo.firstDetectorIndex(i);
+      bankName = componentInfo.name(componentInfo.parent(componentInfo.parent(detIndex)));
       pathlength = slantPathLength(inst, componentInfo, bankName, L2, depth);
     }
 
