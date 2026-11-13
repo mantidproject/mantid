@@ -25,7 +25,9 @@ PeaksWorkspace to another workspace.
 The algorithm operates by calculating the scattering direction (given
 the :ref:`UB matrix <Lattice>`) for a particular HKL, and determining
 whether that hits a detector. The Max/MinDSpacing parameters are used
-to determine what HKL's to try.
+to determine what HKL's to try. A predicted peak is assigned the detector
+it hits, but its Q and d-spacing are those calculated from the
+:ref:`UB matrix <Lattice>` and HKL rather than from the centre of that detector.
 
 The parameters of WavelengthMin/WavelengthMax also limit the peaks
 attempted to those that can be detected/produced by your instrument.
