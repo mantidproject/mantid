@@ -252,17 +252,14 @@ void updateRowFromOutputProperties(const IAlgorithm_sptr &algorithm, Item &item)
   std::vector<std::string> iVsQs;
   std::vector<std::string> iVsQBins;
 
-  auto const iVsLam = AlgorithmProperties::getOutputWorkspace(algorithm, "OutputWorkspaceWavelength");
-  auto const iVsQ = AlgorithmProperties::getOutputWorkspace(algorithm, "OutputWorkspace");
-  auto const iVsQBin = AlgorithmProperties::getOutputWorkspace(algorithm, "OutputWorkspaceBinned");
-  if (iVsQ.empty() || iVsLam.empty() || iVsQBin.empty()) {
+  if (algorithm->getProperty("UsingMultiOutputs")) {
     iVsLams = AlgorithmProperties::getMultipleOutputWorkspaces(algorithm, "OutputWorkspacesWavelength");
     iVsQs = AlgorithmProperties::getMultipleOutputWorkspaces(algorithm, "OutputWorkspaces");
     iVsQBins = AlgorithmProperties::getMultipleOutputWorkspaces(algorithm, "OutputWorkspacesBinned");
   } else {
-    iVsLams = {iVsLam};
-    iVsQs = {iVsQ};
-    iVsQBins = {iVsQBin};
+    iVsLams = {AlgorithmProperties::getOutputWorkspace(algorithm, "OutputWorkspaceWavelength")};
+    iVsQs = {AlgorithmProperties::getOutputWorkspace(algorithm, "OutputWorkspace")};
+    iVsQBins = {AlgorithmProperties::getOutputWorkspace(algorithm, "OutputWorkspaceBinned")};
   }
 
   row.setOutputNames(std::vector<std::vector<std::string>>{iVsLams, iVsQs, iVsQBins});
