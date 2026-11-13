@@ -126,6 +126,7 @@ set(TEST_PY_FILES
     RefineSingleCrystalGoniometerTest.py
     ReorientUnitCellTest.py
     PoldiAutoCorrelation6Test.py
+    PoldiCalibrationUtilsTest.py
     ReflectometryReductionOneLiveDataTest.py
     ReflectometrySliceEventWorkspaceTest.py
     ReflectometrySliceEventWorkspaceV2Test.py
