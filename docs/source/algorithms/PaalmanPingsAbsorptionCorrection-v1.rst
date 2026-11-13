@@ -60,6 +60,11 @@ limited impact on the final absorption correction factor, therefore it is genera
 safe to use the same element size for both sample and container regardless of
 the actual geometry difference when running this algorithm.
 
+Sample Orientation
+##################
+
+The sample is always held in a container, which the goniometer does not currently rotate, so the run's goniometer rotation is not applied to the sample either and a warning is logged when there is one. A shape that already carries a rotation, for example one copied by :ref:`algm-CopySample`, is used as it is.
+
 Usage
 -----
 

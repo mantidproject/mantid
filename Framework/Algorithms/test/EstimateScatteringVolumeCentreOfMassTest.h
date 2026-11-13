@@ -11,8 +11,12 @@
 #include "MantidAlgorithms/EstimateScatteringVolumeCentreOfMass.h"
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/Instrument/Container.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidGeometry/Instrument/SampleEnvironment.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerProperty.h"
 #include "MantidKernel/UnitFactory.h"
@@ -198,6 +202,69 @@ public:
     TS_ASSERT_DELTA(result.Y(), 0.01 / 3.0, 0.0002);
     TS_ASSERT_DELTA(result.Z(), 0.01 / 3.0, 0.0002);
   }
+  void testPreRotatedShapeIsNotRotatedTwice() {
+    // As testGoniometerRotatedGaugeClipsSampleCorrectly, but with the shape already baked the way
+    // CopySample leaves it. Turned twice, the centre would land at (0, 0, 0.005).
+    Mantid::Geometry::Goniometer gonio;
+    gonio.pushAxis("phi", 1.0, 0.0, 0.0, 45.0, 1);
+    const auto rotation = gonio.getR();
+
+    // The sequence CopySample uses: stamp the goniometer onto the shape's XML and rebuild.
+    const auto plainShape = ComponentCreationHelper::createCuboid(0.02, 0.02, 0.02, V3D(0.0, 0.02, 0.0), "asymmSample");
+    const auto rotatedXML = Mantid::Geometry::ShapeFactory().addGoniometerTag(rotation, plainShape->getShapeXML());
+    const auto preRotatedShape = Mantid::Geometry::ShapeFactory().createShape(rotatedXML, false);
+    TS_ASSERT(preRotatedShape->hasValidShape());
+    // the shape must report the rotation it carries, which is what makes this resolvable at all
+    TS_ASSERT(preRotatedShape->getAppliedRotation() != Mantid::Kernel::Matrix<double>(3, 3, true));
+
+    MatrixWorkspace_sptr testWS = createTestWorkspace();
+    testWS->mutableSample().setShape(preRotatedShape);
+    const std::string gaugeXML = " \
+        <cuboid id='gv'> \
+        <height val='0.02' /> \
+        <width val='0.02' /> \
+        <depth val='0.02' /> \
+        <centre x='0.0' y='0.0' z='0.0' /> \
+        </cuboid> \
+        <algebra val='gv' /> \
+        ";
+    testWS->mutableRun().addProperty("GaugeVolume", gaugeXML);
+    testWS->mutableRun().setGoniometer(gonio, false);
+
+    Mantid::Algorithms::EstimateScatteringVolumeCentreOfMass centerOfMass;
+    centerOfMass.initialize();
+    centerOfMass.setProperty("InputWorkspace", testWS);
+    centerOfMass.setProperty("ElementSize", 0.5);
+    TS_ASSERT_THROWS_NOTHING(centerOfMass.execute());
+    TS_ASSERT(centerOfMass.isExecuted());
+    std::vector<double> resultVec = centerOfMass.getProperty("CentreOfMass");
+    V3D result(resultVec[0], resultVec[1], resultVec[2]);
+    TS_ASSERT_DELTA(result.X(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(result.Y(), 0.01 / 3.0, 0.0002);
+    TS_ASSERT_DELTA(result.Z(), 0.01 / 3.0, 0.0002);
+  }
+
+  void testSampleInAnEnvironmentIsStillRotated() {
+    // The environment takes no part in the centre of mass, so the goniometer turns the sample as
+    // usual: 90 degrees about x carries a sample centred on +y onto +z.
+    MatrixWorkspace_sptr testWS = createWorkspaceWithAnyOffsetCylinderSample(V3D(0.0, 0.02, 0.0));
+    auto can = std::make_shared<Mantid::Geometry::Container>(
+        ComponentCreationHelper::createSphere(0.2, V3D(0.0, 0.0, 0.0), "can"));
+    testWS->mutableSample().setEnvironment(std::make_unique<Mantid::Geometry::SampleEnvironment>("kit", can));
+    Mantid::Geometry::Goniometer gonio;
+    gonio.pushAxis("phi", 1.0, 0.0, 0.0, 90.0, 1);
+    testWS->mutableRun().setGoniometer(gonio, false);
+
+    Mantid::Algorithms::EstimateScatteringVolumeCentreOfMass centerOfMass;
+    centerOfMass.initialize();
+    centerOfMass.setProperty("InputWorkspace", testWS);
+    centerOfMass.setProperty("ElementSize", 2.0);
+    TS_ASSERT_THROWS_NOTHING(centerOfMass.execute());
+    const std::vector<double> result = centerOfMass.getProperty("CentreOfMass");
+    TS_ASSERT_DELTA(result[1], 0.0, 0.001);
+    TS_ASSERT(result[2] > 0.01);
+  }
+
   void testBadElementUnitsThrowsError() {
     // Create a test workspace with cylinder sample
     MatrixWorkspace_sptr testWS = createWorkspaceWithCylinderSample();

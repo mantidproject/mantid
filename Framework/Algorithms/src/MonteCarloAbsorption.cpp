@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/MonteCarloAbsorption.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/LabFrameSample.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -293,7 +294,11 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(const MatrixWorkspace &i
   const auto nhists = static_cast<int64_t>(instrumentWS.getNumberHistograms());
 
   EFixedProvider efixed(instrumentWS);
-  auto beamProfile = BeamProfileFactory::createBeamProfile(instrumentWS.componentInfo(), inputWS.sample());
+
+  // The gauge volume, beam and detectors are in the lab frame, so everything below uses this copy.
+  auto labFrameSample = API::labFrameSample(inputWS);
+
+  auto beamProfile = BeamProfileFactory::createBeamProfile(instrumentWS.componentInfo(), labFrameSample);
 
   // Configure progress
   Progress prog(this, 0.0, 1.0, nhists);
@@ -322,7 +327,7 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(const MatrixWorkspace &i
   }
 
   std::shared_ptr<IMCInteractionVolume> interactionVolume =
-      MCInteractionVolume::create(inputWS.sample(), maxScatterPtAttempts, pointsIn, gaugeVolume);
+      MCInteractionVolume::create(labFrameSample, maxScatterPtAttempts, pointsIn, gaugeVolume);
 
   Geometry::IObject_sptr gv = interactionVolume->getGaugeVolume();
 
@@ -367,7 +372,7 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(const MatrixWorkspace &i
         j = nbins - lambdaStepSize - 1;
       }
     }
-    MCInteractionStatistics detStatistics(detID, inputWS.sample());
+    MCInteractionStatistics detStatistics(detID, labFrameSample);
 
     strategy->calculate(rng, detPos, packedLambdas, lambdaFixed, packedAttFactors, packedAttFactorErrors,
                         detStatistics);

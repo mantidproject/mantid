@@ -7,6 +7,7 @@
 #include "MantidAlgorithms/AbsorptionCorrection.h"
 #include "MantidAPI/HistoWorkspace.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/LabFrameSample.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -376,6 +377,12 @@ void AbsorptionCorrection::constructSample(API::Sample &sample) {
       const std::string mess("No shape has been defined for the sample in the input workspace");
       g_log.error(mess);
       throw std::invalid_argument(mess);
+    }
+
+    if (scatterFrom == CALC_SAMPLE) {
+      // The container and environment are not currently goniometer-rotated, so they stay as they are.
+      m_labFrameShape = API::labFrameSampleShape(*m_inputWS);
+      m_sampleObject = m_labFrameShape.get();
     }
   } else if (scatterFrom != CALC_SAMPLE) { // should never be in this case
     std::stringstream msg;

@@ -7,6 +7,7 @@
 #include "MantidAlgorithms/PaalmanPingsAbsorptionCorrection.h"
 #include "MantidAPI/HistoWorkspace.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/LabFrameSample.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -381,16 +382,19 @@ void PaalmanPingsAbsorptionCorrection::retrieveBaseProperties() {
 }
 
 /// Create the sample object using the Geometry classes, or use the existing one
-void PaalmanPingsAbsorptionCorrection::constructSample(API::Sample &sample) {
-  m_sampleObject = &sample.getShape();
+void PaalmanPingsAbsorptionCorrection::constructSample(const API::Sample &sample) {
   m_containerObject = &(sample.getEnvironment().getContainer());
 
   // Check there is one, and fail if not
-  if (!m_sampleObject->hasValidShape()) {
+  if (!sample.getShape().hasValidShape()) {
     const std::string mess("No shape has been defined for the sample in the input workspace");
     g_log.error(mess);
     throw std::invalid_argument(mess);
   }
+
+  // The quadrature intersects a lab-frame region.
+  m_labFrameSampleShape = API::labFrameSampleShape(*m_inputWS);
+  m_sampleObject = m_labFrameSampleShape.get();
   // Check there is one, and fail if not
   if (!m_containerObject->hasValidShape()) {
     const std::string mess("No shape has been defined for the container in the input workspace");

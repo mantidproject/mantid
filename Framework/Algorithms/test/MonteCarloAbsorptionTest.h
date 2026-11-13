@@ -26,6 +26,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/WarningSuppressions.h"
 
+#include "SampleFrameEquivalence.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
@@ -303,6 +304,11 @@ public:
     TS_ASSERT_DELTA(calculatedAttFactor2, yData[1], delta);
     const double calculatedAttFactorSD2 = sqrt(calculatedAttFactorSq2 - pow(calculatedAttFactor2, 2));
     TS_ASSERT_DELTA(calculatedAttFactorSD2, attenuationFactorsSD2, delta);
+  }
+
+  void test_Both_Ways_Of_Orienting_The_Sample_Agree() {
+    SampleFrameEquivalence::assertFramesAgree(SampleFrameEquivalence::rotationY(30.0),
+                                              [this](const auto &r, bool baked) { return runOverPlate(r, baked); });
   }
 
   void test_Workspace_With_Just_Sample_For_Direct() {
@@ -851,6 +857,21 @@ private:
     }
     mcabs->execute();
     return getOutputWorkspace(mcabs);
+  }
+
+  /// Run the correction over a plate sample held in the given frame, with a fixed seed so two runs
+  /// over identical geometry give identical numbers.
+  Mantid::HistogramData::HistogramY runOverPlate(const Mantid::Kernel::Matrix<double> &rotation, const bool baked) {
+    using Mantid::Kernel::DeltaEMode;
+    TestWorkspaceDescriptor wsProps = {1, 2, false, Environment::CubeSampleOnly, DeltaEMode::Elastic, -1};
+    auto testWS = setUpWS(wsProps);
+    SampleFrameEquivalence::setSample(*testWS, rotation, baked);
+    auto mcAbsorb = createAlgorithm();
+    mcAbsorb->setProperty("EventsPerPoint", 2000);
+    mcAbsorb->setProperty("SeedValue", 123456789);
+    mcAbsorb->setProperty("InputWorkspace", testWS);
+    mcAbsorb->execute();
+    return getOutputWorkspace(mcAbsorb)->getSpectrum(0).y();
   }
 
   Mantid::API::IAlgorithm_sptr createAlgorithm() {

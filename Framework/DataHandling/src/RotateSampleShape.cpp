@@ -83,13 +83,26 @@ void RotateSampleShape::exec() {
     return;
   }
 
-  const auto &oldRotation = ei->run().getGoniometer().getR();
-  auto newSampleShapeRot = sampleShapeRotation * oldRotation;
+  // Rotate within the shape's own frame, leaving the run's goniometer to whoever consumes it.
+  // Folding it in would make a reorientation indistinguishable from a move to the lab frame. A shape
+  // already baked into the lab frame by B is stored as B * D, so turning D by S means applying
+  // B * S * B^T to what is stored.
+  const auto bakedRotation = ei->sample().getShape().getAppliedRotation();
+  const auto ownFrameRotation = bakedRotation * sampleShapeRotation * bakedRotation.Tprime();
   if (isMeshShape) {
-    auto meshShape = std::dynamic_pointer_cast<MeshObject>(ei->sample().getShapePtr());
-    meshShape->rotate(newSampleShapeRot);
+    // Rotate a copy: Sample's copy constructor shares the shape pointer, so rotating in place
+    // would turn every cloned workspace's sample too.
+    auto meshShape = std::dynamic_pointer_cast<MeshObject>(std::shared_ptr<IObject>(ei->sample().getShape().clone()));
+    meshShape->rotate(ownFrameRotation);
+    ei->mutableSample().setShape(meshShape);
   } else {
-    shapeXML = Geometry::ShapeFactory().addGoniometerTag(newSampleShapeRot, shapeXML);
+    // Pin the bake first: without an <applied-goniometer> tag in place, growing the total would
+    // leave the whole of it looking like a bake.
+    shapeXML = Geometry::ShapeFactory().addAppliedGoniometerTag(bakedRotation, shapeXML);
+
+    // Compose rather than replace, so repeated calls accumulate as they do for a mesh.
+    const auto total = Geometry::ShapeFactory::goniometerFromXML(shapeXML);
+    shapeXML = Geometry::ShapeFactory().addGoniometerTag(ownFrameRotation * total, shapeXML);
     Mantid::DataHandling::CreateSampleShape::setSampleShape(*ei, shapeXML, false);
   }
 }

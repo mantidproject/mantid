@@ -103,8 +103,8 @@ void LoadSampleShape::exec() {
   const std::vector<double> translationVector = getProperty("TranslationVector");
   shape = reader->translate(shape, translationVector);
 
-  // rotate shape according to goniometer
-  shape->rotate(ei->run().getGoniometer().getR());
+  // Unlike the user rotation above, this moves the shape into the lab frame, so it is recorded.
+  shape->bakeGoniometerRotation(ei->run().getGoniometer().getR());
 
   // Put shape into sample.
   Sample &sample = ei->mutableSample();
