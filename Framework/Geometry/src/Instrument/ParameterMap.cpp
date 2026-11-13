@@ -1209,7 +1209,7 @@ void ParameterMap::buildInstrumentMetadata() {
   std::shared_ptr<const DetectorInfo> physicalDetectorInfo;
   if (const auto &basePhysicalInstrument = m_instrument->getPhysicalInstrument()) {
     // This map's parameters are keyed by the neutronic instrument's components, so none apply to the
-    // physical one and it is walked unparametrized. The visitor keeps it alive inside the DetectorInfo.
+    // physical one and it is walked unparametrized.
     InstrumentVisitor visitor(basePhysicalInstrument);
     visitor.walkInstrument();
     std::tie(physicalComponentInfo, physicalDetectorInfo) = visitor.makeWrappers();

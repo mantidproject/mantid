@@ -33,11 +33,10 @@ void addToInstrument(const MatrixWorkspace_sptr &testWS, const bool &add_deltaE_
                               // peak in the analyzers
   if (add_deltaE_mode) {
     testWS->instrumentParameters().addString(testWS->getInstrument()->getComponentID(), "deltaE-mode", "indirect");
-    auto &pmap = testWS->instrumentParameters();
+    auto &componentInfo = testWS->mutableComponentInfo();
     const auto &spectrumInfo = testWS->spectrumInfo();
-    auto const &componentInfo = testWS->componentInfo();
     for (size_t ihist = 0; ihist < testWS->getNumberHistograms(); ++ihist) {
-      pmap.addDouble(componentInfo.componentID(spectrumInfo.firstDetectorIndex(ihist)), "Efixed", evalue);
+      componentInfo.addDouble(spectrumInfo.firstDetectorIndex(ihist), "Efixed", evalue);
     }
   }
   if (add_t0_formula) {
