@@ -19,7 +19,7 @@ namespace HistogramData {
 class Points;
 }
 namespace Geometry {
-class IDetector;
+class ComponentInfo;
 class IObject;
 class ParameterMap;
 } // namespace Geometry
@@ -74,7 +74,8 @@ private:
   /// Correct the given spectra index for efficiency
   void correctForEfficiency(std::size_t spectraIndex, const API::SpectrumInfo &spectrumInfo);
   /// Sets the detector geometry cache if necessary
-  void getDetectorGeometry(const Geometry::IDetector &det, double &detRadius, Kernel::V3D &detAxis);
+  void getDetectorGeometry(Geometry::ComponentInfo const &componentInfo, API::SpectrumInfo const &spectrumInfo,
+                           std::size_t spectraIndex, double &detRadius, Kernel::V3D &detAxis);
   /// Computes the distance to the given shape from a starting point
   double distToSurface(const Kernel::V3D &start, const Geometry::IObject *shape) const;
   /// Calculate the detector efficiency
@@ -83,11 +84,12 @@ private:
   void logErrors() const;
   /// Retrieve the detector parameters from workspace or detector properties
   double getParameter(const std::string &wsPropName, std::size_t currentIndex, const std::string &detPropName,
-                      const Geometry::IDetector &idet);
+                      Geometry::ComponentInfo const &componentInfo, API::SpectrumInfo const &spectrumInfo);
   /// Helper for event handling
   template <class T> void eventHelper(std::vector<T> &events, double expval);
   /// Function to calculate exponential contribution
-  double calculateExponential(std::size_t spectraIndex, const Geometry::IDetector &idet);
+  double calculateExponential(std::size_t spectraIndex, Geometry::ComponentInfo const &componentInfo,
+                              API::SpectrumInfo const &spectrumInfo);
 
   /// The user selected (input) workspace
   API::MatrixWorkspace_const_sptr m_inputWS;

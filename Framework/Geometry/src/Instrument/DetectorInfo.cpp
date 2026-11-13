@@ -51,20 +51,13 @@ double applyPhiOffset(const double phi, const double offset) { return phi < 0 ? 
  * argument. The ParameterInfo and ReferenceFrame must be the same objects held
  * by the matching ComponentInfo. */
 DetectorInfo::DetectorInfo(std::unique_ptr<Beamline::DetectorInfo> detectorInfo,
-                           std::shared_ptr<const Geometry::Instrument> instrument,
                            std::shared_ptr<const std::vector<detid_t>> detectorIds,
                            std::shared_ptr<const std::unordered_map<detid_t, size_t>> detIdToIndexMap,
                            std::shared_ptr<ParameterInfo> parameterInfo,
                            std::shared_ptr<ReferenceFrame const> referenceFrame)
-    : m_detectorInfo(std::move(detectorInfo)), m_instrument(std::move(instrument)),
-      m_detectorIDs(std::move(detectorIds)), m_detIDToIndex(std::move(detIdToIndexMap)),
-      m_parameterInfo(std::move(parameterInfo)), m_referenceFrame(std::move(referenceFrame)),
-      m_lastDetector(PARALLEL_GET_MAX_THREADS), m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {
-
-  // Note: This does not seem possible currently (the instrument objects is
-  // always allocated, even if it is empty), so this will not fail.
-  if (!m_instrument)
-    throw std::invalid_argument("DetectorInfo::DetectorInfo Workspace does not contain an instrument!");
+    : m_detectorInfo(std::move(detectorInfo)), m_detectorIDs(std::move(detectorIds)),
+      m_detIDToIndex(std::move(detIdToIndexMap)), m_parameterInfo(std::move(parameterInfo)),
+      m_referenceFrame(std::move(referenceFrame)) {
 
   if (m_detectorIDs->size() != m_detIDToIndex->size()) {
     throw std::invalid_argument("DetectorInfo::DetectorInfo: ID and ID->index map do not match");
@@ -76,10 +69,9 @@ DetectorInfo::DetectorInfo(std::unique_ptr<Beamline::DetectorInfo> detectorInfo,
  * Public copy should not be used since proper links between DetectorInfo and
  * ComponentInfo must be set up. */
 DetectorInfo::DetectorInfo(const DetectorInfo &other)
-    : m_detectorInfo(std::make_unique<Beamline::DetectorInfo>(*other.m_detectorInfo)), m_instrument(other.m_instrument),
+    : m_detectorInfo(std::make_unique<Beamline::DetectorInfo>(*other.m_detectorInfo)),
       m_detectorIDs(other.m_detectorIDs), m_detIDToIndex(other.m_detIDToIndex), m_parameterInfo(other.m_parameterInfo),
-      m_referenceFrame(other.m_referenceFrame), m_lastDetector(PARALLEL_GET_MAX_THREADS),
-      m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {}
+      m_referenceFrame(other.m_referenceFrame) {}
 
 /// Assigns the contents of the non-wrapping part of `rhs` to this.
 DetectorInfo &DetectorInfo::operator=(const DetectorInfo &rhs) {
@@ -514,11 +506,6 @@ void DetectorInfo::setRotation(const std::pair<size_t, size_t> &index, const Ker
   m_detectorInfo->setRotation(index, Kernel::toQuaterniond(rotation));
 }
 
-/// Return a const reference to the detector with given index.
-const Geometry::IDetector &DetectorInfo::detector(const size_t index) const {
-  ALLOW_DEPRECATED(return getDetector(index));
-}
-
 /// Returns the source position.
 Kernel::V3D DetectorInfo::sourcePosition() const { return Kernel::toV3D(m_detectorInfo->sourcePosition()); }
 
@@ -563,30 +550,6 @@ const DetectorInfoConstIt DetectorInfo::cbegin() const { return DetectorInfoCons
 
 const DetectorInfoConstIt DetectorInfo::cend() const { return DetectorInfoConstIt(*this, size(), size()); }
 
-const Geometry::IDetector &DetectorInfo::getDetector(const size_t index) const {
-  auto thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
-  if (m_lastIndex[thread] != index) {
-    m_lastIndex[thread] = index;
-    try {
-      m_lastDetector[thread] = m_instrument->getDetector(detid(index));
-    } catch (...) {
-      // Reset so a future call for this index retries rather than returning
-      // whatever stale pointer m_lastDetector holds from a previous access.
-      m_lastIndex[thread] = -1;
-      throw;
-    }
-  }
-
-  return *m_lastDetector[thread];
-}
-
-/// Helper used by SpectrumInfo.
-std::shared_ptr<const Geometry::IDetector> DetectorInfo::getDetectorPtr(const size_t index) const {
-  auto thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
-  ALLOW_DEPRECATED(static_cast<void>(getDetector(index)));
-  return m_lastDetector[thread];
-}
-
 // Begin method for iterator
 DetectorInfoIt DetectorInfo::begin() { return DetectorInfoIt(*this, 0, size()); }
 
@@ -606,17 +569,11 @@ size_t DetectorInfo::getMemorySize() const {
   // Count the heap-allocated map object + each node (key + value + ~2 pointers for bucket/chain overhead)
   const size_t detIDToIndexMem =
       sizeof(std::unordered_map<detid_t, size_t>) + n * (sizeof(detid_t) + sizeof(size_t) + 2 * sizeof(void *));
-  // m_lastDetector and m_lastIndex: one slot per OpenMP thread
-  const size_t cacheMem = m_lastDetector.capacity() * sizeof(std::shared_ptr<const Geometry::IDetector>) +
-                          m_lastIndex.capacity() * sizeof(size_t);
-
   // m_parameterInfo is a shared_ptr to the ParameterMap already held in ComponentInfo; only count the pointer wrapper
   const size_t paramInfoSize = sizeof(std::shared_ptr<Geometry::ParameterInfo>);
   // m_referenceFrame is a shared_ptr to the ReferenceFrame already held by instrument; only count the pointer wrapper
   const size_t refFrameSize = sizeof(std::shared_ptr<Geometry::ReferenceFrame const>);
-  // m_instrument is a shared_ptr to an Instrument owned by the workspace; its memory is counted in
-  // Instrument::getMemorySize() and excluded here to avoid double-counting.
-  return sizeof(*this) + beamlineMem + detectorIDsMem + detIDToIndexMem + cacheMem + paramInfoSize + refFrameSize;
+  return sizeof(*this) + beamlineMem + detectorIDsMem + detIDToIndexMem + paramInfoSize + refFrameSize;
 }
 
 } // namespace Mantid::Geometry

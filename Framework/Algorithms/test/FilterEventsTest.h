@@ -17,6 +17,7 @@
 #include "MantidDataObjects/SplittersWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -693,12 +694,10 @@ public:
       TS_ASSERT_EQUALS(outcorrws->x(0).size(), 2);
 
       const auto &spectrumInfo = ws->spectrumInfo();
+      auto const &componentInfo = ws->componentInfo();
 
       for (size_t iws = 0; iws < outcorrws->getNumberHistograms(); ++iws) {
-        const ParameterMap &pmap = ws->constInstrumentParameters();
-
-        const auto &det = spectrumInfo.detector(iws);
-        Parameter_sptr par = pmap.getRecursive(&det, "Efixed");
+        auto const par = componentInfo.parameter(spectrumInfo.firstDetectorIndex(iws), "Efixed");
         double efix = par->value<double>();
 
         double l2 = spectrumInfo.l2(iws);
@@ -1596,23 +1595,11 @@ public:
     eventWS->mutableRun().addProperty("run_start", runstart.toISO8601String(), true);
     eventWS->mutableRun().addProperty("run_end", runend.toISO8601String(), true);
 
-    // Add EFixed to each detector
-    const ParameterMap &pmap = eventWS->constInstrumentParameters();
-
+    // Add EFixed to each detector that does not have one
     for (size_t i = 0; i < 10; ++i) {
-
       const auto &spectrumInfo = eventWS->spectrumInfo();
-
-      const auto &det = spectrumInfo.detector(i);
-      Parameter_sptr par = pmap.getRecursive(&det, "Efixed");
-      if (par) {
-        // No need to set up E-Fix
-        // double efix = par->value<double>();
-        ;
-      } else {
-
-        eventWS->setEFixed(det.getID(), 2.08);
-      }
+      if (!eventWS->componentInfo().hasParameter(spectrumInfo.firstDetectorIndex(i), "Efixed"))
+        eventWS->setEFixed(spectrumInfo.firstDetectorID(i), 2.08);
     }
 
     // Create `pulseCount` pulses with one event per pulse

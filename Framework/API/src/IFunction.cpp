@@ -19,7 +19,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidGeometry/Instrument/ParameterInfo.h"

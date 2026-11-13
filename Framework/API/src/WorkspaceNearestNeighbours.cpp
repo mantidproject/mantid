@@ -7,7 +7,6 @@
 #include "MantidAPI/WorkspaceNearestNeighbours.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 // Nearest neighbours library
 #include "MantidKernel/ANN/ANN.h"
@@ -123,11 +122,9 @@ void WorkspaceNearestNeighbours::build(const int noNeighbours) {
   m_specToVertex.clear();
   m_noNeighbours = noNeighbours;
 
-  BoundingBox bbox;
   // Base the scaling on the first detector, should be adequate but we can look
   // at this
-  const auto &firstDet = m_spectrumInfo.detector(indices.front());
-  firstDet.getBoundingBox(bbox);
+  BoundingBox bbox = m_spectrumInfo.boundingBox(indices.front());
   m_scale = V3D(bbox.width());
   ANNpointArray dataPoints = annAllocPts(nspectra, 3);
   MapIV pointNoToVertex;

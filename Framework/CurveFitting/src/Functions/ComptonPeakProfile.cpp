@@ -8,6 +8,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/PhysicalConstants.h"
 
 #include <cmath>
@@ -107,9 +108,9 @@ void ComptonPeakProfile::setWorkspace(std::shared_ptr<const API::Workspace> ws) 
   const double trec = detpar.l1 / v1 + detpar.l2 / v2;
 
   // Compute lorentz width due to in Y due to spread in energy hwhm_lorentz
-  const auto &det = workspace->spectrumInfo().detector(m_wsIndex);
-  const auto &pmap = workspace->constInstrumentParameters();
-  const double dELorentz = ConvertToYSpace::getComponentParameter(det, pmap, "hwhm_lorentz");
+  auto const &spectrumDefinition = workspace->spectrumInfo().spectrumDefinition(m_wsIndex);
+  double const dELorentz =
+      ConvertToYSpace::getComponentParameter(workspace->componentInfo(), spectrumDefinition, "hwhm_lorentz");
   double yplus(0.0), yminus(0.0), dummy(0.0);
   detpar.efixed += dELorentz;
   ConvertToYSpace::calculateY(yplus, dummy, dummy, m_mass, trec, k1, v1, detpar);

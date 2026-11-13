@@ -1864,18 +1864,7 @@ public:
     TS_ASSERT_EQUALS(specInfo.position(0), V3D(1, 0, 0));
     TS_ASSERT_EQUALS(specInfo.position(1), V3D(2, 0, 0));
 
-    TS_ASSERT_THROWS_NOTHING(specInfo.detector(0));
-    const auto &det = specInfo.detector(0);
-    // Failing legacy methods (use DetectorInfo/SpectrumInfo instead):
-    TS_ASSERT_THROWS(det.getPos(), const std::runtime_error &);
-    TS_ASSERT_THROWS(det.getRelativePos(), const std::runtime_error &);
-    TS_ASSERT_THROWS(det.getRotation(), const std::runtime_error &);
-    TS_ASSERT_THROWS(det.getRelativeRot(), const std::runtime_error &);
-    TS_ASSERT_THROWS(det.getPhi(), const std::runtime_error &);
-    // Failing methods, currently without replacement:
-    TS_ASSERT_THROWS(det.solidAngle(V3D(0, 0, 0)), const std::runtime_error &);
-    BoundingBox bb;
-    TS_ASSERT_THROWS(det.getBoundingBox(bb), const std::runtime_error &);
+    auto const detIndex = specInfo.firstDetectorIndex(0);
     // Moving parent not possible since non-detector components do not have time
     // indices and thus DetectorInfo cannot tell which set of detector positions
     // to adjust.
@@ -1883,11 +1872,9 @@ public:
     auto &compInfo = merged->mutableComponentInfo();
 
     // Try to move the parent
-    TS_ASSERT_THROWS(compInfo.setPosition(compInfo.parent(compInfo.indexOf(det.getComponentID())), V3D(1, 2, 3)),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(compInfo.setPosition(compInfo.parent(detIndex), V3D(1, 2, 3)), const std::runtime_error &);
     // Try to rotate the parent
-    TS_ASSERT_THROWS(compInfo.setRotation(compInfo.parent(compInfo.indexOf(det.getComponentID())), Quat(1, 2, 3, 4)),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS(compInfo.setRotation(compInfo.parent(detIndex), Quat(1, 2, 3, 4)), const std::runtime_error &);
   }
 
   void test_detectorSignedTwoTheta() {

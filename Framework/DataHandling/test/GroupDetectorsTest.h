@@ -17,7 +17,6 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/UnitFactory.h"
@@ -147,20 +146,16 @@ public:
 
     const auto &spectrumInfo = outputWS->spectrumInfo();
     TS_ASSERT(spectrumInfo.hasDetectors(0));
-    const auto &det0 = spectrumInfo.detector(0);
-    // (void) avoids a compiler warning for unused variable
-    TS_ASSERT_THROWS_NOTHING((void)dynamic_cast<const DetectorGroup &>(det0));
+    TS_ASSERT(!spectrumInfo.hasUniqueDetector(0));
 
     TS_ASSERT(spectrumInfo.hasDetectors(1));
-    const auto &det1 = spectrumInfo.detector(1);
-    TS_ASSERT_THROWS_NOTHING((void)dynamic_cast<const Detector &>(det1));
+    TS_ASSERT(spectrumInfo.hasUniqueDetector(1));
 
     TS_ASSERT(!spectrumInfo.hasDetectors(2));
     TS_ASSERT(!spectrumInfo.hasDetectors(3));
 
     TS_ASSERT(spectrumInfo.hasDetectors(4));
-    const auto &det4 = spectrumInfo.detector(4);
-    TS_ASSERT_THROWS_NOTHING((void)dynamic_cast<const Detector &>(det4));
+    TS_ASSERT(spectrumInfo.hasUniqueDetector(4));
 
     AnalysisDataService::Instance().remove("GroupTestWS");
   }

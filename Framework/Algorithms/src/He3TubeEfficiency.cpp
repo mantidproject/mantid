@@ -14,6 +14,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Objects/Track.h"
@@ -158,8 +159,7 @@ void He3TubeEfficiency::correctForEfficiency(std::size_t spectraIndex, const API
     return;
   }
 
-  const auto &det = spectrumInfo.detector(spectraIndex);
-  const double exp_constant = this->calculateExponential(spectraIndex, det);
+  const double exp_constant = this->calculateExponential(spectraIndex, m_inputWS->componentInfo(), spectrumInfo);
   const double scale = this->getProperty("ScaleFactor");
 
   const auto &yValues = m_inputWS->y(spectraIndex);
@@ -187,27 +187,32 @@ void He3TubeEfficiency::correctForEfficiency(std::size_t spectraIndex, const API
  * This function calculates the exponential contribution to the He3 tube
  * efficiency.
  * @param spectraIndex :: the current index to calculate
- * @param idet :: the current detector pointer
+ * @param componentInfo :: the ComponentInfo of the workspace
+ * @param spectrumInfo :: the SpectrumInfo of the workspace
  * @throw out_of_range if twice tube thickness is greater than tube diameter
  * @return the exponential contribution for the given detector
  */
-double He3TubeEfficiency::calculateExponential(std::size_t spectraIndex, const Geometry::IDetector &idet) {
+double He3TubeEfficiency::calculateExponential(std::size_t spectraIndex, Geometry::ComponentInfo const &componentInfo,
+                                               API::SpectrumInfo const &spectrumInfo) {
   // Get the parameters for the current associated tube
-  double pressure = this->getParameter("TubePressure", spectraIndex, "tube_pressure", idet);
-  double tubethickness = this->getParameter("TubeThickness", spectraIndex, "tube_thickness", idet);
-  double temperature = this->getParameter("TubeTemperature", spectraIndex, "tube_temperature", idet);
+  double pressure = this->getParameter("TubePressure", spectraIndex, "tube_pressure", componentInfo, spectrumInfo);
+  double tubethickness =
+      this->getParameter("TubeThickness", spectraIndex, "tube_thickness", componentInfo, spectrumInfo);
+  double temperature =
+      this->getParameter("TubeTemperature", spectraIndex, "tube_temperature", componentInfo, spectrumInfo);
 
   double detRadius(0.0);
   Kernel::V3D detAxis;
-  this->getDetectorGeometry(idet, detRadius, detAxis);
+  this->getDetectorGeometry(componentInfo, spectrumInfo, spectraIndex, detRadius, detAxis);
+  std::size_t const detIndex = spectrumInfo.firstDetectorIndex(spectraIndex);
   double detDiameter = 2.0 * detRadius;
   double twiceTubeThickness = 2.0 * tubethickness;
 
   // now get the sin of the angle, it's the magnitude of the cross product of
   // unit vector along the detector tube axis and a unit vector directed from
   // the sample to the detector center
-  const Kernel::V3D vectorFromSample = normalize(idet.getPos() - m_samplePos);
-  Kernel::Quat rot = idet.getRotation();
+  const Kernel::V3D vectorFromSample = normalize(componentInfo.position(detIndex) - m_samplePos);
+  Kernel::Quat rot = componentInfo.rotation(detIndex);
   // rotate the original cylinder object axis to get the detector axis in the
   // actual instrument
   rot.rotate(detAxis);
@@ -228,45 +233,49 @@ double He3TubeEfficiency::calculateExponential(std::size_t spectraIndex, const G
 
 /**
  * Update the shape cache if necessary
- * @param det :: a pointer to the detector to query
+ * @param componentInfo :: the ComponentInfo of the workspace
+ * @param spectrumInfo :: the SpectrumInfo of the workspace
+ * @param spectraIndex :: the workspace index of the detector to query
  * @param detRadius :: An output parameter that contains the detector radius
  * @param detAxis :: An output parameter that contains the detector axis vector
  */
-void He3TubeEfficiency::getDetectorGeometry(const Geometry::IDetector &det, double &detRadius, Kernel::V3D &detAxis) {
-  std::shared_ptr<const Geometry::IObject> shape_sptr = det.shape();
-  if (!shape_sptr) {
-    throw std::runtime_error("Detector geometry error: detector with id: " + std::to_string(det.getID()) +
-                             " does not have shape. Is this a detectors group?\n"
-                             "The algorithm works for instruments with one-to-one "
-                             "spectra-to-detector maps only!");
+void He3TubeEfficiency::getDetectorGeometry(Geometry::ComponentInfo const &componentInfo,
+                                            API::SpectrumInfo const &spectrumInfo, std::size_t spectraIndex,
+                                            double &detRadius, Kernel::V3D &detAxis) {
+  std::size_t const detIndex = spectrumInfo.firstDetectorIndex(spectraIndex);
+  if (!spectrumInfo.hasUniqueDetector(spectraIndex) || !componentInfo.hasValidShape(detIndex)) {
+    throw std::runtime_error(
+        "Detector geometry error: detector with id: " + std::to_string(spectrumInfo.firstDetectorID(spectraIndex)) +
+        " does not have shape. Is this a detectors group?\n"
+        "The algorithm works for instruments with one-to-one "
+        "spectra-to-detector maps only!");
   }
-  // std::map<const Geometry::Object *, std::pair<double,
-  // Kernel::V3D>>::const_iterator
-  auto it = m_shapeCache.find(shape_sptr.get());
+  auto const *shape = &componentInfo.shape(detIndex);
+  auto it = m_shapeCache.find(shape);
   if (it == m_shapeCache.end()) {
-    double xDist = distToSurface(Kernel::V3D(DIST_TO_UNIVERSE_EDGE, 0, 0), shape_sptr.get());
-    double zDist = distToSurface(Kernel::V3D(0, 0, DIST_TO_UNIVERSE_EDGE), shape_sptr.get());
+    double xDist = distToSurface(Kernel::V3D(DIST_TO_UNIVERSE_EDGE, 0, 0), shape);
+    double zDist = distToSurface(Kernel::V3D(0, 0, DIST_TO_UNIVERSE_EDGE), shape);
     if (Kernel::withinAbsoluteDifference(zDist, xDist, 1e-8)) {
       detRadius = zDist / 2.0;
       detAxis = Kernel::V3D(0, 1, 0);
       // assume radii in z and x and the axis is in the y
-      PARALLEL_CRITICAL(deteff_shapecachea) { m_shapeCache.insert({shape_sptr.get(), {detRadius, detAxis}}); }
+      PARALLEL_CRITICAL(deteff_shapecachea) { m_shapeCache.insert({shape, {detRadius, detAxis}}); }
       return;
     }
-    double yDist = distToSurface(Kernel::V3D(0, DIST_TO_UNIVERSE_EDGE, 0), shape_sptr.get());
+    double yDist = distToSurface(Kernel::V3D(0, DIST_TO_UNIVERSE_EDGE, 0), shape);
     if (Kernel::withinAbsoluteDifference(yDist, zDist, 1e-8)) {
       detRadius = yDist / 2.0;
       detAxis = Kernel::V3D(1, 0, 0);
       // assume that y and z are radii of the cylinder's circular cross-section
       // and the axis is perpendicular, in the x direction
-      PARALLEL_CRITICAL(deteff_shapecacheb) { m_shapeCache.insert({shape_sptr.get(), {detRadius, detAxis}}); }
+      PARALLEL_CRITICAL(deteff_shapecacheb) { m_shapeCache.insert({shape, {detRadius, detAxis}}); }
       return;
     }
 
     if (Kernel::withinAbsoluteDifference(xDist, yDist, 1e-8)) {
       detRadius = xDist / 2.0;
       detAxis = Kernel::V3D(0, 0, 1);
-      PARALLEL_CRITICAL(deteff_shapecachec) { m_shapeCache.insert({shape_sptr.get(), {detRadius, detAxis}}); }
+      PARALLEL_CRITICAL(deteff_shapecachec) { m_shapeCache.insert({shape, {detRadius, detAxis}}); }
       return;
     }
   } else {
@@ -339,15 +348,20 @@ void He3TubeEfficiency::logErrors() const {
  * @param wsPropName :: the workspace property name for the detector parameter
  * @param currentIndex :: the currently requested spectra index
  * @param detPropName :: the detector property name for the detector parameter
- * @param idet :: the current detector
+ * @param componentInfo :: the ComponentInfo of the workspace
+ * @param spectrumInfo :: the SpectrumInfo of the workspace
  * @return the value of the detector property
  */
 double He3TubeEfficiency::getParameter(const std::string &wsPropName, std::size_t currentIndex,
-                                       const std::string &detPropName, const Geometry::IDetector &idet) {
+                                       const std::string &detPropName, Geometry::ComponentInfo const &componentInfo,
+                                       API::SpectrumInfo const &spectrumInfo) {
   std::vector<double> wsProp = this->getProperty(wsPropName);
 
   if (wsProp.empty()) {
-    return idet.getNumberParameter(detPropName).at(0);
+    // A spectrum of several detectors has no parameters of its own
+    if (!spectrumInfo.hasUniqueDetector(currentIndex))
+      throw std::out_of_range("He3TubeEfficiency: no " + detPropName + " for a spectrum of several detectors");
+    return componentInfo.getNumberParameter(spectrumInfo.firstDetectorIndex(currentIndex), detPropName).at(0);
   } else {
     if (wsProp.size() == 1) {
       return wsProp.at(0);
@@ -375,20 +389,20 @@ void He3TubeEfficiency::execEvent() {
 
   std::size_t numHistograms = loc_outputWS->getNumberHistograms();
   auto &spectrumInfo = loc_outputWS->mutableSpectrumInfo();
+  auto const &componentInfo = loc_outputWS->componentInfo();
   m_progress = std::make_unique<API::Progress>(this, 0.0, 1.0, numHistograms);
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*loc_outputWS))
   for (int i = 0; i < static_cast<int>(numHistograms); ++i) {
     PARALLEL_START_INTERRUPT_REGION
 
-    const auto &det = spectrumInfo.detector(i);
     if (spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i)) {
       continue;
     }
 
     double exp_constant = 0.0;
     try {
-      exp_constant = this->calculateExponential(i, det);
+      exp_constant = this->calculateExponential(i, componentInfo, spectrumInfo);
     } catch (std::out_of_range &) {
       // Parameters are bad so skip correction
       PARALLEL_CRITICAL(deteff_invalid) {

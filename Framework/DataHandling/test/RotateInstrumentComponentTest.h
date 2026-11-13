@@ -12,6 +12,7 @@
 #include "MantidDataHandling/RotateInstrumentComponent.h"
 
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 
 using Mantid::DataHandling::RotateInstrumentComponent;
 
@@ -40,9 +41,8 @@ public:
                                  false); // Detector 1
 
     const auto &spectrumInfo = testWS->spectrumInfo();
-    const auto &detId1 = spectrumInfo.detector(0);
     auto expectedRot = Mantid::Kernel::Quat(angle, axis);
-    auto newRot = detId1.getRotation();
+    auto newRot = testWS->componentInfo().rotation(spectrumInfo.firstDetectorIndex(0));
     TS_ASSERT_DELTA(newRot.real(), expectedRot.real(), 1e-12);
     TS_ASSERT_DELTA(newRot.imagI(), expectedRot.imagI(), 1e-12);
     TS_ASSERT_DELTA(newRot.imagJ(), expectedRot.imagJ(), 1e-12);
@@ -68,8 +68,7 @@ public:
     auto expectedRot = Mantid::Kernel::Quat(angle, axis);
     expectedRot *= expectedRot;
     const auto &spectrumInfo = testWS->spectrumInfo();
-    const auto &detId1 = spectrumInfo.detector(0);
-    const auto &newRot = detId1.getRotation();
+    auto const newRot = testWS->componentInfo().rotation(spectrumInfo.firstDetectorIndex(0));
 
     TS_ASSERT_DELTA(newRot.real(), expectedRot.real(), 1e-12);
     TS_ASSERT_DELTA(newRot.imagI(), expectedRot.imagI(), 1e-12);

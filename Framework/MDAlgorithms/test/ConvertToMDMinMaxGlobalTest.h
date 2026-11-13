@@ -16,6 +16,7 @@
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidMDAlgorithms/ConvertToMDMinMaxGlobal.h"
@@ -64,10 +65,10 @@ Mantid::API::MatrixWorkspace_sptr MakeWorkspace(double xmin, double dx, bool del
 
   auto &pmap = ws->instrumentParameters();
   const auto &specInfo = ws->spectrumInfo();
+  auto const &componentInfo = ws->componentInfo();
   if (Ef > 0) {
     for (int i = 0; i < nHist; i++) {
-      const auto &det = specInfo.detector(i);
-      pmap.addDouble(&det, "Efixed", Ef);
+      pmap.addDouble(componentInfo.componentID(specInfo.firstDetectorIndex(i)), "Efixed", Ef);
     }
   }
 

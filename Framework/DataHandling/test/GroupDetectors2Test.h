@@ -119,7 +119,7 @@ public:
     const auto &spectrumInfo = outputWS->spectrumInfo();
     TS_ASSERT(spectrumInfo.hasDetectors(0));
     TS_ASSERT(!spectrumInfo.hasUniqueDetector(0));
-    TS_ASSERT_THROWS_ANYTHING(spectrumInfo.detector(1));
+    TS_ASSERT_EQUALS(spectrumInfo.size(), 1);
   }
 
   void testIndexList() {
@@ -151,7 +151,7 @@ public:
 
     const auto &spectrumInfo = outputWS->spectrumInfo();
     TS_ASSERT(spectrumInfo.hasDetectors(0));
-    TS_ASSERT_THROWS_ANYTHING(spectrumInfo.detector(1));
+    TS_ASSERT_EQUALS(spectrumInfo.size(), 1);
   }
 
   void testGroupingPattern() {
@@ -184,7 +184,7 @@ public:
 
     const auto &spectrumInfo = outputWS->spectrumInfo();
     TS_ASSERT(spectrumInfo.hasDetectors(0));
-    TS_ASSERT_THROWS_ANYTHING(spectrumInfo.detector(1));
+    TS_ASSERT_EQUALS(spectrumInfo.size(), 1);
     AnalysisDataService::Instance().remove(output);
   }
 
@@ -218,7 +218,7 @@ public:
 
     const auto &spectrumInfo = outputWS->spectrumInfo();
     TS_ASSERT(spectrumInfo.hasDetectors(0));
-    TS_ASSERT_THROWS_ANYTHING(spectrumInfo.detector(1));
+    TS_ASSERT_EQUALS(spectrumInfo.size(), 1);
   }
 
   void testGroupingPatternOffsetSpectra() {
@@ -251,7 +251,7 @@ public:
 
     const auto &spectrumInfo = outputWS->spectrumInfo();
     TS_ASSERT(spectrumInfo.hasDetectors(0));
-    TS_ASSERT_THROWS_ANYTHING(spectrumInfo.detector(1));
+    TS_ASSERT_EQUALS(spectrumInfo.size(), 1);
   }
 
   void testDetectorList() {
@@ -280,7 +280,7 @@ public:
 
     const auto &spectrumInfo = outputWS->spectrumInfo();
     TS_ASSERT(spectrumInfo.hasDetectors(0));
-    TS_ASSERT_THROWS_ANYTHING(spectrumInfo.detector(1));
+    TS_ASSERT_EQUALS(spectrumInfo.size(), 1);
   }
 
   void testFileList() {
@@ -945,7 +945,7 @@ public:
 
     const auto &spectrumInfo = outputWS->spectrumInfo();
     TS_ASSERT(spectrumInfo.hasDetectors(0));
-    TS_ASSERT_THROWS_ANYTHING(spectrumInfo.detector(1));
+    TS_ASSERT_EQUALS(spectrumInfo.size(), 1);
   }
 
   void test_GroupingPattern_event_workspace_without_SpectraAxis_works() {
