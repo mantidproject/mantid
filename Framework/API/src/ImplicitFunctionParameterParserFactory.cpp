@@ -12,8 +12,7 @@
 namespace Mantid::API {
 
 std::shared_ptr<ImplicitFunctionParameterParser>
-ImplicitFunctionParameterParserFactoryImpl::create(const std::string &xmlString) const {
-  UNUSED_ARG(xmlString);
+ImplicitFunctionParameterParserFactoryImpl::create([[maybe_unused]] const std::string &xmlString) const {
   throw std::runtime_error("Use of create in this context is forbidden. Use "
                            "createUnwrappedInstead.");
 }

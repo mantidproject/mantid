@@ -38,7 +38,7 @@ bool LiveListener::dataReset() {
  * Default behaviour reads all spectrum numbers
  * @param specList :: A vector with spectra numbers (ignored)
  */
-void LiveListener::setSpectra(const std::vector<specnum_t> &specList) { UNUSED_ARG(specList); }
+void LiveListener::setSpectra([[maybe_unused]] const std::vector<specnum_t> &specList) {}
 
 /**
  * Default behaviour updates property values on Listener

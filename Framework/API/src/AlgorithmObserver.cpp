@@ -106,42 +106,35 @@ The default handler is provided (doing nothing).
 @param estimatedTime :: estimated time to completion in seconds
 @param progressPrecision :: number of digits after the decimal
 */
-void AlgorithmObserver::progressHandle(const IAlgorithm *alg, double p, const std::string &msg,
-                                       const double estimatedTime, const int progressPrecision) {
-  UNUSED_ARG(alg);
-  UNUSED_ARG(p);
-  UNUSED_ARG(msg);
-  UNUSED_ARG(estimatedTime);
-  UNUSED_ARG(progressPrecision);
-}
+void AlgorithmObserver::progressHandle([[maybe_unused]] const IAlgorithm *alg, [[maybe_unused]] double p,
+                                       [[maybe_unused]] const std::string &msg,
+                                       [[maybe_unused]] const double estimatedTime,
+                                       [[maybe_unused]] const int progressPrecision) {}
 
 /** Handler of the start notifications. Must be overriden in inherited classes.
 The default handler is provided (doing nothing).
 @param alg :: Shared Pointer to the algorithm sending the notification.
 */
-void AlgorithmObserver::startingHandle(IAlgorithm_sptr alg) { UNUSED_ARG(alg); }
+void AlgorithmObserver::startingHandle([[maybe_unused]] IAlgorithm_sptr alg) {}
 
 /** Handler of the start notifications. Must be overriden in inherited classes.
 The default handler is provided (doing nothing).
 @param alg :: Pointer to the algorithm sending the notification.
 */
-void AlgorithmObserver::startHandle(const IAlgorithm *alg) { UNUSED_ARG(alg); }
+void AlgorithmObserver::startHandle([[maybe_unused]] const IAlgorithm *alg) {}
 
 /** Handler of the finish notifications. Must be overriden in inherited classes.
  The default handler is provided (doing nothing).
  @param alg :: Pointer to the algorithm sending the notification.
 */
-void AlgorithmObserver::finishHandle(const IAlgorithm *alg) { UNUSED_ARG(alg); }
+void AlgorithmObserver::finishHandle([[maybe_unused]] const IAlgorithm *alg) {}
 
 /** Handler of the error notifications. Must be overriden in inherited classes.
 The default handler is provided (doing nothing).
 @param alg :: Pointer to the algorithm sending the notification.
 @param what :: The error message
 */
-void AlgorithmObserver::errorHandle(const IAlgorithm *alg, const std::string &what) {
-  UNUSED_ARG(alg);
-  UNUSED_ARG(what);
-}
+void AlgorithmObserver::errorHandle([[maybe_unused]] const IAlgorithm *alg, [[maybe_unused]] const std::string &what) {}
 /// @endcond
 
 /** Poco notification handler for Algorithm::ProgressNotification.

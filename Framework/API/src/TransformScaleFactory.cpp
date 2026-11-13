@@ -39,8 +39,7 @@ ITransformScale_sptr TransformScaleFactoryImpl::create(const std::string &type) 
  *  @returns Never
  *  @throws Exception::NotImplementedError every time!
  */
-ITransformScale *TransformScaleFactoryImpl::createUnwrapped(const std::string &className) const {
-  UNUSED_ARG(className);
+ITransformScale *TransformScaleFactoryImpl::createUnwrapped([[maybe_unused]] const std::string &className) const {
   throw Kernel::Exception::NotImplementedError("Don't use this method - use the safe one!!!");
 }
 

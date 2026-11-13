@@ -65,9 +65,7 @@ public:
     declareParameter("Sigma");
   }
 
-  void function(const FunctionDomain &domain, FunctionValues &values) const override {
-    UNUSED_ARG(domain);
-    UNUSED_ARG(values);
+  void function([[maybe_unused]] const FunctionDomain &domain, [[maybe_unused]] FunctionValues &values) const override {
     // Does nothing, not required for this test.
   }
 
@@ -95,9 +93,7 @@ public:
     declareAttribute("Attribute2", IFunction::Attribute("Test"));
   }
 
-  void function(const FunctionDomain &domain, FunctionValues &values) const override {
-    UNUSED_ARG(domain);
-    UNUSED_ARG(values);
+  void function([[maybe_unused]] const FunctionDomain &domain, [[maybe_unused]] FunctionValues &values) const override {
     // Does nothing, not required for this test.
   }
 };

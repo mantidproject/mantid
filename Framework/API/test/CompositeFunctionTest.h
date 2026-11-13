@@ -47,10 +47,7 @@ public:
   /// Returns the size of each block of data returned by the dataY accessors
   std::size_t blocksize() const override { return m_blocksize; }
   /// Returns the number of bins for a given histogram index.
-  std::size_t getNumberBins(const std::size_t &index) const override {
-    UNUSED_ARG(index);
-    return m_blocksize;
-  }
+  std::size_t getNumberBins([[maybe_unused]] const std::size_t &index) const override { return m_blocksize; }
   /// Returns the maximum number of bins in a workspace (works on ragged data).
   std::size_t getMaxNumberBins() const override { return m_blocksize; }
   /// Returns the number of histograms in the workspace
@@ -147,16 +144,13 @@ public:
   // Override pure virtual functions.
   std::string name() const override { return "FunctionWithNDomains"; }
   double fwhm() const override { return 1; }
-  void setFwhm(const double w) override { UNUSED_ARG(w); }
-  void functionLocal(double *out, const double *xValues, const size_t nData) const override {
-    UNUSED_ARG(out);
-    UNUSED_ARG(xValues);
-    UNUSED_ARG(nData);
-  }
+  void setFwhm([[maybe_unused]] const double w) override {}
+  void functionLocal([[maybe_unused]] double *out, [[maybe_unused]] const double *xValues,
+                     [[maybe_unused]] const size_t nData) const override {}
   double centre() const override { return 1; }
   double height() const override { return 1; }
-  void setCentre(const double c) override { UNUSED_ARG(c); }
-  void setHeight(const double h) override { UNUSED_ARG(h); }
+  void setCentre([[maybe_unused]] const double c) override {}
+  void setHeight([[maybe_unused]] const double h) override {}
 
 private:
   size_t m_nDomains;

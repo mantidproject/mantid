@@ -33,16 +33,10 @@ public:
     declareParameter("a1");
   }
   std::string name() const override { return "FunctionFactoryTest_FunctA"; }
-  void function1D(double *out, const double *xValues, const size_t nData) const override {
-    UNUSED_ARG(out);
-    UNUSED_ARG(xValues);
-    UNUSED_ARG(nData);
-  }
-  void functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData) override {
-    UNUSED_ARG(out);
-    UNUSED_ARG(xValues);
-    UNUSED_ARG(nData);
-  }
+  void function1D([[maybe_unused]] double *out, [[maybe_unused]] const double *xValues,
+                  [[maybe_unused]] const size_t nData) const override {}
+  void functionDeriv1D([[maybe_unused]] Jacobian *out, [[maybe_unused]] const double *xValues,
+                       [[maybe_unused]] const size_t nData) override {}
   bool hasAttribute(const std::string &attName) const override {
     if (attName == "attr")
       return true;
@@ -80,16 +74,10 @@ public:
 
   std::string name() const override { return "FunctionFactoryTest_FunctB"; }
 
-  void function1D(double *out, const double *xValues, const size_t nData) const override {
-    UNUSED_ARG(out);
-    UNUSED_ARG(xValues);
-    UNUSED_ARG(nData);
-  }
-  void functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData) override {
-    UNUSED_ARG(out);
-    UNUSED_ARG(xValues);
-    UNUSED_ARG(nData);
-  }
+  void function1D([[maybe_unused]] double *out, [[maybe_unused]] const double *xValues,
+                  [[maybe_unused]] const size_t nData) const override {}
+  void functionDeriv1D([[maybe_unused]] Jacobian *out, [[maybe_unused]] const double *xValues,
+                       [[maybe_unused]] const size_t nData) override {}
 };
 
 class FunctionFactoryTest_CompFunctA : public CompositeFunction {
@@ -110,8 +98,7 @@ public:
       return Attribute(m_attr);
     return getAttribute(attName);
   }
-  void setAttribute(const std::string &attName, const Attribute &value) override {
-    UNUSED_ARG(attName);
+  void setAttribute([[maybe_unused]] const std::string &attName, const Attribute &value) override {
     m_attr = value.asString();
   }
 };

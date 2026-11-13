@@ -29,40 +29,27 @@ public:
   ~FakeAnalysisDataServiceObserver() { this->observeAll(false); }
 
   void anyChangeHandle() override { m_anyChangeHandleCalled = true; }
-  void addHandle(const std::string &wsName, const Workspace_sptr &ws) override {
-    UNUSED_ARG(wsName);
-    UNUSED_ARG(ws);
+  void addHandle([[maybe_unused]] const std::string &wsName, [[maybe_unused]] const Workspace_sptr &ws) override {
     m_addHandleCalled = true;
   }
-  void replaceHandle(const std::string &wsName, const Workspace_sptr &ws) override {
-    UNUSED_ARG(wsName);
-    UNUSED_ARG(ws);
+  void replaceHandle([[maybe_unused]] const std::string &wsName, [[maybe_unused]] const Workspace_sptr &ws) override {
     m_replaceHandleCalled = true;
   }
-  void deleteHandle(const std::string &wsName, const Workspace_sptr &ws) override {
-    UNUSED_ARG(wsName);
-    UNUSED_ARG(ws);
+  void deleteHandle([[maybe_unused]] const std::string &wsName, [[maybe_unused]] const Workspace_sptr &ws) override {
     m_deleteHandleCalled = true;
   }
   void clearHandle() override { m_clearHandleCalled = true; }
-  void renameHandle(const std::string &wsName, const std::string &newName) override {
-    UNUSED_ARG(wsName);
-    UNUSED_ARG(newName);
+  void renameHandle([[maybe_unused]] const std::string &wsName, [[maybe_unused]] const std::string &newName) override {
     m_renameHandleCalled = true;
   }
-  void groupHandle(const std::string &wsName, const Workspace_sptr &ws) override {
-    UNUSED_ARG(wsName);
-    UNUSED_ARG(ws);
+  void groupHandle([[maybe_unused]] const std::string &wsName, [[maybe_unused]] const Workspace_sptr &ws) override {
     m_groupHandleCalled = true;
   }
-  void unGroupHandle(const std::string &wsName, const Workspace_sptr &ws) override {
-    UNUSED_ARG(wsName);
-    UNUSED_ARG(ws);
+  void unGroupHandle([[maybe_unused]] const std::string &wsName, [[maybe_unused]] const Workspace_sptr &ws) override {
     m_unGroupHandleCalled = true;
   }
-  void groupUpdateHandle(const std::string &wsName, const Workspace_sptr &ws) override {
-    UNUSED_ARG(wsName);
-    UNUSED_ARG(ws);
+  void groupUpdateHandle([[maybe_unused]] const std::string &wsName,
+                         [[maybe_unused]] const Workspace_sptr &ws) override {
     m_groupUpdateHandleCalled = true;
   }
 

@@ -42,8 +42,7 @@ BinEdgeAxis::BinEdgeAxis(std::span<double const> edges)
  *  @returns A pointer to a copy of the NumericAxis on which the method is
  * called
  */
-Axis *BinEdgeAxis::clone(const MatrixWorkspace *const parentWorkspace) {
-  UNUSED_ARG(parentWorkspace);
+Axis *BinEdgeAxis::clone([[maybe_unused]] const MatrixWorkspace *const parentWorkspace) {
   return new BinEdgeAxis(*this);
 }
 
@@ -52,8 +51,7 @@ Axis *BinEdgeAxis::clone(const MatrixWorkspace *const parentWorkspace) {
  * @param parentWorkspace The workspace is not used in this implementation
  * @returns A pointer to a copy of the NumericAxis on which the method is called
  */
-Axis *BinEdgeAxis::clone(const std::size_t length, const MatrixWorkspace *const parentWorkspace) {
-  UNUSED_ARG(parentWorkspace);
+Axis *BinEdgeAxis::clone(const std::size_t length, [[maybe_unused]] const MatrixWorkspace *const parentWorkspace) {
   auto *newAxis = new BinEdgeAxis(*this);
   newAxis->m_values.clear();
   newAxis->m_values.resize(length);

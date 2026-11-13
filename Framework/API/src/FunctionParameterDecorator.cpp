@@ -284,12 +284,9 @@ void FunctionParameterDecorator::throwIfNoFunctionSet() const {
 }
 
 /// Does nothing, function does not have parameters.
-void FunctionParameterDecorator::declareParameter(const std::string &name, double initValue,
-                                                  const std::string &description) {
-  UNUSED_ARG(name);
-  UNUSED_ARG(initValue);
-  UNUSED_ARG(description);
-}
+void FunctionParameterDecorator::declareParameter([[maybe_unused]] const std::string &name,
+                                                  [[maybe_unused]] double initValue,
+                                                  [[maybe_unused]] const std::string &description) {}
 
 void FunctionParameterDecorator::tie(const std::string &parName, const std::string &expr, bool isDefault) {
   throwIfNoFunctionSet();
@@ -313,7 +310,7 @@ void FunctionParameterDecorator::addTie(std::unique_ptr<ParameterTie> tie) {
  *
  * @param fn :: Function that is going to be decorated.
  */
-void FunctionParameterDecorator::beforeDecoratedFunctionSet(const IFunction_sptr &fn) { UNUSED_ARG(fn); }
+void FunctionParameterDecorator::beforeDecoratedFunctionSet([[maybe_unused]] const IFunction_sptr &fn) {}
 
 void FunctionParameterDecorator::setDecoratedFunctionPrivate(const IFunction_sptr &fn) { m_wrappedFunction = fn; }
 

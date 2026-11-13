@@ -54,10 +54,8 @@ void ILatticeFunction::functionDeriv(const FunctionDomain &domain, Jacobian &jac
 }
 
 /// Default implementation, throws NotImplementedError.
-void ILatticeFunction::functionDerivLattice(const LatticeDomain &latticeDomain, Jacobian &jacobian) {
-  UNUSED_ARG(latticeDomain);
-  UNUSED_ARG(jacobian);
-
+void ILatticeFunction::functionDerivLattice([[maybe_unused]] const LatticeDomain &latticeDomain,
+                                            [[maybe_unused]] Jacobian &jacobian) {
   throw Kernel::Exception::NotImplementedError("FunctionLatticeDeriv is not implemented for this function.");
 }
 
