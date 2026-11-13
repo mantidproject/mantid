@@ -2400,7 +2400,7 @@ class MIDASMaskTests(unittest.TestCase):
         return {
             int(det_id)
             for i in range(mask_ws.getNumberHistograms())
-            if mask_ws.readY(i)[0] > 0.5
+            if mask_ws.y(i)[0] > 0.5
             for det_id in mask_ws.getSpectrum(i).getDetectorIDs()
         }
 
