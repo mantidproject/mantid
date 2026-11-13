@@ -1,4 +1,5 @@
 set(SRC_FILES
+    src/H5ValidatingAdapter.cpp
     src/H5Util.cpp
     src/NexusClasses.cpp
     src/hdf5_type_helper.cpp
@@ -11,6 +12,7 @@ set(SRC_FILES
 )
 
 set(INC_FILES
+    inc/MantidNexus/H5ValidatingAdapter.h
     inc/MantidNexus/H5Util.h
     inc/MantidNexus/NexusClasses.h
     inc/MantidNexus/NexusIOHelper.h
@@ -25,6 +27,7 @@ set(INC_FILES
 )
 
 set(TEST_FILES
+    H5ValidatingAdapterTest.h
     H5UtilTest.h
     NexusIOHelperTest.h
     NexusClassesTest.h

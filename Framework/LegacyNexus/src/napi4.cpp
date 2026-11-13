@@ -767,9 +767,15 @@ NXstatus NX4getdata(NXhandle fid, void *data) {
   }
   /* first read dimension information */
   memset(iStart, 0, H4_MAX_VAR_DIMS * sizeof(int32));
-  SDgetinfo(pFile->iCurrentSDS, pBuffer, &iRank, iSize, &iType, &iAtt);
+  if (SDgetinfo(pFile->iCurrentSDS, pBuffer, &iRank, iSize, &iType, &iAtt) == FAIL) {
+    NXReportError("ERROR: cannot determine dataset dimensions");
+    return NXstatus::NX_ERROR;
+  }
   /* actually read */
-  SDreaddata(pFile->iCurrentSDS, iStart, NULL, iSize, data);
+  if (SDreaddata(pFile->iCurrentSDS, iStart, NULL, iSize, data) == FAIL) {
+    NXReportError("ERROR: failed to transfer dataset");
+    return NXstatus::NX_ERROR;
+  }
   return NXstatus::NX_OK;
 }
 
@@ -788,7 +794,10 @@ NXstatus NX4getinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *i
     return NXstatus::NX_ERROR;
   }
   /* read information */
-  SDgetinfo(pFile->iCurrentSDS, pBuffer, &iRank, myDim, &mType, &iAtt);
+  if (SDgetinfo(pFile->iCurrentSDS, pBuffer, &iRank, myDim, &mType, &iAtt) == FAIL) {
+    NXReportError("ERROR: cannot determine dataset dimensions");
+    return NXstatus::NX_ERROR;
+  }
 
   /* conversion to proper ints for the platform */
   *iType = static_cast<NXnumtype>(mType);
