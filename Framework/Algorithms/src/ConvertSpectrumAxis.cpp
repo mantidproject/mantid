@@ -12,6 +12,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/HistogramBuilder.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -121,22 +122,29 @@ void ConvertSpectrumAxis::exec() {
       throw std::runtime_error("Unable to convert spectrum axis values on all spectra");
     }
   } else {
-    // Set up binding to memeber funtion. Avoids condition as part of loop over
-    // nHistograms.
-    using namespace std::placeholders;
-    std::function<double(const IDetector &)> thetaFunction;
+    // Choose the angle function once, rather than branching inside the loop over spectra. Use the overloads taking an
+    // explicit observer and axis: unlike the plain twoTheta(index), these also give an angle for monitors.
+    auto const &spectrumInfo = inputWS->spectrumInfo();
+    auto const samplePos = spectrumInfo.samplePosition();
+    auto const beamLine = samplePos - spectrumInfo.sourcePosition();
+    if (beamLine.nullVector())
+      throw Exception::InstrumentDefinitionError("Source and sample are at same position!");
+    std::function<double(std::size_t const)> thetaFunction;
     if (unitTarget == "signed_theta") {
-      thetaFunction = std::bind(&MatrixWorkspace::detectorSignedTwoTheta, inputWS, _1);
+      auto const thetaSignAxis = inputWS->getReferenceFrame()->vecThetaSign();
+      thetaFunction = [&spectrumInfo, samplePos, beamLine, thetaSignAxis](std::size_t const index) {
+        return spectrumInfo.signedTwoTheta(index, samplePos, beamLine, thetaSignAxis);
+      };
     } else {
-      thetaFunction = std::bind(&MatrixWorkspace::detectorTwoTheta, inputWS, _1);
+      thetaFunction = [&spectrumInfo, samplePos, beamLine](std::size_t const index) {
+        return spectrumInfo.twoTheta(index, samplePos, beamLine);
+      };
     }
 
     bool warningGiven = false;
     for (size_t i = 0; i < nHist; ++i) {
       try {
-        IDetector_const_sptr det = inputWS->getDetector(i);
-        // Invoke relevant member function.
-        indexMap.emplace(thetaFunction(*det) * rad2deg, i);
+        indexMap.emplace(thetaFunction(i) * rad2deg, i);
       } catch (Exception::NotFoundError &) {
         if (!warningGiven)
           g_log.warning("The instrument definition is incomplete - spectra "

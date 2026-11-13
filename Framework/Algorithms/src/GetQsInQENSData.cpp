@@ -7,8 +7,7 @@
 #include "MantidAlgorithms/GetQsInQENSData.h"
 
 #include "MantidAPI/NumericAxis.h"
-#include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitConversion.h"
@@ -117,10 +116,11 @@ MantidVec GetQsInQENSData::extractQValues(const Mantid::API::MatrixWorkspace_spt
     // Iterate over all spectrum in the specified workspace.
     try {
 
+      auto const &spectrumInfo = workspace->spectrumInfo();
+      auto const emode = workspace->getEMode();
       for (size_t i = 0; i < numSpectra; i++) {
-        IDetector_const_sptr detector = workspace->getDetector(i);
-        double efixed = workspace->getEFixed(detector);
-        double theta = 0.5 * workspace->detectorTwoTheta(*detector);
+        double const efixed = workspace->getEFixedForDetectorIndex(spectrumInfo.firstDetectorIndex(i), emode);
+        double const theta = 0.5 * spectrumInfo.twoTheta(i);
         qValues[i] = UnitConversion::convertToElasticQ(theta, efixed);
       }
     } catch (std::exception &) {

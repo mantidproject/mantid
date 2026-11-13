@@ -11,6 +11,7 @@
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDEventFactory.h"
@@ -505,8 +506,7 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
     signal_t norm_error = std::sqrt(m_normfactor * norm_signal);
     double ki = 2.0 * M_PI / ds.wavelength;
     for (size_t i = 0; i < ds.detID.size(); i++) {
-      const auto &detector = instWS->getDetector(i);
-      const auto &detectorPosition = detector->getPos();
+      const auto &detectorPosition = instWS->spectrumInfo().position(i);
       const auto detectorVector = detectorPosition - samplePosition;
       const auto l2 = detectorVector.norm();
       auto tof2_elastic = 1e+06 * l2 / velocity;
@@ -654,8 +654,7 @@ void LoadDNSSCD::fillOutputWorkspaceRaw(double wavelength) {
     signal_t norm_signal(ds.norm);
     signal_t norm_error = std::sqrt(m_normfactor * norm_signal);
     for (size_t i = 0; i < ds.detID.size(); i++) {
-      const auto &detector = instWS->getDetector(i);
-      const auto &detectorPosition = detector->getPos();
+      const auto &detectorPosition = instWS->spectrumInfo().position(i);
       const auto detectorVector = detectorPosition - samplePosition;
       const auto l2 = detectorVector.norm();
       auto tof2_elastic = 1e+06 * l2 / velocity;

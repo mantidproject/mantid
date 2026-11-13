@@ -14,7 +14,6 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/OptionalBool.h"
 #include <array>
 #include <cxxtest/TestSuite.h>

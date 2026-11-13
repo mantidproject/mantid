@@ -73,17 +73,16 @@ void SaveBankScatteringAngles::exec() {
   for (int i = 0; i < inputWS->getNumberOfEntries(); ++i) {
     const auto ws = inputWS->getItem(i);
     const auto matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
-    const auto &instrument = matrixWS->getInstrument();
-    const auto &samplePosition = instrument->getSample()->getPos();
-    const auto &sourcePosition = instrument->getSource()->getPos();
-    const auto &detector = matrixWS->getDetector(0);
-    const auto &detectorPosition = detector->getPos();
+    const auto &specInfo = matrixWS->spectrumInfo();
+    const auto &samplePosition = specInfo.samplePosition();
+    const auto &sourcePosition = specInfo.sourcePosition();
+    const auto &detectorPosition = specInfo.position(0);
 
     const auto beamVector = samplePosition - sourcePosition;
     const auto detectorVector = detectorPosition - samplePosition;
 
     const auto twoTheta = radToDeg(beamVector.angle(detectorVector));
-    const auto phi = radToDeg(matrixWS->spectrumInfo().phi(0));
+    const auto phi = radToDeg(specInfo.phi(0));
     const auto group = matrixWS->getSpectrum(0).getSpectrumNo();
 
     outFile << "bank :    " << i << "  "
