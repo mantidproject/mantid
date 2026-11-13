@@ -112,7 +112,6 @@ void PointByPointVCorrection::exec() {
     double error2_factor = (error2_factor1 / factor1 / factor1 + error2_factor2);
 
     // Calculate the normalized Y values
-    using std::placeholders::_1;
     // NOTE: Previously, we had been using std::transform with
     // std::bind(std::multiplies<double>(), _1,factor)
     //       here, but that seemed to have strange effects in Windows Debug

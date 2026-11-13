@@ -76,7 +76,7 @@ public:
   /// Return a new Polygon based on the current Quadrilateral
   ConvexPolygon toPoly() const override;
   /// Shifts the vertexes in a clockwise manner
-  virtual void shiftVertexesClockwise();
+  void shiftVertexesClockwise();
 
 private:
   inline const Kernel::V2D &lowerLeft() const { return m_vertices[0]; }

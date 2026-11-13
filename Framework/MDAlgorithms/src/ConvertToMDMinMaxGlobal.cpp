@@ -128,7 +128,7 @@ void ConvertToMDMinMaxGlobal::exec() {
     MaxValues.emplace_back(xmax);
   } else // need to calculate the appropriate q values
   {
-    double qmax, deltaEmax, deltaEmin;
+    double qmax{0.}, deltaEmax{0.}, deltaEmin{0.};
     auto conv = createChildAlgorithm("ConvertUnits", 0.0, 0.9);
     conv->setProperty<MatrixWorkspace_sptr>("InputWorkspace", ws);
     conv->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", wstemp);

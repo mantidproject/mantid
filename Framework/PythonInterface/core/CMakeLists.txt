@@ -124,6 +124,11 @@ target_link_libraries(
   PUBLIC ${PUBLIC_TARGETS} Mantid::Kernel
   PRIVATE Mantid::Types
 )
+# GCC >= 15 emits false-positive -Wmaybe-uninitialized warnings for the rvalue storage inside boost::python::extract
+# wherever it is used, so suppress it for everything that uses the Python interface.
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 15)
+  target_compile_options(${_target_name} PUBLIC $<$<COMPILE_LANGUAGE:CXX>:-Wno-maybe-uninitialized>)
+endif()
 
 # Add to the 'Framework/Python' group in MSVS
 set_property(TARGET ${_target_name} PROPERTY FOLDER "MantidFramework/Python")
