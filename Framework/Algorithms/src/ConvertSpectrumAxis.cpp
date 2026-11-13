@@ -124,7 +124,6 @@ void ConvertSpectrumAxis::exec() {
   } else {
     // Choose the angle function once, rather than branching inside the loop over spectra. Use the overloads taking an
     // explicit observer and axis: unlike the plain twoTheta(index), these also give an angle for monitors.
-    auto const &spectrumInfo = inputWS->spectrumInfo();
     auto const samplePos = spectrumInfo.samplePosition();
     auto const beamLine = samplePos - spectrumInfo.sourcePosition();
     if (beamLine.nullVector())
