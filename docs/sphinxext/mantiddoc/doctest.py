@@ -570,3 +570,8 @@ def setup(app):
     Connect the 'build-finished' event to the handler function.
     """
     app.connect("build-finished", doctest_to_xunit)
+
+    return {
+        "parallel_read_safe": True,
+        "parallel_write_safe": True,
+    }
