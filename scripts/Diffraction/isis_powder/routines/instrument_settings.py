@@ -209,3 +209,16 @@ def _print_known_keys(master_mapping):
     for param_entry in sorted_attributes:
         print(param_entry.ext_name + ", ", end="")
     print("\n----------------------------------")
+
+
+def expand_parameter_list[T](parameter: T | list[T], expected_length: int) -> list[T]:
+    """
+    If parameter is a list, confirm that it is the correct length
+    If parameter is a single value, expand it to a list of the expected_length
+    Note: A single value could be a tuple
+    """
+    if isinstance(parameter, list):
+        if len(parameter) != expected_length:
+            raise RuntimeError("Expected %s values in parameter, but received %s" % (expected_length, len(parameter)))
+        return parameter
+    return [parameter] * expected_length

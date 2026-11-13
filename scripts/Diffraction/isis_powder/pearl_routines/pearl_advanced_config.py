@@ -40,6 +40,9 @@ general_params = {
         -0.0006,  # Bank 14
     ],
     "custom_focused_bin_widths": -0.0006,
+    "vanadium_strip_peak_fwhm": [15] * 12 + [20, 20],
+    "vanadium_strip_peak_tolerance": [8] * 12 + [10, 10],
+    "vanadium_strip_peak_repeat": [1] * 12 + [2, 2],
 }
 
 long_mode_off_params = {
@@ -67,7 +70,7 @@ long_mode_off_params = {
     ],
     "custom_focused_cropping_values": (1500, 19990),
     "monitor_spline_coefficient": 20,
-    "spline_coefficient": 60,
+    "spline_coefficient": [45] * 9 + [50] * 3 + [20] * 2,
 }
 
 long_mode_on_params = {
