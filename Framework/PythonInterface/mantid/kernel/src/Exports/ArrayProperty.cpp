@@ -130,4 +130,5 @@ void export_ArrayProperty() {
   // Python can be seen also. Users shouldn't need this
   EXPORT_ARRAY_PROP(int, CInt);
   EXPORT_ARRAY_PROP(size_t, UnsignedInt);
+  EXPORT_ARRAY_PROP(unsigned int, UInt32);
 }

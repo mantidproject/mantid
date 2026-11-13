@@ -1,0 +1,1 @@
+- Mantid now ships type information for ``mantid.simpleapi`` algorithms, allowing compatible Python language servers to provide more useful parameter and option completions. See :ref:`Python editor type information <PythonTypeInformation>` for setup and coverage details.
