@@ -183,7 +183,7 @@ void InstrumentVisitor::recordIndex(const IComponent &component, const size_t co
     return;
   }
   if (auto const *const comp = dynamic_cast<Component const *>(&component)) {
-    comp->m_index.value = componentIndex;
+    comp->m_index = componentIndex;
   }
 }
 
