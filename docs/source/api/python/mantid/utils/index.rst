@@ -14,6 +14,7 @@ same functionality without the need to duplicate code.
 .. toctree::
    :maxdepth: 1
 
+   logging
    reflectometry
 
 
