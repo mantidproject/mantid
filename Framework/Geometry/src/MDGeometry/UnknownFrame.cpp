@@ -35,13 +35,6 @@ UnknownFrame *UnknownFrame::clone() const { return new UnknownFrame(std::unique_
 bool UnknownFrame::isQ() const { return false; }
 
 bool UnknownFrame::isSameType(const MDFrame &frame) const {
-  auto isSameType = true;
-  try {
-    const auto &tmp = dynamic_cast<const UnknownFrame &>(frame);
-    UNUSED_ARG(tmp);
-  } catch (std::bad_cast &) {
-    isSameType = false;
-  }
-  return isSameType;
+  return (dynamic_cast<const UnknownFrame *>(&frame) != nullptr);
 }
 } // namespace Mantid::Geometry

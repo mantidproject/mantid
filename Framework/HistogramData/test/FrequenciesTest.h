@@ -8,6 +8,8 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include <concepts>
+
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Counts.h"
 #include "MantidHistogramData/Frequencies.h"
@@ -23,12 +25,11 @@ public:
   static void destroySuite(FrequenciesTest *suite) { delete suite; }
 
   void test_has_correct_mixins() {
-    Frequencies data;
-    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG((dynamic_cast<detail::VectorOf<Frequencies, HistogramY> &>(data))));
-    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(dynamic_cast<detail::Addable<Frequencies> &>(data)));
-    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(dynamic_cast<detail::Iterable<Frequencies> &>(data)));
-    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(dynamic_cast<detail::Offsetable<Frequencies> &>(data)));
-    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(dynamic_cast<detail::Scalable<Frequencies> &>(data)));
+    TS_ASSERT((std::derived_from<Frequencies, detail::VectorOf<Frequencies, HistogramY>>));
+    TS_ASSERT((std::derived_from<Frequencies, detail::Addable<Frequencies>>));
+    TS_ASSERT((std::derived_from<Frequencies, detail::Iterable<Frequencies>>));
+    TS_ASSERT((std::derived_from<Frequencies, detail::Offsetable<Frequencies>>));
+    TS_ASSERT((std::derived_from<Frequencies, detail::Scalable<Frequencies>>));
   }
 
   void test_construct_default() {

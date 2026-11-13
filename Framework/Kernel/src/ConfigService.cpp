@@ -1252,8 +1252,6 @@ std::string ConfigServiceImpl::getOSVersionReadable() {
       description = product_name + " " + product_vers;
 #elif _WIN32
       description = getValueFromStdOut(result, "Caption=");
-#else
-      UNUSED_ARG(result); // only used on mac and windows
 #endif
     } else {
       std::stringstream messageStream;
@@ -1278,8 +1276,8 @@ std::string ConfigServiceImpl::getUsername() {
     if (!username.empty()) {
       return username;
     }
-  } catch (const Poco::NotFoundException &e) {
-    UNUSED_ARG(e); // let it drop on the floor
+  } catch (const Poco::NotFoundException &) {
+    // let it drop on the floor
   }
 
   // windoze and alternate linux username variable
@@ -1288,8 +1286,8 @@ std::string ConfigServiceImpl::getUsername() {
     if (!username.empty()) {
       return username;
     }
-  } catch (const Poco::NotFoundException &e) {
-    UNUSED_ARG(e); // let it drop on the floor
+  } catch (const Poco::NotFoundException &) {
+    // let it drop on the floor
   }
 
   // give up and return an empty string

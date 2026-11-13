@@ -33,9 +33,8 @@ namespace Mantid::Kernel {
  * @param changedPropName :: Name of the property that has just been changed
  * @return  :: True if the changed property is the property that we are watching
  */
-bool SetDefaultWhenProperty::isConditionChanged(const IPropertyManager *algo,
+bool SetDefaultWhenProperty::isConditionChanged([[maybe_unused]] const IPropertyManager *algo,
                                                 const std::string &changedPropName) const {
-  UNUSED_ARG(algo);
   return changedPropName == m_watchedPropName;
 }
 
