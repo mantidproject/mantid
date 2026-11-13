@@ -21,7 +21,7 @@ namespace API {
   @date 2012-02-17
 */
 
-class DLLExport OptionsPropertyWidget : public PropertyWidget {
+class EXPORT_OPT_MANTIDQT_COMMON OptionsPropertyWidget : public PropertyWidget {
   Q_OBJECT
 
 public:
