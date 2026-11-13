@@ -668,7 +668,7 @@ public:
   }
 
   /** Refs #2649: Add a dirty flag when changing X on an event list */
-  void do_test_dirtyFlag(bool do_parallel) {
+  void do_test_dirtyFlag([[maybe_unused]] bool do_parallel) {
     // 50 pixels, 100 bins, 2 events in each
     int numpixels = 900;
     EventWorkspace_sptr ew1 = WorkspaceCreationHelper::createEventWorkspace2(numpixels, 100);
@@ -697,8 +697,6 @@ public:
       Mantid::HistogramData::HistogramE const &E_other = ew1->e(i + 1);
       TS_ASSERT_DELTA(E_other[0], M_SQRT2, 1e-5);
     }
-    // suppress unused argument when built without openmp.
-    UNUSED_ARG(do_parallel);
   }
 
   void test_dirtyFlag() { do_test_dirtyFlag(false); }

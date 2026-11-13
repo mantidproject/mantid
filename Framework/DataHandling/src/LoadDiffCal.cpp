@@ -493,9 +493,8 @@ void LoadDiffCal::exec() {
   Group calibrationGroup;
   try {
     calibrationGroup = file.openGroup("calibration");
-  } catch (FileIException &e) {
+  } catch ([[maybe_unused]] FileIException &e) {
 #if H5_VERSION_GE(1, 8, 13)
-    UNUSED_ARG(e);
     H5::Exception::printErrorStack();
 #else
     e.printError(stderr);

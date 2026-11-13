@@ -17,6 +17,7 @@
 #include <cmath>
 #include <functional>
 #include <memory>
+#include <tuple>
 #include <utility>
 
 #include <cxxtest/TestSuite.h>
@@ -1271,10 +1272,8 @@ public:
   void test_iterator_3D_signalAndErrorOnly() {
     auto it = std::make_unique<MDHistoWorkspaceIterator>(ws, new SkipNothing);
     do {
-      signal_t sig = it->getNormalizedSignal();
-      signal_t err = it->getNormalizedError();
-      UNUSED_ARG(sig);
-      UNUSED_ARG(err);
+      std::ignore = it->getNormalizedSignal();
+      std::ignore = it->getNormalizedError();
     } while (it->next());
   }
 
@@ -1283,11 +1282,9 @@ public:
     auto it = std::make_unique<MDHistoWorkspaceIterator>(ws, new SkipNothing);
     size_t numVertices;
     do {
-      signal_t sig = it->getNormalizedSignal();
-      signal_t err = it->getNormalizedError();
+      std::ignore = it->getNormalizedSignal();
+      std::ignore = it->getNormalizedError();
       auto vertexes = it->getVertexesArray(numVertices);
-      UNUSED_ARG(sig);
-      UNUSED_ARG(err);
     } while (it->next());
   }
 
@@ -1295,11 +1292,9 @@ public:
   void test_iterator_3D_withGetCenter() {
     auto it = std::make_unique<MDHistoWorkspaceIterator>(ws, new SkipNothing);
     do {
-      signal_t sig = it->getNormalizedSignal();
-      signal_t err = it->getNormalizedError();
+      std::ignore = it->getNormalizedSignal();
+      std::ignore = it->getNormalizedError();
       VMD center = it->getCenter();
-      UNUSED_ARG(sig);
-      UNUSED_ARG(err);
     } while (it->next());
   }
 
@@ -1309,11 +1304,9 @@ public:
     int max = int(it->getDataSize());
     for (int i = 0; i < max; i++) {
       it->jumpTo(size_t(i));
-      signal_t sig = it->getNormalizedSignal();
-      signal_t err = it->getNormalizedError();
+      std::ignore = it->getNormalizedSignal();
+      std::ignore = it->getNormalizedError();
       VMD center = it->getCenter();
-      UNUSED_ARG(sig);
-      UNUSED_ARG(err);
     }
   }
 

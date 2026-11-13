@@ -139,8 +139,7 @@ void PeaksWorkspace::removePeaks(std::vector<int> badPeaks) {
     return;
   // if index of peak is in badPeaks remove
   int ip = -1;
-  auto it = std::remove_if(m_peaks.begin(), m_peaks.end(), [&ip, badPeaks](const Peak &pk) {
-    UNUSED_ARG(pk);
+  auto it = std::remove_if(m_peaks.begin(), m_peaks.end(), [&ip, badPeaks]([[maybe_unused]] const Peak &pk) {
     ip++;
     return std::any_of(badPeaks.cbegin(), badPeaks.cend(), [ip](int badPeak) { return badPeak == ip; });
   });

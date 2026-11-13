@@ -16,8 +16,7 @@ DECLARE_MD_TRANSFID(MDTransfQ3D, Q3D)
 /** method returns number of matrix dimensions calculated by this class
  * as function of energy analysis mode   */
 unsigned int MDTransfQ3D::getNMatrixDimensions(Kernel::DeltaEMode::Type mode,
-                                               API::MatrixWorkspace_const_sptr inWS) const {
-  UNUSED_ARG(inWS);
+                                               [[maybe_unused]] API::MatrixWorkspace_const_sptr inWS) const {
   switch (mode) {
   case (Kernel::DeltaEMode::Direct):
     return 4;
@@ -135,9 +134,8 @@ bool MDTransfQ3D::calcMatrixCoord3DElastic(const double k0, std::vector<coord_t>
   return false;
 }
 
-std::vector<double> MDTransfQ3D::getExtremumPoints(const double xMin, const double xMax, size_t det_num) const {
-  UNUSED_ARG(det_num);
-
+std::vector<double> MDTransfQ3D::getExtremumPoints(const double xMin, const double xMax,
+                                                   [[maybe_unused]] size_t det_num) const {
   std::vector<double> rez(2);
   rez[0] = xMin;
   rez[1] = xMax;
@@ -153,8 +151,7 @@ std::vector<double> MDTransfQ3D::getExtremumPoints(const double xMin, const doub
  *process.
  *
  */
-bool MDTransfQ3D::calcYDepCoordinates(std::vector<coord_t> &Coord, size_t i) {
-  UNUSED_ARG(Coord);
+bool MDTransfQ3D::calcYDepCoordinates([[maybe_unused]] std::vector<coord_t> &Coord, size_t i) {
   m_ex = (m_DetDirecton + i)->X();
   m_ey = (m_DetDirecton + i)->Y();
   m_ez = (m_DetDirecton + i)->Z();
@@ -248,8 +245,7 @@ The position of each dimID in the vector corresponds to the position of each MD
 coordinate in the Coord vector
 */
 std::vector<std::string> MDTransfQ3D::getDefaultDimID(Kernel::DeltaEMode::Type dEmode,
-                                                      API::MatrixWorkspace_const_sptr inWS) const {
-  UNUSED_ARG(inWS);
+                                                      [[maybe_unused]] API::MatrixWorkspace_const_sptr inWS) const {
   std::vector<std::string> default_dim_ID;
   switch (dEmode) {
   case (Kernel::DeltaEMode::Elastic): {
@@ -278,8 +274,7 @@ std::vector<std::string> MDTransfQ3D::getDefaultDimID(Kernel::DeltaEMode::Type d
  * @return
  * It is Momentum and DelteE in inelastic modes   */
 std::vector<std::string> MDTransfQ3D::outputUnitID(Kernel::DeltaEMode::Type dEmode,
-                                                   API::MatrixWorkspace_const_sptr inWS) const {
-  UNUSED_ARG(inWS);
+                                                   [[maybe_unused]] API::MatrixWorkspace_const_sptr inWS) const {
   std::vector<std::string> UnitID = this->getDefaultDimID(dEmode, inWS);
 
   // TODO: is it really momentum transfer, as MomentumTransfer units are seems

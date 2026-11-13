@@ -51,8 +51,9 @@ CoordTransformDistanceParser::createTransform(Poco::XML::Element *coordTransElem
   // Parse the out dimension parameter.
   OutDimParameterParser outDimParamParser;
   parameter = dynamic_cast<Poco::XML::Element *>(parameters->item(1));
-  std::shared_ptr<Mantid::API::OutDimParameter> outDimParameter(outDimParamParser.createWithoutDelegation(parameter));
-  UNUSED_ARG(outDimParameter); // not actually used as an input.
+  // not actually used as an input.
+  [[maybe_unused]] std::shared_ptr<Mantid::API::OutDimParameter> outDimParameter(
+      outDimParamParser.createWithoutDelegation(parameter));
 
   // Parse the coordinate centre parameter.
   CoordCenterParser coordCenterParser;

@@ -24,6 +24,7 @@
 
 #include <boost/algorithm/string/trim.hpp>
 #include <map>
+#include <tuple>
 #include <utility>
 
 using Mantid::Kernel::Strings::getWord;
@@ -307,18 +308,18 @@ DataObjects::Peak LoadIsawPeaks::readPeak(const PeaksWorkspace_sptr &outWS, std:
 
   col = std::stod(getWord(in, false), nullptr);
   row = std::stod(getWord(in, false), nullptr);
-  UNUSED_ARG(std::stod(getWord(in, false), nullptr)); // chan
-  UNUSED_ARG(std::stod(getWord(in, false), nullptr)); // L2
-  UNUSED_ARG(std::stod(getWord(in, false), nullptr)); // ScatAng
+  std::ignore = std::stod(getWord(in, false), nullptr); // chan
+  std::ignore = std::stod(getWord(in, false), nullptr); // L2
+  std::ignore = std::stod(getWord(in, false), nullptr); // ScatAng
 
-  UNUSED_ARG(std::stod(getWord(in, false), nullptr)); // Az
+  std::ignore = std::stod(getWord(in, false), nullptr); // Az
   wl = std::stod(getWord(in, false), nullptr);
-  UNUSED_ARG(std::stod(getWord(in, false), nullptr)); // D
+  std::ignore = std::stod(getWord(in, false), nullptr); // D
   IPK = std::stod(getWord(in, false), nullptr);
 
   Inti = std::stod(getWord(in, false), nullptr);
   SigI = std::stod(getWord(in, false), nullptr);
-  UNUSED_ARG(std::stoi(getWord(in, false))); // iReflag
+  std::ignore = std::stoi(getWord(in, false)); // iReflag
 
   // Finish the line and get the first word of next line
   readToEndOfLine(in, true);

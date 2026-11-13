@@ -192,10 +192,8 @@ inline const Types::Core::DateAndTime &WeightedEventNoTime::pulseTime() const { 
 /// Return the pulse time; this returns 0 since this type of Event has no time associated.
 inline Types::Core::DateAndTime WeightedEventNoTime::pulseTOFTime() const { return UNSET_DATEANDTIME; }
 /// Return the pulse time; this returns 0 since this type of Event has no time associated.
-inline Types::Core::DateAndTime WeightedEventNoTime::pulseTOFTimeAtSample(const double &factor,
-                                                                          const double &shift) const {
-  UNUSED_ARG(factor);
-  UNUSED_ARG(shift);
+inline Types::Core::DateAndTime WeightedEventNoTime::pulseTOFTimeAtSample([[maybe_unused]] const double &factor,
+                                                                          [[maybe_unused]] const double &shift) const {
   return 0;
 }
 

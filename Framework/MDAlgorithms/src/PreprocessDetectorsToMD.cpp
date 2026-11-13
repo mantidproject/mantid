@@ -347,9 +347,8 @@ void PreprocessDetectorsToMD::updateMasksState(const API::MatrixWorkspace_const_
 
 /** method calculates fake detectors positions in the situation when real
  * detector information has been lost  */
-void PreprocessDetectorsToMD::buildFakeDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,
-                                                          DataObjects::TableWorkspace_sptr &targWS) {
-  UNUSED_ARG(inputWS);
+void PreprocessDetectorsToMD::buildFakeDetectorsPositions(
+    [[maybe_unused]] const API::MatrixWorkspace_const_sptr &inputWS, DataObjects::TableWorkspace_sptr &targWS) {
   // set sample-detector position equal to 1;
   targWS->logs()->addProperty<double>("L1", 1., true);
   //

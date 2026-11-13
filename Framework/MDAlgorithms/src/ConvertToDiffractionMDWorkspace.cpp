@@ -31,6 +31,8 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitLabelTypes.h"
 
+#include <tuple>
+
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -444,8 +446,7 @@ void ConvertToDiffractionMDWorkspace::exec() {
 
   // Copy ExperimentInfo (instrument, run, sample) to the output WS
   ExperimentInfo_sptr ei(m_inWS->cloneExperimentInfo());
-  uint16_t expInfoIndex = ws->addExperimentInfo(ei);
-  UNUSED_ARG(expInfoIndex);
+  std::ignore = ws->addExperimentInfo(ei);
 
   // ------------------- Cache values that are common for all
   // ---------------------------

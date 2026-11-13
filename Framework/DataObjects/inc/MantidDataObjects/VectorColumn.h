@@ -103,15 +103,12 @@ public:
   }
 
   /// Cast to double
-  double toDouble(size_t i) const override {
-    UNUSED_ARG(i);
+  double toDouble([[maybe_unused]] size_t i) const override {
     throw std::runtime_error("VectorColumn is not convertible to double.");
   }
 
   /// Assign from double
-  void fromDouble(size_t i, double value) override {
-    UNUSED_ARG(i);
-    UNUSED_ARG(value);
+  void fromDouble([[maybe_unused]] size_t i, [[maybe_unused]] double value) override {
     throw std::runtime_error("VectorColumn is not assignable from double.");
   }
 

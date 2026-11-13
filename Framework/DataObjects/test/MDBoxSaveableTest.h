@@ -665,7 +665,7 @@ public:
   //-----------------------------------------------------------------------------------------
   /** Set up the file back end and test accessing data
    * by integrating a sphere */
-  void do_test_fileBackEnd_integrationOperations(bool parallel_condition) {
+  void do_test_fileBackEnd_integrationOperations([[maybe_unused]] bool parallel_condition) {
     // Create a box with a controller for the back-end
     BoxController_sptr bc(new BoxController(3));
 
@@ -696,8 +696,6 @@ public:
 
     bc->getFileIO()->closeFile();
     do_deleteNexusFile("MDBoxBinningxest.nxs");
-    // suppress unused variable when built without openmp
-    UNUSED_ARG(parallel_condition);
   }
 
   void test_fileBackEnd_integrationOperations() { do_test_fileBackEnd_integrationOperations(false); }

@@ -174,9 +174,8 @@ void SCDPanelErrors::moveDetector(double x, double y, double z, double rotx, dou
 
 /// Evaluate the function for a list of arguments and given scaling factor
 void SCDPanelErrors::eval(double xshift, double yshift, double zshift, double xrotate, double yrotate, double zrotate,
-                          double scalex, double scaley, double *out, const double *xValues, const size_t nData,
-                          double tShift) const {
-  UNUSED_ARG(xValues);
+                          double scalex, double scaley, double *out, [[maybe_unused]] const double *xValues,
+                          const size_t nData, double tShift) const {
   if (nData == 0)
     return;
 

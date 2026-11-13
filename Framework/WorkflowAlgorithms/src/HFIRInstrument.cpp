@@ -43,8 +43,8 @@ double readInstrumentParameter(const std::string &parameter, const API::MatrixWo
 /*
  * Return the detector ID corresponding to the [x,y] pixel coordinates.
  */
-int getDetectorFromPixel(const int &pixel_x, const int &pixel_y, const API::MatrixWorkspace_sptr &dataWS) {
-  UNUSED_ARG(dataWS);
+int getDetectorFromPixel(const int &pixel_x, const int &pixel_y,
+                         [[maybe_unused]] const API::MatrixWorkspace_sptr &dataWS) {
   return 1000000 + 1000 * pixel_x + pixel_y;
 }
 
