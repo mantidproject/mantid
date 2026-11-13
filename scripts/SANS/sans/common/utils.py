@@ -609,7 +609,7 @@ def _yield_masked_det_ids(masking_ws):
     """
     for ws_index in range(masking_ws.getNumberHistograms()):
         if masking_ws.y(ws_index)[0] == 1:
-            yield masking_ws.getDetector(ws_index).getID()
+            yield masking_ws.getSpectrum(ws_index).getDetectorIDs()[0]
 
 
 def get_masked_det_ids_from_mask_file(mask_file_path, idf_path):

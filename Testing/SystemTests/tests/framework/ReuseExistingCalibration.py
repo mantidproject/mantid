@@ -30,7 +30,7 @@ class ReuseExistingCalibration(systemtesting.MantidSystemTest):
             ms.CopyInstrumentParameters(calibration, data)
             # Now move component on data workspace using a relative move, where that component was a detector in the calibrated workspace
             ms.MoveInstrumentComponent(data, DetectorID=1100, X=0.0, Y=0.0, Z=5.0, RelativePosition=True)
-            return data.getDetector(0).getPos()
+            return data.spectrumInfo().position(0)
 
         ####
 

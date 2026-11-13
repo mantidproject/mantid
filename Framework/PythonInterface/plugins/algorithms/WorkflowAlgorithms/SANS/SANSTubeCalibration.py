@@ -519,9 +519,10 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
     @staticmethod
     def _set_counts_to_one_outside_strip_boundaries(ws, boundaries: tuple[float]) -> None:
         """Set counts equal to 1 for x values outside the strip position boundaries."""
+        spectrum_info = ws.spectrumInfo()
         for ws_idx in range(ws.getNumberHistograms()):
             try:
-                det_x = ws.getDetector(ws_idx).getPos().getX()
+                det_x = spectrum_info.position(ws_idx).getX()
                 if det_x < boundaries[0] or det_x > boundaries[1]:
                     ws.mutableY(ws_idx)[0] = 1
             except RuntimeError:

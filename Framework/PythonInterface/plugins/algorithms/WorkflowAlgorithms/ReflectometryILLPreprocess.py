@@ -199,10 +199,11 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         Keyword arguments:
         ws -- workspace to be analysed for the index direction.
         """
-        first_det = ws.getDetector(0)
-        first_angle = ws.detectorTwoTheta(first_det)
-        last_det = ws.getDetector(ws.getNumberHistograms() - 1)
-        last_angle = ws.detectorTwoTheta(last_det)
+        spectrum_info = ws.spectrumInfo()
+        # An explicit observer gives the angle for monitors too, as the detector-based method did
+        sample_pos = spectrum_info.samplePosition()
+        first_angle = spectrum_info.twoTheta(0, sample_pos)
+        last_angle = spectrum_info.twoTheta(ws.getNumberHistograms() - 1, sample_pos)
         return 1 if first_angle < last_angle else -1
 
     def category(self):

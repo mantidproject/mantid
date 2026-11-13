@@ -126,8 +126,8 @@ class DirectILLReductionTest(unittest.TestCase):
         self.assertTrue(groupedWSName in mtd)
         groupedWS = mtd[groupedWSName]
         self.assertEqual(groupedWS.getNumberHistograms(), 2)
-        groupIds = list(groupedWS.getDetector(0).getDetectorIDs())
-        groupIds += groupedWS.getDetector(1).getDetectorIDs()
+        groupIds = list(groupedWS.getSpectrum(0).getDetectorIDs())
+        groupIds += groupedWS.getSpectrum(1).getDetectorIDs()
         self.assertEqual(collections.Counter(detectorIds), collections.Counter(groupIds))
 
     def testDetectorGroupingWithUserGivenAngleStep(self):

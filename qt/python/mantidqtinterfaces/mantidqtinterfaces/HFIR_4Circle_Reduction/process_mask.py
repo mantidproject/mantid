@@ -71,7 +71,7 @@ def get_region_of_interest(mask_ws_name):
 
     # mask or unmask all the matrix element according to mask workspace
     for iws in range(mask_ws.getNumberHistograms()):
-        det_id = mask_ws.getDetector(iws).getID()
+        det_id = mask_ws.getSpectrum(iws).getDetectorIDs()[0]
         pixel_2d_id = det_id / size_y, det_id % size_y
         mask_matrix[pixel_2d_id] = int(mask_ws.isMasked(iws))
     # END-FOR
