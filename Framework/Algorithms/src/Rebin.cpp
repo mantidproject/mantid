@@ -86,9 +86,7 @@ std::vector<double> Rebin::rebinParamsFromInput(const std::vector<double> &inPar
     // Input are min, delta1, mid1, delta2, mid2, ... , max
     rbParams = inParams;
   } else if (inParams.size() == 1) {
-    double xmin = 0.;
-    double xmax = 0.;
-    inputWS.getXMinMax(xmin, xmax);
+    const auto [xmin, xmax] = inputWS.getXMinMax();
 
     logger.information() << "Using the current min and max as default " << xmin << ", " << xmax << '\n';
     rbParams.resize(3);
@@ -298,9 +296,7 @@ void Rebin::exec() {
   bool useReverseLog = getProperty(PropertyNames::RVRS_LOG_BIN);
   double power = getProperty(PropertyNames::POWER);
 
-  double xmin = 0.;
-  double xmax = 0.;
-  inputWS->getXMinMax(xmin, xmax);
+  const auto [xmin, xmax] = inputWS->getXMinMax();
 
   // create new output X axis
   std::vector<double> xAxisTmp;

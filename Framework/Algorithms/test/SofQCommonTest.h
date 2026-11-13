@@ -146,9 +146,7 @@ public:
     const auto minQ = directQ(Ei, minDeltaE);
     const auto maxQ = directQ(Ei, maxDeltaE);
     s.initCachedValues(*ws, &alg);
-    double minE;
-    double maxE;
-    ws->getXMinMax(minE, maxE);
+    const auto [minE, maxE] = ws->getXMinMax();
     std::pair<double, double> minmaxQ;
     TS_ASSERT_THROWS_NOTHING(minmaxQ = s.qBinHints(*ws, minE, maxE))
     TS_ASSERT(minmaxQ.first < minmaxQ.second)
@@ -178,9 +176,7 @@ public:
     const auto minQ = std::min(indirectQ(eFixed0, minDeltaE, twoTheta0), indirectQ(eFixed1, minDeltaE, twoTheta1));
     const auto maxQ = std::max(indirectQ(eFixed0, maxDeltaE, twoTheta1), indirectQ(eFixed1, maxDeltaE, twoTheta1));
     s.initCachedValues(*ws, &alg);
-    double minE;
-    double maxE;
-    ws->getXMinMax(minE, maxE);
+    const auto [minE, maxE] = ws->getXMinMax();
     const auto minmaxQ = s.qBinHints(*ws, minE, maxE);
     TS_ASSERT_EQUALS(minmaxQ.first, minQ)
     TS_ASSERT_DELTA(minmaxQ.second, maxQ, 1e-12)
