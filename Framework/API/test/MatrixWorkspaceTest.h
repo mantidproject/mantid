@@ -2448,11 +2448,9 @@ public:
   /// This test is equivalent to GeometryInfoFactoryTestPerformance, see there.
   void test_typical() {
     auto const &specInfo = m_workspace.spectrumInfo();
-    Mantid::Kernel::V3D const sample = specInfo.samplePosition();
     double const L1 = specInfo.l1();
     double result = 0.0;
     for (size_t i = 0; i < 10000; ++i) {
-      auto detector = m_workspace.getDetector(i);
       result += L1;
       result += specInfo.l2(i);
       result += specInfo.twoTheta(i);

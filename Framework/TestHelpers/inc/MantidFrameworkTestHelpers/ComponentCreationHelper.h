@@ -111,19 +111,20 @@ std::shared_ptr<Mantid::Geometry::CompAssembly> createTestAssemblyOfFourCylinder
 std::shared_ptr<Mantid::Geometry::CSGObject>
 createHollowShell(double innerRadius, double outerRadius, const Mantid::Kernel::V3D &centre = Mantid::Kernel::V3D());
 
-// allow DetectorGtoup in the below functions
+// allow DetectorGroup in the below functions
 GNU_DIAG_OFF("deprecated-declarations")
 MSVC_DIAG_OFF(4996)
 /**
  * Create a detector group containing 5 detectors
  */
 [[deprecated("DetectorGroup has been deprecated in Mantid 7.1; this helper only remains to test it")]]
-std::shared_ptr<Mantid::Geometry::DetectorGroup> createDetectorGroupWith5CylindricalDetectors()
+std::shared_ptr<Mantid::Geometry::DetectorGroup> createDetectorGroupWith5CylindricalDetectors();
 /**
  * Create a detector group containing n detectors with gaps
  */
 [[deprecated("DetectorGroup has been deprecated in Mantid 7.1; this helper only remains to test it")]]
-std::shared_ptr<Mantid::Geometry::DetectorGroup> createDetectorGroupWithNCylindricalDetectorsWithGaps(unsigned int nDet = 4, double gap = 0.01)
+std::shared_ptr<Mantid::Geometry::DetectorGroup>
+createDetectorGroupWithNCylindricalDetectorsWithGaps(unsigned int nDet = 4, double gap = 0.01);
 /**
  * Create a detector group containing detectors ring
  * R_min -- min radius of the ring
@@ -132,7 +133,8 @@ std::shared_ptr<Mantid::Geometry::DetectorGroup> createDetectorGroupWithNCylindr
   The detectors are the cylinders with 1.5cm height and 0.5 cm radius
  */
 [[deprecated("DetectorGroup has been deprecated in Mantid 7.1; this helper only remains to test it")]]
-std::shared_ptr<Mantid::Geometry::DetectorGroup> createRingOfCylindricalDetectors(const double R_min = 4.5, const double R_max = 5, const double z0 = 4))
+std::shared_ptr<Mantid::Geometry::DetectorGroup>
+createRingOfCylindricalDetectors(const double R_min = 4.5, const double R_max = 5, const double z0 = 4);
 
 MSVC_DIAG_ON(4996)
 GNU_DIAG_ON("deprecated-declarations")
@@ -146,7 +148,7 @@ GNU_DIAG_ON("deprecated-declarations")
   The detectors are the cylinders with 1.5cm height and 0.5 cm radius
  */
 std::vector<std::unique_ptr<Mantid::Geometry::IDetector>>
-createVectorOfCylindricalDetectors(const double R_min = 4.5, const double R_max = 5, const double z000000000000000 = 4);
+createVectorOfCylindricalDetectors(const double R_min = 4.5, const double R_max = 5, const double z0 = 4);
 
 /**
  * Creates a single flat bank with cylindrical (tubes) of detectors. Vertical y
