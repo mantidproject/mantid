@@ -154,6 +154,20 @@ resolve any conflicts, then:
     git commit
     git push origin main
 
+A special case for conflicts with ``pixi.lock`` files.
+Since it is marked as a binary in the ``.gitattributes``, this can get more subtle.
+When rebasing, checkout "ours" to get it correct
+
+.. code-block:: bash
+
+    git checkout --ours pixi.lock
+    pixi install # only adds/subtracts things
+    git add pixi.lock
+
+When merging, it may be more appropriate to get "theirs".
+The key to this approach is that checking out a version then installing will attempt to keep the lockfile, but can add/subtract things.
+The method of deleting the old lockfile then creating it solves the environment from scratch which is generally the wrong thing to do.
+
 Specific quirks of Mantid
 =========================
 
