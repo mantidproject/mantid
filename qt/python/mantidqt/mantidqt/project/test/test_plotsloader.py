@@ -22,6 +22,7 @@ from mantidqt.project.plotsloader import PlotsLoader
 import mantid.plots.axesfunctions
 from mantid.api import AnalysisDataService as ADS
 from mantid.dataobjects import Workspace2D
+from mantid.plots.utility import MantidAxType
 
 
 def pass_func():
@@ -156,6 +157,31 @@ class PlotsLoaderTest(unittest.TestCase):
         self.assertEqual(self.plots_loader.workspace_plot_func.call_count, 1)
         self.assertEqual(self.plots_loader.plot_func.call_count, 2)
         self.assertEqual(self.plots_loader.restore_figure_data.call_count, 1)
+
+    @mock.patch("mantidqt.project.plotsloader.create_subplots")
+    def test_make_fig_restores_axis_type_and_reopens_superplot(self, mock_create_subplots):
+        ADS.addOrReplace("ws", Workspace2D())
+        fig, axes_matrix = mock.Mock(), mock.Mock()
+        axes_matrix.flatten.return_value.tolist.return_value = [mock.Mock()]
+        mock_create_subplots.return_value = (fig, axes_matrix, 1, 1)
+        plot_dict = {"label": "plot", "superplot": True, "creationArguments": [[{"workspaces": "ws", "wkspIndex": 0, "axis": 0}]]}
+        self.plots_loader.workspace_plot_func = mock.MagicMock()
+        self.plots_loader.restore_figure_data = mock.MagicMock()
+
+        self.plots_loader.make_fig(plot_dict)
+
+        self.assertEqual(MantidAxType.BIN, self.plots_loader.workspace_plot_func.call_args[0][3]["axis"])
+        fig.canvas.manager.superplot_toggle.assert_called_once()
+
+    def test_make_fig_recreates_3d_plot_from_its_workspaces(self):
+        mock_plot_surface = mock.Mock()
+        plot_dict = {"label": "plot", "creationArguments": [[{"workspaces": "ws", "function": "plot_surface"}]]}
+
+        with mock.patch.dict("mantidqt.project.plotsloader.PLOT_FUNCTIONS_3D", {"plot_surface": mock_plot_surface}):
+            self.plots_loader.make_fig(plot_dict)
+
+        mock_plot_surface.assert_called_once_with(["ws"])
+        mock_plot_surface.return_value.canvas.manager.set_window_title.assert_called_once_with("plot")
 
     def test_restore_fig_properties(self):
         matplotlib.figure.Figure.set_figheight = mock.MagicMock()

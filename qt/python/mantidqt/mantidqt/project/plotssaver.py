@@ -7,11 +7,15 @@
 #  This file is part of the mantidqt package
 #
 from copy import deepcopy
+import json
+
 import matplotlib.axis
+import numpy as np
 from matplotlib import ticker
 from matplotlib.image import AxesImage
 
 from mantid import logger
+from mantid.plots import MantidAxes3D
 from mantid.plots.legend import LegendProperties
 from mantid.plots.utility import MantidAxType
 
@@ -30,7 +34,12 @@ class PlotsSaver(object):
         plot_list = []
         for index in plot_dict:
             try:
-                plot_list.append(self.get_dict_from_fig(plot_dict[index].canvas.figure))
+                fig_dict = self.get_dict_from_fig(plot_dict[index].canvas.figure)
+                if getattr(plot_dict[index], "superplot", None) is not None:
+                    fig_dict["superplot"] = True
+                # A plot that cannot be written to the project file is skipped, rather than failing the whole save
+                json.dumps(fig_dict)
+                plot_list.append(fig_dict)
             except BaseException as e:
                 # Catch all errors in here so it can fail silently-ish, if this is happening on all plots make sure you
                 # have built your project.
@@ -48,6 +57,21 @@ class PlotsSaver(object):
     def _convert_normalise_obj_to_dict(norm):
         norm_dict = {"type": type(norm).__name__, "clip": norm.clip, "vmin": norm.vmin, "vmax": norm.vmax}
         return norm_dict
+
+    @staticmethod
+    def _convert_numpy_to_json_types(value):
+        """
+        Recursively replace numpy arrays and scalars, which cannot be json serialised, with their python equivalents
+        """
+        if isinstance(value, np.ndarray):
+            return value.tolist()
+        if isinstance(value, np.generic):
+            return value.item()
+        if isinstance(value, dict):
+            return {key: PlotsSaver._convert_numpy_to_json_types(item) for key, item in value.items()}
+        if isinstance(value, (list, tuple)):
+            return [PlotsSaver._convert_numpy_to_json_types(item) for item in value]
+        return value
 
     @staticmethod
     def _add_normalisation_kwargs(cargs_list, axes_list):
@@ -68,14 +92,15 @@ class PlotsSaver(object):
                     if "norm" in args_dict.keys() and isinstance(args_dict["norm"], Normalize):
                         norm_dict = self._convert_normalise_obj_to_dict(args_dict["norm"])
                         args_dict["norm"] = norm_dict
-                    if "axis" in args_dict.keys():
-                        args_dict["axis"] = args_dict["axis"].value
+                creation_args = [self._convert_numpy_to_json_types(args_dict) for args_dict in creation_args]
                 create_list.append(creation_args)
                 self.figure_creation_args = creation_args
             except AttributeError:
                 logger.debug("Axis had an axis without creation_args - Common with a Colorfill plot")
                 continue
-            axes_list.append(self.get_dict_for_axes(ax))
+            # 3D axes are recreated from their creation_args alone
+            if not isinstance(ax, MantidAxes3D):
+                axes_list.append(self.get_dict_for_axes(ax))
 
         if create_list and axes_list:
             self._add_normalisation_kwargs(create_list, axes_list)
