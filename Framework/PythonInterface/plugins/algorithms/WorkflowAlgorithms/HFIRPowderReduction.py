@@ -60,6 +60,7 @@ from mantid.simpleapi import (
     LoadEventAsWorkspace2D,
     LoadInstrument,
     AddSampleLog,
+    MaskDetectors,
 )
 import h5py
 import numpy as np
@@ -67,6 +68,14 @@ import os
 import re
 
 logger = Logger(__name__)
+
+# Standard MIDAS mask: the first and last MIDAS_MASKED_END_PIXELS pixels of every tube.
+# These pixels lie outside the active length of the detector tubes and do not count neutrons.
+# The pixel count is an approximate default; a MaskWorkspace can be supplied when it is not suitable.
+# Detector IDs run consecutively along each tube, tube after tube, through all banks.
+MIDAS_NUM_TUBES = 7 * 16  # 7 banks of one 16-tube pack each
+MIDAS_PIXELS_PER_TUBE = 512
+MIDAS_MASKED_END_PIXELS = 40
 
 
 class HFIRPowderReduction(DataProcessorAlgorithm):
@@ -116,7 +125,8 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         self.declareProperty(
             FileProperty(name="IDFFilename", defaultValue="", action=FileAction.OptionalLoad, extensions=[".xml"]),
             doc="Optional instrument definition file (IDF). If provided, it overrides the instrument geometry "
-            "that would otherwise be determined by the sample file.",
+            "that would otherwise be determined by the sample file. For MIDAS, the standard mask (ApplyMask) "
+            "assumes the IDF keeps the standard detector ID numbering of 512 consecutive IDs per tube.",
         )
         # TODO: This field fields below will be autopopulated from the sample file in a future PR, handled by EWM item 13209
         self.declareProperty(
@@ -918,6 +928,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         except RuntimeError:
             logger.warning(f"LoadEventAsWorkspace2D failed for {filename}, falling back to generic Load")
             self._load_MIDAS(filename, wsname)
+            self._apply_MIDAS_mask(wsname)
             return
 
         # Normalization needs these logs (gd_prtn_chrg for Monitor, duration for Time).
@@ -953,9 +964,36 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
 
         # A user-supplied IDF overrides the geometry embedded in the sample file.
         self._load_IDF_if_supplied(wsname, rewrite_spectra_map=False)
-        # Masking is not used yet, but will be added back later
-        # if self.getProperty("ApplyMask").value:
-        #     MaskBTP(wsname, Pixel="1,2,511,512", EnableLogging=False)
+        self._apply_MIDAS_mask(wsname)
+
+    def _apply_MIDAS_mask(self, wsname):
+        """Apply the standard MIDAS mask when ApplyMask is set.
+
+        Masks the first and last MIDAS_MASKED_END_PIXELS pixels of every detector tube. The mask
+        is defined by detector ID rather than by instrument name or component tree, so it also
+        applies when a user-supplied IDF has replaced the geometry.
+        """
+        if not self.getProperty("ApplyMask").value:
+            return
+        tube_starts = np.arange(MIDAS_NUM_TUBES) * MIDAS_PIXELS_PER_TUBE
+        tube_offsets = np.concatenate(
+            (
+                np.arange(MIDAS_MASKED_END_PIXELS),
+                np.arange(MIDAS_PIXELS_PER_TUBE - MIDAS_MASKED_END_PIXELS, MIDAS_PIXELS_PER_TUBE),
+            )
+        )
+        mask_ids = (tube_starts[:, np.newaxis] + tube_offsets).ravel()
+
+        workspace = mtd[wsname]
+        names = workspace.getNames() if isinstance(workspace, WorkspaceGroup) else [wsname]
+        for name in names:
+            # only mask IDs present in the instrument, e.g. in case a custom IDF has fewer pixels
+            detector_ids = mtd[name].detectorInfo().detectorIDs()
+            ids_to_mask = np.intersect1d(mask_ids, detector_ids)
+            if ids_to_mask.size == 0:
+                logger.warning(f"None of the standard MIDAS mask detector IDs exist in {name}; no mask applied")
+                continue
+            MaskDetectors(Workspace=name, DetectorList=ids_to_mask, EnableLogging=False)
 
     def PyExec(self):
         """
@@ -1609,10 +1647,15 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         mask_workspaces = []
         for n, (_wksp_in, _wksp_out) in enumerate(zip(input_workspaces, output_workspaces)):
             _wksp_in = str(_wksp_in)
-            if mask_angle == Property.EMPTY_DBL:
+            if mask_angle == Property.EMPTY_DBL and mask is None:
+                # ExtractUnmaskedSpectra falls back to the workspace's own masked detectors
+                # (e.g. the standard MIDAS mask) when no MaskWorkspace is given
                 self._to_spectrum_axis(_wksp_in, _wksp_out, mask)
                 mask_workspaces.append(mask)
             else:
+                # Start from the workspace's own masked detectors so that they are kept when
+                # combined with MaskAngle and/or the user MaskWorkspace; ExtractUnmaskedSpectra
+                # ignores the internal mask flags once a MaskWorkspace is supplied.
                 _mask_n = f"__mask_{n}"  # mask for n-th
                 self.temp_workspace_list.append(_mask_n)  # cleanup later
 
@@ -1625,7 +1668,6 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                         EnableLogging=False,
                     )
                 if mask is not None:
-                    # might be a bug if the mask angle isn't set
                     BinaryOperateMasks(
                         InputWorkspace1=_mask_n,
                         InputWorkspace2=mask,
