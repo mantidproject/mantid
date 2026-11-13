@@ -436,8 +436,8 @@ std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>> Instrum
   auto const parameterInfo = makeParameterInfo();
   ALLOW_DEPRECATED(auto const referenceFrame = m_instrument->getReferenceFrame());
   auto compInfoWrapper = std::make_unique<ComponentInfo>(std::move(compInfo), m_shapes, parameterInfo, referenceFrame);
-  auto detInfoWrapper = std::make_unique<DetectorInfo>(std::move(detInfo), m_instrument, detectorIds(),
-                                                       detectorIdToIndexMap(), parameterInfo, referenceFrame);
+  auto detInfoWrapper = std::make_unique<DetectorInfo>(std::move(detInfo), detectorIds(), detectorIdToIndexMap(),
+                                                       parameterInfo, referenceFrame);
 
   return {std::move(compInfoWrapper), std::move(detInfoWrapper)};
 }
