@@ -11,6 +11,7 @@
 #include "MantidDataObjects/DllConfig.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <string>
 
@@ -98,6 +99,8 @@ public:
   double getEventXMax() const;
   void getEventXMinMax(double &xmin, double &xmax) const;
 
+  GNU_DIAG_OFF("deprecated-declarations")
+  MSVC_DIAG_OFF(4996)
   [[deprecated("use mutableX() instead")]]
   MantidVec &dataX(const std::size_t) override;
   [[deprecated("use mutableY() instead")]]
@@ -116,6 +119,8 @@ public:
   const MantidVec &dataDx(const std::size_t) const override;
   [[deprecated("use sharedX() instead")]]
   Kernel::cow_ptr<HistogramData::HistogramX> refX(const std::size_t) const override;
+  MSVC_DIAG_ON(4996)
+  GNU_DIAG_ON("deprecated-declarations")
 
   /// Generate a new histogram from specified event list at the given index.
   void generateHistogram(const std::size_t index, std::span<double const> X, MantidVec &Y, MantidVec &E,
