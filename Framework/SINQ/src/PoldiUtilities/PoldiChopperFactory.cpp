@@ -10,9 +10,7 @@
 
 namespace Mantid::Poldi {
 
-Poldi::PoldiAbstractChopper *PoldiChopperFactory::createChopper(std::string chopperType) {
-  UNUSED_ARG(chopperType);
-
+Poldi::PoldiAbstractChopper *PoldiChopperFactory::createChopper([[maybe_unused]] std::string chopperType) {
   return new PoldiBasicChopper();
 }
 } // namespace Mantid::Poldi

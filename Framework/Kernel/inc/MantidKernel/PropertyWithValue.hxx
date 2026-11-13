@@ -73,13 +73,11 @@ PropertyWithValue<TYPE>::PropertyWithValue(std::string name, TYPE defaultValue, 
  * or Direction::InOut (Input & Output) property
  */
 template <typename TYPE>
-PropertyWithValue<TYPE>::PropertyWithValue(const std::string &name, const TYPE &defaultValue,
+PropertyWithValue<TYPE>::PropertyWithValue(const std::string &name, [[maybe_unused]] const TYPE &defaultValue,
                                            const std::string &defaultValueStr, IValidator_sptr validator,
                                            unsigned int direction)
     : Property(name, typeid(TYPE), direction), m_value(extractToValueVector<TYPE>(defaultValueStr)),
-      m_initialValue(m_value), m_validator(validator ? std::move(validator) : std::make_shared<NullValidator>()) {
-  UNUSED_ARG(defaultValue);
-}
+      m_initialValue(m_value), m_validator(validator ? std::move(validator) : std::make_shared<NullValidator>()) {}
 
 /**Copy constructor
  *  Note the default value of the copied object is the initial value of
@@ -400,8 +398,7 @@ std::string PropertyWithValue<TYPE>::setTypedValue(const U &value, const std::tr
  */
 template <typename TYPE>
 template <typename U>
-std::string PropertyWithValue<TYPE>::setTypedValue(const U &value, const std::false_type &) {
-  UNUSED_ARG(value);
+std::string PropertyWithValue<TYPE>::setTypedValue([[maybe_unused]] const U &value, const std::false_type &) {
   return "Attempt to assign object of type DataItem to property (" + name() + ") of incorrect type";
 }
 

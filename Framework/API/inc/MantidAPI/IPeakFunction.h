@@ -111,8 +111,7 @@ public:
   /// by intensity() is constant during fitting.
   /// @param isDefault :: If true fix intensity by default:
   ///    don't show it in ties
-  virtual void fixIntensity(bool isDefault = false) {
-    UNUSED_ARG(isDefault);
+  virtual void fixIntensity([[maybe_unused]] bool isDefault = false) {
     throw std::runtime_error("Generic intensity fixing isn't implemented for this function.");
   }
 

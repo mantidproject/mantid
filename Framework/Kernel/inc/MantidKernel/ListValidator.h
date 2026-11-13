@@ -126,10 +126,7 @@ protected:
    * @param value :: The value to check
    * @return True if it is considered empty
    */
-  template <typename T> bool isEmpty(const T &value) const {
-    UNUSED_ARG(value);
-    return false;
-  }
+  template <typename T> bool isEmpty([[maybe_unused]] const T &value) const { return false; }
   /**
    * Is the value considered empty. Specialized string version to use empty
    * @param value :: The value to check

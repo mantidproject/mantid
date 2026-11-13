@@ -56,10 +56,8 @@ public:
   /// @param suffix :: A suffix to give to all new properties.
   /// @param addProp :: If false don't actually declare new properties but do
   /// other stuff if needed
-  virtual void declareDatasetProperties(const std::string &suffix = "", bool addProp = true) {
-    UNUSED_ARG(suffix);
-    UNUSED_ARG(addProp);
-  }
+  virtual void declareDatasetProperties([[maybe_unused]] const std::string &suffix = "",
+                                        [[maybe_unused]] bool addProp = true) {}
 
   /// Create a domain and values from the input workspace. FunctionValues must
   /// be filled with data to fit to.
@@ -87,14 +85,10 @@ public:
   ///                                       just return a pointer
   /// @return A shared pointer to the created workspace.
   virtual std::shared_ptr<API::Workspace>
-  createOutputWorkspace(const std::string &baseName, API::IFunction_sptr function,
-                        std::shared_ptr<API::FunctionDomain> domain, std::shared_ptr<API::FunctionValues> values,
-                        const std::string &outputWorkspacePropertyName = "OutputWorkspace") {
-    UNUSED_ARG(baseName);
-    UNUSED_ARG(function);
-    UNUSED_ARG(domain);
-    UNUSED_ARG(values);
-    UNUSED_ARG(outputWorkspacePropertyName);
+  createOutputWorkspace([[maybe_unused]] const std::string &baseName, [[maybe_unused]] API::IFunction_sptr function,
+                        [[maybe_unused]] std::shared_ptr<API::FunctionDomain> domain,
+                        [[maybe_unused]] std::shared_ptr<API::FunctionValues> values,
+                        [[maybe_unused]] const std::string &outputWorkspacePropertyName = "OutputWorkspace") {
     throw std::logic_error("Method createOutputWorkspace() isn't implemented");
   }
   /// Initialize the function

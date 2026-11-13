@@ -151,9 +151,8 @@ void Unit::toTOF(std::vector<double> &xdata, std::vector<double> const &ydata, c
   toTOF(xdata, ydata, _l1, _emode, paramsMap);
 }
 
-void Unit::toTOF(std::vector<double> &xdata, std::vector<double> const &ydata, const double &_l1, const int &_emode,
-                 const UnitParametersMap &params) {
-  UNUSED_ARG(ydata);
+void Unit::toTOF(std::vector<double> &xdata, [[maybe_unused]] std::vector<double> const &ydata, const double &_l1,
+                 const int &_emode, const UnitParametersMap &params) {
   this->initialize(_l1, _emode, params);
   size_t numX = xdata.size();
   for (size_t i = 0; i < numX; i++)
@@ -181,9 +180,8 @@ void Unit::fromTOF(std::vector<double> &xdata, std::vector<double> const &ydata,
   fromTOF(xdata, ydata, _l1, _emode, paramsMap);
 }
 
-void Unit::fromTOF(std::vector<double> &xdata, std::vector<double> const &ydata, const double &_l1, const int &_emode,
-                   const UnitParametersMap &params) {
-  UNUSED_ARG(ydata);
+void Unit::fromTOF(std::vector<double> &xdata, [[maybe_unused]] std::vector<double> const &ydata, const double &_l1,
+                   const int &_emode, const UnitParametersMap &params) {
   this->initialize(_l1, _emode, params);
   size_t numX = xdata.size();
   for (size_t i = 0; i < numX; i++)
@@ -221,13 +219,11 @@ const UnitLabel Empty::label() const { return Symbol::EmptyLabel; }
 
 void Empty::init() {}
 
-double Empty::singleToTOF(const double x) const {
-  UNUSED_ARG(x);
+double Empty::singleToTOF([[maybe_unused]] const double x) const {
   throw Kernel::Exception::NotImplementedError("Cannot convert unit " + this->unitID() + " to time of flight");
 }
 
-double Empty::singleFromTOF(const double tof) const {
-  UNUSED_ARG(tof);
+double Empty::singleFromTOF([[maybe_unused]] const double tof) const {
   throw Kernel::Exception::NotImplementedError("Cannot convert to unit " + this->unitID() + " from time of flight");
 }
 
@@ -1333,13 +1329,11 @@ Time::Time() : Unit(), factorTo(DBL_MIN), factorFrom(DBL_MIN) {}
 
 void Time::init() {}
 
-double Time::singleToTOF(const double x) const {
-  UNUSED_ARG(x);
+double Time::singleToTOF([[maybe_unused]] const double x) const {
   throw std::runtime_error("Time is not allowed to be convert to TOF. ");
 }
 
-double Time::singleFromTOF(const double tof) const {
-  UNUSED_ARG(tof);
+double Time::singleFromTOF([[maybe_unused]] const double tof) const {
   throw std::runtime_error("Time is not allowed to be converted from TOF. ");
 }
 
@@ -1361,13 +1355,11 @@ Degrees::Degrees() : Empty(), m_label("degrees") {}
 
 const UnitLabel Degrees::label() const { return m_label; }
 
-double Degrees::singleToTOF(const double x) const {
-  UNUSED_ARG(x);
+double Degrees::singleToTOF([[maybe_unused]] const double x) const {
   throw std::runtime_error("Degrees is not allowed to be converted to TOF. ");
 }
 
-double Degrees::singleFromTOF(const double tof) const {
-  UNUSED_ARG(tof);
+double Degrees::singleFromTOF([[maybe_unused]] const double tof) const {
   throw std::runtime_error("Degrees is not allowed to be converted from TOF. ");
 }
 
@@ -1389,13 +1381,11 @@ Temperature::Temperature() : Empty(), m_label("K") {}
 
 const UnitLabel Temperature::label() const { return m_label; }
 
-double Temperature::singleToTOF(const double x) const {
-  UNUSED_ARG(x);
+double Temperature::singleToTOF([[maybe_unused]] const double x) const {
   throw std::runtime_error("Temperature is not allowed to be converted to TOF. ");
 }
 
-double Temperature::singleFromTOF(const double tof) const {
-  UNUSED_ARG(tof);
+double Temperature::singleFromTOF([[maybe_unused]] const double tof) const {
   throw std::runtime_error("Temperature is not allowed to be converted from TOF. ");
 }
 
@@ -1415,13 +1405,11 @@ const UnitLabel AtomicDistance::label() const { return Symbol::Angstrom; }
 
 Unit *AtomicDistance::clone() const { return new AtomicDistance(*this); }
 
-double AtomicDistance::singleToTOF(const double x) const {
-  UNUSED_ARG(x);
+double AtomicDistance::singleToTOF([[maybe_unused]] const double x) const {
   throw std::runtime_error("Atomic Distance is not allowed to be converted to TOF. ");
 }
 
-double AtomicDistance::singleFromTOF(const double tof) const {
-  UNUSED_ARG(tof);
+double AtomicDistance::singleFromTOF([[maybe_unused]] const double tof) const {
   throw std::runtime_error("Atomic Distance is not allowed to be converted from TOF. ");
 }
 
