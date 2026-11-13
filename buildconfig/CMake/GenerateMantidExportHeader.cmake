@@ -2,8 +2,8 @@ include(GenerateExportHeader)
 
 # Generate the DllConfig.h for a target.
 #
-# generate_mantid_export_header(<target> <generate_extern> [GENERATE_UNUSED_ARG] [BASE_NAME <name>] [EXPORT_MACRO_NAME
-# <name>] [EXPORT_FILE_NAME <path>] [EXTERN_MACRO_NAME <name>])
+# generate_mantid_export_header(<target> <generate_extern> [BASE_NAME <name>] [EXPORT_MACRO_NAME <name>]
+# [EXPORT_FILE_NAME <path>] [EXTERN_MACRO_NAME <name>])
 #
 # By default the generated header follows the Framework convention: it is written to Mantid<target>/DllConfig.h and
 # exports with MANTID_<TARGET>_DLL. Sub-packages that predate this function use different macro names and header
@@ -12,9 +12,8 @@ include(GenerateExportHeader)
 # Whether the macro expands to dllexport or dllimport is decided by the target's DEFINE_SYMBOL property, which CMake
 # defaults to <target>_EXPORTS.
 function(GENERATE_MANTID_EXPORT_HEADER TARGET_LIBRARY GENERATE_EXTERN)
-  set(options GENERATE_UNUSED_ARG)
   set(oneValueArgs BASE_NAME EXPORT_MACRO_NAME EXPORT_FILE_NAME EXTERN_MACRO_NAME)
-  cmake_parse_arguments(PARSED "${options}" "${oneValueArgs}" "" ${ARGN})
+  cmake_parse_arguments(PARSED "" "${oneValueArgs}" "" ${ARGN})
 
   string(TOUPPER "${TARGET_LIBRARY}" TARGET_NAME)
 
@@ -80,17 +79,6 @@ function(GENERATE_MANTID_EXPORT_HEADER TARGET_LIBRARY GENERATE_EXTERN)
 // Declare an explicit instantiation that this library defines and exports\n\
 #define ${PARSED_BASE_NAME}_EXTERN_TEMPLATE(...) extern template class ${PARSED_EXPORT_MACRO_NAME} __VA_ARGS__\n\n"
     )
-  endif()
-
-  if(PARSED_GENERATE_UNUSED_ARG)
-    set(CUSTOM
-        "${CUSTOM}\
-#ifndef UNUSED_ARG\n\
-    #define UNUSED_ARG(...) (void)(__VA_ARGS__)\n\
-#endif\n\n\
-#include <cstdint>\n"
-    )
-
   endif()
 
   generate_export_header(

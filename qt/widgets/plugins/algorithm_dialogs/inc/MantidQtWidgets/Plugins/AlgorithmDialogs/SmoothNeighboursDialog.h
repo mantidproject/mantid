@@ -22,7 +22,7 @@ protected:
 
 private slots:
   /// Called when input workspace get changed
-  void inputWorkspaceChanged(const QString &pName);
+  void inputWorkspaceChanged();
 
 private:
   /// Non rectangular detector group name

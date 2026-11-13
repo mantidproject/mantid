@@ -64,9 +64,7 @@ double PoldiResidualCorrelationCore::calculateAverageDeviationFromValue(const st
 
 /// Background is the sum of correlation counts, sum of counts is discarded.
 double PoldiResidualCorrelationCore::calculateCorrelationBackground(double sumOfCorrelationCounts,
-                                                                    double sumOfCounts) const {
-  UNUSED_ARG(sumOfCounts);
-
+                                                                    [[maybe_unused]] double sumOfCounts) const {
   return sumOfCorrelationCounts;
 }
 

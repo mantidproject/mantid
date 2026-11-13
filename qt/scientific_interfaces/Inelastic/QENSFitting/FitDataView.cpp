@@ -64,8 +64,7 @@ void FitDataView::renameHandle(const std::string &oldName, const std::string &ne
                             Q_ARG(const std::string &, oldName));
 }
 
-void FitDataView::deleteHandle(const std::string &name, const Workspace_sptr &ws) {
-  UNUSED_ARG(ws);
+void FitDataView::deleteHandle(const std::string &name, [[maybe_unused]] const Workspace_sptr &ws) {
   QMetaObject::invokeMethod(this, "notifyADSDelete", Qt::AutoConnection, Q_ARG(const std::string &, name));
 }
 

@@ -79,8 +79,8 @@ Mantid::API::IAlgorithm_sptr QtAlgorithmRunner::getAlgorithm() const { return m_
  *
  * @param pNf :: finished notification object.
  */
-void QtAlgorithmRunner::handleAlgorithmFinishedNotification(const Poco::AutoPtr<Algorithm::FinishedNotification> &pNf) {
-  UNUSED_ARG(pNf);
+void QtAlgorithmRunner::handleAlgorithmFinishedNotification(
+    [[maybe_unused]] const Poco::AutoPtr<Algorithm::FinishedNotification> &pNf) {
   emit algorithmComplete(false);
 }
 
@@ -99,8 +99,8 @@ void QtAlgorithmRunner::handleAlgorithmProgressNotification(const Poco::AutoPtr<
  *
  * @param pNf :: notification object
  */
-void QtAlgorithmRunner::handleAlgorithmErrorNotification(const Poco::AutoPtr<Algorithm::ErrorNotification> &pNf) {
-  UNUSED_ARG(pNf);
+void QtAlgorithmRunner::handleAlgorithmErrorNotification(
+    [[maybe_unused]] const Poco::AutoPtr<Algorithm::ErrorNotification> &pNf) {
   emit algorithmComplete(true);
 }
 

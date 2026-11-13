@@ -115,6 +115,6 @@ void TransmissionCalc::algorithmComplete(bool error) {
  *
  * @param settings The settings to loading into the interface
  */
-void TransmissionCalc::restoreSettings(const API::FileFinderSettings &settings) { UNUSED_ARG(settings); }
+void TransmissionCalc::restoreSettings([[maybe_unused]] const API::FileFinderSettings &settings) {}
 
 } // namespace MantidQt::CustomInterfaces

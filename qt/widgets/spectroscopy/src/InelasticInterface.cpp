@@ -41,7 +41,7 @@ void InelasticInterface::settings() {
 
 void InelasticInterface::applySettings() { applySettings(Settings::getSettings()); }
 
-void InelasticInterface::applySettings(std::map<std::string, QVariant> const &settings) { UNUSED_ARG(settings); }
+void InelasticInterface::applySettings([[maybe_unused]] std::map<std::string, QVariant> const &settings) {}
 
 void InelasticInterface::manageUserDirectories() { ManageUserDirectories::openManageUserDirectories(); }
 

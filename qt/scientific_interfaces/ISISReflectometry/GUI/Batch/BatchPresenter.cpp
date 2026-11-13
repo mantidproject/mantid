@@ -116,9 +116,7 @@ void BatchPresenter::notifyPauseAutoreductionRequested() { pauseAutoreduction();
 
 void BatchPresenter::notifyAutoreductionCompleted() { autoreductionCompleted(); }
 
-void BatchPresenter::notifyBatchComplete(bool error) {
-  UNUSED_ARG(error);
-
+void BatchPresenter::notifyBatchComplete([[maybe_unused]] bool error) {
   // Continue processing the next batch of algorithms, if there is more to do
   auto algorithms = m_jobManager->getAlgorithms();
   if (algorithms.size() > 0) {

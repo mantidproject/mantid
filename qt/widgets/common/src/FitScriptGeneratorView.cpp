@@ -193,9 +193,7 @@ void FitScriptGeneratorView::onRemoveDomainClicked() { m_presenter->notifyPresen
 
 void FitScriptGeneratorView::onAddDomainClicked() { m_presenter->notifyPresenter(ViewEvent::AddDomainClicked); }
 
-void FitScriptGeneratorView::onCellChanged(int row, int column) {
-  UNUSED_ARG(row);
-
+void FitScriptGeneratorView::onCellChanged([[maybe_unused]] int row, int column) {
   if (column == ColumnIndex::StartX) {
     m_dataTable->formatSelection();
     m_presenter->notifyPresenter(ViewEvent::StartXChanged);

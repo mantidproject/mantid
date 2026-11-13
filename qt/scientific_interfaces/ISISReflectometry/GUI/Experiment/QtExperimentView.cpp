@@ -365,7 +365,7 @@ void QtExperimentView::registerExperimentSettingsWidgets(const Mantid::API::IAlg
 }
 
 void QtExperimentView::connectExperimentSettingsWidgets() {
-  connect(m_ui.summationTypeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onSummationTypeChanged(int)));
+  connect(m_ui.summationTypeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onSummationTypeChanged()));
   connectSettingsChange(*m_ui.optionsTable);
   connectSettingsChange(*m_ui.analysisModeComboBox);
   connectSettingsChange(*m_ui.startOverlapEdit);
@@ -422,10 +422,7 @@ void QtExperimentView::onRestoreDefaultsRequested() {
   m_notifyee->notifyRestoreDefaultsRequested();
 }
 
-void QtExperimentView::onSummationTypeChanged(int reductionTypeIndex) {
-  UNUSED_ARG(reductionTypeIndex);
-  m_notifyee->notifySummationTypeChanged();
-}
+void QtExperimentView::onSummationTypeChanged() { m_notifyee->notifySummationTypeChanged(); }
 
 void QtExperimentView::enableReductionType() { m_ui.reductionTypeComboBox->setEnabled(true); }
 

@@ -89,8 +89,7 @@ public:
   /** StartLiveData and run LoadLiveData only once (UpdateEvery=0)
    * This checks that the properties are copied to LoadLiveData */
   void test_startOnce() {
-    const auto [alg, ws] = doExecEvent("Replace", 0, "", "", "Rebin", "Params=40e3, 1e3, 60e3");
-    UNUSED_ARG(alg);
+    [[maybe_unused]] const auto [alg, ws] = doExecEvent("Replace", 0, "", "", "Rebin", "Params=40e3, 1e3, 60e3");
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(ws->getNumberEvents(), 200);
     // Check that rebin was called
@@ -106,8 +105,7 @@ public:
     // Make an existing output workspace "fake" that should be overwritten
     AnalysisDataService::Instance().addOrReplace("fake", WorkspaceCreationHelper::create2DWorkspace(23, 12));
 
-    const auto [alg, ws] = doExecEvent("Add", 0);
-    UNUSED_ARG(alg);
+    [[maybe_unused]] const auto [alg, ws] = doExecEvent("Add", 0);
 
     // The "fake" workspace was replaced.
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2);

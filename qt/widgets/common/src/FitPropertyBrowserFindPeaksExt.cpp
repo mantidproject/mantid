@@ -83,8 +83,7 @@ void FindPeakDefaultStrategy::execute() {
 
 void FindPeakDefaultStrategy::initialise(const std::string &wsName, const int workspaceIndex,
                                          const std::string &peakListName, const int FWHM,
-                                         AlgorithmFinishObserver *obs) {
-  UNUSED_ARG(obs);
+                                         [[maybe_unused]] AlgorithmFinishObserver *obs) {
   m_peakListName = peakListName;
   const QString setting =
       QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("curvefitting.findPeaksTolerance"));

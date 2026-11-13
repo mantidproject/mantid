@@ -87,8 +87,7 @@ GNU_DIAG_OFF("maybe-uninitialized")
  * @param exc A cancel exception to translate. Unused here as the message is
  * ignored
  */
-void translateCancel(const Algorithm::CancelException &exc) {
-  UNUSED_ARG(exc);
+void translateCancel([[maybe_unused]] const Algorithm::CancelException &exc) {
   PyErr_SetString(PyExc_KeyboardInterrupt, "");
 }
 

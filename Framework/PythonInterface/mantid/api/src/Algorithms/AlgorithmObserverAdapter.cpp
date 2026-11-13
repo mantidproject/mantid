@@ -11,9 +11,9 @@ namespace Mantid::PythonInterface {
 
 AlgorithmObserverAdapter::AlgorithmObserverAdapter(PyObject *self) : API::AlgorithmObserver(), m_self(self) {}
 
-void AlgorithmObserverAdapter::progressHandle(const API::IAlgorithm *alg, double p, const std::string &msg,
-                                              const double estimatedTime, const int progressPrecision) {
-  UNUSED_ARG(alg);
+void AlgorithmObserverAdapter::progressHandle([[maybe_unused]] const API::IAlgorithm *alg, double p,
+                                              const std::string &msg, const double estimatedTime,
+                                              const int progressPrecision) {
   try {
     return callMethod<void>(getSelf(), "progressHandle", p, msg, estimatedTime, progressPrecision);
   } catch (UndefinedAttributeError &) {
@@ -29,8 +29,7 @@ void AlgorithmObserverAdapter::startingHandle(API::IAlgorithm_sptr alg) {
   }
 }
 
-void AlgorithmObserverAdapter::finishHandle(const API::IAlgorithm *alg) {
-  UNUSED_ARG(alg);
+void AlgorithmObserverAdapter::finishHandle([[maybe_unused]] const API::IAlgorithm *alg) {
   try {
     return callMethod<void>(getSelf(), "finishHandle");
   } catch (UndefinedAttributeError &) {
@@ -38,8 +37,7 @@ void AlgorithmObserverAdapter::finishHandle(const API::IAlgorithm *alg) {
   }
 }
 
-void AlgorithmObserverAdapter::errorHandle(const API::IAlgorithm *alg, const std::string &what) {
-  UNUSED_ARG(alg);
+void AlgorithmObserverAdapter::errorHandle([[maybe_unused]] const API::IAlgorithm *alg, const std::string &what) {
   try {
     return callMethod<void>(getSelf(), "errorHandle", what);
   } catch (UndefinedAttributeError &) {

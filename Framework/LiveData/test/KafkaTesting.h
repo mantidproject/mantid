@@ -59,17 +59,15 @@ public:
 class FakeExceptionThrowingStreamSubscriber : public Mantid::LiveData::IKafkaStreamSubscriber {
 public:
   void subscribe() override {}
-  void subscribe(int64_t offset) override { UNUSED_ARG(offset); }
-  void consumeMessage(std::string *buffer, int64_t &offset, int32_t &partition, std::string &topic) override {
+  void subscribe([[maybe_unused]] int64_t offset) override {}
+  void consumeMessage(std::string *buffer, [[maybe_unused]] int64_t &offset, [[maybe_unused]] int32_t &partition,
+                      [[maybe_unused]] std::string &topic) override {
     buffer->clear();
-    UNUSED_ARG(offset);
-    UNUSED_ARG(partition);
-    UNUSED_ARG(topic);
     throw std::runtime_error("FakeExceptionThrowingStreamSubscriber");
   }
 
-  std::unordered_map<std::string, std::vector<int64_t>> getOffsetsForTimestamp(int64_t timestamp) override {
-    UNUSED_ARG(timestamp);
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getOffsetsForTimestamp([[maybe_unused]] int64_t timestamp) override {
     return {std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
   }
 
@@ -78,11 +76,8 @@ public:
     return offsets;
   }
 
-  void seek(const std::string &topic, uint32_t partition, int64_t offset) override {
-    UNUSED_ARG(topic);
-    UNUSED_ARG(partition);
-    UNUSED_ARG(offset);
-  }
+  void seek([[maybe_unused]] const std::string &topic, [[maybe_unused]] uint32_t partition,
+            [[maybe_unused]] int64_t offset) override {}
 };
 
 // -----------------------------------------------------------------------------
@@ -91,16 +86,14 @@ public:
 class FakeEmptyStreamSubscriber : public Mantid::LiveData::IKafkaStreamSubscriber {
 public:
   void subscribe() override {}
-  void subscribe(int64_t offset) override { UNUSED_ARG(offset); }
-  void consumeMessage(std::string *buffer, int64_t &offset, int32_t &partition, std::string &topic) override {
+  void subscribe([[maybe_unused]] int64_t offset) override {}
+  void consumeMessage(std::string *buffer, [[maybe_unused]] int64_t &offset, [[maybe_unused]] int32_t &partition,
+                      [[maybe_unused]] std::string &topic) override {
     buffer->clear();
-    UNUSED_ARG(offset);
-    UNUSED_ARG(partition);
-    UNUSED_ARG(topic);
   }
 
-  std::unordered_map<std::string, std::vector<int64_t>> getOffsetsForTimestamp(int64_t timestamp) override {
-    UNUSED_ARG(timestamp);
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getOffsetsForTimestamp([[maybe_unused]] int64_t timestamp) override {
     return {std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
   }
 
@@ -109,11 +102,8 @@ public:
     return offsets;
   }
 
-  void seek(const std::string &topic, uint32_t partition, int64_t offset) override {
-    UNUSED_ARG(topic);
-    UNUSED_ARG(partition);
-    UNUSED_ARG(offset);
-  }
+  void seek([[maybe_unused]] const std::string &topic, [[maybe_unused]] uint32_t partition,
+            [[maybe_unused]] int64_t offset) override {}
 };
 
 namespace {
@@ -231,20 +221,17 @@ class FakeISISEventSubscriber : public Mantid::LiveData::IKafkaStreamSubscriber 
 public:
   explicit FakeISISEventSubscriber(int32_t nperiods) : m_nperiods(nperiods), m_nextPeriod(0) {}
   void subscribe() override {}
-  void subscribe(int64_t offset) override { UNUSED_ARG(offset); }
-  void consumeMessage(std::string *message, int64_t &offset, int32_t &partition, std::string &topic) override {
+  void subscribe([[maybe_unused]] int64_t offset) override {}
+  void consumeMessage(std::string *message, [[maybe_unused]] int64_t &offset, [[maybe_unused]] int32_t &partition,
+                      [[maybe_unused]] std::string &topic) override {
     assert(message);
 
     fakeReceiveAnISISEventMessage(message, m_nextPeriod);
     m_nextPeriod = ((m_nextPeriod + 1) % m_nperiods);
-
-    UNUSED_ARG(offset);
-    UNUSED_ARG(partition);
-    UNUSED_ARG(topic);
   }
 
-  std::unordered_map<std::string, std::vector<int64_t>> getOffsetsForTimestamp(int64_t timestamp) override {
-    UNUSED_ARG(timestamp);
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getOffsetsForTimestamp([[maybe_unused]] int64_t timestamp) override {
     return {std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
   }
 
@@ -253,11 +240,8 @@ public:
     return offsets;
   }
 
-  void seek(const std::string &topic, uint32_t partition, int64_t offset) override {
-    UNUSED_ARG(topic);
-    UNUSED_ARG(partition);
-    UNUSED_ARG(offset);
-  }
+  void seek([[maybe_unused]] const std::string &topic, [[maybe_unused]] uint32_t partition,
+            [[maybe_unused]] int64_t offset) override {}
 
 private:
   const int32_t m_nperiods;
@@ -271,8 +255,9 @@ private:
 class FakeEventSubscriber : public Mantid::LiveData::IKafkaStreamSubscriber {
 public:
   void subscribe() override {}
-  void subscribe(int64_t offset) override { UNUSED_ARG(offset); }
-  void consumeMessage(std::string *message, int64_t &offset, int32_t &partition, std::string &topic) override {
+  void subscribe([[maybe_unused]] int64_t offset) override {}
+  void consumeMessage(std::string *message, [[maybe_unused]] int64_t &offset, [[maybe_unused]] int32_t &partition,
+                      [[maybe_unused]] std::string &topic) override {
     assert(message);
 
     switch (m_nextOffset) {
@@ -286,14 +271,10 @@ public:
       fakeReceiveAnEventMessage(message);
     }
     m_nextOffset++;
-
-    UNUSED_ARG(offset);
-    UNUSED_ARG(partition);
-    UNUSED_ARG(topic);
   }
 
-  std::unordered_map<std::string, std::vector<int64_t>> getOffsetsForTimestamp(int64_t timestamp) override {
-    UNUSED_ARG(timestamp);
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getOffsetsForTimestamp([[maybe_unused]] int64_t timestamp) override {
     return {std::pair<std::string, std::vector<int64_t>>(m_topicName, {1})};
   }
 
@@ -302,11 +283,8 @@ public:
     return {std::pair<std::string, std::vector<int64_t>>(m_topicName, {1})};
   }
 
-  void seek(const std::string &topic, uint32_t partition, int64_t offset) override {
-    UNUSED_ARG(topic);
-    UNUSED_ARG(partition);
-    UNUSED_ARG(offset);
-  }
+  void seek([[maybe_unused]] const std::string &topic, [[maybe_unused]] uint32_t partition,
+            [[maybe_unused]] int64_t offset) override {}
 
 private:
   std::string m_topicName = "topic_name";
@@ -321,8 +299,9 @@ private:
 class FakeHistoSubscriber : public Mantid::LiveData::IKafkaStreamSubscriber {
 public:
   void subscribe() override {}
-  void subscribe(int64_t offset) override { UNUSED_ARG(offset); }
-  void consumeMessage(std::string *message, int64_t &offset, int32_t &partition, std::string &topic) override {
+  void subscribe([[maybe_unused]] int64_t offset) override {}
+  void consumeMessage(std::string *message, [[maybe_unused]] int64_t &offset, [[maybe_unused]] int32_t &partition,
+                      [[maybe_unused]] std::string &topic) override {
     assert(message);
 
     switch (m_nextOffset) {
@@ -336,14 +315,10 @@ public:
       fakeReceiveHistoMessage(message);
     }
     m_nextOffset++;
-
-    UNUSED_ARG(offset);
-    UNUSED_ARG(partition);
-    UNUSED_ARG(topic);
   }
 
-  std::unordered_map<std::string, std::vector<int64_t>> getOffsetsForTimestamp(int64_t timestamp) override {
-    UNUSED_ARG(timestamp);
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getOffsetsForTimestamp([[maybe_unused]] int64_t timestamp) override {
     return {std::pair<std::string, std::vector<int64_t>>(m_topicName, {1})};
   }
 
@@ -352,11 +327,8 @@ public:
     return {std::pair<std::string, std::vector<int64_t>>(m_topicName, {1})};
   }
 
-  void seek(const std::string &topic, uint32_t partition, int64_t offset) override {
-    UNUSED_ARG(topic);
-    UNUSED_ARG(partition);
-    UNUSED_ARG(offset);
-  }
+  void seek([[maybe_unused]] const std::string &topic, [[maybe_unused]] uint32_t partition,
+            [[maybe_unused]] int64_t offset) override {}
 
 private:
   std::string m_topicName = "topic_name";
@@ -370,19 +342,16 @@ private:
 class FakeSampleEnvironmentSubscriber : public Mantid::LiveData::IKafkaStreamSubscriber {
 public:
   void subscribe() override {}
-  void subscribe(int64_t offset) override { UNUSED_ARG(offset); }
-  void consumeMessage(std::string *message, int64_t &offset, int32_t &partition, std::string &topic) override {
+  void subscribe([[maybe_unused]] int64_t offset) override {}
+  void consumeMessage(std::string *message, [[maybe_unused]] int64_t &offset, [[maybe_unused]] int32_t &partition,
+                      [[maybe_unused]] std::string &topic) override {
     assert(message);
 
     fakeReceiveASampleEnvMessage(message);
-
-    UNUSED_ARG(offset);
-    UNUSED_ARG(partition);
-    UNUSED_ARG(topic);
   }
 
-  std::unordered_map<std::string, std::vector<int64_t>> getOffsetsForTimestamp(int64_t timestamp) override {
-    UNUSED_ARG(timestamp);
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getOffsetsForTimestamp([[maybe_unused]] int64_t timestamp) override {
     return {std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
   }
 
@@ -391,11 +360,8 @@ public:
     return offsets;
   }
 
-  void seek(const std::string &topic, uint32_t partition, int64_t offset) override {
-    UNUSED_ARG(topic);
-    UNUSED_ARG(partition);
-    UNUSED_ARG(offset);
-  }
+  void seek([[maybe_unused]] const std::string &topic, [[maybe_unused]] uint32_t partition,
+            [[maybe_unused]] int64_t offset) override {}
 };
 
 // -----------------------------------------------------------------------------
@@ -405,20 +371,18 @@ class FakeRunInfoStreamSubscriber : public Mantid::LiveData::IKafkaStreamSubscri
 public:
   explicit FakeRunInfoStreamSubscriber(int32_t nperiods) : m_nperiods(nperiods) {}
   void subscribe() override {}
-  void subscribe(int64_t offset) override { UNUSED_ARG(offset); }
-  void consumeMessage(std::string *buffer, int64_t &offset, int32_t &partition, std::string &topic) override {
+  void subscribe([[maybe_unused]] int64_t offset) override {}
+  void consumeMessage(std::string *buffer, [[maybe_unused]] int64_t &offset, [[maybe_unused]] int32_t &partition,
+                      [[maybe_unused]] std::string &topic) override {
     assert(buffer);
 
     fakeReceiveARunStartMessage(buffer, m_runNumber, m_startTime, m_instName, m_nperiods);
 
     m_runNumber++;
-    UNUSED_ARG(offset);
-    UNUSED_ARG(partition);
-    UNUSED_ARG(topic);
   }
 
-  std::unordered_map<std::string, std::vector<int64_t>> getOffsetsForTimestamp(int64_t timestamp) override {
-    UNUSED_ARG(timestamp);
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getOffsetsForTimestamp([[maybe_unused]] int64_t timestamp) override {
     return {std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
   }
 
@@ -427,11 +391,8 @@ public:
     return offsets;
   }
 
-  void seek(const std::string &topic, uint32_t partition, int64_t offset) override {
-    UNUSED_ARG(topic);
-    UNUSED_ARG(partition);
-    UNUSED_ARG(offset);
-  }
+  void seek([[maybe_unused]] const std::string &topic, [[maybe_unused]] uint32_t partition,
+            [[maybe_unused]] int64_t offset) override {}
 
 private:
   std::string m_startTime = "2016-08-31T12:07:42";
@@ -446,21 +407,19 @@ private:
 class FakeRunInfoStreamSubscriberVaryingNPeriods : public Mantid::LiveData::IKafkaStreamSubscriber {
 public:
   void subscribe() override {}
-  void subscribe(int64_t offset) override { UNUSED_ARG(offset); }
-  void consumeMessage(std::string *buffer, int64_t &offset, int32_t &partition, std::string &topic) override {
+  void subscribe([[maybe_unused]] int64_t offset) override {}
+  void consumeMessage(std::string *buffer, [[maybe_unused]] int64_t &offset, [[maybe_unused]] int32_t &partition,
+                      [[maybe_unused]] std::string &topic) override {
     assert(buffer);
 
     fakeReceiveARunStartMessage(buffer, m_runNumber, m_startTime, m_instName, m_nperiods);
 
     m_nperiods++;
     m_runNumber++;
-    UNUSED_ARG(offset);
-    UNUSED_ARG(partition);
-    UNUSED_ARG(topic);
   }
 
-  std::unordered_map<std::string, std::vector<int64_t>> getOffsetsForTimestamp(int64_t timestamp) override {
-    UNUSED_ARG(timestamp);
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getOffsetsForTimestamp([[maybe_unused]] int64_t timestamp) override {
     return {std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
   }
 
@@ -469,11 +428,8 @@ public:
     return offsets;
   }
 
-  void seek(const std::string &topic, uint32_t partition, int64_t offset) override {
-    UNUSED_ARG(topic);
-    UNUSED_ARG(partition);
-    UNUSED_ARG(offset);
-  }
+  void seek([[maybe_unused]] const std::string &topic, [[maybe_unused]] uint32_t partition,
+            [[maybe_unused]] int64_t offset) override {}
 
 private:
   std::string m_startTime = "2016-08-31T12:07:42";
@@ -489,7 +445,7 @@ class FakeVariablePeriodSubscriber : public Mantid::LiveData::IKafkaStreamSubscr
 public:
   explicit FakeVariablePeriodSubscriber(uint32_t startOffset) : m_nextOffset(startOffset) {}
   void subscribe() override {}
-  void subscribe(int64_t offset) override { UNUSED_ARG(offset); }
+  void subscribe([[maybe_unused]] int64_t offset) override {}
   void consumeMessage(std::string *buffer, int64_t &offset, int32_t &partition, std::string &topic) override {
     assert(buffer);
 
@@ -527,8 +483,8 @@ public:
     m_nextOffset++;
   }
 
-  std::unordered_map<std::string, std::vector<int64_t>> getOffsetsForTimestamp(int64_t timestamp) override {
-    UNUSED_ARG(timestamp);
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getOffsetsForTimestamp([[maybe_unused]] int64_t timestamp) override {
     return {std::pair<std::string, std::vector<int64_t>>(m_topicName, {2})};
   }
 
@@ -536,11 +492,8 @@ public:
     return {std::pair<std::string, std::vector<int64_t>>(m_topicName, {2})};
   }
 
-  void seek(const std::string &topic, uint32_t partition, int64_t offset) override {
-    UNUSED_ARG(topic);
-    UNUSED_ARG(partition);
-    UNUSED_ARG(offset);
-  }
+  void seek([[maybe_unused]] const std::string &topic, [[maybe_unused]] uint32_t partition,
+            [[maybe_unused]] int64_t offset) override {}
 
 private:
   const std::string m_topicName = "topic_name";
@@ -558,7 +511,7 @@ class FakeDataStreamSubscriber : public Mantid::LiveData::IKafkaStreamSubscriber
 public:
   explicit FakeDataStreamSubscriber(int64_t stopOffset) : m_stopOffset(stopOffset) {}
   void subscribe() override {}
-  void subscribe(int64_t offset) override { UNUSED_ARG(offset); }
+  void subscribe([[maybe_unused]] int64_t offset) override {}
   void consumeMessage(std::string *buffer, int64_t &offset, int32_t &partition, std::string &topic) override {
     assert(buffer);
 
@@ -589,8 +542,8 @@ public:
     m_nextOffset++;
   }
 
-  std::unordered_map<std::string, std::vector<int64_t>> getOffsetsForTimestamp(int64_t timestamp) override {
-    UNUSED_ARG(timestamp);
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getOffsetsForTimestamp([[maybe_unused]] int64_t timestamp) override {
     return {std::pair<std::string, std::vector<int64_t>>(m_topicName, {m_stopOffset})};
   }
 
@@ -598,11 +551,8 @@ public:
     return {std::pair<std::string, std::vector<int64_t>>(m_topicName, {m_nextOffset - 1})};
   }
 
-  void seek(const std::string &topic, uint32_t partition, int64_t offset) override {
-    UNUSED_ARG(topic);
-    UNUSED_ARG(partition);
-    UNUSED_ARG(offset);
-  }
+  void seek([[maybe_unused]] const std::string &topic, [[maybe_unused]] uint32_t partition,
+            [[maybe_unused]] int64_t offset) override {}
 
 private:
   const std::string m_topicName = "topic_name";

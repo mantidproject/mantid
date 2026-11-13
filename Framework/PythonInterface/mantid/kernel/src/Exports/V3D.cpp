@@ -82,10 +82,7 @@ void setV3DItem(V3D &self, int index, double value) {
   }
 }
 
-int getV3DLength(V3D &self) {
-  UNUSED_ARG(self);
-  return 3;
-}
+int getV3DLength([[maybe_unused]] V3D &self) { return 3; }
 } // namespace
 
 class V3DPickleSuite : public boost::python::pickle_suite {

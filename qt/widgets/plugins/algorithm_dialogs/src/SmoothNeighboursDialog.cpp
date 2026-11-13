@@ -54,8 +54,7 @@ void SmoothNeighboursDialog::initLayout() {
 
   PropertyWidget *inputWorkspaceWidget = m_propertiesWidget->m_propWidgets[INPUT_WORKSPACE];
 
-  connect(inputWorkspaceWidget, SIGNAL(valueChanged(const QString &)), this,
-          SLOT(inputWorkspaceChanged(const QString &)));
+  connect(inputWorkspaceWidget, SIGNAL(valueChanged(const QString &)), this, SLOT(inputWorkspaceChanged()));
 
   m_dialogLayout->addWidget(m_propertiesWidget);
 
@@ -66,9 +65,7 @@ void SmoothNeighboursDialog::initLayout() {
   inputWorkspaceWidget->valueChangedSlot();
 }
 
-void SmoothNeighboursDialog::inputWorkspaceChanged(const QString &pName) {
-  UNUSED_ARG(pName);
-
+void SmoothNeighboursDialog::inputWorkspaceChanged() {
   m_propertiesWidget->m_groupWidgets[RECTANGULAR_GROUP]->setVisible(false);
   m_propertiesWidget->m_groupWidgets[NON_UNIFORM_GROUP]->setVisible(false);
 

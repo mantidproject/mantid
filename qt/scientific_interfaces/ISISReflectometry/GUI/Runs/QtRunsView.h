@@ -125,7 +125,7 @@ private slots:
   void onStartMonitorComplete();
   void onSearchResultsChanged(const QModelIndex &, const QModelIndex &);
   void onSearchComplete();
-  void onInstrumentChanged(int index);
+  void onInstrumentChanged();
   void onShowSearchContextMenuRequested(const QPoint &pos);
 };
 

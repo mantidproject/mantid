@@ -140,6 +140,7 @@ private:
   public:
     MOCK_CONST_METHOD1(getF, StructureFactor(const V3D &));
     MOCK_CONST_METHOD1(getFSquared, double(const V3D &));
+    MOCK_METHOD1(crystalStructureSetHook, void(const CrystalStructure &));
   };
 };
 GNU_DIAG_ON_SUGGEST_OVERRIDE

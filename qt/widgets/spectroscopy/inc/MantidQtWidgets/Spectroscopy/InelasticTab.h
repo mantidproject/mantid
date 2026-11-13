@@ -164,7 +164,7 @@ protected slots:
   virtual void algorithmFinished(bool error);
 
 private slots:
-  virtual void handleDataReady(QString const &dataName) { UNUSED_ARG(dataName); };
+  virtual void handleDataReady([[maybe_unused]] QString const &dataName) {};
 
 signals:
   /// Send signal to parent window to show a message box to user
