@@ -297,10 +297,8 @@ void BinaryOperation::exec() {
  * @param lhs :: left-hand event workspace
  * @param rhs :: right-hand event workspace
  */
-void BinaryOperation::execEvent(DataObjects::EventWorkspace_const_sptr lhs,
-                                DataObjects::EventWorkspace_const_sptr rhs) {
-  UNUSED_ARG(lhs);
-  UNUSED_ARG(rhs);
+void BinaryOperation::execEvent([[maybe_unused]] DataObjects::EventWorkspace_const_sptr lhs,
+                                [[maybe_unused]] DataObjects::EventWorkspace_const_sptr rhs) {
   // This should never happen
   throw Exception::NotImplementedError("BinaryOperation::execEvent() is not implemented for this operation.");
 }
@@ -349,10 +347,8 @@ bool BinaryOperation::checkCompatibility(const API::MatrixWorkspace_const_sptr l
  * @param rhs :: right-hand event workspace to check
  * @return false by default; will be overridden by specific algorithms
  */
-bool BinaryOperation::checkEventCompatibility(const API::MatrixWorkspace_const_sptr lhs,
-                                              const API::MatrixWorkspace_const_sptr rhs) {
-  UNUSED_ARG(lhs);
-  UNUSED_ARG(rhs);
+bool BinaryOperation::checkEventCompatibility([[maybe_unused]] const API::MatrixWorkspace_const_sptr lhs,
+                                              [[maybe_unused]] const API::MatrixWorkspace_const_sptr rhs) {
   return false;
 }
 
@@ -800,9 +796,8 @@ void BinaryOperation::propagateBinMasks(const API::MatrixWorkspace_const_sptr &r
  *  @param lhs :: Reference to the EventList that will be modified in place.
  *  @param rhs :: Const reference to the EventList on the right hand side.
  */
-void BinaryOperation::performEventBinaryOperation(DataObjects::EventList &lhs, const DataObjects::EventList &rhs) {
-  UNUSED_ARG(lhs);
-  UNUSED_ARG(rhs);
+void BinaryOperation::performEventBinaryOperation([[maybe_unused]] DataObjects::EventList &lhs,
+                                                  [[maybe_unused]] const DataObjects::EventList &rhs) {
   throw Exception::NotImplementedError("BinaryOperation::performEventBinaryOperation() not implemented.");
 }
 
@@ -815,12 +810,10 @@ void BinaryOperation::performEventBinaryOperation(DataObjects::EventList &lhs, c
  *  @param rhsY :: Rhs data values
  *  @param rhsE :: Rhs error values
  */
-void BinaryOperation::performEventBinaryOperation(DataObjects::EventList &lhs, std::span<double const> rhsX,
-                                                  std::span<double const> rhsY, std::span<double const> rhsE) {
-  UNUSED_ARG(lhs);
-  UNUSED_ARG(rhsX);
-  UNUSED_ARG(rhsY);
-  UNUSED_ARG(rhsE);
+void BinaryOperation::performEventBinaryOperation([[maybe_unused]] DataObjects::EventList &lhs,
+                                                  [[maybe_unused]] std::span<double const> rhsX,
+                                                  [[maybe_unused]] std::span<double const> rhsY,
+                                                  [[maybe_unused]] std::span<double const> rhsE) {
   throw Exception::NotImplementedError("BinaryOperation::performEventBinaryOperation() not implemented.");
 }
 
@@ -832,10 +825,9 @@ void BinaryOperation::performEventBinaryOperation(DataObjects::EventList &lhs, s
  *  @param rhsY :: The rhs data value
  *  @param rhsE :: The rhs error value
  */
-void BinaryOperation::performEventBinaryOperation(DataObjects::EventList &lhs, const double &rhsY, const double &rhsE) {
-  UNUSED_ARG(lhs);
-  UNUSED_ARG(rhsY);
-  UNUSED_ARG(rhsE);
+void BinaryOperation::performEventBinaryOperation([[maybe_unused]] DataObjects::EventList &lhs,
+                                                  [[maybe_unused]] const double &rhsY,
+                                                  [[maybe_unused]] const double &rhsE) {
   throw Exception::NotImplementedError("BinaryOperation::performEventBinaryOperation() not implemented.");
 }
 

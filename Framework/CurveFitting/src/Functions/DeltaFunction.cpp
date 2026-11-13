@@ -26,15 +26,12 @@ DeltaFunction::DeltaFunction() : IPeakFunction() {
   declareParameter("Centre", 0.0, "Shift along the x-axis to be applied to the resolution.");
 }
 
-void DeltaFunction::function1D(double *out, const double *xValues, const size_t nData) const {
-  UNUSED_ARG(xValues);
+void DeltaFunction::function1D(double *out, [[maybe_unused]] const double *xValues, const size_t nData) const {
   std::fill(out, out + nData, 0);
 }
 
-void DeltaFunction::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData) {
-  UNUSED_ARG(out);
-  UNUSED_ARG(xValues);
-  UNUSED_ARG(nData);
+void DeltaFunction::functionDeriv1D([[maybe_unused]] Jacobian *out, [[maybe_unused]] const double *xValues,
+                                    [[maybe_unused]] const size_t nData) {
   throw std::runtime_error("Cannot compute derivative of a delta function");
 }
 

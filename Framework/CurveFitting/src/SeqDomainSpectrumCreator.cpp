@@ -99,11 +99,10 @@ void SeqDomainSpectrumCreator::createDomain(std::shared_ptr<FunctionDomain> &dom
 
 Workspace_sptr SeqDomainSpectrumCreator::createOutputWorkspace(const std::string &baseName, IFunction_sptr function,
                                                                std::shared_ptr<FunctionDomain> domain,
-                                                               std::shared_ptr<FunctionValues> values,
+                                                               [[maybe_unused]] std::shared_ptr<FunctionValues> values,
                                                                const std::string &outputWorkspacePropertyName) {
   // don't need values, since the values need to be calculated spectrum by
   // spectrum (see loop below).
-  UNUSED_ARG(values);
 
   std::shared_ptr<SeqDomain> seqDomain = std::dynamic_pointer_cast<SeqDomain>(domain);
 

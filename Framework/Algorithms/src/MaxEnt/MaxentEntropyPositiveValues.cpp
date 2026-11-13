@@ -33,9 +33,8 @@ std::vector<double> MaxentEntropyPositiveValues::derivative(const std::vector<do
  * @return : The second derivative as a vector
  */
 std::vector<double> MaxentEntropyPositiveValues::secondDerivative(const std::vector<double> &values,
-                                                                  double background) {
+                                                                  [[maybe_unused]] double background) {
 
-  UNUSED_ARG(background);
   // This is referred to as 'second derivative' in the paper, but in the codes
   // I've seen is just the input vector
   return values;

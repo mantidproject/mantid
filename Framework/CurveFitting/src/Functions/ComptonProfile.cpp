@@ -45,9 +45,7 @@ ComptonProfile::ComptonProfile()
  * times in microseconds
  * @param nData The length of the out & xValues arrays
  */
-void ComptonProfile::function1D(double *out, const double *xValues, const size_t nData) const {
-  UNUSED_ARG(xValues); // Y-space values have already been pre-cached
-
+void ComptonProfile::function1D(double *out, [[maybe_unused]] const double *xValues, const size_t nData) const {
   this->massProfile(out, nData);
 
   m_log.setEnabled(false);
