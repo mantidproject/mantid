@@ -255,7 +255,8 @@ void updateRowFromOutputProperties(const IAlgorithm_sptr &algorithm, Item &item)
   auto const iVsLam = AlgorithmProperties::getOutputWorkspace(algorithm, "OutputWorkspaceWavelength");
   auto const iVsQ = AlgorithmProperties::getOutputWorkspace(algorithm, "OutputWorkspace");
   auto const iVsQBin = AlgorithmProperties::getOutputWorkspace(algorithm, "OutputWorkspaceBinned");
-  if (iVsQ.empty() || iVsLam.empty() || iVsQBin.empty()) {
+  // The IvsLam output is only set in debug mode, so it does not tell us whether the input was a workspace group
+  if (iVsQ.empty() || iVsQBin.empty()) {
     iVsLams = AlgorithmProperties::getMultipleOutputWorkspaces(algorithm, "OutputWorkspacesWavelength");
     iVsQs = AlgorithmProperties::getMultipleOutputWorkspaces(algorithm, "OutputWorkspaces");
     iVsQBins = AlgorithmProperties::getMultipleOutputWorkspaces(algorithm, "OutputWorkspacesBinned");

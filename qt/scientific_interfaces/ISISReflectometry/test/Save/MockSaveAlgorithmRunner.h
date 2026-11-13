@@ -19,7 +19,7 @@ public:
                      void(const Mantid::API::Workspace_sptr &, std::string const &, std::string const &,
                           std::vector<std::string> const &, const bool &, const bool &, std::string const &));
   MOCK_CONST_METHOD6(runSaveORSOAlgorithm, void(std::vector<std::string> const &, std::string const &, const bool &,
-                                                const bool &, std::string const &, const bool &));
+                                                const bool &, std::vector<std::string> const &, const bool &));
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
 GNU_DIAG_ON_SUGGEST_OVERRIDE

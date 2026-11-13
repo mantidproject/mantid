@@ -287,16 +287,29 @@ FileFormatOptions SavePresenter::getSaveParametersFromView(bool const isAutoSave
       /*separator=*/m_view->getSeparator(),
       /*includeQResolution=*/m_view->getQResolutionCheck(),
       /*includeAdditionalColumns=*/m_view->getAdditionalColumnsCheck(),
-      /*shouldSaveToSingleFile=*/isAutoSave && m_view->getSaveToSingleFileCheck(),
-      /*model=*/m_view->getModel(),
-      /*model_validation=*/m_view->getValidateModelCheck());
+      /*shouldSaveToSingleFile=*/isAutoSave && m_view->getSaveToSingleFileCheck());
+}
+
+/** Get the model description for each workspace. A model entered on the Save tab is used for every workspace,
+ * otherwise each workspace uses the model entered in the search results for the runs that produced it.
+ */
+ORSOModelOptions SavePresenter::getModelOptions(std::vector<std::string> const &workspaceNames) const {
+  std::map<std::string, std::string> workspaceModels;
+  if (auto const model = m_view->getModel(); !model.empty()) {
+    for (auto const &workspaceName : workspaceNames)
+      workspaceModels[workspaceName] = model;
+  } else if (m_mainPresenter) {
+    workspaceModels = m_mainPresenter->modelsForWorkspaces(workspaceNames);
+  }
+  return ORSOModelOptions(std::move(workspaceModels), m_view->getValidateModelCheck());
 }
 
 void SavePresenter::saveWorkspaces(std::vector<std::string> const &workspaceNames,
                                    std::vector<std::string> const &logParameters, bool const isAutoSave) {
   auto savePath = m_view->getSavePath();
   if (m_saver->isValidSaveDirectory(savePath))
-    m_saver->save(savePath, workspaceNames, logParameters, getSaveParametersFromView(isAutoSave));
+    m_saver->save(savePath, workspaceNames, logParameters, getSaveParametersFromView(isAutoSave),
+                  getModelOptions(workspaceNames));
   else
     errorInvalidSaveDirectory();
 }

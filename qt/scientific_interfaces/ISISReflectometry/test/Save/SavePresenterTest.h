@@ -39,7 +39,7 @@ public:
   SavePresenterTest()
       : m_view(), m_savePath("/foo/bar/"), m_fileFormat(NamedFormat::Custom), m_prefix("testoutput_"),
         m_includeHeader(true), m_separator(","), m_includeQResolution(true), m_includeAdditionalColumns(false),
-        m_model(""), m_validation(false) {}
+        m_validation(false) {}
 
   void tearDown() override {
     // Verifying and clearing of expectations happens when mock variables are destroyed.
@@ -174,6 +174,37 @@ public:
     auto selectedWorkspaces = std::vector<std::string>{"test2", "test4"};
     EXPECT_CALL(m_view, getSelectedWorkspaces()).Times(1).WillOnce(Return(selectedWorkspaces));
     expectSaveWorkspaces(selectedWorkspaces, logs);
+    presenter.notifySaveSelectedWorkspaces();
+  }
+
+  void testNotifySaveSelectedWorkspacesPassesModelsFromRunsTable() {
+    auto presenter = makePresenter();
+    auto const selectedWorkspaces = createWorkspaces({"test1", "test2"});
+    auto const workspaceModels = std::map<std::string, std::string>{{"test1", "air | Ni 100 | Si"}};
+    EXPECT_CALL(m_view, getSelectedWorkspaces()).Times(1).WillOnce(Return(selectedWorkspaces));
+    EXPECT_CALL(m_mainPresenter, modelsForWorkspaces(selectedWorkspaces)).Times(1).WillOnce(Return(workspaceModels));
+    EXPECT_CALL(m_view, getSelectedParameters()).Times(1).WillOnce(Return(std::vector<std::string>{}));
+    expectGetValidSaveDirectory();
+    expectGetSaveParametersFromView(false, false);
+    EXPECT_CALL(*m_fileSaver,
+                save(m_savePath, selectedWorkspaces, _, _, ORSOModelOptions(workspaceModels, m_validation)))
+        .Times(1);
+    presenter.notifySaveSelectedWorkspaces();
+  }
+
+  void testNotifySaveSelectedWorkspacesUsesSaveTabModelInsteadOfModelsFromRunsTable() {
+    auto presenter = makePresenter();
+    auto const selectedWorkspaces = createWorkspaces({"test1", "test2"});
+    auto const model = std::string("air | Si");
+    EXPECT_CALL(m_view, getSelectedWorkspaces()).Times(1).WillOnce(Return(selectedWorkspaces));
+    EXPECT_CALL(m_mainPresenter, modelsForWorkspaces(_)).Times(0);
+    EXPECT_CALL(m_view, getSelectedParameters()).Times(1).WillOnce(Return(std::vector<std::string>{}));
+    expectGetValidSaveDirectory();
+    expectGetSaveParametersFromView(false, false, model);
+    auto const expectedModels = std::map<std::string, std::string>{{"test1", model}, {"test2", model}};
+    EXPECT_CALL(*m_fileSaver,
+                save(m_savePath, selectedWorkspaces, _, _, ORSOModelOptions(expectedModels, m_validation)))
+        .Times(1);
     presenter.notifySaveSelectedWorkspaces();
   }
 
@@ -608,14 +639,15 @@ private:
     EXPECT_CALL(*m_fileSaver, isValidSaveDirectory(m_savePath)).Times(1).WillOnce(Return(false));
   }
 
-  void expectGetSaveParametersFromView(const bool saveToSingleFile, const bool isAutoSave) {
+  void expectGetSaveParametersFromView(const bool saveToSingleFile, const bool isAutoSave,
+                                       std::string const &model = "") {
     EXPECT_CALL(m_view, getFileFormatIndex()).Times(1).WillOnce(Return(static_cast<int>(m_fileFormat)));
     EXPECT_CALL(m_view, getPrefix()).Times(1).WillOnce(Return(m_prefix));
     EXPECT_CALL(m_view, getHeaderCheck()).Times(1).WillOnce(Return(m_includeHeader));
     EXPECT_CALL(m_view, getSeparator()).Times(1).WillOnce(Return(m_separator));
     EXPECT_CALL(m_view, getQResolutionCheck()).Times(1).WillOnce(Return(m_includeQResolution));
     EXPECT_CALL(m_view, getAdditionalColumnsCheck()).Times(1).WillOnce(Return(m_includeAdditionalColumns));
-    EXPECT_CALL(m_view, getModel()).Times(1).WillOnce(Return(m_model));
+    EXPECT_CALL(m_view, getModel()).Times(1).WillOnce(Return(model));
     EXPECT_CALL(m_view, getValidateModelCheck()).Times(1).WillOnce(Return(m_validation));
     if (isAutoSave) {
       EXPECT_CALL(m_view, getSaveToSingleFileCheck()).Times(1).WillOnce(Return(saveToSingleFile));
@@ -629,10 +661,9 @@ private:
     EXPECT_CALL(m_view, getSelectedParameters()).Times(1).WillOnce(Return(logs));
     expectGetValidSaveDirectory();
     expectGetSaveParametersFromView(false, false);
-    auto fileFormatOptions =
-        FileFormatOptions(m_fileFormat, m_prefix, m_includeHeader, m_separator, m_includeQResolution,
-                          m_includeAdditionalColumns, false, m_model, m_validation);
-    EXPECT_CALL(*m_fileSaver, save(m_savePath, workspaceNames, logs, fileFormatOptions)).Times(1);
+    auto fileFormatOptions = FileFormatOptions(m_fileFormat, m_prefix, m_includeHeader, m_separator,
+                                               m_includeQResolution, m_includeAdditionalColumns, false);
+    EXPECT_CALL(*m_fileSaver, save(m_savePath, workspaceNames, logs, fileFormatOptions, _)).Times(1);
   }
 
   void expectSaveWorkspacesNoLogs(const std::vector<std::string> &workspaceNames, const bool isSingleFileRequested,
@@ -641,8 +672,8 @@ private:
     expectGetSaveParametersFromView(isSingleFileRequested, isAutoSave);
     auto fileFormatOptions =
         FileFormatOptions(m_fileFormat, m_prefix, m_includeHeader, m_separator, m_includeQResolution,
-                          m_includeAdditionalColumns, expectedSingleFileOption, m_model, m_validation);
-    EXPECT_CALL(*m_fileSaver, save(m_savePath, workspaceNames, _, fileFormatOptions)).Times(1);
+                          m_includeAdditionalColumns, expectedSingleFileOption);
+    EXPECT_CALL(*m_fileSaver, save(m_savePath, workspaceNames, _, fileFormatOptions, _)).Times(1);
   }
 
   void expectProcessing() { EXPECT_CALL(m_mainPresenter, isProcessing()).Times(1).WillOnce(Return(true)); }
@@ -790,6 +821,5 @@ private:
   std::string m_separator;
   bool m_includeQResolution;
   bool m_includeAdditionalColumns;
-  std::string m_model;
   bool m_validation;
 };

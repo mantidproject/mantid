@@ -342,6 +342,11 @@ Mantid::Geometry::Instrument_const_sptr BatchPresenter::instrument() const { ret
 
 std::string BatchPresenter::instrumentName() const { return mainPresenter().instrumentName(); }
 
+std::map<std::string, std::string>
+BatchPresenter::modelsForWorkspaces(std::vector<std::string> const &workspaceNames) const {
+  return m_runsPresenter->modelsForWorkspaces(workspaceNames);
+}
+
 void BatchPresenter::settingsChanged() {
   setBatchUnsaved();
   m_model->updateLookupIndexesOfTable();

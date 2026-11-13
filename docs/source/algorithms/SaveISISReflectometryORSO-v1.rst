@@ -66,6 +66,17 @@ saving process sources any metadata.
 |                          | list of the metadata and their relevant properties is included below.                         |
 +--------------------------+-----------------------------------------------------------------------------------------------+
 
+Model description
+-----------------
+
+A model description of the sample, for example ``air | Ni 100 | SiO2 0.5 | Si``, can be included in the header of each dataset.
+To include models, pass a list to ``ModelDescriptions`` with one entry for each workspace in ``WorkspaceList``.
+All the datasets created from a workspace group use the entry for that group.
+A workspace with an empty entry is saved without a model.
+If ``ValidateModel`` is set to ``True`` then the syntax of each model is checked using the orsopy library.
+The model is not stored in the workspace history, so ``ModelDescriptions`` is only used with the ``HistoryWherePossible`` and ``Manual`` metadata sources.
+It is ignored with the ``History`` metadata source.
+
 Data values
 -----------
 

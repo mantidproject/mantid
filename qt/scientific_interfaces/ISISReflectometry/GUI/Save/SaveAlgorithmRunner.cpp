@@ -11,6 +11,13 @@
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
+namespace {
+// Metadata the GUI does not provide, so the ORSO file should only include it if it is found in the workspace history
+std::vector<std::string> const ORSO_HISTORY_OPTIONAL_PROPERTIES{
+    "ReductionTimestamp",    "FirstTransmissionFileList", "SecondTransmissionFileList",
+    "FloodCorrectionSource", "CalibrationFile",           "PolarizationEfficienciesFile"};
+} // namespace
+
 void SaveAlgorithmRunner::runSaveAsciiAlgorithm(const Mantid::API::Workspace_sptr &workspace,
                                                 std::string const &savePath, std::string const &extension,
                                                 std::vector<std::string> const &logParameters,
@@ -30,14 +37,17 @@ void SaveAlgorithmRunner::runSaveAsciiAlgorithm(const Mantid::API::Workspace_spt
 void SaveAlgorithmRunner::runSaveORSOAlgorithm(std::vector<std::string> const &workspaceNames,
                                                std::string const &savePath, const bool &includeQResolution,
                                                const bool &includeAdditionalColumns,
-                                               std::string const &modelDescription, const bool &validateModel) const {
+                                               std::vector<std::string> const &modelDescriptions,
+                                               const bool &validateModel) const {
   auto alg = Mantid::API::AlgorithmManager::Instance().create("SaveISISReflectometryORSO");
   alg->setRethrows(true);
   alg->setProperty("WorkspaceList", workspaceNames);
+  alg->setProperty("MetadataSource", "HistoryWherePossible");
+  alg->setProperty("IgnoredProperties", ORSO_HISTORY_OPTIONAL_PROPERTIES);
   alg->setProperty("Filename", savePath);
   alg->setProperty("WriteResolution", includeQResolution);
   alg->setProperty("IncludeAdditionalColumns", includeAdditionalColumns);
-  alg->setProperty("ModelDescription", modelDescription);
+  alg->setProperty("ModelDescriptions", modelDescriptions);
   alg->setProperty("ValidateModel", validateModel);
   alg->execute();
 }
