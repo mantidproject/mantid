@@ -77,7 +77,7 @@ private:
   using MapIV = std::unordered_map<specnum_t, Vertex>;
 
   /// Construct the graph based on the given number of neighbours and the
-  /// current instument and spectra-detector mapping
+  /// current instrument and spectra-detector mapping
   void build(const int noNeighbours);
   /// Query the graph for the default number of nearest neighbours to specified
   /// detector

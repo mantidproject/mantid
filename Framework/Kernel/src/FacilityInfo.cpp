@@ -153,7 +153,7 @@ void FacilityInfo::fillInstruments(const Poco::XML::Element *elem) {
         InstrumentInfo instr(this, elemenent);
         m_instruments.emplace_back(instr);
       } catch (std::runtime_error &e) { /*skip this instrument*/
-        g_log.warning("Failed to load instument for: " + m_name + ": " + e.what());
+        g_log.warning("Failed to load instrument for: " + m_name + ": " + e.what());
       }
     }
   }

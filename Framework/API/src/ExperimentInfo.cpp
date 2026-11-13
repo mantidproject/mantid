@@ -1103,7 +1103,7 @@ void ExperimentInfo::loadInstrumentInfoNexus(const std::string &nxFilename, Nexu
   file->closeGroup();
 
   // Set the instrument given the name and and XML obtained
-  setInstumentFromXML(nxFilename, instrumentName, instrumentXml);
+  setInstrumentFromXML(nxFilename, instrumentName, instrumentXml);
 }
 
 /** Load the instrument from an open NeXus file without reading any parameters
@@ -1129,7 +1129,7 @@ void ExperimentInfo::loadInstrumentInfoNexus(const std::string &nxFilename, Nexu
   file->closeGroup();
 
   // Set the instrument given the name and and XML obtained
-  setInstumentFromXML(nxFilename, instrumentName, instrumentXml);
+  setInstrumentFromXML(nxFilename, instrumentName, instrumentXml);
 }
 
 /** Attempt to load an IDF embedded in the Nexus file.
@@ -1161,8 +1161,8 @@ void ExperimentInfo::loadEmbeddedInstrumentInfoNexus(Nexus::File *file, std::str
  * @param instrumentXml  :: XML string of instrument or empty to indicate load
  * of instrument definition file
  */
-void ExperimentInfo::setInstumentFromXML(const std::string &nxFilename, std::string &instrumentName,
-                                         std::string &instrumentXml) {
+void ExperimentInfo::setInstrumentFromXML(const std::string &nxFilename, std::string &instrumentName,
+                                          std::string &instrumentXml) {
 
   instrumentXml = Strings::strip(instrumentXml);
   instrumentName = Strings::strip(instrumentName);

@@ -52,7 +52,7 @@ void FindDetectorsPar::init() {
                   "An optional file that contains of the list of angular "
                   "parameters for the detectors and detectors groups;\n"
                   "If specified, will use data from file instead of the data, "
-                  "calculated from the instument description");
+                  "calculated from the instrument description");
 
   //
   declareProperty("OutputParTable", "",

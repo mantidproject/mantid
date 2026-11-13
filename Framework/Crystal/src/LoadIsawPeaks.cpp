@@ -195,7 +195,7 @@ std::string LoadIsawPeaks::readHeader(const PeaksWorkspace_sptr &outWS, std::ifs
     if (s == "5")
       det.emplace_back(bank);
   }
-  // Find bank numbers in instument that are not in header lines
+  // Find bank numbers in instrument that are not in header lines
   std::string maskBanks;
   if (!instr)
     throw std::runtime_error("No instrument in the Workspace. Cannot save DetCal file.");
