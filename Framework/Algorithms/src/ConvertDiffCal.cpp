@@ -176,8 +176,7 @@ double calculateDIFC(const OffsetsWorkspace_const_sptr &offsetsWS, const size_t 
  * @param unused not used, for function template conformity
  * @return The updated value of DIFC, if physical
  */
-double updateAbsoluteDIFC(const double offset, const double oldDIFC, const double unused) {
-  UNUSED_ARG(unused);
+double updateAbsoluteDIFC(const double offset, const double oldDIFC, [[maybe_unused]] const double unused) {
   if (offset <= -1.) { // non-physical
     std::stringstream msg;
     msg << "Encountered offset of " << offset << " which converts data to negative d-spacing from old DIFC " << oldDIFC

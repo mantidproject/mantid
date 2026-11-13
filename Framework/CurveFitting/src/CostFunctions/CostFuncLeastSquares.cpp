@@ -63,8 +63,8 @@ void CostFuncLeastSquares::addVal(API::FunctionDomain_sptr domain, API::Function
  * @param evalHessian :: Flag to evaluate the Hessian
  */
 void CostFuncLeastSquares::addValDerivHessian(API::IFunction_sptr function, API::FunctionDomain_sptr domain,
-                                              API::FunctionValues_sptr values, bool evalDeriv, bool evalHessian) const {
-  UNUSED_ARG(evalDeriv);
+                                              API::FunctionValues_sptr values, [[maybe_unused]] bool evalDeriv,
+                                              bool evalHessian) const {
   function->function(*domain, *values);
   size_t np = function->nParams(); // number of parameters
   size_t ny = values->size();      // number of data points
@@ -155,9 +155,7 @@ std::vector<double> CostFuncLeastSquares::getFitWeights(API::FunctionValues_sptr
  * @param covar :: Output cavariance matrix.
  * @param epsrel :: Tolerance.
  */
-void CostFuncLeastSquares::calActiveCovarianceMatrix(EigenMatrix &covar, double epsrel) {
-  UNUSED_ARG(epsrel);
-
+void CostFuncLeastSquares::calActiveCovarianceMatrix(EigenMatrix &covar, [[maybe_unused]] double epsrel) {
   if (m_hessian.isEmpty()) {
     valDerivHessian();
   }

@@ -32,10 +32,8 @@ BoundaryConstraint::BoundaryConstraint()
 
 /// Constructor with no boundary arguments
 /// @param paramName :: The parameter name
-BoundaryConstraint::BoundaryConstraint(const std::string &paramName)
-    : API::IConstraint(), m_penaltyFactor(getDefaultPenaltyFactor()), m_hasLowerBound(false), m_hasUpperBound(false) {
-  UNUSED_ARG(paramName);
-}
+BoundaryConstraint::BoundaryConstraint([[maybe_unused]] const std::string &paramName)
+    : API::IConstraint(), m_penaltyFactor(getDefaultPenaltyFactor()), m_hasLowerBound(false), m_hasUpperBound(false) {}
 
 /** Constructor with boundary arguments
  * @param fun :: The function

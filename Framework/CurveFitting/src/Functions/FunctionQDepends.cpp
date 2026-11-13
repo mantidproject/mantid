@@ -87,9 +87,7 @@ void FunctionQDepends::setAttribute(const std::string &attName, const Attr &attV
  * @param endX unused
  */
 void FunctionQDepends::setMatrixWorkspace(std::shared_ptr<const Mantid::API::MatrixWorkspace> workspace, size_t wi,
-                                          double startX, double endX) {
-  UNUSED_ARG(startX);
-  UNUSED_ARG(endX);
+                                          [[maybe_unused]] double startX, [[maybe_unused]] double endX) {
   // reset attributes if new workspace is passed
   if (!m_vQ.empty()) {
     Mantid::API::IFunction::setAttributeValue("WorkspaceIndex", EMPTY_INT());

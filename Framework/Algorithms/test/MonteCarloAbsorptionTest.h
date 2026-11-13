@@ -801,25 +801,17 @@ private:
 
   protected:
     std::shared_ptr<Mantid::Algorithms::IMCAbsorptionStrategy>
-    createStrategy(std::shared_ptr<Mantid::Algorithms::IMCInteractionVolume> interactionVol,
-                   const Mantid::Algorithms::IBeamProfile &beamProfile, Mantid::Kernel::DeltaEMode::Type EMode,
-                   const size_t nevents, const size_t maxScatterPtAttempts,
-                   const bool regenerateTracksForEachLambda) override {
-      UNUSED_ARG(interactionVol);
-      UNUSED_ARG(beamProfile);
-      UNUSED_ARG(EMode);
-      UNUSED_ARG(nevents);
-      UNUSED_ARG(maxScatterPtAttempts);
-      UNUSED_ARG(regenerateTracksForEachLambda);
+    createStrategy([[maybe_unused]] std::shared_ptr<Mantid::Algorithms::IMCInteractionVolume> interactionVol,
+                   [[maybe_unused]] const Mantid::Algorithms::IBeamProfile &beamProfile,
+                   [[maybe_unused]] Mantid::Kernel::DeltaEMode::Type EMode, [[maybe_unused]] const size_t nevents,
+                   [[maybe_unused]] const size_t maxScatterPtAttempts,
+                   [[maybe_unused]] const bool regenerateTracksForEachLambda) override {
       return m_MCAbsorptionStrategy;
     }
     std::shared_ptr<Mantid::Algorithms::SparseWorkspace>
-    createSparseWorkspace(const Mantid::API::MatrixWorkspace &modelWS, const size_t wavelengthPoints, const size_t rows,
-                          const size_t columns) override {
-      UNUSED_ARG(modelWS);
-      UNUSED_ARG(wavelengthPoints);
-      UNUSED_ARG(rows);
-      UNUSED_ARG(columns);
+    createSparseWorkspace([[maybe_unused]] const Mantid::API::MatrixWorkspace &modelWS,
+                          [[maybe_unused]] const size_t wavelengthPoints, [[maybe_unused]] const size_t rows,
+                          [[maybe_unused]] const size_t columns) override {
       return m_SparseWorkspace;
     }
 

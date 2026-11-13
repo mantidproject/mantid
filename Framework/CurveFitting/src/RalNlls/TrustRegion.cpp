@@ -145,8 +145,7 @@ double evaluateModel(const DoubleFortranVector &f, const DoubleFortranMatrix &J,
  *  @param md :: The value of the model at the same d as normfnew.
  *  @param options :: The options.
  */
-double calculateRho(double normf, double normfnew, double md, const nlls_options &options) {
-  UNUSED_ARG(options);
+double calculateRho(double normf, double normfnew, double md, [[maybe_unused]] const nlls_options &options) {
   auto actual_reduction = (0.5 * pow(normf, 2)) - (0.5 * pow(normfnew, 2));
   auto predicted_reduction = ((0.5 * pow(normf, 2)) - md);
   double rho = 0.0;

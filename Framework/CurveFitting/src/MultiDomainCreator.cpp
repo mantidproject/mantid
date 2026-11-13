@@ -102,12 +102,11 @@ void MultiDomainCreator::initFunction(API::IFunction_sptr function) {
  *    empty the property won't be created.
  * @return A shared pointer to the created workspace.
  */
-std::shared_ptr<API::Workspace> MultiDomainCreator::createOutputWorkspace(
-    const std::string &baseName, API::IFunction_sptr function, std::shared_ptr<API::FunctionDomain> domain,
-    std::shared_ptr<API::FunctionValues> values, const std::string &outputWorkspacePropertyName) {
-  UNUSED_ARG(domain);
-  UNUSED_ARG(values);
-
+std::shared_ptr<API::Workspace>
+MultiDomainCreator::createOutputWorkspace(const std::string &baseName, API::IFunction_sptr function,
+                                          [[maybe_unused]] std::shared_ptr<API::FunctionDomain> domain,
+                                          [[maybe_unused]] std::shared_ptr<API::FunctionValues> values,
+                                          const std::string &outputWorkspacePropertyName) {
   // split the function into independent parts
   std::vector<API::IFunction_sptr> functions = function->createEquivalentFunctions();
   // there must be as many parts as there are domains

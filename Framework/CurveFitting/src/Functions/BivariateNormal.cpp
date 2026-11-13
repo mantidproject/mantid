@@ -76,10 +76,9 @@ BivariateNormal::~BivariateNormal() { delete[] expVals; }
 
 // overwrite IFunction base class methods
 
-void BivariateNormal::function1D(double *out, const double *xValues, const size_t nData) const {
+void BivariateNormal::function1D(double *out, [[maybe_unused]] const double *xValues,
+                                 [[maybe_unused]] const size_t nData) const {
 
-  UNUSED_ARG(xValues);
-  UNUSED_ARG(nData);
   if (nData == 0)
     return;
 
@@ -163,9 +162,8 @@ void BivariateNormal::function1D(double *out, const double *xValues, const size_
   g_log.debug(inf.str());
 }
 
-void BivariateNormal::functionDeriv1D(API::Jacobian *out, const double *xValues, const size_t nData) {
-  UNUSED_ARG(xValues);
-  UNUSED_ARG(nData);
+void BivariateNormal::functionDeriv1D(API::Jacobian *out, [[maybe_unused]] const double *xValues,
+                                      [[maybe_unused]] const size_t nData) {
   if (nData == 0)
     return;
   double penDeriv = initCommon();

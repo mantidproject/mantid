@@ -146,16 +146,12 @@ void PawleyParameterFunction::setParametersFromUnitCell(const UnitCell &cell) {
 }
 
 /// This method does nothing.
-void PawleyParameterFunction::function(const FunctionDomain &domain, FunctionValues &values) const {
-  UNUSED_ARG(domain);
-  UNUSED_ARG(values);
-}
+void PawleyParameterFunction::function([[maybe_unused]] const FunctionDomain &domain,
+                                       [[maybe_unused]] FunctionValues &values) const {}
 
 /// This method does nothing.
-void PawleyParameterFunction::functionDeriv(const FunctionDomain &domain, Jacobian &jacobian) {
-  UNUSED_ARG(domain);
-  UNUSED_ARG(jacobian);
-}
+void PawleyParameterFunction::functionDeriv([[maybe_unused]] const FunctionDomain &domain,
+                                            [[maybe_unused]] Jacobian &jacobian) {}
 
 /// Declares attributes and generates parameters based on the defaults.
 void PawleyParameterFunction::init() {

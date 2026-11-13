@@ -83,10 +83,7 @@ void VesuvioResolution::setUpForFit() {
  * @param endX Ending x-vaue (unused).
  */
 void VesuvioResolution::setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wsIndex,
-                                           double startX, double endX) {
-  UNUSED_ARG(startX);
-  UNUSED_ARG(endX);
-
+                                           [[maybe_unused]] double startX, [[maybe_unused]] double endX) {
   m_wsIndex = wsIndex;
   DetectorParams detpar = ConvertToYSpace::getDetectorParameters(workspace, m_wsIndex);
   ResolutionParams respar = getResolutionParameters(workspace, m_wsIndex);

@@ -54,9 +54,8 @@ std::vector<double> MaxentEntropyNegativeValues::secondDerivative(const std::vec
  * @param newValue : [input] The new value to use (unused variable)
  * @return : The corrected values as a vector
  */
-std::vector<double> MaxentEntropyNegativeValues::correctValues(const std::vector<double> &values, double newValue) {
-
-  UNUSED_ARG(newValue);
+std::vector<double> MaxentEntropyNegativeValues::correctValues(const std::vector<double> &values,
+                                                               [[maybe_unused]] double newValue) {
 
   // Nothing to correct
   return values;

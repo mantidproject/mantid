@@ -28,9 +28,7 @@ void FlatBackground::init() { declareParameter("A0", 0.0, "coefficient for linea
  * @param xValues The points to evaluate at
  * @param nData The number of points.
  */
-void FlatBackground::function1D(double *out, const double *xValues, const size_t nData) const {
-  UNUSED_ARG(xValues);
-
+void FlatBackground::function1D(double *out, [[maybe_unused]] const double *xValues, const size_t nData) const {
   const double a0 = getParameter("A0");
 
   for (size_t i = 0; i < nData; i++) {
@@ -44,9 +42,7 @@ void FlatBackground::function1D(double *out, const double *xValues, const size_t
  * @param xValues The points to evaluate at
  * @param nData The number of points.
  */
-void FlatBackground::functionDeriv1D(API::Jacobian *out, const double *xValues, const size_t nData) {
-  UNUSED_ARG(xValues);
-
+void FlatBackground::functionDeriv1D(API::Jacobian *out, [[maybe_unused]] const double *xValues, const size_t nData) {
   for (size_t i = 0; i < nData; i++) {
     out->set(i, 0, 1);
   }

@@ -34,8 +34,7 @@ double gauss(double x, double height, double centre, double fwhm) {
 }
 
 // Function to generate test background without peaks
-double background(double xPoint, int iSpec = 0) {
-  UNUSED_ARG(iSpec);
+double background(double xPoint, [[maybe_unused]] int iSpec = 0) {
   return gauss(xPoint, 5.0, 0.0, 5.0) + gauss(xPoint, 2.0, 3.0, 2.0);
 }
 

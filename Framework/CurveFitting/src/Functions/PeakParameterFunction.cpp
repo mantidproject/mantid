@@ -29,8 +29,7 @@ DECLARE_FUNCTION(PeakParameterFunction)
  * @param xValues :: Domain, ignored.
  * @param nData :: Domain size, must be 4.
  */
-void PeakParameterFunction::function1D(double *out, const double *xValues, const size_t nData) const {
-  UNUSED_ARG(xValues);
+void PeakParameterFunction::function1D(double *out, [[maybe_unused]] const double *xValues, const size_t nData) const {
   if (nData != 4) {
     throw std::invalid_argument("Can only work with domain of size 4.");
   }

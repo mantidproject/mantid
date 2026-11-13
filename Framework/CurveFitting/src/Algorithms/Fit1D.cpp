@@ -215,11 +215,8 @@ derivative free simplex minimization
 * @param xValues :: X values for data points
 * @param nData :: Number of data points
  */
-void Fit1D::functionDeriv(const double *in, Jacobian *out, const double *xValues, const size_t nData) {
-  UNUSED_ARG(in);
-  UNUSED_ARG(out);
-  UNUSED_ARG(xValues);
-  UNUSED_ARG(nData);
+void Fit1D::functionDeriv([[maybe_unused]] const double *in, [[maybe_unused]] Jacobian *out,
+                          [[maybe_unused]] const double *xValues, [[maybe_unused]] const size_t nData) {
   throw Exception::NotImplementedError("No derivative function provided");
 }
 

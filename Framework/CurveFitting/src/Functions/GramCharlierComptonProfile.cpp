@@ -228,9 +228,7 @@ size_t GramCharlierComptonProfile::fillConstraintMatrix(Kernel::DblMatrix &cmatr
  * results
  * @param nData The length of the array
  */
-void GramCharlierComptonProfile::massProfile(double *result, const size_t nData) const {
-  UNUSED_ARG(nData);
-
+void GramCharlierComptonProfile::massProfile(double *result, [[maybe_unused]] const size_t nData) const {
   using namespace Mantid::Kernel;
 
   // Hermite expansion (only even terms) + FSE term

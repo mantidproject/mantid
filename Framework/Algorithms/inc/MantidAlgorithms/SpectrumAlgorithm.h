@@ -88,7 +88,7 @@ private:
 
   /// Templated function used as 'compile-time conditional', together with
   /// specialization. See there for details.
-  template <class WS> void ifEventWorkspaceClearMRU(const WS &workspace) { UNUSED_ARG(workspace); }
+  template <class WS> void ifEventWorkspaceClearMRU([[maybe_unused]] const WS &workspace) {}
 
   std::string m_indexMinPropertyName;
   std::string m_indexMaxPropertyName;
