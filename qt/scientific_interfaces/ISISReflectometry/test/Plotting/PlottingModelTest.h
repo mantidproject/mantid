@@ -8,6 +8,7 @@
 
 #include "../../../ISISReflectometry/GUI/Plotting/model/PlottingModel.h"
 #include "../../../ISISReflectometry/TestHelpers/PlottingTestHelpers.h"
+#include "Common/GroupHelper.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -104,7 +105,7 @@ public:
   void testAlignmentCreatesPlotWorkspaceGroupWithDetectorIndexXAxisForSelectedWorkspace() {
     createConstantWorkspace("IvsQ_12345", -100.0);
     createAlignmentInputWorkspace("raw_input_name", "12345", alignmentYValues(100.35, 7.0));
-    createTOFGroup({"raw_input_name"});
+    associateProcessedInput("IvsQ_12345", "raw_input_name");
     auto model = PlottingModel{};
     auto const workspaces = plottingWorkspaces({"IvsQ_12345"});
     auto const workspacesForPlotting = model.workspacesForPlotting(workspaces, alignmentOutputSelection());
@@ -125,7 +126,7 @@ public:
     createConstantWorkspace("IvsQ_12345", -100.0);
     createAlignmentInputWorkspace("raw_input_name", "12345",
                                   std::vector<double>(644, std::numeric_limits<double>::quiet_NaN()));
-    createTOFGroup({"raw_input_name"});
+    associateProcessedInput("IvsQ_12345", "raw_input_name");
     auto model = PlottingModel{};
     auto const workspaces = plottingWorkspaces({"IvsQ_12345"});
     TS_ASSERT_THROWS(model.workspacesForPlotting(workspaces, alignmentOutputSelection()), std::runtime_error const &);
@@ -138,7 +139,7 @@ public:
   void testAlignmentUsesInitialPeakCentreWhenGaussianFitCannotBeAttempted() {
     createConstantWorkspace("IvsQ_12345", -100.0);
     createAlignmentInputWorkspace("raw_input_name", "12345", alignmentYValues(4, 7.0));
-    createTOFGroup({"raw_input_name"});
+    associateProcessedInput("IvsQ_12345", "raw_input_name");
     auto model = PlottingModel{};
     auto const workspaces = std::vector<PlottingWorkspace>{plottingWorkspace("IvsQ_12345", {"12345"})};
     auto const workspacesForPlotting = model.workspacesForPlotting(workspaces, alignmentOutputSelection());
@@ -155,7 +156,7 @@ public:
   void testAlignmentMapsProfileFitAndOptimizedPeakCentreToTheta() {
     createConstantWorkspace("IvsQ_12345", -100.0);
     createAlignmentInputWorkspace("raw_input_name", "12345", alignmentYValues(100.35, 7.0));
-    createTOFGroup({"raw_input_name"});
+    associateProcessedInput("IvsQ_12345", "raw_input_name");
     auto model = PlottingModel{};
     auto outputSelection = alignmentOutputSelection();
     outputSelection.alignmentXAxis = AlignmentXAxis::Theta;
@@ -182,11 +183,11 @@ public:
   void testAlignmentMapsDetectorPositionsOnEitherSideOfBeamCentreToSignedTheta() {
     createConstantWorkspace("IvsQ_12345", -100.0);
     createAlignmentInputWorkspace("raw_input_name", "12345", alignmentYValues(100.35, 7.0));
+    associateProcessedInput("IvsQ_12345", "raw_input_name");
     auto const rawWorkspace =
         Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>("raw_input_name");
     setSpectrumDetectorYPosition(rawWorkspace, 100, -0.1);
     setSpectrumDetectorYPosition(rawWorkspace, 101, 0.1);
-    createTOFGroup({"raw_input_name"});
     auto outputSelection = alignmentOutputSelection();
     outputSelection.alignmentXAxis = AlignmentXAxis::Theta;
 
@@ -203,7 +204,7 @@ public:
     auto yValues = alignmentYValues(100.35, 7.0);
     yValues[4] = std::numeric_limits<double>::quiet_NaN();
     createAlignmentInputWorkspace("raw_input_name", "12345", yValues);
-    createTOFGroup({"raw_input_name"});
+    associateProcessedInput("IvsQ_12345", "raw_input_name");
     auto model = PlottingModel{};
     auto const workspaces = std::vector<PlottingWorkspace>{plottingWorkspace("IvsQ_12345", {"12345"})};
     model.workspacesForPlotting(workspaces, alignmentOutputSelection());
@@ -220,7 +221,8 @@ public:
     createConstantWorkspace("IvsQ_22345", -100.0, "22345");
     createAlignmentInputWorkspace("raw_input_name_1", "12345", alignmentYValues(100, 7.0));
     createAlignmentInputWorkspace("raw_input_name_2", "22345", alignmentYValues(110, 9.0));
-    createTOFGroup({"raw_input_name_1", "raw_input_name_2"});
+    associateProcessedInput("IvsQ_12345", "raw_input_name_1");
+    associateProcessedInput("IvsQ_22345", "raw_input_name_2");
     auto model = PlottingModel{};
     auto const workspaces = std::vector<PlottingWorkspace>{plottingWorkspace("IvsQ_12345", {"12345"}),
                                                            plottingWorkspace("IvsQ_22345", {"22345"})};
@@ -235,56 +237,17 @@ public:
     TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_align_IvsQ_22345_profile"));
   }
 
-  void testAlignmentCreatesWorkspaceForAddedRuns() {
-    createConstantWorkspace("IvsQ_12345+12346", -100.0, "12345+12346");
-    createAlignmentInputWorkspace("TOF_12345+12346", "12345+12346", alignmentYValues(100, 10.0));
-    createAlignmentInputWorkspace("TOF_12345", "12345", alignmentYValues(100, 3.0));
-    createAlignmentInputWorkspace("TOF_12346", "12346", alignmentYValues(100, 7.0));
-    createTOFGroup({"TOF_12345", "TOF_12346"});
-    auto model = PlottingModel{};
-    auto const workspaces = std::vector<PlottingWorkspace>{plottingWorkspace("IvsQ_12345+12346", {"12345", "12346"})};
-    auto const workspacesForPlotting = model.workspacesForPlotting(workspaces, alignmentOutputSelection());
-
-    TS_ASSERT_EQUALS(workspacesForPlotting, std::vector<std::string>{"__isis_refl_align_IvsQ_12345+12346"});
-    assertYValue("__isis_refl_align_IvsQ_12345+12346_profile", 10.0, 96);
-  }
-
-  void testAlignmentFindsSummedRunLogOutsideTOFGroup() {
-    createConstantWorkspace("IvsQ_12345+12346", -100.0, "12345+12346");
-    createAlignmentInputWorkspace("TOF_12345+12346", "12345+12346", alignmentYValues(100, 10.0));
-    auto const workspaces = std::vector<PlottingWorkspace>{plottingWorkspace("IvsQ_12345+12346", {"12345+12346"})};
-    auto const outputs = PlottingModel{}.workspacesForPlotting(workspaces, alignmentOutputSelection());
-    TS_ASSERT_EQUALS(outputs, std::vector<std::string>{"__isis_refl_align_IvsQ_12345+12346"});
-    assertYValue("__isis_refl_align_IvsQ_12345+12346_profile", 10.0, 96);
-  }
-
-  void testDetectorMapFindsSummedWorkspaceOutsideTOFGroup() {
-    createConstantWorkspace("IvsQ_12345+12346", -100.0, "12345+12346");
-    createDetectorMapInputWorkspace("TOF_12345", "12345", 10.0);
-    createDetectorMapInputWorkspace("TOF_12346", "12346", 20.0);
-    createTOFGroup({"TOF_12345", "TOF_12346"});
-    createDetectorMapInputWorkspace("TOF_12345+12346", "12345+12346", 30.0);
-    auto const workspaces = std::vector<PlottingWorkspace>{plottingWorkspace("IvsQ_12345+12346", {"12345+12346"})};
-    auto const outputs = PlottingModel{}.workspacesForPlotting(workspaces, detectorMapOutputSelection());
-    TS_ASSERT_EQUALS(outputs, std::vector<std::string>{"__isis_refl_det_map_IvsQ_12345+12346"});
-    assertYValue("__isis_refl_det_map_IvsQ_12345+12346", 34.0);
-  }
-
-  void testBothPlotTypesFindHiddenSummedWorkspace() {
-    createConstantWorkspace("IvsQ_12345+12346", -100.0, "12345+12346");
-    createAlignmentInputWorkspace("__TOF_12345+12346", "12345+12346", alignmentYValues(100, 10.0));
-    auto const workspaces = std::vector<PlottingWorkspace>{plottingWorkspace("IvsQ_12345+12346", {"12345+12346"})};
-    TS_ASSERT_EQUALS(PlottingModel{}.workspacesForPlotting(workspaces, alignmentOutputSelection()).size(), 1);
-    TS_ASSERT_EQUALS(PlottingModel{}.workspacesForPlotting(workspaces, detectorMapOutputSelection()).size(), 1);
-    assertYValue("__isis_refl_align_IvsQ_12345+12346_profile", 10.0, 96);
-    assertYValue("__isis_refl_det_map_IvsQ_12345+12346", 10.0, 0, 96);
-  }
-
-  void testBothPlotTypesFindSelectedPeriodInSummedWorkspaceGroup() {
+  void testBothPlotTypesUseSelectedPeriodOfProcessedInputGroup() {
     createConstantWorkspace("IvsQ_12345+12346_2", -100.0, "12345+12346");
-    createAlignmentInputWorkspace("TOF_12345+12346_1", "12345+12346", alignmentYValues(100, 3.0), 1);
-    createAlignmentInputWorkspace("TOF_12345+12346_2", "12345+12346", alignmentYValues(100, 10.0), 2);
-    createTOFGroup({"TOF_12345+12346_1", "TOF_12345+12346_2"}, "TOF_12345+12346");
+    createAlignmentInputWorkspace("processed_input_1", "12345+12346", alignmentYValues(100, 3.0), 1);
+    createAlignmentInputWorkspace("processed_input_2", "12345+12346", alignmentYValues(100, 10.0), 2);
+    auto &ads = Mantid::API::AnalysisDataService::Instance();
+    auto processedGroup = std::make_shared<Mantid::API::WorkspaceGroup>();
+    processedGroup->addWorkspace(ads.retrieve("processed_input_1"));
+    processedGroup->addWorkspace(ads.retrieve("processed_input_2"));
+    ads.addOrReplace("processed_input", processedGroup);
+    associateProcessedInput("IvsQ_12345+12346_2", "processed_input", "__TOF_processed");
+    ads.remove("processed_input");
     auto const workspaces = std::vector<PlottingWorkspace>{plottingWorkspace("IvsQ_12345+12346_2", {"12345+12346"}, 2)};
     TS_ASSERT_EQUALS(PlottingModel{}.workspacesForPlotting(workspaces, alignmentOutputSelection()).size(), 1);
     TS_ASSERT_EQUALS(PlottingModel{}.workspacesForPlotting(workspaces, detectorMapOutputSelection()).size(), 1);
@@ -292,25 +255,10 @@ public:
     assertYValue("__isis_refl_det_map_IvsQ_12345+12346_2", 10.0, 0, 96);
   }
 
-  void testAlignmentFindsPeriodSpecificTOFWorkspaceInTOFGroup() {
-    createConstantWorkspace("IvsQ_12345_2", -100.0);
-    createAlignmentInputWorkspace("period_1_raw_input_name", "12345", alignmentYValues(100, 7.0), 1);
-    createAlignmentInputWorkspace("period_2_raw_input_name", "12345", alignmentYValues(100, 10.0), 2);
-    createTOFGroup({"period_1_raw_input_name", "period_2_raw_input_name"});
-    auto model = PlottingModel{};
-    auto const workspaces = std::vector<PlottingWorkspace>{plottingWorkspace("IvsQ_12345_2", {"12345"}, 2)};
-
-    auto const workspacesForPlotting = model.workspacesForPlotting(workspaces, alignmentOutputSelection());
-
-    auto const expected = std::vector<std::string>{"__isis_refl_align_IvsQ_12345_2"};
-    TS_ASSERT_EQUALS(workspacesForPlotting, expected);
-    assertYValue("__isis_refl_align_IvsQ_12345_2_profile", 10.0, 96);
-  }
-
   void testAlignmentReusesExistingGeneratedWorkspace() {
     createConstantWorkspace("IvsQ_12345", -100.0);
     createAlignmentInputWorkspace("raw_input_name", "12345", alignmentYValues(100, 7.0));
-    createTOFGroup({"raw_input_name"});
+    associateProcessedInput("IvsQ_12345", "raw_input_name");
     auto model = PlottingModel{};
     auto const workspaces = plottingWorkspaces({"IvsQ_12345"});
     model.workspacesForPlotting(workspaces, alignmentOutputSelection());
@@ -326,7 +274,7 @@ public:
   void testAlignmentThrowsForUnsupportedInstrument() {
     createConstantWorkspace("IvsQ_12345", -100.0);
     createAlignmentInputWorkspace("raw_input_name", "12345", alignmentYValues(100, 7.0));
-    createTOFGroup({"raw_input_name"});
+    associateProcessedInput("IvsQ_12345", "raw_input_name");
     auto model = PlottingModel{};
     auto outputSelection = PlotOutputSelection{PlotOutputType::Alignment};
     outputSelection.instrumentName = "UNKNOWN";
@@ -335,10 +283,10 @@ public:
                      std::invalid_argument const &);
   }
 
-  void testDetectorMapCreatesPlotWorkspaceFromSelectedWorkspacesRawTOFWorkspace() {
+  void testDetectorMapUsesSelectedWorkspacesProcessedInput() {
     createConstantWorkspace("IvsQ_12345", -100.0);
     createDetectorMapInputWorkspace("raw_input_name", "12345", 10.0);
-    createTOFGroup({"raw_input_name"});
+    associateProcessedInput("IvsQ_12345", "raw_input_name");
     auto model = PlottingModel{};
     auto const workspaces = plottingWorkspaces({"IvsQ_12345"});
     auto const workspacesForPlotting = model.workspacesForPlotting(workspaces, detectorMapOutputSelection());
@@ -357,7 +305,8 @@ public:
     createConstantWorkspace("IvsQ_22345", -100.0, "22345");
     createDetectorMapInputWorkspace("raw_input_name_1", "12345", 10.0);
     createDetectorMapInputWorkspace("raw_input_name_2", "22345", 20.0);
-    createTOFGroup({"raw_input_name_1", "raw_input_name_2"});
+    associateProcessedInput("IvsQ_12345", "raw_input_name_1");
+    associateProcessedInput("IvsQ_22345", "raw_input_name_2");
     auto model = PlottingModel{};
     auto const workspaces = std::vector<PlottingWorkspace>{plottingWorkspace("IvsQ_12345", {"12345"}),
                                                            plottingWorkspace("IvsQ_22345", {"22345"})};
@@ -365,30 +314,16 @@ public:
 
     auto const expected = std::vector<std::string>{"__isis_refl_det_map_IvsQ_12345", "__isis_refl_det_map_IvsQ_22345"};
     TS_ASSERT_EQUALS(workspacesForPlotting, expected);
+    assertYValue("__isis_refl_det_map_IvsQ_12345", 14.0);
+    assertYValue("__isis_refl_det_map_IvsQ_22345", 24.0);
     TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_det_map_IvsQ_12345"));
     TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("__isis_refl_det_map_IvsQ_22345"));
-  }
-
-  void testDetectorMapFindsPeriodSpecificTOFWorkspaceInTOFGroup() {
-    createConstantWorkspace("IvsQ_12345_2", -100.0);
-    createDetectorMapInputWorkspace("period_1_raw_input_name", "12345", 10.0, 1);
-    createDetectorMapInputWorkspace("period_2_raw_input_name", "12345", 20.0, 2);
-    createTOFGroup({"period_1_raw_input_name", "period_2_raw_input_name"});
-    auto model = PlottingModel{};
-    auto const workspaces = std::vector<PlottingWorkspace>{plottingWorkspace("IvsQ_12345_2", {"12345"}, 2)};
-    auto const workspacesForPlotting = model.workspacesForPlotting(workspaces, detectorMapOutputSelection());
-
-    auto const expected = std::vector<std::string>{"__isis_refl_det_map_IvsQ_12345_2"};
-    TS_ASSERT_EQUALS(workspacesForPlotting, expected);
-    auto outputWorkspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
-        "__isis_refl_det_map_IvsQ_12345_2");
-    TS_ASSERT_DELTA(outputWorkspace->y(0)[0], 24.0, 1e-12);
   }
 
   void testDetectorMapCanConvertXAxisToLambda() {
     createConstantWorkspace("IvsQ_12345", -100.0);
     createDetectorMapInputWorkspace("raw_input_name", "12345", 10.0);
-    createTOFGroup({"raw_input_name"});
+    associateProcessedInput("IvsQ_12345", "raw_input_name");
     auto model = PlottingModel{};
     auto const workspacesForPlotting =
         model.workspacesForPlotting(plottingWorkspaces({"IvsQ_12345"}),
@@ -403,7 +338,7 @@ public:
   void testDetectorMapCanUseThetaYAxis() {
     createConstantWorkspace("IvsQ_12345", -100.0);
     createDetectorMapInputWorkspace("raw_input_name", "12345", 10.0);
-    createTOFGroup({"raw_input_name"});
+    associateProcessedInput("IvsQ_12345", "raw_input_name");
     auto model = PlottingModel{};
     model.workspacesForPlotting(plottingWorkspaces({"IvsQ_12345"}),
                                 detectorMapOutputSelection(DetectorMapXAxis::TimeOfFlight, DetectorMapYAxis::Theta));
@@ -417,7 +352,7 @@ public:
   void testDetectorMapReusesExistingGeneratedWorkspace() {
     createConstantWorkspace("IvsQ_12345", -100.0);
     createDetectorMapInputWorkspace("raw_input_name", "12345", 10.0);
-    createTOFGroup({"raw_input_name"});
+    associateProcessedInput("IvsQ_12345", "raw_input_name");
     auto model = PlottingModel{};
     auto const workspaces = plottingWorkspaces({"IvsQ_12345"});
     model.workspacesForPlotting(workspaces, detectorMapOutputSelection());
@@ -435,7 +370,8 @@ public:
     createConstantWorkspace("IvsQ_12345--", -100.0, "12345--");
     createDetectorMapInputWorkspace("raw_input_name_plus", "12345++", 10.0);
     createDetectorMapInputWorkspace("raw_input_name_minus", "12345--", 20.0);
-    createTOFGroup({"raw_input_name_plus", "raw_input_name_minus"});
+    associateProcessedInput("IvsQ_12345++", "raw_input_name_plus");
+    associateProcessedInput("IvsQ_12345--", "raw_input_name_minus");
     auto model = PlottingModel{};
     auto const workspaces = std::vector<PlottingWorkspace>{plottingWorkspace("IvsQ_12345++", {"12345++"}),
                                                            plottingWorkspace("IvsQ_12345--", {"12345--"})};
@@ -451,7 +387,7 @@ public:
   void testDetectorMapThrowsForUnsupportedInstrument() {
     createConstantWorkspace("IvsQ_12345", -100.0);
     createDetectorMapInputWorkspace("raw_input_name", "12345", 10.0);
-    createTOFGroup({"raw_input_name"});
+    associateProcessedInput("IvsQ_12345", "raw_input_name");
     auto model = PlottingModel{};
     auto outputSelection = detectorMapOutputSelection();
     outputSelection.instrumentName = "UNKNOWN";
@@ -558,13 +494,18 @@ private:
     }
   }
 
-  void createTOFGroup(std::vector<std::string> const &workspaceNames, std::string const &groupName = "TOF") {
-    auto group = std::make_shared<Mantid::API::WorkspaceGroup>();
-    for (auto const &workspaceName : workspaceNames) {
-      group->addWorkspace(
-          Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(workspaceName));
+  void associateProcessedInput(std::string const &outputName, std::string const &inputId,
+                               std::string const &groupName = "TOF_processed") {
+    auto &ads = Mantid::API::AnalysisDataService::Instance();
+    auto output = ads.retrieveWS<Mantid::API::MatrixWorkspace>(outputName);
+    output->mutableRun().addProperty("reflectometry_processed_tof_id", inputId);
+    auto group = ads.doesExist(groupName) ? ads.retrieveWS<Mantid::API::WorkspaceGroup>(groupName)
+                                          : std::make_shared<Mantid::API::WorkspaceGroup>();
+    for (auto const &input : getMembers(ads.retrieve(inputId))) {
+      input->mutableRun().addProperty("reflectometry_processed_tof_id", inputId);
+      group->addWorkspace(input);
     }
-    Mantid::API::AnalysisDataService::Instance().addOrReplace(groupName, group);
+    ads.addOrReplace(groupName, group);
   }
 
   void assertYValue(std::string const &workspaceName, double expected, size_t const binIndex = 0,

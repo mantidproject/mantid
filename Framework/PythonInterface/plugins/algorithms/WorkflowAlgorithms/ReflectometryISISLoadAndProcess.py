@@ -7,7 +7,10 @@
 
 from mantid.api import AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, WorkspaceGroup
 
-from mantid.simpleapi import MergeRuns
+from contextlib import contextmanager
+from uuid import uuid4
+
+from mantid.simpleapi import RenameWorkspace
 
 from mantid.kernel import (
     CompositeValidator,
@@ -54,8 +57,13 @@ class Prop:
 class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
     _CALIBRATION_FILE_LOG = "reflectometry_calibration_file"
     _ADJUSTED_THETA_LOG = "reflectometry_adjusted_theta"
+    _PROCESSED_TOF_ID_LOG = "reflectometry_processed_tof_id"
+    _CACHED_GROUP_NAME_LOG = "reflectometry_cached_group_name"
     _POLREF = "POLREF"
     _POLREF_START_WS_INDEX = 4
+    _INPUT_WS_INDEX = 0
+    _FIRST_TRANS_WS_INDEX = 1
+    _SECOND_TRANS_WS_INDEX = 2
 
     def __init__(self):
         """Initialize an instance of the algorithm."""
@@ -98,68 +106,139 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
     def PyExec(self):
         """Execute the algorithm."""
-        if self.getProperty(Prop.HIDE_INPUT).value:
-            self._tofPrefix = "__" + self._tofPrefix
-            self._transPrefix = "__" + self._transPrefix
-        self._reload = self.getProperty(Prop.RELOAD).value
-        # Convert run numbers to real workspaces
-        inputRuns = self.getProperty(Prop.RUNS).value
-        inputWorkspaces = self._getInputWorkspaces(inputRuns, False)
-        firstTransRuns = self.getProperty(Prop.FIRST_TRANS_RUNS).value
-        firstTransWorkspaces = self._getInputWorkspaces(firstTransRuns, True)
-        secondTransRuns = self.getProperty(Prop.SECOND_TRANS_RUNS).value
-        secondTransWorkspaces = self._getInputWorkspaces(secondTransRuns, True)
-        # Combine multiple input runs, if required
-        inputWorkspace = self._sumWorkspaces(inputWorkspaces, False)
-        firstTransWorkspace = self._sumWorkspaces(firstTransWorkspaces, True)
-        secondTransWorkspace = self._sumWorkspaces(secondTransWorkspaces, True)
-        nominal_specular_pixel = self.getProperty(Prop.NOMINAL_SPECULAR_PIXEL).value
-        if self.getProperty(Prop.NOMINAL_SPECULAR_PIXEL).isDefault:
-            nominal_specular_pixel = self.getProperty(Prop.ACTUAL_SPECULAR_PIXEL).value
-        inputWorkspace, adjusted_theta = self._calibrate_workspace(inputWorkspace, adjust_theta=True)
-        firstTransWorkspace, _ = self._calibrate_workspace(
-            firstTransWorkspace, experiment_angle=0, specular_spectrum_no=nominal_specular_pixel
-        )
-        secondTransWorkspace, _ = self._calibrate_workspace(
-            secondTransWorkspace, experiment_angle=0, specular_spectrum_no=nominal_specular_pixel
-        )
-        # Check if we will need to sum banks as part of the reduction
-        self._should_sum_banks(inputWorkspace, firstTransWorkspace, secondTransWorkspace)
-        # Slice the input workspace, if required
+        cloned_workspaces, input_workspace_names = self._load()
+        cloned_workspace_names, cloned_workspace_objects = zip(*cloned_workspaces)
+        adjusted_theta = self._calibrate(*cloned_workspace_objects)
+        self._should_sum_banks(*cloned_workspace_objects)
         if self._slicingEnabled():
-            to_reduce = self._sliceWorkspace(inputWorkspace)
+            # clones monitor workspace - input detector workspace is already a clone
+            to_reduce = self._sliceWorkspace(cloned_workspace_objects[self._INPUT_WS_INDEX], cloned_workspace_names[self._INPUT_WS_INDEX])
         else:
-            to_reduce = [inputWorkspace]
+            to_reduce = [cloned_workspace_objects[self._INPUT_WS_INDEX]]
         # Perform the reduction
         is_multi_reduction = len(to_reduce) > 1
         finished_algs = []
-        for ws in to_reduce:
-            alg = self._reduce(ws, firstTransWorkspace, secondTransWorkspace, adjusted_theta, is_multi_reduction)
+        for cloned_workspace_slice in to_reduce:
+            # replace original input workspace with the slice
+            slice_specific_input_workspaces = [
+                (cloned_workspace_names[self._INPUT_WS_INDEX], cloned_workspace_slice),
+                *cloned_workspaces[self._FIRST_TRANS_WS_INDEX :],
+            ]
+            alg = self._reduce(
+                slice_specific_input_workspaces,
+                adjusted_theta,
+                is_multi_reduction,
+            )
             finished_algs.append(alg)
         # Set outputs and tidy TOF workspaces into a group
         self._finalize(finished_algs)
-        self._groupTOFWorkspaces(inputWorkspaces)
+        processed_workspace_name = self._publish_processed_input(cloned_workspace_objects[self._INPUT_WS_INDEX], finished_algs)
+        self._groupTOFWorkspaces(input_workspace_names)
+        self._groupProcessedTOFWorkspaces([processed_workspace_name, *(workspace.name() for workspace in to_reduce)], input_workspace_names)
+
+    def _publish_processed_input(self, cloned_workspace, finished_algs):
+        """Retain the full-detector working input for diagnostics without another copy."""
+        workspace_name = finished_algs[0].getPropertyValue(Prop.OUTPUT_WS_BINNED) + "_processed_tof"
+        if self.getProperty(Prop.HIDE_INPUT).value and not workspace_name.startswith("__"):
+            workspace_name = "__" + workspace_name
+
+        def publish(workspace, name):
+            if isinstance(workspace, WorkspaceGroup):
+                for index, member in enumerate(workspace):
+                    publish(member, f"{name}_{index + 1}")
+            else:
+                workspace.mutableRun().addProperty(self._PROCESSED_TOF_ID_LOG, workspace_name, True)
+            AnalysisDataService.addOrReplace(name, workspace)
+
+        publish(cloned_workspace, workspace_name)
+        for alg in finished_algs:
+            for property_name in (Prop.OUTPUT_WS, Prop.OUTPUT_WS_BINNED, Prop.OUTPUT_WS_LAM):
+                output_workspace = alg.getProperty(property_name).value
+                for member in output_workspace if isinstance(output_workspace, WorkspaceGroup) else [output_workspace]:
+                    if member is not None:
+                        member.mutableRun().addProperty(self._PROCESSED_TOF_ID_LOG, workspace_name, True)
+        return workspace_name
+
+    def _load(self):
+        hide_inputs = self.getProperty(Prop.HIDE_INPUT).value
+        self._tofPrefix = "__TOF_" if hide_inputs else "TOF_"
+        self._transPrefix = "__TRANS_" if hide_inputs else "TRANS_"
+        self._reload = self.getProperty(Prop.RELOAD).value
+        # Convert run numbers to real workspaces
+        inputRuns = self.getProperty(Prop.RUNS).value
+        input_workspace_names = self._getInputWorkspaces(inputRuns, False)
+        firstTransRuns = self.getProperty(Prop.FIRST_TRANS_RUNS).value
+        first_transmission_workspace_names = self._getInputWorkspaces(firstTransRuns, True)
+        secondTransRuns = self.getProperty(Prop.SECOND_TRANS_RUNS).value
+        second_transmission_workspace_names = self._getInputWorkspaces(secondTransRuns, True)
+        # clones input, either directly (single inputs) or via merge.
+        cloned_input_workspace, cloned_input_workspace_name = self._sumWorkspaces(input_workspace_names, False)
+        cloned_first_transmission_workspace, cloned_first_transmission_workspace_name = self._sumWorkspaces(
+            first_transmission_workspace_names, True
+        )
+        cloned_second_transmission_workspace, cloned_second_transmission_workspace_name = self._sumWorkspaces(
+            second_transmission_workspace_names, True
+        )
+        reduction_inputs = (
+            (cloned_input_workspace_name, cloned_input_workspace),
+            (cloned_first_transmission_workspace_name, cloned_first_transmission_workspace),
+            (cloned_second_transmission_workspace_name, cloned_second_transmission_workspace),
+        )
+        return reduction_inputs, input_workspace_names
+
+    def _calibrate(self, cloned_workspace, cloned_first_transmission_workspace, cloned_second_transmission_workspace):
+        nominal_specular_pixel = self.getProperty(Prop.NOMINAL_SPECULAR_PIXEL).value
+        if self.getProperty(Prop.NOMINAL_SPECULAR_PIXEL).isDefault:
+            nominal_specular_pixel = self.getProperty(Prop.ACTUAL_SPECULAR_PIXEL).value
+        cloned_workspace, adjusted_theta = self._calibrate_workspace(cloned_workspace, adjust_theta=True)
+        cloned_first_transmission_workspace, _ = self._calibrate_workspace(
+            cloned_first_transmission_workspace, experiment_angle=0, specular_spectrum_no=nominal_specular_pixel
+        )
+        cloned_second_transmission_workspace, _ = self._calibrate_workspace(
+            cloned_second_transmission_workspace, experiment_angle=0, specular_spectrum_no=nominal_specular_pixel
+        )
+        return adjusted_theta
 
     def _groupTOFWorkspaces(self, inputWorkspaces):
-        """Put all of the TOF workspaces into a group called 'TOF' to hide some noise
-        for the user."""
+        """Group cached inputs and monitors in TOF or __TOF."""
         if not self.getProperty(Prop.GROUP_TOF).value:
             return
-        tofWorkspaces = set(inputWorkspaces)
+        tofWorkspaces = list(inputWorkspaces)
         # If slicing, also group the monitor workspace (note that there is only one
         # input run when slicing)
         if self._slicingEnabled():
-            tofWorkspaces.add(_monitorWorkspace(inputWorkspaces[0]))
-        # Add summed segment workspaces to TOF group
-        for workspace_name in inputWorkspaces:
-            summed_seg_name = _summedSegmentWorkspace(workspace_name)
-            if AnalysisDataService.doesExist(summed_seg_name):
-                tofWorkspaces.add(summed_seg_name)
+            tofWorkspaces.append(_monitorWorkspace(inputWorkspaces[0]))
         # Create the group
         if self.getProperty(Prop.HIDE_INPUT).value:
             self._group_workspaces(tofWorkspaces, "__TOF")
         else:
             self._group_workspaces(tofWorkspaces, "TOF")
+
+        # Remove group workspaces whose members have now been flattened into TOF
+        cached_group_names = [
+            workspace_name
+            for workspace_name in dict.fromkeys(tofWorkspaces)
+            if AnalysisDataService.doesExist(workspace_name) and isinstance(AnalysisDataService.retrieve(workspace_name), WorkspaceGroup)
+        ]
+        for workspace_name in cached_group_names:
+            AnalysisDataService.remove(workspace_name)
+
+    def _groupProcessedTOFWorkspaces(self, workspace_names, input_workspace_names):
+        """Group processed inputs, collapsed slices and bank sums in TOF_processed or __TOF_processed."""
+        if not self.getProperty(Prop.GROUP_TOF).value:
+            return
+        processed_workspace_names = list(workspace_names)
+        for input_workspace_name in input_workspace_names:
+            summed_workspace_name = _summedSegmentWorkspace(input_workspace_name)
+            if AnalysisDataService.doesExist(summed_workspace_name):
+                processed_workspace_names.append(summed_workspace_name)
+        processed_workspace_names = list(dict.fromkeys(processed_workspace_names))
+        group_name = "__TOF_processed" if self.getProperty(Prop.HIDE_INPUT).value else "TOF_processed"
+        self._group_workspaces(processed_workspace_names, group_name)
+        # Only the flattened TOF members are needed after successful grouping.
+        for workspace_name in processed_workspace_names:
+            if isinstance(AnalysisDataService.retrieve(workspace_name), WorkspaceGroup):
+                AnalysisDataService.remove(workspace_name)
 
     def validateInputs(self):
         """Return a dictionary containing issues found in properties."""
@@ -345,39 +424,85 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         )
 
     def _getInputWorkspaces(self, runs, isTrans):
-        """Convert the given run numbers into real workspace names. Uses workspaces from
-        the ADS if they exist, or loads them otherwise."""
-        resolved_inputs = []
+        """Resolve run numbers to logical input names, reusing cached workspaces or loading them."""
+        workspaces = []
         for run in runs:
             ws = self._getRunFromADSOrNone(run, isTrans)
-            load_from_source = ws is None
-            if load_from_source:
+            if ws is None:
                 ws = self._loadRun(run, isTrans)
             if not ws:
                 raise RuntimeError("Error loading run " + run)
-            resolved_inputs.append((run, ws, load_from_source))
 
-        workspaces = [ws for _, ws, _ in resolved_inputs]
-        if self._inputs_require_raw_reload(workspaces):
-            workspaces = [
-                self._raw_input_workspace(run, ws, isTrans, loaded_from_source) for run, ws, loaded_from_source in resolved_inputs
-            ]
+            # Stamp group workspace members so their original group name can be identified when ungrouped.
+            for workspace_name in (ws, _monitorWorkspace(ws)):
+                workspace = self._get_cached_workspace(workspace_name)
+                if isinstance(workspace, WorkspaceGroup):
+                    for member in workspace:
+                        member.mutableRun().addProperty(self._CACHED_GROUP_NAME_LOG, workspace_name, True)
+            workspaces.append(ws)
         return workspaces
 
-    def _raw_input_workspace(self, run, workspace_name, is_transmission, loaded_from_source):
-        workspace = AnalysisDataService.retrieve(workspace_name)
-        if self._workspaceIsRaw(workspace):
-            return workspace_name
-        if loaded_from_source:
-            raise RuntimeError(
-                "Cannot obtain uncalibrated input workspaces for post-summation calibration; "
-                "workspace loaded from file is already calibrated."
+    def _clone_workspace(self, input_workspace):
+        if isinstance(input_workspace, WorkspaceGroup):
+            return self._create_workspace_group_from_members(
+                [self._clone_workspace(input_member_workspace) for input_member_workspace in input_workspace]
             )
+        alg = self.createChildAlgorithm("CloneWorkspace", InputWorkspace=input_workspace)
+        alg.execute()
+        return alg.getProperty("OutputWorkspace").value
 
-        workspace_name = self._loadRun(run, is_transmission)
-        if not workspace_name or not self._workspaceIsRaw(AnalysisDataService.retrieve(workspace_name)):
-            raise RuntimeError("Cannot obtain uncalibrated input workspaces for post-summation calibration.")
-        return workspace_name
+    @contextmanager
+    def _temporary_ads_workspaces(self, workspace_inputs, require_names=False):
+        """Register inputs together, removing only registrations created in this scope."""
+        workspace_names = {}
+
+        def register(cloned_workspace, input_workspace_name):
+            if cloned_workspace.name() and AnalysisDataService.doesExist(cloned_workspace.name()):
+                return cloned_workspace.name()
+            if isinstance(cloned_workspace, WorkspaceGroup):
+                register_args = map_cloned_group_member_to_input_name(cloned_workspace, input_workspace_name)
+                for cloned_member_workspace, input_member_workspace_name in register_args:
+                    register(cloned_member_workspace, input_member_workspace_name)
+            cloned_workspace_name = "_refl_work_" + uuid4().hex + "_" + input_workspace_name
+            AnalysisDataService.add(cloned_workspace_name, cloned_workspace)
+            workspace_names[cloned_workspace_name] = input_workspace_name
+            return cloned_workspace_name
+
+        def map_cloned_group_member_to_input_name(cloned_workspace, input_workspace_name):
+            cached_input_group = self._get_cached_workspace(input_workspace_name)
+            member_to_name_list = []
+            for index, cloned_member_workspace in enumerate(cloned_workspace):
+                # Preserve cached member names; merged groups have no cached group, so generate names.
+                input_member_workspace_name = (
+                    cached_input_group[index].name()
+                    if isinstance(cached_input_group, WorkspaceGroup)
+                    else f"{input_workspace_name}_{index + 1}"
+                )
+                member_to_name_list.append((cloned_member_workspace, input_member_workspace_name))
+            return member_to_name_list
+
+        try:
+            input_properties = {}
+            for property_name, input_workspace_name, cloned_workspace in workspace_inputs:
+                property_value = cloned_workspace
+                if cloned_workspace is not None and (require_names or isinstance(cloned_workspace, WorkspaceGroup)):
+                    property_value = register(cloned_workspace, input_workspace_name)
+                input_properties[property_name] = property_value
+            yield input_properties, workspace_names
+        finally:
+            for cloned_workspace_name in reversed(workspace_names):
+                AnalysisDataService.remove(cloned_workspace_name)
+
+    @staticmethod
+    def _rename_summed_workspaces(workspace_names):
+        for cloned_workspace_name, input_workspace_name in workspace_names.items():
+            for hidden_prefix in ("", "__"):
+                summed_workspace_name = _summedSegmentWorkspace(hidden_prefix + cloned_workspace_name)
+                if AnalysisDataService.doesExist(summed_workspace_name):
+                    public_workspace_name = (
+                        input_workspace_name if input_workspace_name.startswith("__") else hidden_prefix + input_workspace_name
+                    )
+                    RenameWorkspace(InputWorkspace=summed_workspace_name, OutputWorkspace=_summedSegmentWorkspace(public_workspace_name))
 
     def _loadFloodCorrectionWorkspace(self):
         flood_workspace = self.getPropertyValue("FloodWorkspace")
@@ -428,13 +553,12 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             return
 
         perform_sum = []
-        for workspace_name, inspect_all_group_members in [
+        for workspace, inspect_all_group_members in [
             (inputWorkspace, True),
             (firstTransWorkspace, False),
             (secondTransWorkspace, False),
         ]:
-            if workspace_name is not None:
-                workspace = AnalysisDataService.retrieve(workspace_name)
+            if workspace is not None:
                 if isinstance(workspace, WorkspaceGroup):
                     workspaces = workspace if inspect_all_group_members else [workspace[0]]
                 else:
@@ -519,10 +643,15 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
                     raise RuntimeError(message)
             return True
 
-        if not _hasWorkspaceID(workspace_name, workspace_id):
+        workspace = self._get_cached_workspace(workspace_name)
+
+        if self._representative_workspace(workspace).id() != workspace_id:
             message = "Workspace " + workspace_name + " exists but is not a " + workspace_id
             if self._reload:
                 self.log().information(message)
+                if isinstance(workspace, WorkspaceGroup):
+                    for member in list(workspace):
+                        _removeWorkspace(member.name())
                 _removeWorkspace(workspace_name)
                 return False
             else:
@@ -530,7 +659,6 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
         # For event workspaces, the monitors workspace must also exist, otherwise it's not valid
         if workspace_id == "EventWorkspace":
-            workspace = AnalysisDataService.retrieve(workspace_name)
             if workspace.isGroup():
                 return all([check_for_monitors(member.name()) for member in workspace])
             return check_for_monitors(workspace_name)
@@ -538,7 +666,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
     def _workspaceExistsAndIsValid(self, workspace_name, isTrans):
         """Return true, if the given workspace exists in the ADS and is valid"""
-        if not AnalysisDataService.doesExist(workspace_name):
+        if self._get_cached_workspace(workspace_name) is None:
             self.log().information("Workspace " + workspace_name + " does not exist")
             return False
         self.log().information("Workspace " + workspace_name + " exists")
@@ -550,55 +678,31 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         if not is_valid:
             return False
 
-        workspace = AnalysisDataService.retrieve(workspace_name)
-        if (
-            self.getPropertyValue("CalibrationFile")
-            and self._workspaceHasCalibration(workspace)
-            and not self._workspaceHasRequestedCalibration(workspace)
-        ):
-            self.log().information(f'Workspace "{workspace_name}" does not have the requested calibration')
-            return False
         return True
-
-    def _workspaceHasCalibration(self, workspace):
-        return self._representative_workspace(workspace).run().hasProperty(self._CALIBRATION_FILE_LOG)
-
-    def _workspaceHasRequestedCalibration(self, workspace):
-        calibration_filepath = self.getPropertyValue("CalibrationFile")
-        if not calibration_filepath:
-            return True
-        run = self._representative_workspace(workspace).run()
-        return run.hasProperty(self._CALIBRATION_FILE_LOG) and run.getProperty(self._CALIBRATION_FILE_LOG).value == calibration_filepath
-
-    def _inputs_require_raw_reload(self, workspace_names):
-        """Return whether cached geometry is unsafe to reuse for the current input set.
-
-        An adjusted angle may have been calculated from a different set of summed inputs,
-        so angle-dependent geometry must always be recreated from raw workspaces.
-        """
-        if not self.getPropertyValue("CalibrationFile"):
-            return False
-        workspaces = [AnalysisDataService.retrieve(name) for name in workspace_names]
-        if any(self._workspaceHasAngleCorrection(workspace) for workspace in workspaces):
-            return True
-        if not any(self._workspaceHasCalibration(workspace) for workspace in workspaces):
-            return False
-        return not all([self._workspaceHasRequestedCalibration(workspace) for workspace in workspaces])
-
-    def _workspaceIsRaw(self, workspace):
-        return not self._workspaceHasCalibration(workspace) and not self._workspaceHasAngleCorrection(workspace)
-
-    def _workspaceHasAngleCorrection(self, workspace):
-        return self._representative_workspace(workspace).run().hasProperty(self._ADJUSTED_THETA_LOG)
 
     @staticmethod
     def _representative_workspace(workspace):
         return workspace[0] if isinstance(workspace, WorkspaceGroup) else workspace
 
+    def _get_cached_workspace(self, workspace_name):
+        """Resolve an ADS input or its ordered members in a flattened TOF cache."""
+        if AnalysisDataService.doesExist(workspace_name):
+            return AnalysisDataService.retrieve(workspace_name)
+        for group_name in ("TOF", "__TOF"):
+            if not AnalysisDataService.doesExist(group_name):
+                continue
+            members = [
+                member
+                for member in AnalysisDataService.retrieve(group_name)
+                if member.run().hasProperty(self._CACHED_GROUP_NAME_LOG)
+                and member.run().getProperty(self._CACHED_GROUP_NAME_LOG).value == workspace_name
+            ]
+            if members:
+                return self._create_workspace_group_from_members(members)
+        return None
+
     def _getRunFromADSOrNone(self, run, isTrans):
-        """Given a run name, return the name of the equivalent workspace in the ADS (
-        which may or may not have a prefix applied). Returns None if the workspace does
-        not exist or is not valid for the requested reflectometry reduction."""
+        """Return the logical name of a valid cached input, with or without its prefix."""
         # Try given run number
         workspace_name = run
         if self._workspaceExistsAndIsValid(workspace_name, isTrans):
@@ -611,23 +715,15 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         return None
 
     def _collapse_workspace_groups(self, workspaces):
-        """Given a list of workspaces, which themselves could be groups of workspaces,
-        return a new list of workspaces which are TOF"""
-        ungrouped_workspaces = set([])
-        delete_ws_group_flag = True
-        for ws_name in workspaces:
-            ws = AnalysisDataService.retrieve(ws_name)
-            if isinstance(ws, WorkspaceGroup):
-                ungrouped_workspaces = ungrouped_workspaces.union(self._collapse_workspace_groups(ws.getNames()))
-                if delete_ws_group_flag is True:
-                    AnalysisDataService.remove(ws_name)
-            else:
-                if (ws.getAxis(0).getUnit().unitID()) == "TOF":
-                    ungrouped_workspaces.add(ws_name)
-                else:
-                    # Do not remove the workspace group from the ADS if a non-TOF workspace exists
-                    delete_ws_group_flag = False
-        return ungrouped_workspaces
+        """Return unique TOF members in input order."""
+        ungrouped_workspaces = []
+        for name in workspaces:
+            workspace = self._get_cached_workspace(name)
+            if isinstance(workspace, WorkspaceGroup):
+                ungrouped_workspaces.extend(self._collapse_workspace_groups(workspace.getNames()))
+            elif workspace.getAxis(0).getUnit().unitID() == "TOF":
+                ungrouped_workspaces.append(name)
+        return list(dict.fromkeys(ungrouped_workspaces))
 
     def _group_workspaces(self, workspaces, output_ws_name):
         """
@@ -652,7 +748,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
                         ws_group.add(ws)
         else:
             alg = self.createChildAlgorithm("GroupWorkspaces")
-            alg.setProperty("InputWorkspaces", list(workspaces))
+            alg.setProperty("InputWorkspaces", workspaces)
             alg.setProperty("OutputWorkspace", output_ws_name)
             alg.execute()
             ws_group = alg.getProperty("OutputWorkspace").value
@@ -689,17 +785,12 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         args = {"InputRunList": [run], "EventMode": event_mode}
         return args
 
-    def _calibrate_workspace(self, workspace_name, adjust_theta=False, experiment_angle=None, specular_spectrum_no=None):
+    def _calibrate_workspace(self, workspace, adjust_theta=False, experiment_angle=None, specular_spectrum_no=None):
         calibration_filepath = self.getPropertyValue("CalibrationFile")
-        if workspace_name is None or not calibration_filepath:
-            return workspace_name, experiment_angle
-
-        workspace = AnalysisDataService.retrieve(workspace_name)
+        if workspace is None or not calibration_filepath:
+            return workspace, experiment_angle
         representative_workspace = self._representative_workspace(workspace)
         self._validate_instrument_specific_calibration_properties(representative_workspace)
-
-        if self._workspaceHasRequestedCalibration(workspace):
-            return workspace_name, experiment_angle
 
         is_group = isinstance(workspace, WorkspaceGroup)
         members = list(workspace) if is_group else [workspace]
@@ -709,13 +800,14 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             alg = self.createChildAlgorithm("ReflectometryISISCalibration")
             alg.setRethrows(True)
             alg.setProperty("InputWorkspace", member)
+            alg.setProperty("PreserveInputWorkspace", False)
             alg.setProperty("CalibrationFile", calibration_filepath)
             experiment_angle, has_angle_dependent_geometry = self._setInstrumentSpecificProperties(
                 alg, representative_workspace, adjust_theta, experiment_angle, specular_spectrum_no
             )
             alg.execute()
             calibrated_member = alg.getProperty("OutputWorkspace").value
-            calibrated_member.run().addProperty(self._CALIBRATION_FILE_LOG, calibration_filepath, True)
+            calibrated_member.mutableRun().addProperty(self._CALIBRATION_FILE_LOG, calibration_filepath, True)
             #  Only return the adjusted theta from the first member of a group, since it should be the same for all members
             if has_angle_dependent_geometry and member_index == 0:
                 adjusted_theta = experiment_angle
@@ -724,8 +816,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             calibrated_members.append(calibrated_member)
 
         calibrated_workspace = self._create_workspace_group_from_members(calibrated_members) if is_group else calibrated_members[0]
-        AnalysisDataService.addOrReplace(workspace_name, calibrated_workspace)
-        return workspace_name, adjusted_theta
+        return calibrated_workspace, adjusted_theta
 
     def _create_workspace_group_from_members(self, members):
         group = WorkspaceGroup()
@@ -794,28 +885,20 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         upper_spectrum_no = workspace.getSpectrum(lower_index + 1).getSpectrumNo()
         return lower_spectrum_no + fraction * (upper_spectrum_no - lower_spectrum_no)
 
-    def _sumWorkspaces(self, workspaces, isTrans):
-        """If there are multiple input workspaces, sum them and return the result. Otherwise
-        just return the single input workspace, or None if the list is empty"""
-        if len(workspaces) < 1:
-            return None
-        if len(workspaces) < 2:
-            return workspaces[0]
-        workspaces_without_prefixes = [self._removePrefix(ws, isTrans) for ws in workspaces]
-        concatenated_names = "+".join(workspaces_without_prefixes)
-        summed_name = self._prefixedName(concatenated_names, isTrans)
-        self.log().information("Summing workspaces" + " ".join(workspaces) + " into " + summed_name)
-        summed_ws = MergeRuns(InputWorkspaces=", ".join(workspaces), OutputWorkspace=summed_name)
-        # The reduction algorithm sets the output workspace names from the run number,
-        # which by default is just the first run. Set it to the concatenated name,
-        # e.g. 13461+13462
-        if isinstance(summed_ws, WorkspaceGroup):
-            for workspaceName in summed_ws.getNames():
-                grouped_ws = AnalysisDataService.retrieve(workspaceName)
-                grouped_ws.run().addProperty("run_number", concatenated_names, True)
-        else:
-            summed_ws.run().addProperty("run_number", concatenated_names, True)
-        return summed_name
+    def _sumWorkspaces(self, input_workspace_names, isTrans):
+        if not input_workspace_names:
+            return None, ""
+        if len(input_workspace_names) == 1:
+            return self._clone_workspace(self._get_cached_workspace(input_workspace_names[0])), input_workspace_names[0]
+        run_numbers = "+".join(self._removePrefix(input_workspace_name, isTrans) for input_workspace_name in input_workspace_names)
+        workspace_inputs = [(str(index), name, self._get_cached_workspace(name)) for index, name in enumerate(input_workspace_names)]
+        with self._temporary_ads_workspaces(workspace_inputs, require_names=True) as (input_properties, _):
+            alg = self.createChildAlgorithm("MergeRuns", InputWorkspaces=list(input_properties.values()))
+            alg.execute()
+            summed_workspace = alg.getProperty("OutputWorkspace").value
+        for member in summed_workspace if isinstance(summed_workspace, WorkspaceGroup) else [summed_workspace]:
+            member.mutableRun().addProperty("run_number", run_numbers, True)
+        return summed_workspace, self._prefixedName(run_numbers, isTrans)
 
     def _slicingEnabled(self):
         return self.getProperty(Prop.SLICE).value
@@ -848,64 +931,81 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         alg.setProperty("StartTime", str(run.startTime()))
         alg.setProperty("StopTime", str(run.endTime()))
 
-    def _runSliceAlgorithm(self, input_workspace, output_workspace):
+    def _runSliceAlgorithm(self, input_workspace_name, monitor_workspace_name, output_workspace_name):
         """Run the child algorithm to perform the slicing"""
         self.log().information("Running ReflectometrySliceEventWorkspace")
         alg = self.createChildAlgorithm("ReflectometrySliceEventWorkspace")
         for property in self._slice_properties:
             alg.setProperty(property, self.getPropertyValue(property))
-        alg.setProperty("OutputWorkspaceName", output_workspace)
-        alg.setProperty("InputWorkspaceName", input_workspace)
-        alg.setProperty("MonitorWorkspaceName", _monitorWorkspace(input_workspace))
-        self._setUniformNumberOfSlices(alg, input_workspace)
-        self._setSliceStartStopTimes(alg, input_workspace)
+        alg.setProperty("OutputWorkspaceName", output_workspace_name)
+        alg.setProperty("InputWorkspaceName", input_workspace_name)
+        alg.setProperty("MonitorWorkspaceName", monitor_workspace_name)
+        self._setUniformNumberOfSlices(alg, input_workspace_name)
+        self._setSliceStartStopTimes(alg, input_workspace_name)
         alg.execute()
 
         return alg.getProperty("OutputWorkspaceNames").value
 
-    def _sliceWorkspace(self, workspace):
-        # Perform the slicing
-        sliced_workspace_name = self._getSlicedWorkspaceGroupName(workspace)
-        self.log().information("Slicing workspace " + workspace + " into " + sliced_workspace_name)
-        slice_output = self._runSliceAlgorithm(workspace, sliced_workspace_name)
-        if isinstance(slice_output, list):
-            # We've sliced a group into one group for each slice. This is a list of their names.
-            return slice_output
-        # We've sliced a matrix into a group.
-        return [sliced_workspace_name]
+    # Clone the cached monitors before slicing; the supplied sample is already a working copy.
+    def _sliceWorkspace(self, cloned_workspace, input_workspace_name):
+        input_monitor_workspace_name = _monitorWorkspace(input_workspace_name)
+        cloned_monitor_workspace = self._clone_workspace(self._get_cached_workspace(input_monitor_workspace_name))
+        workspace_inputs = [
+            ("InputWorkspaceName", input_workspace_name, cloned_workspace),
+            ("MonitorWorkspaceName", input_monitor_workspace_name, cloned_monitor_workspace),
+        ]
+        with self._temporary_ads_workspaces(workspace_inputs, require_names=True) as (input_properties, workspace_names):
+            sliced_workspace_name = input_workspace_name + "_sliced"
+            output_workspace_names = self._runSliceAlgorithm(
+                input_properties["InputWorkspaceName"], input_properties["MonitorWorkspaceName"], sliced_workspace_name
+            )
+            sliced_workspace_names = output_workspace_names if isinstance(output_workspace_names, list) else [sliced_workspace_name]
+            # Slices are public outputs; retain input workspace member names for grouped data.
+            for group_workspace_name in sliced_workspace_names:
+                for member_workspace in AnalysisDataService.retrieve(group_workspace_name):
+                    public_workspace_name = member_workspace.name()
+                    for cloned_workspace_name, input_workspace_name in sorted(
+                        workspace_names.items(), key=lambda item: len(item[0]), reverse=True
+                    ):
+                        public_workspace_name = public_workspace_name.replace(cloned_workspace_name, input_workspace_name)
+                    if public_workspace_name != member_workspace.name():
+                        RenameWorkspace(InputWorkspace=member_workspace, OutputWorkspace=public_workspace_name)
+        return [AnalysisDataService.retrieve(workspace_name) for workspace_name in sliced_workspace_names]
 
-    def _getSlicedWorkspaceGroupName(self, workspace):
-        if not self.getProperty("OutputWorkspace").isDefault:
-            return self.getPropertyValue("OutputWorkspace")
-        return workspace + "_sliced"
-
-    def _reduce(self, input_workspace, first_trans_workspace, second_trans_workspace, adjusted_theta=None, multi_reduction: bool = False):
+    def _reduce(
+        self,
+        cloned_workspaces,
+        adjusted_theta=None,
+        multi_reduction: bool = False,
+    ):
         """Run the child algorithm to do the reduction. Return the child algorithm."""
-        self.log().information("Running ReflectometryReductionOneAuto on " + input_workspace)
+        self.log().information("Running ReflectometryReductionOneAuto")
         alg = self.createChildAlgorithm("ReflectometryReductionOneAuto")
         # Set properties that we copied directly from the child
         for property in self._reduction_properties:
             alg.setProperty(property, self.getPropertyValue(property))
         if adjusted_theta is not None:
             alg.setProperty("ThetaIn", adjusted_theta)
-        # Set properties that we could not take directly from the child
-        alg.setProperty("InputWorkspace", input_workspace)
-        alg.setProperty("FirstTransmissionRun", first_trans_workspace)
-        alg.setProperty("SecondTransmissionRun", second_trans_workspace)
-        flood_workspace = self._loadFloodCorrectionWorkspace()
-        if flood_workspace:
-            alg.setProperty("FloodWorkspace", flood_workspace)
-        alg.setProperty("HideSummedWorkspaces", self.getProperty(Prop.HIDE_INPUT).value)
-        efficiencies_ws = self._loadPolarizationCorrectionWorkspace()
-        if efficiencies_ws:
-            alg.setProperty("PolarizationEfficiencies", efficiencies_ws)
-        if multi_reduction:
-            name_base = AnalysisDataService.retrieve(input_workspace).name()
-            alg.setProperty(Prop.OUTPUT_WS, f"IvsQ_{name_base}")
-            alg.setProperty(Prop.OUTPUT_WS_BINNED, f"IvsQ_binned_{name_base}")
-            alg.setProperty(Prop.OUTPUT_WS_LAM, f"IvsLam_{name_base}")
-        alg.setProperty("PolarizationCorrectionInputSpinStateOrder", self._polarizationCorrectionInputSpinStateOrder())
-        alg.execute()
+        workspace_inputs = [(v, *t) for v, t in zip(("InputWorkspace", "FirstTransmissionRun", "SecondTransmissionRun"), cloned_workspaces)]
+        with self._temporary_ads_workspaces(workspace_inputs) as (input_properties, workspace_names):
+            for property_name, property_value in input_properties.items():
+                alg.setProperty(property_name, property_value)
+            alg.setProperty("PreserveInputWorkspace", False)
+            flood_workspace = self._loadFloodCorrectionWorkspace()
+            if flood_workspace:
+                alg.setProperty("FloodWorkspace", flood_workspace)
+            alg.setProperty("HideSummedWorkspaces", self.getProperty(Prop.HIDE_INPUT).value)
+            efficiencies_ws = self._loadPolarizationCorrectionWorkspace()
+            if efficiencies_ws:
+                alg.setProperty("PolarizationEfficiencies", efficiencies_ws)
+            if multi_reduction:
+                workspace_name = cloned_workspaces[self._INPUT_WS_INDEX][1].name()
+                alg.setProperty(Prop.OUTPUT_WS, f"IvsQ_{workspace_name}")
+                alg.setProperty(Prop.OUTPUT_WS_BINNED, f"IvsQ_binned_{workspace_name}")
+                alg.setProperty(Prop.OUTPUT_WS_LAM, f"IvsLam_{workspace_name}")
+            alg.setProperty("PolarizationCorrectionInputSpinStateOrder", self._polarizationCorrectionInputSpinStateOrder())
+            alg.execute()
+            self._rename_summed_workspaces(workspace_names)
         return alg
 
     def _polarizationCorrectionInputSpinStateOrder(self):
@@ -1000,14 +1100,14 @@ def _throwIfNotValidReflectometryEventWorkspace(workspace_name):
     check_workspace(workspace)
 
 
-def _monitorWorkspace(workspace):
-    """Return the associated monitor workspace name for the given workspace"""
-    return workspace + "_monitors"
+def _monitorWorkspace(workspace_name):
+    """Return the monitor workspace name associated with the input workspace name."""
+    return workspace_name + "_monitors"
 
 
-def _summedSegmentWorkspace(workspace):
-    """Return the associated summed segment workspace name for the given workspace"""
-    return workspace + "_summed_segment"
+def _summedSegmentWorkspace(workspace_name):
+    """Return the summed segment workspace name associated with the input workspace name."""
+    return workspace_name + "_summed_segment"
 
 
 def _getRunNumberAsString(workspace):
@@ -1020,15 +1120,6 @@ def _getRunNumberAsString(workspace):
         return str(workspace[0].getRunNumber())
     except:
         raise RuntimeError("Could not find run number for workspace " + workspace.getName())
-
-
-def _hasWorkspaceID(workspace_name, workspace_id):
-    """Check that a workspace has the given type"""
-    workspace = AnalysisDataService.retrieve(workspace_name)
-    if isinstance(workspace, WorkspaceGroup):
-        return workspace[0].id() == workspace_id
-    else:
-        return workspace.id() == workspace_id
 
 
 def _removeWorkspace(workspace_name):

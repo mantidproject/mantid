@@ -106,7 +106,19 @@ class INTERReductionTest(systemtesting.MantidSystemTest, ISISReflectometryWorkfl
         testReductionOfThreeAngleFringedSolidLiquidExample([45222, 45223, 45224])
         testReductionOfTwoAngleAirLiquidExample([44984, 44985])
         testFittingOfReducedData(44990, 44991, self.expected_fit_params, self.expected_fit_covariance)
-        self.finaliseResults()
+        output_names = [f"{run}_{suffix}" for run in self.run_numbers for suffix in ("IvsQ", "IvsQ_binned", "IvsLam")]
+        output_names += [f"{run}_{start}_{start + 60}_ref_binned" for run in self.event_run_numbers for start in range(0, 300, 60)]
+        output_names += self.transmission_workspace_names + ["44984_85", "44990_91", "45222_24"]
+        output_names += [
+            "D2O_IvsQ_binned",
+            "D2O_fit_NormalisedCovarianceMatrix",
+            "D2O_fit_Parameters",
+            "D2O_fit_Workspace",
+            "44990_91_scaled",
+            "44990_91_fit_Workspace",
+            "45222_filter",
+        ]
+        self.finaliseResults(output_names, expected_workspace_count=70)
 
     def regenerateReferenceFileByReducing(self):
         setupInstrument()

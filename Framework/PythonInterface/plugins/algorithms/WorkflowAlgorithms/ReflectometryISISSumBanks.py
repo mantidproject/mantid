@@ -36,6 +36,7 @@ class ReflectometryISISSumBanks(DataProcessorAlgorithm):
             doc="An input 2D detector workspace or workspace group",
         )
         self.declareProperty(self._ROI, defaultValue="", doc="List of detector IDs to include")
+        self.declareProperty("PreserveInputWorkspace", True, doc="Clone the input before applying the detector ROI mask.")
         self.declareProperty(
             WorkspaceProperty(self._OUTPUT_WS, "", direction=Direction.Output),
             doc="The preprocessed output workspace or workspace group.",
@@ -62,7 +63,7 @@ class ReflectometryISISSumBanks(DataProcessorAlgorithm):
             return input_workspace
 
         roi_detector_ids = self.getProperty(self._ROI).value
-        return self.mask_detectors(input_workspace, roi_detector_ids)
+        return self.mask_detectors(input_workspace, roi_detector_ids, self.getProperty("PreserveInputWorkspace").value)
 
     def validateInputs(self):
         issues = dict()
@@ -73,20 +74,13 @@ class ReflectometryISISSumBanks(DataProcessorAlgorithm):
             issues["InputWorkspace"] = str(err)
         return issues
 
-    def mask_detectors(self, workspace: MatrixWorkspace, roi_detector_ids: str) -> MatrixWorkspace:
-        # We need to apply the mask to the original workspace so we can extract a MaskWorkspace to use in
-        # BinaryOperateMasks which inverts it. First, we take a clone to not destructively alter the original WS
-        cloned_ws = self._run_child_with_out_props("CloneWorkspace", InputWorkspace=workspace)
-        cloned_ws = self._remove_monitors(cloned_ws)
-        self.createChildAlgorithm("MaskDetectors", Workspace=cloned_ws, DetectorList=roi_detector_ids).execute()
-        mask_ws = self._run_child_with_out_props("ExtractMask", InputWorkspace=cloned_ws)
-
+    def mask_detectors(self, workspace: MatrixWorkspace, roi_detector_ids: str, preserve_input=True) -> MatrixWorkspace:
+        mask_ws = self._run_child_with_out_props("ExtractMask", InputWorkspace=workspace, UngroupDetectors=True)
+        self.createChildAlgorithm("MaskDetectors", Workspace=mask_ws, DetectorList=roi_detector_ids).execute()
         self.createChildAlgorithm("BinaryOperateMasks", InputWorkspace1=mask_ws, OperationType="NOT", OutputWorkspace=mask_ws).execute()
-
-        # and then re-apply this to the original workspace, again taking a clone
-        cloned_ws = self._run_child_with_out_props("CloneWorkspace", InputWorkspace=workspace)
-        self.createChildAlgorithm("MaskDetectors", Workspace=cloned_ws, MaskedWorkspace=mask_ws).execute()
-        return cloned_ws
+        result = self._run_child_with_out_props("CloneWorkspace", InputWorkspace=workspace) if preserve_input else workspace
+        self.createChildAlgorithm("MaskDetectors", Workspace=result, MaskedWorkspace=mask_ws).execute()
+        return result
 
     def sum_banks(self, workspace: MatrixWorkspace, num_banks: int):
         return self._run_child_with_out_props("SmoothNeighbours", InputWorkspace=workspace, SumPixelsX=num_banks, SumPixelsY=1)
@@ -118,11 +112,6 @@ class ReflectometryISISSumBanks(DataProcessorAlgorithm):
         append_alg = self.createChildAlgorithm("AppendSpectra", InputWorkspace1=monitor_workspace, InputWorkspace2=summed_workspace)
         append_alg.execute()
         return append_alg.getProperty("OutputWorkspace").value
-
-    def _remove_monitors(self, input_workspace):
-        crop_alg = self.createChildAlgorithm("ExtractMonitors", InputWorkspace=input_workspace, DetectorWorkspace="__preview_ws_detectors")
-        crop_alg.execute()
-        return crop_alg.getProperty("DetectorWorkspace").value
 
 
 AlgorithmFactory.subscribe(ReflectometryISISSumBanks)

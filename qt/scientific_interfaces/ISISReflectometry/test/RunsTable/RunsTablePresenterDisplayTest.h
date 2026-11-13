@@ -43,12 +43,8 @@ public:
     auto presenter = makePresenter(m_view, oneGroupWithARowModel());
     auto precision = 2;
     presenter.setTablePrecision(precision);
-    auto workspace = WorkspaceCreationHelper::create2DWorkspace(1, 2);
-    workspace->mutableRun().addProperty("run_number", std::string("12345"));
     auto &ads = Mantid::API::AnalysisDataService::Instance();
-    ads.addOrReplace("TOF_12345", workspace);
     auto output = WorkspaceCreationHelper::create2DWorkspace(1, 2);
-    output->mutableRun().addProperty("run_number", std::string("12345"));
     ads.addOrReplace("IvsQ_binned_12345", output);
     getRow(presenter, 0, 0)->setOutputNames({{""}, {""}, {"IvsQ_binned_12345"}});
     Item const &row = *getRow(presenter, 0, 0);
@@ -56,17 +52,16 @@ public:
     EXPECT_CALL(m_jobs, setCellsAt(location(0, 0), _)).Times(4).WillRepeatedly(testing::SaveArg<1>(&cells));
     presenter.notifyRowModelChanged(row);
     TS_ASSERT(cells.at(adjustedAngleColumn).contentText().empty());
-    workspace->mutableRun().addProperty("reflectometry_adjusted_theta", 0.626);
+    output->mutableRun().addProperty("reflectometry_adjusted_theta", 0.626);
     presenter.notifyRowModelChanged(row);
     TS_ASSERT_EQUALS(cells.at(adjustedAngleColumn).contentText(), "0.63");
     TS_ASSERT(!cells.at(adjustedAngleColumn).isEditable());
-    workspace->mutableRun().addProperty("reflectometry_adjusted_theta", 0.75, true);
+    output->mutableRun().addProperty("reflectometry_adjusted_theta", 0.75, true);
     presenter.notifyRowModelChanged(row);
     TS_ASSERT_EQUALS(cells.at(adjustedAngleColumn).contentText(), "0.75");
-    workspace->mutableRun().removeProperty("reflectometry_adjusted_theta");
+    output->mutableRun().removeProperty("reflectometry_adjusted_theta");
     presenter.notifyRowModelChanged(row);
     TS_ASSERT(cells.at(adjustedAngleColumn).contentText().empty());
-    ads.remove("TOF_12345");
     ads.remove("IvsQ_binned_12345");
     verifyAndClearExpectations();
   }

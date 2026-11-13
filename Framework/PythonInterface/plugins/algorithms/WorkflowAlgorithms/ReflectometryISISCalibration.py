@@ -151,6 +151,9 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
         self._enable_property_when_workflow_option_enables(self._ADJUST_EXPERIMENT_ANGLE)
         self._enable_property_when_workflow_option_enables(self._NOMINAL_SPECULAR_PIXEL_SPECTRUM_NO)
         self.declareProperty(
+            "PreserveInputWorkspace", True, doc="Clone the input before applying calibration; disable for an owned working copy."
+        )
+        self.declareProperty(
             WorkspaceProperty(self._OUTPUT_WORKSPACE, "", direction=Direction.Output),
             doc="The calibrated output workspace.",
         )
@@ -165,10 +168,10 @@ class ReflectometryISISCalibration(DataProcessorAlgorithm):
 
         ws = self.getProperty(self._WORKSPACE).value
         correct_angle = self._workflow_options.angle_correction_enabled and self.getProperty(self._ADJUST_EXPERIMENT_ANGLE).value
-        calibrated_ws = self._clone_workspace(ws)
+        calibrated_ws = self._clone_workspace(ws) if self.getProperty("PreserveInputWorkspace").value else ws
         if correct_angle:
             self._adjusted_theta = self._calculate_adjusted_theta(calibration_data)
-            calibrated_ws.run().addProperty(self._ADJUSTED_THETA_LOG, self._adjusted_theta, True)
+            calibrated_ws.mutableRun().addProperty(self._ADJUSTED_THETA_LOG, self._adjusted_theta, True)
         self._correct_detector_positions(calibrated_ws, calibration_data)
         self.setProperty(self._OUTPUT_WORKSPACE, calibrated_ws)
 
