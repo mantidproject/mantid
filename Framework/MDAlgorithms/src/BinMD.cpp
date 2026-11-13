@@ -20,7 +20,6 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Utils.h"
-#include <boost/algorithm/string.hpp>
 
 namespace Mantid::MDAlgorithms {
 

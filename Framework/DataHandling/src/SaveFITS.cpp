@@ -14,7 +14,7 @@
 #include <fstream>
 #include <iomanip>
 
-#include <boost/pointer_cast.hpp>
+#include <memory>
 
 namespace Mantid::DataHandling {
 

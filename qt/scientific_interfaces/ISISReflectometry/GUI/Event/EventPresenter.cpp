@@ -10,7 +10,6 @@
 #include "IEventPresenter.h"
 #include "IEventView.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include <boost/algorithm/string.hpp>
 #include <stdexcept>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {

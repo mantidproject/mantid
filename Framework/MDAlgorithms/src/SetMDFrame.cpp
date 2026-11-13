@@ -20,7 +20,6 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MDAxisValidator.h"
 
-#include <boost/pointer_cast.hpp>
 #include <map>
 #include <memory>
 

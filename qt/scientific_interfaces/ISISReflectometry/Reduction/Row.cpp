@@ -7,7 +7,8 @@
 #include "Row.h"
 #include "Common/Map.h"
 #include "IGroup.h"
-#include <boost/algorithm/string.hpp>
+#include <algorithm>
+#include <iterator>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
@@ -93,7 +94,7 @@ Row Row::withExtraRunNumbers(std::vector<std::string> const &extraRunNumbers) co
 
   auto newRunNumbers = std::vector<std::string>();
   newRunNumbers.reserve(m_runNumbers.size() + extraRunNumbers.size());
-  boost::range::set_union(m_runNumbers, extraRunNumbers, std::back_inserter(newRunNumbers));
+  std::ranges::set_union(m_runNumbers, extraRunNumbers, std::back_inserter(newRunNumbers));
   auto wsNames = workspaceNames(newRunNumbers, transmissionWorkspaceNames());
   return Row(newRunNumbers, theta(), transmissionWorkspaceNames(), qRange(), scaleFactor(), reductionOptions(), wsNames,
              nominalSpecularPixel(), actualSpecularPixel());

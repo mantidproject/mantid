@@ -12,8 +12,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Logger.h"
 
-#include <boost/algorithm/string.hpp>
-
 #include <algorithm>
 #include <stdexcept>
 #include <utility>

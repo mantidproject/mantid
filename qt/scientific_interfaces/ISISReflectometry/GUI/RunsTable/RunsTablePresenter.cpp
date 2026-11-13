@@ -11,8 +11,7 @@
 #include "Reduction/RowLocation.h"
 #include "Reduction/ValidateRow.h"
 #include "RegexRowFilter.h"
-#include <boost/range/algorithm/fill.hpp>
-#include <boost/range/iterator_range_core.hpp>
+#include <algorithm>
 #include <boost/regex.hpp>
 #include <stdexcept>
 
@@ -533,7 +532,7 @@ void RunsTablePresenter::notifySelectionChanged() {
 void RunsTablePresenter::applyGroupStylingToRow(MantidWidgets::Batch::RowLocation const &location) {
   auto cells = m_view->jobs().cellsAt(location);
   if (cells.size() > 0) {
-    boost::fill(boost::make_iterator_range(cells.begin() + 1, cells.end()), m_view->jobs().deadCell());
+    std::fill(cells.begin() + 1, cells.end(), m_view->jobs().deadCell());
     m_view->jobs().setCellsAt(location, cells);
   }
 }

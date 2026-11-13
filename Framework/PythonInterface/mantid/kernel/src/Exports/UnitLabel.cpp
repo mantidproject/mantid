@@ -10,7 +10,6 @@
 #include <boost/python/make_constructor.hpp>
 #include <boost/python/return_value_policy.hpp>
 
-#include <boost/scoped_array.hpp>
 #include <memory>
 
 // For Python unicode object
@@ -24,7 +23,7 @@ std::shared_ptr<UnitLabel> createLabel(const object &ascii, const object &utf8, 
   using Utf8Char = UnitLabel::Utf8String::value_type;
   if (PyUnicode_Check(utf8.ptr())) {
     auto length = PyUnicode_GetLength(utf8.ptr());
-    boost::scoped_array<Utf8Char> buffer(new Utf8Char[length]);
+    std::unique_ptr<Utf8Char[]> buffer(new Utf8Char[length]);
     PyUnicode_AsWideChar(utf8.ptr(), buffer.get(), length);
     return std::make_shared<UnitLabel>(extract<std::string>(ascii)(),
                                        UnitLabel::Utf8String(buffer.get(), buffer.get() + length),

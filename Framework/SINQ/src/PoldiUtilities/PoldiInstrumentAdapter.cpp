@@ -11,7 +11,7 @@
 #include "MantidSINQ/PoldiUtilities/PoldiDetectorFactory.h"
 #include "MantidSINQ/PoldiUtilities/PoldiSourceSpectrum.h"
 
-#include "boost/make_shared.hpp"
+#include <memory>
 
 namespace Mantid::Poldi {
 using namespace Mantid::Geometry;

@@ -16,7 +16,7 @@
 #include "MantidKernel/VMD.h"
 #include <cxxtest/TestSuite.h>
 
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -103,7 +103,7 @@ public:
     ct.addTranslation(translation);
 
     // Clone and check the clone works
-    boost::scoped_ptr<CoordTransform> clone(ct.clone());
+    std::unique_ptr<CoordTransform> clone(ct.clone());
     clone->apply(in, out);
     compare(2, out, expected);
   }
@@ -280,7 +280,7 @@ public:
     CoordTransformAffine ct2(2, 2);
     ct2.addTranslation(translation2);
     // Combine them
-    boost::scoped_ptr<CoordTransformAffine> combined(CoordTransformAffine::combineTransformations(&ct1, &ct2));
+    std::unique_ptr<CoordTransformAffine> combined(CoordTransformAffine::combineTransformations(&ct1, &ct2));
     combined->apply(in, out);
     compare(2, out, expected);
   }
@@ -298,7 +298,7 @@ public:
     ct2->apply(out1, out2);
 
     // Combine them
-    boost::scoped_ptr<CoordTransformAffine> combined(CoordTransformAffine::combineTransformations(ct1, ct2));
+    std::unique_ptr<CoordTransformAffine> combined(CoordTransformAffine::combineTransformations(ct1, ct2));
     combined->apply(in, out_combined);
 
     // Applying the combined one = same as each one in sequence

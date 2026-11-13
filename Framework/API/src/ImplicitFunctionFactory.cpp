@@ -13,7 +13,7 @@
 #include <Poco/DOM/NodeList.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 
 namespace Mantid::API {
 
@@ -29,7 +29,7 @@ ImplicitFunctionFactoryImpl::createUnwrapped(Poco::XML::Element *processXML) con
   ImplicitFunctionParser *funcParser =
       Mantid::API::ImplicitFunctionParserFactory::Instance().createImplicitFunctionParserFromXML(processXML);
 
-  boost::scoped_ptr<ImplicitFunctionBuilder> functionBuilder(funcParser->createFunctionBuilder(processXML));
+  std::unique_ptr<ImplicitFunctionBuilder> functionBuilder(funcParser->createFunctionBuilder(processXML));
   return functionBuilder->create();
 }
 
@@ -40,10 +40,10 @@ ImplicitFunctionFactoryImpl::createUnwrapped(const std::string &processXML) cons
   Poco::AutoPtr<Document> pDoc = pParser.parseString(processXML);
   Element *pInstructionsXML = pDoc->documentElement();
 
-  boost::scoped_ptr<ImplicitFunctionParser> funcParser(
+  std::unique_ptr<ImplicitFunctionParser> funcParser(
       ImplicitFunctionParserFactory::Instance().createImplicitFunctionParserFromXML(processXML));
 
-  boost::scoped_ptr<ImplicitFunctionBuilder> functionBuilder(funcParser->createFunctionBuilder(pInstructionsXML));
+  std::unique_ptr<ImplicitFunctionBuilder> functionBuilder(funcParser->createFunctionBuilder(pInstructionsXML));
   return functionBuilder->create();
 }
 } // namespace Mantid::API

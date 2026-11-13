@@ -26,7 +26,6 @@
 #include "Poco/SAX/InputSource.h"
 #include "Poco/SAX/SAXException.h"
 
-#include <boost/algorithm/string.hpp>
 #include <filesystem>
 #include <memory>
 #include <sstream>

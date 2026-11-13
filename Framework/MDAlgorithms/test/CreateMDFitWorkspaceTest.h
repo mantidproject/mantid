@@ -10,8 +10,8 @@
 #include "MantidAPI/IFitFunction.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidMDAlgorithms/CreateMDFitWorkspace.h"
-#include <boost/scoped_ptr.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 #include <vector>
 
 using namespace Mantid::MDAlgorithms;

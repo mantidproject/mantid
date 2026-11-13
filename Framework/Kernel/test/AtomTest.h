@@ -11,8 +11,7 @@
 #include <cxxtest/TestSuite.h>
 #include <stdexcept>
 
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_int_distribution.hpp>
+#include <random>
 
 using namespace Mantid::PhysicalConstants;
 
@@ -61,8 +60,8 @@ public:
   /// Set up all the test workspaces
   AtomTestPerformance() {
     const size_t test_size = 1000000;
-    boost::random::mt19937 gen;
-    boost::random::uniform_int_distribution<uint16_t> dist(1, 96);
+    std::mt19937 gen;
+    std::uniform_int_distribution<uint16_t> dist(1, 96);
     for (size_t i = 0; i < test_size; ++i) {
       z_input.emplace_back(dist(gen));
     }

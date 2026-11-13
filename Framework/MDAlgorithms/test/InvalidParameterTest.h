@@ -7,8 +7,8 @@
 #pragma once
 
 #include "MantidMDAlgorithms/InvalidParameter.h"
-#include <boost/scoped_ptr.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 #include <vector>
 
 class InvalidParameterTest : public CxxTest::TestSuite {
@@ -22,7 +22,7 @@ public:
   void testClone() {
     using namespace Mantid::MDAlgorithms;
     InvalidParameter original("1");
-    boost::scoped_ptr<InvalidParameter> cloned(original.clone());
+    std::unique_ptr<InvalidParameter> cloned(original.clone());
     TSM_ASSERT_EQUALS("The parameter value has not been cloned.", "1", cloned->getValue());
   }
 

@@ -10,7 +10,6 @@
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/DeltaEMode.h"
 #include "MantidMDAlgorithms/DisplayNormalizationSetter.h"
-#include "boost/pointer_cast.hpp"
 #include <cxxtest/TestSuite.h>
 using namespace Mantid::MDAlgorithms;
 

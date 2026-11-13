@@ -10,7 +10,7 @@
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
 
-#include <boost/scoped_array.hpp>
+#include <memory>
 
 using namespace Mantid;
 using namespace Mantid::DataObjects;
@@ -44,7 +44,7 @@ public:
     TS_ASSERT_EQUALS(a.getCenter(2), 2.5);
 
     // Dynamic array
-    boost::scoped_array<coord_t> coords2(new coord_t[5]);
+    std::unique_ptr<coord_t[]> coords2(new coord_t[5]);
     coords2[0] = 1.0;
     coords2[1] = 2.0;
     coords2[2] = 3.0;

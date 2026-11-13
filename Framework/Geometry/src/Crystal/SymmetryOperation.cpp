@@ -8,8 +8,6 @@
 #include "MantidGeometry/Crystal/SymmetryOperationSymbolParser.h"
 #include <memory>
 
-#include <boost/algorithm/string.hpp>
-
 namespace Mantid::Geometry {
 
 /// Default constructor, results in identity.

@@ -20,8 +20,8 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Unit.h"
 
-#include "boost/make_shared.hpp"
 #include <algorithm>
+#include <memory>
 
 namespace Mantid::Algorithms {
 

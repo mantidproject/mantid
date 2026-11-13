@@ -16,8 +16,6 @@
 #include "MantidDataHandling/MaskDetectorsInShape.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
 
-#include <boost/cast.hpp>
-
 using Mantid::Algorithms::CalculateDynamicRange;
 using Mantid::Algorithms::CreateSampleWorkspace;
 using Mantid::API::FrameworkManager;

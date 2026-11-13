@@ -13,7 +13,7 @@
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/FakeObjects.h"
 
-#include "boost/make_shared.hpp"
+#include <memory>
 
 using namespace Mantid::Kernel;
 using Mantid::API::SampleShapeValidator;

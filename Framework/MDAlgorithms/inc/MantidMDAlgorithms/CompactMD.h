@@ -18,7 +18,6 @@
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidMDAlgorithms/CutMD.h"
 #include "MantidMDAlgorithms/DllConfig.h"
-#include "boost/shared_ptr.hpp"
 
 namespace Mantid {
 namespace MDAlgorithms {

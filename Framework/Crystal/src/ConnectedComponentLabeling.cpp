@@ -280,8 +280,8 @@ ClusterMap ConnectedComponentLabeling::calculateDisjointTree(const IMDHistoWorks
     // PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < m_nThreadsToUse; ++i) {
       API::IMDIterator *iterator = iterators[i].get();
-      boost::scoped_ptr<BackgroundStrategy> strategy(baseStrategy->clone()); // local strategy
-      VecEdgeIndexPair &edgeVec = parallelEdgeVec[i];                        // local edge indexes
+      std::unique_ptr<BackgroundStrategy> strategy(baseStrategy->clone()); // local strategy
+      VecEdgeIndexPair &edgeVec = parallelEdgeVec[i];                      // local edge indexes
 
       const size_t startLabel = m_startId + (i * maxClustersPossible); // Ensure that label ids are
                                                                        // totally unique within each

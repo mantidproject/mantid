@@ -19,7 +19,7 @@
 #include <cxxtest/TestSuite.h>
 #include <vector>
 
-#include "boost/make_shared.hpp"
+#include <memory>
 
 using namespace Mantid;
 using namespace Geometry;

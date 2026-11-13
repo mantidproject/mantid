@@ -10,7 +10,6 @@
 #include "MantidCurveFitting/EigenVector.h"
 
 #include <algorithm>
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <cmath>
 #include <iomanip>
 #include <numeric>
@@ -179,7 +178,7 @@ EigenVector &EigenVector::operator+=(const double d) {
 // Normalise this vector
 void EigenVector::normalize() {
   double N = norm();
-  if (N == 0.0 || !boost::math::isfinite(N)) {
+  if (N == 0.0 || !std::isfinite(N)) {
     throw std::runtime_error("Cannot normalize null vector.");
   }
   *this *= 1.0 / N;

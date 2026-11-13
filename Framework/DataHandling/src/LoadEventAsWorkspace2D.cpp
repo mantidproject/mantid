@@ -21,6 +21,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/NexusIOHelper.h"
+#include <functional>
 #include <regex>
 
 namespace Mantid {
@@ -288,7 +289,7 @@ void LoadEventAsWorkspace2D::exec() {
         }
 
         // Load "h5file" into BankPulseTimes using a shared ptr
-        const auto bankPulseTimes = std::make_shared<BankPulseTimes>(boost::ref(h5file), std::vector<int>());
+        const auto bankPulseTimes = std::make_shared<BankPulseTimes>(std::ref(h5file), std::vector<int>());
 
         // Get event_index from the "h5file"
         const auto event_index =

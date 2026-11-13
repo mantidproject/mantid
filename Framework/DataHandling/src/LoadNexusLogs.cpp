@@ -17,7 +17,7 @@
 #include <Poco/DateTimeFormatter.h>
 #include <Poco/DateTimeParser.h>
 #include <Poco/Glob.h>
-#include <boost/scoped_array.hpp>
+#include <memory>
 
 #include <algorithm>
 #include <locale>
@@ -226,7 +226,7 @@ std::unique_ptr<Kernel::Property> createTimeSeries(Nexus::File &file, const std:
       const std::size_t total_length =
           std::accumulate(info.dims.cbegin(), info.dims.cend(), std::size_t(1),
                           [](std::size_t acc, int64_t x) { return acc * static_cast<std::size_t>(x); });
-      boost::scoped_array<char> val_array(new char[total_length + 1]);
+      std::unique_ptr<char[]> val_array(new char[total_length + 1]);
       file.getData(val_array.get());
       file.closeData();
       values = std::string(val_array.get(), total_length);
@@ -935,7 +935,7 @@ void LoadNexusLogs::loadSELog(Nexus::File &file, const std::string &absolute_ent
       file.openData("value");
       Nexus::Info info = file.getInfo();
       if (info.type == NXnumtype::FLOAT32) {
-        boost::scoped_array<float> value(new float[info.dims[0]]);
+        std::unique_ptr<float[]> value(new float[info.dims[0]]);
         file.getData(value.get());
         file.closeData();
         logValue = std::make_unique<Kernel::PropertyWithValue<double>>(propName, static_cast<double>(value[0]), true);

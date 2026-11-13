@@ -20,8 +20,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <boost/scoped_ptr.hpp>
 #include <cmath>
+#include <memory>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -468,8 +468,8 @@ public:
         // Put a single big bin with all events
         lhs.setSharedX(one_big_bin());
         // But the total neutrons is 0.0! They've been cancelled out :)
-        boost::scoped_ptr<MantidVec> Y(lhs.makeDataY());
-        boost::scoped_ptr<MantidVec> E(lhs.makeDataE());
+        std::unique_ptr<MantidVec> Y(lhs.makeDataY());
+        std::unique_ptr<MantidVec> E(lhs.makeDataE());
         TS_ASSERT_DELTA((*Y)[0], 0.0, 1e-6);
         TS_ASSERT_DELTA((*E)[0], sqrt((double)lhs.getNumberEvents()), 1e-6);
       }
@@ -495,8 +495,8 @@ public:
       // Put a single big bin with all events
       lhs.setSharedX(one_big_bin());
       // But the total neutrons is 0.0! They've been cancelled out :)
-      boost::scoped_ptr<MantidVec> Y(lhs.makeDataY());
-      boost::scoped_ptr<MantidVec> E(lhs.makeDataE());
+      std::unique_ptr<MantidVec> Y(lhs.makeDataY());
+      std::unique_ptr<MantidVec> E(lhs.makeDataE());
       TS_ASSERT_DELTA((*Y)[0], 0.0, 1e-6);
       TS_ASSERT_DELTA((*E)[0], sqrt((double)lhs.getNumberEvents()), 1e-6);
     }
@@ -936,14 +936,14 @@ public:
     const EventList el2(el);
 
     // Getting data before setting X returns empty vector
-    boost::scoped_ptr<MantidVec> Y2(el2.makeDataY());
+    std::unique_ptr<MantidVec> Y2(el2.makeDataY());
     TS_ASSERT_EQUALS(Y2->size(), 0);
 
     // Now do set up an X axis.
     this->test_setX();
     const EventList el3(el);
     auto const &X = el3.x();
-    boost::scoped_ptr<MantidVec> Y3(el3.makeDataY());
+    std::unique_ptr<MantidVec> Y3(el3.makeDataY());
     // Histogram is 0, since I cleared all the events
     for (std::size_t i = 0; i < X.size() - 1; i++) {
       TS_ASSERT_EQUALS((*Y3)[i], 0);
@@ -956,7 +956,7 @@ public:
     // Now give it some fake data, with NUMEVENTS events in it.
     this->fake_data();
     const EventList el4(el);
-    boost::scoped_ptr<MantidVec> Y(el4.makeDataY());
+    std::unique_ptr<MantidVec> Y(el4.makeDataY());
     TS_ASSERT_EQUALS(Y->size(), 0);
   }
 
@@ -970,8 +970,8 @@ public:
       const EventList el3(el); // need to copy to a const method in order to
                                // access the data directly.
       auto const &X = el3.x();
-      boost::scoped_ptr<MantidVec> Y(el3.makeDataY());
-      boost::scoped_ptr<MantidVec> E(el3.makeDataE());
+      std::unique_ptr<MantidVec> Y(el3.makeDataY());
+      std::unique_ptr<MantidVec> E(el3.makeDataE());
       TS_ASSERT_EQUALS(Y->size(), X.size() - 1);
       // The data was created so that there should be exactly 2 events per bin
       // The last bin entry will be 0 since we use it as the top boundary of
@@ -1159,8 +1159,8 @@ public:
     const EventList el3(el); // need to copy to a const method in order to
                              // access the data directly.
     auto const &X = el3.x();
-    boost::scoped_ptr<MantidVec> Y(el3.makeDataY());
-    boost::scoped_ptr<MantidVec> E(el3.makeDataE());
+    std::unique_ptr<MantidVec> Y(el3.makeDataY());
+    std::unique_ptr<MantidVec> E(el3.makeDataE());
     TS_ASSERT_EQUALS(Y->size(), X.size() - 1);
     for (std::size_t i = 0; i < Y->size(); i++) {
       // 5 events, each with a weight of 3.2
@@ -1179,8 +1179,8 @@ public:
     const EventList el3(el); // need to copy to a const method in order to
                              // access the data directly.
     auto const &X = el3.x();
-    boost::scoped_ptr<MantidVec> Y(el3.makeDataY());
-    boost::scoped_ptr<MantidVec> E(el3.makeDataE());
+    std::unique_ptr<MantidVec> Y(el3.makeDataY());
+    std::unique_ptr<MantidVec> E(el3.makeDataE());
     TS_ASSERT_EQUALS(Y->size(), X.size() - 1);
     // The data was created so that there should be exactly 2 events per bin
     // The last bin entry will be 0 since we use it as the top boundary of i-1.
@@ -1206,7 +1206,7 @@ public:
     const EventList el3(el); // need to copy to a const method in order to
                              // access the data directly.
     auto const &X = el3.x();
-    boost::scoped_ptr<MantidVec> Y(el3.makeDataY());
+    std::unique_ptr<MantidVec> Y(el3.makeDataY());
     TS_ASSERT_EQUALS(Y->size(), X.size() - 1);
 
     // The data was created so that there should be exactly 2 events per bin.
@@ -1227,7 +1227,7 @@ public:
     const EventList el3(el); // need to copy to a const method in order to
                              // access the data directly.
     auto const &X = el3.x();
-    boost::scoped_ptr<MantidVec> Y(el3.makeDataY());
+    std::unique_ptr<MantidVec> Y(el3.makeDataY());
     TS_ASSERT_EQUALS(Y->size(), X.size() - 1);
     for (std::size_t i = 0; i < Y->size(); i++) {
       TS_ASSERT_EQUALS((*Y)[i], 4.0);
@@ -1239,7 +1239,7 @@ public:
     this->test_setX();
     const EventList el3(el);
     auto const &X = el3.x();
-    boost::scoped_ptr<MantidVec> Y(el3.makeDataY());
+    std::unique_ptr<MantidVec> Y(el3.makeDataY());
     TS_ASSERT_EQUALS(Y->size(), X.size() - 1);
     for (std::size_t i = 0; i < X.size() - 1; i++) {
       // No data was generated above 10 ms.

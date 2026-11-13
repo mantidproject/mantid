@@ -14,9 +14,6 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#ifndef Q_MOC_RUN
-#include <boost/scoped_array.hpp>
-#endif
 #include <memory>
 #include <string>
 #include <vector>

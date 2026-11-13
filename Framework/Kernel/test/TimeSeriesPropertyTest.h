@@ -15,7 +15,6 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <boost/scoped_ptr.hpp>
 #include <cmath>
 #include <json/value.h>
 #include <memory>
@@ -1599,7 +1598,7 @@ public:
   }
 
   void test_clear() {
-    boost::scoped_ptr<TimeSeriesProperty<int>> p(new TimeSeriesProperty<int>("aProp"));
+    std::unique_ptr<TimeSeriesProperty<int>> p(new TimeSeriesProperty<int>("aProp"));
     p->addValue("2007-11-30T16:17:00", 1);
 
     TS_ASSERT_EQUALS(p->size(), 1);
@@ -1613,7 +1612,7 @@ public:
   }
 
   void test_clearOutdated() {
-    boost::scoped_ptr<TimeSeriesProperty<int>> p(new TimeSeriesProperty<int>("aProp"));
+    std::unique_ptr<TimeSeriesProperty<int>> p(new TimeSeriesProperty<int>("aProp"));
     p->addValue("2007-11-30T16:17:00", 99);
 
     ITimeSeriesProperty *pi = p.get();

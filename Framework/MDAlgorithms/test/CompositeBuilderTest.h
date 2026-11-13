@@ -10,10 +10,10 @@
 #include "MantidAPI/ImplicitFunctionParameter.h"
 #include "MantidMDAlgorithms/CompositeFunctionBuilder.h"
 #include "MantidMDAlgorithms/CompositeImplicitFunction.h"
-#include <boost/scoped_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <memory>
 #include <vector>
 
 class CompositeBuilderTest : public CxxTest::TestSuite {
@@ -59,7 +59,7 @@ public:
     CompositeFunctionBuilder *innerCompBuilder = new CompositeFunctionBuilder;
     innerCompBuilder->addFunctionBuilder(builderA);
     innerCompBuilder->addFunctionBuilder(builderB);
-    boost::scoped_ptr<CompositeFunctionBuilder> outterCompBuilder(new CompositeFunctionBuilder);
+    std::unique_ptr<CompositeFunctionBuilder> outterCompBuilder(new CompositeFunctionBuilder);
     outterCompBuilder->addFunctionBuilder(innerCompBuilder);
     Mantid::Geometry::MDImplicitFunction_sptr topFunc(outterCompBuilder->create());
     // CompositeImplicitFunction* topCompFunc =
