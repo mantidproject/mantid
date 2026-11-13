@@ -60,6 +60,8 @@ public:
     return "Integrate Single Crystal Diffraction Bragg peaks using the ellipsoidal "
            "peak shape already stored on each peak.";
   }
+  /// Check that the normalization workspaces are given together, with the logs they require
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   void init() override;
