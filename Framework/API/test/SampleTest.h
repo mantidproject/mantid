@@ -46,6 +46,19 @@ public:
     return std::make_shared<MeshObject>(faces, vertices, material);
   }
 
+  /// The environment a sample carrying it comes back with from a NeXus round trip.
+  SampleEnvironment roundTripEnvironment(const std::shared_ptr<SampleEnvironment> &env, const std::string &filename) {
+    NexusTestHelper th(true);
+    th.createFile(filename);
+    Sample sample;
+    sample.setEnvironment(env);
+    sample.saveNexus(th.file.get(), "sample");
+    th.reopenFile();
+    Sample loaded;
+    loaded.loadNexus(th.file.get(), "sample");
+    return loaded.getEnvironment();
+  }
+
   std::shared_ptr<SampleEnvironment> createTestEnvironment(const bool asCSG, const int nComponents = 2) {
     using namespace Mantid::Geometry;
     using namespace Mantid::Kernel;
@@ -624,6 +637,33 @@ public:
       validateMeshShape(dynamic_cast<const MeshObject &>(env->getComponent(i)),
                         dynamic_cast<const MeshObject &>(loadedEnv->getComponent(i)));
     }
+  }
+
+  void test_nexus_keeps_which_environment_parts_are_on_the_goniometer() {
+    // createTestEnvironment's kit has the defaults, which are not written, so it also stands in for
+    // a file saved before the flag existed
+    const auto defaults = roundTripEnvironment(createTestEnvironment(true), "SampleTestEnvDefaultMounting.nxs");
+    TS_ASSERT(defaults.isOnGoniometer(0) && !defaults.isOnGoniometer(1) && !defaults.isOnGoniometer(2));
+
+    auto can = std::make_shared<Container>(
+        ShapeFactory().createShape(ComponentCreationHelper::sphereXML(0.01, V3D(0, 0, 0), "can")));
+    auto flipped = std::make_shared<SampleEnvironment>("Flipped", can, false);
+    flipped->add(ComponentCreationHelper::createSphere(0.01, V3D(1, 0, 0)), true);
+    const auto loaded = roundTripEnvironment(flipped, "SampleTestEnvFlippedMounting.nxs");
+    TS_ASSERT(!loaded.isOnGoniometer(0) && loaded.isOnGoniometer(1));
+  }
+
+  void test_nexus_saves_a_lab_frame_environment_as_defined() {
+    auto can = std::make_shared<Container>(
+        ShapeFactory().createShape(ComponentCreationHelper::sphereXML(0.5, V3D(2, 0, 0), "can")));
+    const SampleEnvironment kit("Kit", can);
+    // a quarter turn about z takes the can from +x to +y
+    const auto view = kit.inLabFrame(DblMatrix(std::vector<double>{0, -1, 0, 1, 0, 0, 0, 0, 1}));
+
+    const auto loaded = roundTripEnvironment(view, "SampleTestEnvLabFrameView.nxs");
+
+    TS_ASSERT_DELTA(loaded.getContainer().getBoundingBox().centrePoint().X(), 2.0, 1e-6);
+    TS_ASSERT_EQUALS(&loaded.ownFrame(), &loaded);
   }
 
   void test_equal_when_sample_identical() {
