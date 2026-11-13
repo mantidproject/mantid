@@ -68,6 +68,7 @@ requirements:
     # Development tooling
     - cppcheck==2.18.1
     - pre-commit>=4.0
+    - pyright>=1.1.407,<2
     - wcwidth ${{ wcwidth }}
     - if: linux
       then:
