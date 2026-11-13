@@ -1,0 +1,1 @@
+- Fixed a bug in the :ref:`Muon ALC <MuonALC-ref>` interface where the same run could give different asymmetry values when loaded from HDF4 and HDF5 files, because rounding decided whether the bin starting at the minimum time was used. That bin is now always included, so the asymmetry values of some runs will change slightly.

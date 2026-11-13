@@ -84,10 +84,11 @@ Workspace_sptr MultiPeriodLoadMuonStrategy::loadDetectorGrouping() const {
   return tableGroup;
 }
 /**
- * Performs time-zero correction on the loaded workspace.
+ * Performs time-zero correction on the loaded workspaces' time axes and FirstGoodData logs.
  */
 void MultiPeriodLoadMuonStrategy::applyTimeZeroCorrection() {
   double timeZero = m_nexusLoader.loadTimeZeroFromNexusFile();
+  double firstGoodData = m_nexusLoader.loadFirstGoodDataFromNexus();
   for (int wsIndex = 0; wsIndex < m_workspaceGroup.getNumberOfEntries(); ++wsIndex) {
     auto workspace = std::dynamic_pointer_cast<Workspace2D>(m_workspaceGroup.getItem(wsIndex));
     auto numHistograms = workspace->getNumberHistograms();
@@ -95,6 +96,8 @@ void MultiPeriodLoadMuonStrategy::applyTimeZeroCorrection() {
       auto &timeAxis = workspace->mutableX(i);
       timeAxis = timeAxis - timeZero;
     }
+    // The FirstGoodData log is relative to time zero, consistent with LoadMuonNexus v1
+    workspace->mutableRun().addProperty("FirstGoodData", firstGoodData - timeZero, true);
   }
 }
 // Load dead time table
