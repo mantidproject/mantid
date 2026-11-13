@@ -156,15 +156,19 @@ resolve any conflicts, then:
 
 A special case for conflicts with ``pixi.lock`` files.
 Since it is marked as a binary in the ``.gitattributes``, this can get more subtle.
-When rebasing, checkout "ours" to get it correct
+During a rebase, "ours" is the new base plus already replayed commits, while "theirs" is the commit being replayed.
+During a merge, "ours" is the checked-out branch and "theirs" is the branch being merged.
+Choose a starting lockfile based on the versions you intend to retain, checking both histories for intentional dependency updates.
+``pixi install`` cannot reconstruct discarded lockfile-only updates from an unchanged manifest.
+Resolve any ``pixi.toml`` conflicts first. For example, to start from "ours":
 
 .. code-block:: bash
 
     git checkout --ours pixi.lock
-    pixi install # only adds/subtracts things
-    git add pixi.lock
+    pixi install
 
-When merging, it may be more appropriate to get "theirs".
+Before staging ``pixi.lock`` with ``git add pixi.lock``, preserve or explicitly reapply any intended updates missing from the selected side.
+
 The key to this approach is that checking out a version then installing will attempt to keep the lockfile, but can add/subtract things.
 The method of deleting the old lockfile then creating it solves the environment from scratch which is generally the wrong thing to do.
 
