@@ -27,9 +27,8 @@ public:
 
 protected:
   /// sends a report over the internet
-  InternetHelper::HTTPStatus sendReport(const std::string &message, const std::string &url) override {
-    UNUSED_ARG(message);
-    UNUSED_ARG(url);
+  InternetHelper::HTTPStatus sendReport([[maybe_unused]] const std::string &message,
+                                        [[maybe_unused]] const std::string &url) override {
     // do nothing
     return InternetHelper::HTTPStatus::OK;
   }

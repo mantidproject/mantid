@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/WarningSuppressions.h"
+#include <concepts>
 
 #include "MantidIndexing/PartitionIndex.h"
 
@@ -23,7 +23,6 @@ public:
   static void destroySuite(PartitionIndexTest *suite) { delete suite; }
 
   void test_has_correct_mixins() {
-    PartitionIndex data(0);
-    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(dynamic_cast<detail::IndexType<PartitionIndex, int> &>(data)));
+    TS_ASSERT((std::derived_from<PartitionIndex, detail::IndexType<PartitionIndex, int>>));
   }
 };

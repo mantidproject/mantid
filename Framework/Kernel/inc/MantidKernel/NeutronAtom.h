@@ -10,6 +10,7 @@
 // Include
 //------------------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
+#include <cstdint>
 #include <iosfwd>
 
 namespace Mantid {

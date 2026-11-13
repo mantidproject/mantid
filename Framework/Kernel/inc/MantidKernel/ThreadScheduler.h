@@ -58,10 +58,7 @@ public:
    * @param task :: the Task that was completed.
    * @param threadnum :: Thread ID that launched the task
    */
-  virtual void finished(Task *task, size_t threadnum) {
-    UNUSED_ARG(task);
-    UNUSED_ARG(threadnum);
-  }
+  virtual void finished([[maybe_unused]] Task *task, [[maybe_unused]] size_t threadnum) {}
 
   //-----------------------------------------------------------------------------------
   /** Signal to the scheduler that a task is complete. The
@@ -164,8 +161,7 @@ public:
   }
 
   //-------------------------------------------------------------------------------
-  std::shared_ptr<Task> pop(size_t threadnum) override {
-    UNUSED_ARG(threadnum);
+  std::shared_ptr<Task> pop([[maybe_unused]] size_t threadnum) override {
     std::shared_ptr<Task> temp = nullptr;
     m_queueLock.lock();
     // Check the size within the same locking block; otherwise the size may
@@ -214,8 +210,7 @@ protected:
 class MANTID_KERNEL_DLL ThreadSchedulerLIFO : public ThreadSchedulerFIFO {
 
   //-------------------------------------------------------------------------------
-  std::shared_ptr<Task> pop(size_t threadnum) override {
-    UNUSED_ARG(threadnum);
+  std::shared_ptr<Task> pop([[maybe_unused]] size_t threadnum) override {
     std::shared_ptr<Task> temp = nullptr;
     m_queueLock.lock();
     // Check the size within the same locking block; otherwise the size may
@@ -266,8 +261,7 @@ public:
   }
 
   //-------------------------------------------------------------------------------
-  std::shared_ptr<Task> pop(size_t threadnum) override {
-    UNUSED_ARG(threadnum);
+  std::shared_ptr<Task> pop([[maybe_unused]] size_t threadnum) override {
     std::shared_ptr<Task> temp = nullptr;
     m_queueLock.lock();
     // Check the size within the same locking block; otherwise the size may

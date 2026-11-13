@@ -178,8 +178,7 @@ void AbsorptionCorrections::handleValidation(IUserInputValidator *validator) con
       auto const sampleChem = m_uiForm.leSampleChemicalFormula->text().toStdString();
       try {
         Mantid::Kernel::Material::parseChemicalFormula(sampleChem);
-      } catch (std::runtime_error &ex) {
-        UNUSED_ARG(ex);
+      } catch (const std::runtime_error &) {
         validator->addErrorMessage("Chemical Formula for Sample was not recognised.");
         validator->setErrorLabel(m_uiForm.valSampleChemicalFormula, false);
       }
@@ -200,8 +199,7 @@ void AbsorptionCorrections::handleValidation(IUserInputValidator *validator) con
 
         try {
           Mantid::Kernel::Material::parseChemicalFormula(containerChem);
-        } catch (std::runtime_error &ex) {
-          UNUSED_ARG(ex);
+        } catch (const std::runtime_error &) {
           validator->addErrorMessage("Chemical Formula for Container was not recognised.");
           validator->setErrorLabel(m_uiForm.valCanChemicalFormula, false);
         }

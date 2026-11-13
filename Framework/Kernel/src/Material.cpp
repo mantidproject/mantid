@@ -326,9 +326,7 @@ std::vector<double> Material::linearAbsorpCoef(std::vector<double>::const_iterat
 }
 
 /// According to Sears eqn 12
-double Material::cohScatterLength(const double lambda) const {
-  UNUSED_ARG(lambda);
-
+double Material::cohScatterLength([[maybe_unused]] const double lambda) const {
   if (m_chemicalFormula.size() == 1)
     return m_chemicalFormula.front().atom->neutron.coh_scatt_length;
 
@@ -337,9 +335,7 @@ double Material::cohScatterLength(const double lambda) const {
 }
 
 /// According to Sears eqn 7
-double Material::incohScatterLength(const double lambda) const {
-  UNUSED_ARG(lambda);
-
+double Material::incohScatterLength([[maybe_unused]] const double lambda) const {
   if (m_chemicalFormula.size() == 1)
     return m_chemicalFormula.front().atom->neutron.inc_scatt_length;
 
@@ -347,8 +343,7 @@ double Material::incohScatterLength(const double lambda) const {
 }
 
 /// Sears eqn 12
-double Material::cohScatterLengthReal(const double lambda) const {
-  UNUSED_ARG(lambda);
+double Material::cohScatterLengthReal([[maybe_unused]] const double lambda) const {
   if (m_chemicalFormula.size() == 1)
     return m_chemicalFormula.front().atom->neutron.coh_scatt_length_real;
 
@@ -367,9 +362,7 @@ double Material::cohScatterLengthReal(const double lambda) const {
 }
 
 /// Sears eqn 12
-double Material::cohScatterLengthImg(const double lambda) const {
-  UNUSED_ARG(lambda);
-
+double Material::cohScatterLengthImg([[maybe_unused]] const double lambda) const {
   if (m_chemicalFormula.size() == 1)
     return m_chemicalFormula.front().atom->neutron.coh_scatt_length_img;
 
@@ -388,9 +381,7 @@ double Material::cohScatterLengthImg(const double lambda) const {
 }
 
 /// Not explicitly in Sears, but following eqn 12
-double Material::incohScatterLengthReal(const double lambda) const {
-  UNUSED_ARG(lambda);
-
+double Material::incohScatterLengthReal([[maybe_unused]] const double lambda) const {
   if (m_chemicalFormula.size() == 1)
     return m_chemicalFormula.front().atom->neutron.inc_scatt_length_real;
 
@@ -409,9 +400,7 @@ double Material::incohScatterLengthReal(const double lambda) const {
 }
 
 /// Not explicitly in Sears, but following eqn 12
-double Material::incohScatterLengthImg(const double lambda) const {
-  UNUSED_ARG(lambda);
-
+double Material::incohScatterLengthImg([[maybe_unused]] const double lambda) const {
   if (m_chemicalFormula.size() == 1)
     return m_chemicalFormula.front().atom->neutron.inc_scatt_length_img;
 
@@ -430,9 +419,7 @@ double Material::incohScatterLengthImg(const double lambda) const {
 }
 
 /// Sears eqn 13
-double Material::totalScatterLength(const double lambda) const {
-  UNUSED_ARG(lambda);
-
+double Material::totalScatterLength([[maybe_unused]] const double lambda) const {
   if (m_chemicalFormula.size() == 1)
     return m_chemicalFormula.front().atom->neutron.tot_scatt_length;
 
@@ -440,9 +427,7 @@ double Material::totalScatterLength(const double lambda) const {
   return 10. * std::sqrt(crossSection) * INV_FOUR_PI;
 }
 
-double Material::cohScatterLengthSqrd(const double lambda) const {
-  UNUSED_ARG(lambda);
-
+double Material::cohScatterLengthSqrd([[maybe_unused]] const double lambda) const {
   // these have already acconted for single atom case
   const double real = this->cohScatterLengthReal();
   const double imag = this->cohScatterLengthImg();
@@ -463,9 +448,7 @@ double Material::cohScatterLengthSqrd(const double lambda) const {
   }
 }
 
-double Material::incohScatterLengthSqrd(const double lambda) const {
-  UNUSED_ARG(lambda);
-
+double Material::incohScatterLengthSqrd([[maybe_unused]] const double lambda) const {
   // cross section has this properly averaged already
   const double crossSection = incohScatterXSection();
 
@@ -473,9 +456,7 @@ double Material::incohScatterLengthSqrd(const double lambda) const {
   return 100. * crossSection * INV_FOUR_PI;
 }
 
-double Material::totalScatterLengthSqrd(const double lambda) const {
-  UNUSED_ARG(lambda);
-
+double Material::totalScatterLengthSqrd([[maybe_unused]] const double lambda) const {
   // cross section has this properly averaged already
   const double crossSection = totalScatterXSection();
 

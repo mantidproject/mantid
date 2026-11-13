@@ -8,6 +8,8 @@
 
 #include "MantidKernel/DllConfig.h"
 
+#include <cstdint>
+
 namespace Mantid {
 namespace Kernel {
 

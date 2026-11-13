@@ -47,12 +47,10 @@ public:
   void testRecievesCallbackForSearchDirectoryChange() {
     auto callCount = 0;
     auto constexpr NUMBER_OF_PROPERTIES_CHANGED = 1;
-    auto observer = makeMockObserver("datasearch.directories",
-                                     [&callCount](const std::string &newValue, const std::string &prevValue) -> void {
-                                       UNUSED_ARG(newValue);
-                                       UNUSED_ARG(prevValue);
-                                       callCount++;
-                                     });
+    auto observer =
+        makeMockObserver("datasearch.directories",
+                         [&callCount]([[maybe_unused]] const std::string &newValue,
+                                      [[maybe_unused]] const std::string &prevValue) -> void { callCount++; });
     ConfigService::Instance().setString("datasearch.directories", "/dev/null");
     TS_ASSERT_EQUALS(NUMBER_OF_PROPERTIES_CHANGED, callCount);
   }
@@ -60,31 +58,25 @@ public:
   void testRecievesCallbackForOutputDirectoryChangeOnly() {
     auto callCount = 0;
     auto constexpr NUMBER_OF_PROPERTIES_CHANGED = 1;
-    auto observer = makeMockObserver("datasearch.directories",
-                                     [&callCount](const std::string &newValue, const std::string &prevValue) -> void {
-                                       UNUSED_ARG(newValue);
-                                       UNUSED_ARG(prevValue);
-                                       callCount++;
-                                     });
+    auto observer =
+        makeMockObserver("datasearch.directories",
+                         [&callCount]([[maybe_unused]] const std::string &newValue,
+                                      [[maybe_unused]] const std::string &prevValue) -> void { callCount++; });
     ConfigService::Instance().setString("datasearch.directories", "/dev/null");
     TS_ASSERT_EQUALS(NUMBER_OF_PROPERTIES_CHANGED, callCount);
   }
 
   void testMultipleObserversForDifferentProperties() {
     auto callCountA = 0;
-    auto observerA = makeMockObserver("datasearch.directories",
-                                      [&callCountA](const std::string &newValue, const std::string &prevValue) -> void {
-                                        UNUSED_ARG(newValue);
-                                        UNUSED_ARG(prevValue);
-                                        callCountA++;
-                                      });
+    auto observerA =
+        makeMockObserver("datasearch.directories",
+                         [&callCountA]([[maybe_unused]] const std::string &newValue,
+                                       [[maybe_unused]] const std::string &prevValue) -> void { callCountA++; });
     auto callCountB = 0;
-    auto observerB = makeMockObserver("projectRecovery.secondsBetween",
-                                      [&callCountB](const std::string &newValue, const std::string &prevValue) -> void {
-                                        UNUSED_ARG(newValue);
-                                        UNUSED_ARG(prevValue);
-                                        callCountB++;
-                                      });
+    auto observerB =
+        makeMockObserver("projectRecovery.secondsBetween",
+                         [&callCountB]([[maybe_unused]] const std::string &newValue,
+                                       [[maybe_unused]] const std::string &prevValue) -> void { callCountB++; });
 
     ConfigService::Instance().setString("datasearch.directories", "/dev/null");
     ConfigService::Instance().setString("projectRecovery.secondsBetween", "600");

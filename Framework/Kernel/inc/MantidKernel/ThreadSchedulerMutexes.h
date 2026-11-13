@@ -51,9 +51,7 @@ public:
   }
 
   //-------------------------------------------------------------------------------
-  std::shared_ptr<Task> pop(size_t threadnum) override {
-    UNUSED_ARG(threadnum);
-
+  std::shared_ptr<Task> pop([[maybe_unused]] size_t threadnum) override {
     std::shared_ptr<Task> temp = nullptr;
 
     std::lock_guard<std::mutex> lock(m_queueLock);
@@ -114,8 +112,7 @@ public:
    * @param task :: the Task that was completed.
    * @param threadnum :: unused argument
    */
-  void finished(Task *task, size_t threadnum) override {
-    UNUSED_ARG(threadnum);
+  void finished(Task *task, [[maybe_unused]] size_t threadnum) override {
     std::shared_ptr<std::mutex> mut = task->getMutex();
     if (mut) {
       std::lock_guard<std::mutex> lock(m_queueLock);

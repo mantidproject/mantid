@@ -1860,9 +1860,8 @@ double TimeSeriesProperty<TYPE>::extractStatistic(Math::StatisticType selection,
  *  @throws Kernel::Exception::NotImplementedError always
  */
 template <>
-double TimeSeriesProperty<std::string>::extractStatistic(Math::StatisticType selection, const TimeROI *roi) const {
-  UNUSED_ARG(selection);
-  UNUSED_ARG(roi);
+double TimeSeriesProperty<std::string>::extractStatistic([[maybe_unused]] Math::StatisticType selection,
+                                                         [[maybe_unused]] const TimeROI *roi) const {
   throw Exception::NotImplementedError("TimeSeriesProperty::"
                                        "extractStatistic is not "
                                        "implemented for string properties");
@@ -2144,12 +2143,9 @@ void TimeSeriesProperty<TYPE>::histogramData(const Types::Core::DateAndTime &tMi
 }
 
 template <>
-void TimeSeriesProperty<std::string>::histogramData(const Types::Core::DateAndTime &tMin,
-                                                    const Types::Core::DateAndTime &tMax,
-                                                    std::vector<double> &counts) const {
-  UNUSED_ARG(tMin);
-  UNUSED_ARG(tMax);
-  UNUSED_ARG(counts);
+void TimeSeriesProperty<std::string>::histogramData([[maybe_unused]] const Types::Core::DateAndTime &tMin,
+                                                    [[maybe_unused]] const Types::Core::DateAndTime &tMax,
+                                                    [[maybe_unused]] std::vector<double> &counts) const {
   throw std::runtime_error("histogramData is not implememnted for time series "
                            "properties containing strings");
 }
