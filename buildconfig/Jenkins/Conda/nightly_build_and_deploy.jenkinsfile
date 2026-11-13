@@ -18,6 +18,7 @@ def defaults = [
   publishToAnaconda : publishPackages,
   publishToGithub   : publishPackages,
   packageSuffix     : 'Unstable',
+  buildStandalone   : true,
   anacondaLabel     : 'unstable',
   // The github tag is usually only specified for release candidates.
   // If it's left blank a nightly tag is generated.
@@ -60,6 +61,8 @@ switch(gitBranch) {
     defaults.publishToAnaconda = true
     defaults.anacondaChannelChoices = ['mantid-ornl', 'mantid-test']
     buildMantiddocs = false
+    // Self-extracting (standalone) packages are not needed for ornl-next.
+    defaults.buildStandalone = (gitBranch != 'ornl-next')
     break
 }
 
@@ -78,6 +81,8 @@ pipeline {
            description: 'Choose a platform to build & test the developer configuration.')
     choice(name: 'BUILD_PACKAGE', choices: defaults.platformChoices,
            description: 'Choose a platform to build just this standalone package')
+    booleanParam(name: 'BUILD_STANDALONE', defaultValue: defaults.buildStandalone,
+                 description: 'If true, build the self-extracting standalone package(s) selected by BUILD_PACKAGE')
     string(name: 'PACKAGE_SUFFIX', defaultValue: defaults.packageSuffix,
            description: 'A string to append to the standalone package name')
     booleanParam(name: 'PUBLISH_TO_ANACONDA', defaultValue: defaults.publishToAnaconda,
@@ -332,9 +337,12 @@ pipeline {
             when {
               beforeAgent true
               beforeOptions true
-              anyOf {
+              allOf {
+                expression { params.BUILD_STANDALONE }
+                anyOf {
                   expression { params.BUILD_PACKAGE == "${PLATFORM}" }
                   expression { params.BUILD_PACKAGE == 'all' }
+                }
               }
             }
             agent { label "${PLATFORM}" }
@@ -407,6 +415,8 @@ pipeline {
         beforeOptions true
         allOf {
           expression { params.PUBLISH_TO_GITHUB }
+          // The GitHub release requires the standalone packages
+          expression { params.BUILD_STANDALONE }
           expression { params.GITHUB_RELEASES_REPO.trim() != '' }
         }
       }
