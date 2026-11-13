@@ -70,6 +70,8 @@ import re
 logger = Logger(__name__)
 
 # Standard MIDAS mask: the first and last MIDAS_MASKED_END_PIXELS pixels of every tube.
+# These pixels lie outside the active length of the detector tubes and do not count neutrons.
+# The pixel count is an approximate default; a MaskWorkspace can be supplied when it is not suitable.
 # Detector IDs run consecutively along each tube, tube after tube, through all banks.
 MIDAS_NUM_TUBES = 7 * 16  # 7 banks of one 16-tube pack each
 MIDAS_PIXELS_PER_TUBE = 512
@@ -123,7 +125,8 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         self.declareProperty(
             FileProperty(name="IDFFilename", defaultValue="", action=FileAction.OptionalLoad, extensions=[".xml"]),
             doc="Optional instrument definition file (IDF). If provided, it overrides the instrument geometry "
-            "that would otherwise be determined by the sample file.",
+            "that would otherwise be determined by the sample file. For MIDAS, the standard mask (ApplyMask) "
+            "assumes the IDF keeps the standard detector ID numbering of 512 consecutive IDs per tube.",
         )
         # TODO: This field fields below will be autopopulated from the sample file in a future PR, handled by EWM item 13209
         self.declareProperty(
@@ -1644,10 +1647,15 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         mask_workspaces = []
         for n, (_wksp_in, _wksp_out) in enumerate(zip(input_workspaces, output_workspaces)):
             _wksp_in = str(_wksp_in)
-            if mask_angle == Property.EMPTY_DBL:
+            if mask_angle == Property.EMPTY_DBL and mask is None:
+                # ExtractUnmaskedSpectra falls back to the workspace's own masked detectors
+                # (e.g. the standard MIDAS mask) when no MaskWorkspace is given
                 self._to_spectrum_axis(_wksp_in, _wksp_out, mask)
                 mask_workspaces.append(mask)
             else:
+                # Start from the workspace's own masked detectors so that they are kept when
+                # combined with MaskAngle and/or the user MaskWorkspace; ExtractUnmaskedSpectra
+                # ignores the internal mask flags once a MaskWorkspace is supplied.
                 _mask_n = f"__mask_{n}"  # mask for n-th
                 self.temp_workspace_list.append(_mask_n)  # cleanup later
 
@@ -1660,7 +1668,6 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                         EnableLogging=False,
                     )
                 if mask is not None:
-                    # might be a bug if the mask angle isn't set
                     BinaryOperateMasks(
                         InputWorkspace1=_mask_n,
                         InputWorkspace2=mask,

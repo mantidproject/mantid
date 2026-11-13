@@ -19,6 +19,7 @@ from mantid.simpleapi import (
     GroupWorkspaces,
     SaveNexusESS,
     SaveNexusProcessed,
+    MaskDetectors,
     LoadEmptyInstrument,
     Load,
     mtd,
@@ -2392,6 +2393,35 @@ class MIDASMaskTests(unittest.TestCase):
         algo = _create_algo(Instrument="MIDAS", Wavelength=2.5, ApplyMask=False)
         algo._loadMIDASData(self._midas_file, "test_midas_unmasked")
         self.assertEqual(self._masked_detector_ids(mtd["test_midas_unmasked"]), set())
+
+    @staticmethod
+    def _mask_workspace_ids(mask_ws):
+        """Detector IDs flagged in a MaskWorkspace (one detector per spectrum)."""
+        return {
+            int(det_id)
+            for i in range(mask_ws.getNumberHistograms())
+            if mask_ws.readY(i)[0] > 0.5
+            for det_id in mask_ws.getSpectrum(i).getDetectorIDs()
+        }
+
+    def test_user_mask_without_mask_angle_keeps_midas_mask(self):
+        # ExtractUnmaskedSpectra ignores the workspace's masked flags once a MaskWorkspace is given,
+        # so the MIDAS mask must be combined into the mask passed on, even without MaskAngle
+        user_masked_id = 100  # inside the unmasked central region of the first tube
+        LoadEmptyInstrument(InstrumentName="MIDAS", OutputWorkspace="_user_mask_src")
+        MaskDetectors(Workspace="_user_mask_src", DetectorList=[user_masked_id])
+        ExtractMask(InputWorkspace="_user_mask_src", OutputWorkspace="_user_mask")
+
+        algo = _create_algo(Instrument="MIDAS", Wavelength=2.5, ApplyMask=True, MaskWorkspace="_user_mask")
+        algo._loadMIDASData(self._midas_file, "test_midas_user_mask")
+
+        with patch.object(algo, "_to_spectrum_axis") as to_spectrum_axis:
+            mask_workspaces = algo._extract_masks(["test_midas_user_mask"], ["test_midas_user_mask_out"])
+
+        mask_used = to_spectrum_axis.call_args.args[2]
+        self.assertEqual(mask_workspaces, [mask_used])
+        mask_ws = mtd[mask_used] if isinstance(mask_used, str) else mask_used
+        self.assertEqual(self._mask_workspace_ids(mask_ws), self._expected_mask_ids() | {user_masked_id})
 
 
 if __name__ == "__main__":
