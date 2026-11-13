@@ -19,6 +19,7 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include <memory>
 
 // Forward declarations
@@ -109,15 +110,20 @@ std::shared_ptr<Mantid::Geometry::CompAssembly> createTestAssemblyOfFourCylinder
  */
 std::shared_ptr<Mantid::Geometry::CSGObject>
 createHollowShell(double innerRadius, double outerRadius, const Mantid::Kernel::V3D &centre = Mantid::Kernel::V3D());
+
+// allow DetectorGtoup in the below functions
+GNU_DIAG_OFF("deprecated-declarations")
+MSVC_DIAG_OFF(4996)
 /**
  * Create a detector group containing 5 detectors
  */
-std::shared_ptr<Mantid::Geometry::DetectorGroup> createDetectorGroupWith5CylindricalDetectors();
+[[deprecated("DetectorGroup has been deprecated in Mantid 7.1; this helper only remains to test it")]]
+std::shared_ptr<Mantid::Geometry::DetectorGroup> createDetectorGroupWith5CylindricalDetectors()
 /**
  * Create a detector group containing n detectors with gaps
  */
-std::shared_ptr<Mantid::Geometry::DetectorGroup>
-createDetectorGroupWithNCylindricalDetectorsWithGaps(unsigned int nDet = 4, double gap = 0.01);
+[[deprecated("DetectorGroup has been deprecated in Mantid 7.1; this helper only remains to test it")]]
+std::shared_ptr<Mantid::Geometry::DetectorGroup> createDetectorGroupWithNCylindricalDetectorsWithGaps(unsigned int nDet = 4, double gap = 0.01)
 /**
  * Create a detector group containing detectors ring
  * R_min -- min radius of the ring
@@ -125,8 +131,12 @@ createDetectorGroupWithNCylindricalDetectorsWithGaps(unsigned int nDet = 4, doub
  * z     -- axial z-coordinate of the detectors position;
   The detectors are the cylinders with 1.5cm height and 0.5 cm radius
  */
-std::shared_ptr<Mantid::Geometry::DetectorGroup>
-createRingOfCylindricalDetectors(const double R_min = 4.5, const double R_max = 5, const double z000000000000000 = 4);
+[[deprecated("DetectorGroup has been deprecated in Mantid 7.1; this helper only remains to test it")]]
+std::shared_ptr<Mantid::Geometry::DetectorGroup> createRingOfCylindricalDetectors(const double R_min = 4.5, const double R_max = 5, const double z0 = 4))
+
+MSVC_DIAG_ON(4996)
+GNU_DIAG_ON("deprecated-declarations")
+// end allow DetectorGroup
 
 /**
  * Create a detector vector containing detectors ring

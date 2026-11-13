@@ -10,6 +10,7 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include <cxxtest/TestSuite.h>
 #include <memory>
 
@@ -26,7 +27,7 @@ public:
   static void destroySuite(DetectorGroupTest *suite) { delete suite; }
 
   DetectorGroupTest() : m_origin() {
-    m_detGroup = ComponentCreationHelper::createDetectorGroupWith5CylindricalDetectors();
+    ALLOW_DEPRECATED(m_detGroup = ComponentCreationHelper::createDetectorGroupWith5CylindricalDetectors());
   }
 
   void testConstructors() { TS_ASSERT_EQUALS(m_detGroup->getDetectorIDs().size(), 5); }
@@ -54,6 +55,10 @@ public:
       TS_ASSERT(dets[i]);
     }
   }
+
+  // allow use of DetectorGroup in the tests below
+  GNU_DIAG_OFF("deprecated-declarations")
+  MSVC_DIAG_OFF(4996)
 
   void testIdentRectShape() {
     Kernel::V3D center;
@@ -90,6 +95,10 @@ public:
     TS_ASSERT_DELTA(detg->getPos()[2], 2.0, 1e-08);
   }
 
+  MSVC_DIAG_ON(4996)
+  GNU_DIAG_ON("deprecated-declarations")
+  // end allow DetectorGroup
+
   void test_That_The_Bounding_Box_Is_Large_Enough_For_All_Of_The_Detectors() {
     BoundingBox bbox;
     m_detGroup->getBoundingBox(bbox);
@@ -105,7 +114,7 @@ public:
 
   void test_signed_two_theta() {
     // Create a cluster consisting of a single detector.
-    DetectorGroup cluster;
+    ALLOW_DEPRECATED(DetectorGroup cluster);
     Detector *det = new Detector("det", 0, nullptr);
     det->setPos(1, -1, 0);
     cluster.addDetector(IDetector_const_sptr(det));
@@ -123,6 +132,6 @@ public:
   }
 
 private:
-  std::shared_ptr<DetectorGroup> m_detGroup;
+  ALLOW_DEPRECATED(std::shared_ptr<DetectorGroup> m_detGroup)
   Component m_origin;
 };
