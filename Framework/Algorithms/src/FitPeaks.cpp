@@ -1303,21 +1303,15 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
     try {
       if (wi > 0 && samePeakCrossSpectrum) {
         size_t lastGoodWi = lastGoodPeakSpectra[peak_index];
-        std::shared_ptr<const Geometry::Detector> pdetector =
-            std::dynamic_pointer_cast<const Geometry::Detector>(m_inputMatrixWS->getDetector(lastGoodWi));
-        std::shared_ptr<const Geometry::Detector> cdetector =
-            std::dynamic_pointer_cast<const Geometry::Detector>(m_inputMatrixWS->getDetector(wi));
-
-        // If they do have detector ID
-        if (pdetector && cdetector) {
-          auto prev_id = pdetector->getID();
-          auto curr_id = cdetector->getID();
+        auto const &specInfo = m_inputMatrixWS->spectrumInfo();
+        if (specInfo.hasUniqueDetector(wi) && specInfo.hasUniqueDetector(lastGoodWi)) {
+          auto const prev_id = specInfo.firstDetectorID(lastGoodWi);
+          auto const curr_id = specInfo.firstDetectorID(wi);
           if (prev_id + 1 != curr_id)
             samePeakCrossSpectrum = false;
         } else {
           samePeakCrossSpectrum = false;
         }
-
       } else {
         // first spectrum in the workspace: no peak's fitting result to copy
         // from

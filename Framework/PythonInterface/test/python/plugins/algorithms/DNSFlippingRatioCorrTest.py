@@ -263,11 +263,11 @@ class DNSFlippingRatioCorrTest(unittest.TestCase):
         self.assertEqual(2, ws_nsf.getNumDims())
         # 2theta angles must not change after correction has been applied
         tthetas = np.array([7.53 + i * 5 for i in range(24)])
+        spectrum_info_sf = ws_sf.spectrumInfo()
+        spectrum_info_nsf = ws_nsf.spectrumInfo()
         for i in range(24):
-            det = ws_sf.getDetector(i)
-            self.assertAlmostEqual(tthetas[i], np.degrees(ws_sf.detectorSignedTwoTheta(det)))
-            det = ws_nsf.getDetector(i)
-            self.assertAlmostEqual(tthetas[i], np.degrees(ws_nsf.detectorSignedTwoTheta(det)))
+            self.assertAlmostEqual(tthetas[i], np.degrees(spectrum_info_sf.signedTwoTheta(i)))
+            self.assertAlmostEqual(tthetas[i], np.degrees(spectrum_info_nsf.signedTwoTheta(i)))
 
         run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName + "SF")
         run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName + "NSF")

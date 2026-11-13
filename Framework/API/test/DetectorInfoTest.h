@@ -8,6 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/FakeObjects.h"
 #include "MantidFrameworkTestHelpers/InstrumentCreationHelper.h"
@@ -140,7 +141,7 @@ public:
   // removed at some point.
   void test_twoThetaLegacy() {
     const auto &detectorInfo = m_workspace.detectorInfo();
-    auto det = m_workspace.getDetector(2);
+    ALLOW_DEPRECATED(auto det = m_workspace.getDetector(2));
     TS_ASSERT_EQUALS(detectorInfo.twoTheta(2), m_workspace.detectorTwoTheta(*det));
   }
 
@@ -505,11 +506,11 @@ public:
     const std::string instrumentName("SimpleFakeInstrument");
     InstrumentCreationHelper::addFullInstrumentToWorkspace(workspace, includeMonitors, startYNegative, instrumentName);
     // Check that *workspace* does not have sorted IDs.
-    TS_ASSERT_EQUALS(workspace.getDetector(0)->getID(), 5);
-    TS_ASSERT_EQUALS(workspace.getDetector(1)->getID(), 4);
-    TS_ASSERT_EQUALS(workspace.getDetector(2)->getID(), 3);
-    TS_ASSERT_EQUALS(workspace.getDetector(3)->getID(), 2);
-    TS_ASSERT_EQUALS(workspace.getDetector(4)->getID(), 1);
+    TS_ASSERT_EQUALS(workspace.spectrumInfo().firstDetectorID(0), 5);
+    TS_ASSERT_EQUALS(workspace.spectrumInfo().firstDetectorID(1), 4);
+    TS_ASSERT_EQUALS(workspace.spectrumInfo().firstDetectorID(2), 3);
+    TS_ASSERT_EQUALS(workspace.spectrumInfo().firstDetectorID(3), 2);
+    TS_ASSERT_EQUALS(workspace.spectrumInfo().firstDetectorID(4), 1);
     const auto &info = workspace.detectorInfo();
     const auto &ids = info.detectorIDs();
     auto sorted_ids(ids);

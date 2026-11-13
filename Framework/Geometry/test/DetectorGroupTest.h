@@ -10,6 +10,7 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include <cxxtest/TestSuite.h>
 #include <memory>
 
@@ -17,6 +18,10 @@ using namespace Mantid::Geometry;
 using namespace Mantid;
 using Mantid::Kernel::Quat;
 using Mantid::Kernel::V3D;
+
+// DetectorGroup is deprecated, but still needs testing until it is removed
+GNU_DIAG_OFF("deprecated-declarations")
+MSVC_DIAG_OFF(4996)
 
 class DetectorGroupTest : public CxxTest::TestSuite {
 public:
@@ -126,3 +131,6 @@ private:
   std::shared_ptr<DetectorGroup> m_detGroup;
   Component m_origin;
 };
+
+MSVC_DIAG_ON(4996)
+GNU_DIAG_ON("deprecated-declarations")

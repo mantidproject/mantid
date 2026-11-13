@@ -9,9 +9,11 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/ModeratorTzero.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/UnitFactory.h"
 #include <cmath>
@@ -38,7 +40,8 @@ void AddToIndirectInstrument(MatrixWorkspace_sptr &testWS, const bool &add_t0_fo
     const double evalue(2.082); // energy corresponding to the first order
                                 // Bragg peak in the analyzers
     for (size_t ihist = 0; ihist < testWS->getNumberHistograms(); ++ihist) {
-      testWS->instrumentParameters().addDouble(testWS->getDetector(ihist)->getComponentID(), "Efixed", evalue);
+      auto const detIndex = testWS->spectrumInfo().firstDetectorIndex(ihist);
+      testWS->instrumentParameters().addDouble(testWS->componentInfo().componentID(detIndex), "Efixed", evalue);
     }
   }
 } // end of void AddToInstrument

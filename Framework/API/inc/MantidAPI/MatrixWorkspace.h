@@ -127,6 +127,8 @@ public:
 
   /**@name Instrument queries */
   //@{
+
+  [[deprecated("use spectrumInfo() and componentInfo() instead")]]
   std::shared_ptr<const Geometry::IDetector> getDetector(const size_t workspaceIndex) const;
   double detectorTwoTheta(const Geometry::IDetector &det) const;
   double detectorSignedTwoTheta(const Geometry::IDetector &det) const;

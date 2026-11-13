@@ -31,6 +31,8 @@ public:
                                 const int nNeighbours = 8);
   ~WorkspaceNearestNeighbourInfo();
 
+  [[deprecated("WorkspaceNearestNeighbourInfo::getNeighbours(IDetector) has been deprecated in Mantid 7.1. "
+               "Use the faster getNeighbours(spectrumNumber, radius) instead.")]]
   std::map<specnum_t, Kernel::V3D> getNeighbours(const Geometry::IDetector *comp, const double radius = 0.0) const;
   std::map<specnum_t, Kernel::V3D> getNeighbours(specnum_t spec, const double radius) const;
   std::map<specnum_t, Kernel::V3D> getNeighboursExact(specnum_t spec) const;

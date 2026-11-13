@@ -19,20 +19,17 @@
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/FakeObjects.h"
 #include "MantidFrameworkTestHelpers/InstrumentCreationHelper.h"
-#include "MantidFrameworkTestHelpers/NexusTestHelper.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidHistogramData/LogarithmicGenerator.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/VMD.h"
 #include "MantidKernel/make_cow.h"
 #include "MantidTypes/SpectrumDefinition.h"
 #include "PropertyManagerHelper.h"
@@ -644,7 +641,7 @@ public:
     // Initially un masked
     for (int i = 0; i < numHist; ++i) {
       IDetector_const_sptr det;
-      TS_ASSERT_THROWS_NOTHING(det = workspace->getDetector(i));
+      ALLOW_DEPRECATED(TS_ASSERT_THROWS_NOTHING(det = workspace->getDetector(i)));
       if (det) {
         TS_ASSERT_EQUALS(det->getID(), i);
       } else {
@@ -657,14 +654,14 @@ public:
     spec.addDetectorID(1);
     spec.addDetectorID(2);
     IDetector_const_sptr det;
-    TS_ASSERT_THROWS_NOTHING(det = workspace->getDetector(0));
+    ALLOW_DEPRECATED(TS_ASSERT_THROWS_NOTHING(det = workspace->getDetector(0)));
     TS_ASSERT(det);
 
     // Now an empty (no detector) pixel
     auto &spec2 = workspace->getSpectrum(1);
     spec2.clearDetectorIDs();
     IDetector_const_sptr det2;
-    TS_ASSERT_THROWS_ANYTHING(det2 = workspace->getDetector(1));
+    ALLOW_DEPRECATED(TS_ASSERT_THROWS_ANYTHING(det2 = workspace->getDetector(1)));
     TS_ASSERT(!det2);
   }
 
@@ -2450,16 +2447,13 @@ public:
   }
   /// This test is equivalent to GeometryInfoFactoryTestPerformance, see there.
   void test_typical() {
-    auto instrument = m_workspace.getInstrument();
-    auto source = instrument->getSource();
-    auto sample = instrument->getSample();
-    auto L1 = source->getDistance(*sample);
+    auto const &specInfo = m_workspace.spectrumInfo();
+    double const L1 = specInfo.l1();
     double result = 0.0;
     for (size_t i = 0; i < 10000; ++i) {
-      auto detector = m_workspace.getDetector(i);
       result += L1;
-      result += detector->getDistance(*sample);
-      result += m_workspace.detectorTwoTheta(*detector);
+      result += specInfo.l2(i);
+      result += specInfo.twoTheta(i);
     }
     // We are computing and using the result to fool the optimizer.
     TS_ASSERT_DELTA(result, 5214709.740869, 1e-6);
@@ -2471,12 +2465,10 @@ public:
      * Simulate the L2 calculation performed via the Workspace/Instrument
      * interface.
      */
-    auto instrument = m_workspaceSans.getInstrument();
-    auto sample = instrument->getSample();
+    auto const &spectrumInfo = m_workspaceSans.spectrumInfo();
     double l2 = 0;
     for (size_t i = 0; i < m_workspaceSans.getNumberHistograms(); ++i) {
-      auto detector = m_workspaceSans.getDetector(i);
-      l2 += detector->getDistance(*sample);
+      l2 += spectrumInfo.l2(i);
     }
     // Prevent optimization
     TS_ASSERT(l2 > 0);
@@ -2489,14 +2481,12 @@ public:
      * interface. Repeat several times to benchmark any caching/optmisation that
      * might be taken place in parameter maps.
      */
-    auto instrument = m_workspaceSans.getInstrument();
-    auto sample = instrument->getSample();
+    auto const &spectrumInfo = m_workspaceSans.spectrumInfo();
     double l2 = 0;
     int count = 0;
     while (count < 10) {
       for (size_t i = 0; i < m_workspaceSans.getNumberHistograms(); ++i) {
-        auto detector = m_workspaceSans.getDetector(i);
-        l2 += detector->getDistance(*sample);
+        l2 += spectrumInfo.l2(i);
       }
       ++count;
     }
@@ -2523,7 +2513,7 @@ public:
 
       V3D pos;
       for (size_t i = 1; i < m_workspaceSans.getNumberHistograms(); ++i) {
-        pos += m_workspaceSans.getDetector(i)->getPos();
+        pos += m_workspaceSans.spectrumInfo().position(i);
       }
       ++count;
     }
@@ -2548,7 +2538,7 @@ public:
 
       V3D pos;
       for (size_t i = 1; i < m_workspaceSans.getNumberHistograms(); ++i) {
-        pos += m_workspaceSans.getDetector(i)->getPos();
+        pos += m_workspaceSans.spectrumInfo().position(i);
       }
       ++count;
     }
@@ -2571,7 +2561,7 @@ public:
     }
   }
 
-  // As test_move_bank_and_read_positions_x10 but based on SpectrumInfo.
+  // Move a bank in the workspace and read the positions out again via SpectrumInfo.
   void test_move_bank_and_read_positions_SpectrumInfo_x10() {
     int count = 0;
     while (count < 10) {

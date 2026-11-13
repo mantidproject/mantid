@@ -13,10 +13,12 @@
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -532,10 +534,10 @@ void LoadGSS::createInstrumentGeometry(const MatrixWorkspace_sptr &workspace, co
   } // ENDFOR (i: spectrum)
   workspace->setInstrument(instrument);
 
-  auto &paramMap = workspace->instrumentParameters();
+  auto &compInfo = workspace->mutableComponentInfo();
   for (size_t i = 0; i < workspace->getNumberHistograms(); i++) {
-    auto detector = workspace->getDetector(i);
-    paramMap.addDouble(detector->getComponentID(), "DIFC", difcs[i]);
+    auto detectorIndex = workspace->spectrumInfo().firstDetectorIndex(i);
+    compInfo.addDouble(detectorIndex, "DIFC", difcs[i]);
   }
 }
 } // namespace Mantid::DataHandling

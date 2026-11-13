@@ -29,6 +29,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include "MantidTypes/SpectrumDefinition.h"
 
@@ -909,7 +910,7 @@ Geometry::IDetector_const_sptr MatrixWorkspace::getDetector(const size_t workspa
   }
   // Else need to construct a DetectorGroup and return that
   auto dets_ptr = localInstrument->getDetectors(dets);
-  return std::make_shared<Geometry::DetectorGroup>(dets_ptr);
+  ALLOW_DEPRECATED(return std::make_shared<Geometry::DetectorGroup>(dets_ptr));
 }
 
 /** Returns the signed 2Theta scattering angle for a detector

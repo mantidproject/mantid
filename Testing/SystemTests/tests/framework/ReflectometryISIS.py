@@ -63,9 +63,11 @@ class ReflectometryISIS(systemtesting.MantidSystemTest, metaclass=ABCMeta):
         # Check that signed two theta is being calculated correctly (not normalised)
         ws1 = mtd["SignedTheta_vs_Wavelength"]
         upperHistogram = ws1.getNumberHistograms() - 1
+        spectrum_info = ws1.spectrumInfo()
+        sample_pos = spectrum_info.samplePosition()
         for i in range(0, upperHistogram):
-            thisTheta = ws1.detectorSignedTwoTheta(ws1.getDetector(i))
-            nextTheta = ws1.detectorSignedTwoTheta(ws1.getDetector(i + 1))
+            thisTheta = spectrum_info.signedTwoTheta(i, sample_pos)
+            nextTheta = spectrum_info.signedTwoTheta(i + 1, sample_pos)
             # This check would fail if negative values were being normalised.
             self.assertLess(thisTheta, nextTheta)
 

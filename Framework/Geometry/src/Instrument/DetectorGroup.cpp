@@ -11,10 +11,15 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/V2D.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include <numeric>
 
 namespace Mantid::Geometry {
+// The implementation of the deprecated DetectorGroup must not warn about itself
+GNU_DIAG_OFF("deprecated-declarations")
+MSVC_DIAG_OFF(4996)
+
 namespace {
 // static logger
 Kernel::Logger g_log("DetectorGroup");
@@ -433,4 +438,6 @@ size_t DetectorGroup::registerContents(class ComponentVisitor & /*component*/) c
                            "instrument. On-the-fly only.");
 }
 
+MSVC_DIAG_ON(4996)
+GNU_DIAG_ON("deprecated-declarations")
 } // namespace Mantid::Geometry

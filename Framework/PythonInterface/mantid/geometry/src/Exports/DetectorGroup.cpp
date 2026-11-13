@@ -7,34 +7,62 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include <boost/python/class.hpp>
+
+#include <algorithm>
+#include <string>
+#include <vector>
+
+// DetectorGroup is deprecated, but the Python export remains until it is removed
+GNU_DIAG_OFF("deprecated-declarations")
+MSVC_DIAG_OFF(4996)
 
 using Mantid::Geometry::DetectorGroup;
 using Mantid::Geometry::IDetector;
 using namespace boost::python;
 
 namespace {
-bool isMaskedDeprecated(const DetectorGroup &self) {
+constexpr auto DEPRECATION_MESSAGE_SUFFIX =
+    " is deprecated in Mantid 7.1. "
+    "For more information, see the instrument access layers concept page: "
+    "https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html";
+
+void warnDeprecated(std::string const &name) {
+  if (PyErr_Warn(PyExc_DeprecationWarning, ("'DetectorGroup." + name + "'" + DEPRECATION_MESSAGE_SUFFIX).c_str()) < 0)
+    throw boost::python::error_already_set();
+}
+
+bool isMaskedDeprecated(DetectorGroup const &self) {
   if (PyErr_Warn(PyExc_DeprecationWarning, "'DetectorGroup::isMasked' is deprecated, "
                                            "use 'SpectrumInfo::isMasked' instead.") < 0)
     throw boost::python::error_already_set();
-  const auto &dets = self.getDetectors();
   bool masked = true;
-  for (const auto &det : dets) {
-    const auto &detInfo = det->parameterMap().detectorInfo();
+  for (auto const &det : self.getDetectors()) {
+    auto const &detInfo = det->parameterMap().detectorInfo();
     masked &= detInfo.isMasked(det->index());
   }
   return masked;
 }
 
-bool isMonitorDeprecated(const DetectorGroup &self) {
+bool isMonitorDeprecated(DetectorGroup const &self) {
   if (PyErr_Warn(PyExc_DeprecationWarning, "'DetectorGroup::isMonitor' is "
                                            "deprecated, use "
                                            "'SpectrumInfo::isMonitor' instead.") < 0)
     throw boost::python::error_already_set();
-  const auto &dets = self.getDetectors();
+  auto const &dets = self.getDetectors();
   return std::all_of(dets.cbegin(), dets.cend(),
-                     [](const auto &det) { return det->parameterMap().detectorInfo().isMonitor(det->index()); });
+                     [](auto const &det) { return det->parameterMap().detectorInfo().isMonitor(det->index()); });
+}
+
+std::vector<Mantid::detid_t> getDetectorIDsDeprecated(DetectorGroup const &self) {
+  warnDeprecated("getDetectorIDs");
+  return self.getDetectorIDs();
+}
+
+std::string getNameSeparatorDeprecated(DetectorGroup const &self) {
+  warnDeprecated("getNameSeparator");
+  return self.getNameSeparator();
 }
 } // namespace
 
@@ -45,8 +73,11 @@ void export_DetectorGroup() {
            "detector")
       .def("isMonitor", &isMonitorDeprecated, arg("self"),
            "Returns True if the detector is marked as a monitor in the IDF")
-      .def("getDetectorIDs", &DetectorGroup::getDetectorIDs, arg("self"),
+      .def("getDetectorIDs", &getDetectorIDsDeprecated, arg("self"),
            "Returns the list of detector IDs within this group")
-      .def("getNameSeparator", &DetectorGroup::getNameSeparator, arg("self"),
+      .def("getNameSeparator", &getNameSeparatorDeprecated, arg("self"),
            "Returns separator for list of names of detectors");
 }
+
+MSVC_DIAG_ON(4996)
+GNU_DIAG_ON("deprecated-declarations")

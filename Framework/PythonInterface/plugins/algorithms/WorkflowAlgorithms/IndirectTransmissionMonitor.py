@@ -143,8 +143,10 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
         @param detector_id Detector ID to search for
         """
 
-        for spec_idx in range(0, mtd[workspace].getNumberHistograms()):
-            if mtd[workspace].getDetector(spec_idx).getID() == detector_id:
+        ws = mtd[workspace]
+        for spec_idx in range(0, ws.getNumberHistograms()):
+            detector_ids = ws.getSpectrum(spec_idx).getDetectorIDs()
+            if len(detector_ids) > 0 and detector_ids[0] == detector_id:
                 return spec_idx
 
         return None
