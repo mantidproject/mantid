@@ -54,6 +54,18 @@ outputs:
       - pip ${{ pip }}
       - versioningit ${{ versioningit }}
       - zlib
+      # Python plugins import these when build.sh generates the simpleapi type stubs. Required ones are also in the
+      # mantid run requirements; optional ones (only in run_constraints) are here so that the algorithms they enable
+      # are typed in the stub
+      - euphonic ${{ euphonic }}
+      - joblib
+      - orsopy ${{ orsopy }}
+      - pydantic ${{ pydantic }}
+      - pyyaml ${{ pyyaml }}
+      - scipy ${{ scipy }}
+      - toml ${{ toml }}
+      - pyparsing ${{ pyparsing }}  # optional: PoldiCreatePeaksFromFile
+      - pystog ${{ pystog }}  # optional: PDConvertRealSpace, PDConvertReciprocalSpace (neutrons channel)
       - if: linux
         then:
         - libglu ${{ libglu }}

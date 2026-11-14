@@ -398,6 +398,15 @@ class GenerateSimpleAPIStubsTest(unittest.TestCase):
         self.assertNotIn("_simpleapi_mpi", stub)
         self.assertNotIn("__getattr__", stub)
 
+    def test_failed_python_plugins_stop_generation(self):
+        loaded = types.SimpleNamespace(__file__="/plugins/Loaded.py")
+        simpleapi = types.SimpleNamespace(_plugin_files=["/plugins/Loaded.py", "/plugins/NeedsScipy.py"], _plugin_modules=[loaded])
+        with self.assertRaisesRegex(RuntimeError, "NeedsScipy.py"):
+            generator._check_python_plugins_loaded(simpleapi)
+
+        simpleapi._plugin_files.pop()
+        generator._check_python_plugins_loaded(simpleapi)
+
     def test_mpi_only_fails_without_mpi_algorithms(self):
         modules = _mantid_modules()
         modules["mantid.api"].AlgorithmFactory.getDescriptors = lambda _include_hidden: []

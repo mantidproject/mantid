@@ -96,6 +96,18 @@ their algorithms. `--no-format` skips Ruff formatting, which needs `prek` or
 `pre-commit` and a git checkout. Formatting matters only for the reviewed diff
 of the committed file.
 
+Generating the stub imports every Python algorithm plugin, so the staging
+`host` requirements in `conda/recipes/mantid/recipe.yaml` must include the
+Python packages that plugins import when they load. Required packages are also
+in the `mantid` run requirements. Optional packages that decide whether an
+algorithm is registered, such as `pystog`, are only in `host` and
+`run_constraints`. `pystog` comes from the `neutrons` channel, which
+`buildconfig/Jenkins/Conda/package-conda` passes to the `mantid` build. If a
+plugin fails to load, the generator stops with a list of the failed files
+rather than writing a stub without their algorithms. An optional import that
+only skips registering an algorithm cannot be detected; that algorithm is then
+missing from the packaged stub until its package is added to `host`.
+
 The committed stub is not checked for freshness in CI, so pull requests that
 change algorithm properties do not need to regenerate it, and feature branches
 do not conflict over it. It may lag behind the algorithms on `main` until

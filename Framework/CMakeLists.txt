@@ -98,6 +98,13 @@ if(CMAKE_GENERATOR MATCHES "Visual Studio" OR CMAKE_GENERATOR MATCHES "Xcode")
 else()
   set(_simpleapi_stub_module_dir ${CMAKE_BINARY_DIR}/bin)
 endif()
+# The source package goes on the path too, because conda builds (CONDA_BUILD) skip the editable install that otherwise
+# makes `mantid` importable from the build tree
+if(WIN32)
+  set(_simpleapi_stub_pythonpath "${CMAKE_CURRENT_SOURCE_DIR}/PythonInterface$<SEMICOLON>${_simpleapi_stub_module_dir}")
+else()
+  set(_simpleapi_stub_pythonpath "${CMAKE_CURRENT_SOURCE_DIR}/PythonInterface:${_simpleapi_stub_module_dir}")
+endif()
 # Depending on the library targets (rather than the Framework utility target, which only orders the build) re-runs the
 # generator whenever one is relinked. The Python extension modules are the dependencies of PythonInterface.
 get_target_property(_simpleapi_stub_python_modules PythonInterface MANUALLY_ADDED_DEPENDENCIES)
@@ -105,7 +112,7 @@ get_target_property(_simpleapi_stub_python_modules PythonInterface MANUALLY_ADDE
 # out of the stub
 set(_simpleapi_stub_home ${CMAKE_CURRENT_BINARY_DIR}/simpleapi_stubs_home)
 set(_simpleapi_stub_command
-    ${CMAKE_COMMAND} -E env "PYTHONPATH=${_simpleapi_stub_module_dir}" "HOME=${_simpleapi_stub_home}"
+    ${CMAKE_COMMAND} -E env "PYTHONPATH=${_simpleapi_stub_pythonpath}" "HOME=${_simpleapi_stub_home}"
     "APPDATA=${_simpleapi_stub_home}" ${Python_EXECUTABLE} ${_simpleapi_stub_generator} ${SIMPLEAPI_STUBS_ARGS}
 )
 set(_simpleapi_stub_outputs ${_simpleapi_stub})

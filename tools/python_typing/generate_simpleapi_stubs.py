@@ -460,6 +460,20 @@ def _format_with_ruff(contents: str) -> str:
         temporary_path.unlink(missing_ok=True)
 
 
+def _check_python_plugins_loaded(simpleapi) -> None:
+    """Fail if a Python plugin could not be imported, e.g. because a dependency is missing.
+
+    Its algorithms would otherwise be silently left out of the stub.
+    """
+    loaded = {Path(module.__file__).resolve() for module in getattr(simpleapi, "_plugin_modules", [])}
+    failed = sorted(path for path in getattr(simpleapi, "_plugin_files", []) if Path(path).resolve() not in loaded)
+    if failed:
+        raise RuntimeError(
+            "Python plugins failed to load (see the warnings above), so their algorithms would be missing from the stub:\n  "
+            + "\n  ".join(failed)
+        )
+
+
 def _selected_algorithm_names(args, parser, registered, algorithm_factory, simpleapi) -> list[str]:
     """Return the sorted algorithm names that the command line asks for."""
     if sum((args.all, args.mpi_only, bool(args.algorithms))) > 1:
@@ -497,6 +511,7 @@ def main() -> int:
     import mantid.simpleapi
     from mantid.api import AlgorithmFactory
 
+    _check_python_plugins_loaded(mantid.simpleapi)
     for module_name in ("mantid.api", "mantid.dataobjects"):
         module = importlib.import_module(module_name)
         for property_type in (
