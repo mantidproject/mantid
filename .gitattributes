@@ -1,5 +1,7 @@
 # SCM syntax highlighting & preventing 3-way merges
 pixi.lock merge=binary linguist-language=YAML linguist-generated=true -diff
+# collapsed in GitHub reviews; still diffed and merged as text so signature changes stay reviewable
+Framework/PythonInterface/mantid/simpleapi.pyi linguist-generated=true
 
 # Set default behaviour, in case users don't have core.autocrlf set.
 # See https://help.github.com/articles/dealing-with-line-endings#platform-all for more info

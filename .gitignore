@@ -445,3 +445,6 @@ installers/conda/win/_package_build
 installers/conda/win/_nsis_conda_env
 installers/conda/win/nsis_log.txt
 !installers/conda/win/MantidWorkbench.exe
+
+# generated where the MPIAlgorithms plugin is built; shipped only in the mantidmpi package
+Framework/PythonInterface/mantid/_simpleapi_mpi.pyi

@@ -25,6 +25,7 @@ from mantid.dataobjects import (
 )
 from mantid.api import IFunction
 from mantid.fitfunctions import FunctionWrapper
+from mantid._simpleapi_mpi import *  # noqa: F403
 
 type _Float1DArray = Sequence[float] | numpy.ndarray
 type _Int1DArray = Sequence[int] | numpy.ndarray
