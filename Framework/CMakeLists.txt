@@ -81,7 +81,12 @@ add_custom_target(Framework DEPENDS ${FRAMEWORK_LIBS})
 # ######################################################################################################################
 # Regenerate the committed PythonInterface/mantid/simpleapi.pyi with `ninja simpleapi_stubs`. It is not part of "all"
 # because it rewrites a file in the source tree. Note that `clean` deletes the stub; restore it with git or rerun the
-# target.
+# target. Where the MPIAlgorithms plugin is built (Linux), the target also writes the uncommitted _simpleapi_mpi.pyi for
+# its algorithms. Package builds pass --no-format here, because formatting needs prek or pre-commit.
+set(SIMPLEAPI_STUBS_ARGS
+    ""
+    CACHE STRING "Extra arguments for generate_simpleapi_stubs.py, e.g. --no-format"
+)
 set(_simpleapi_stub ${CMAKE_CURRENT_SOURCE_DIR}/PythonInterface/mantid/simpleapi.pyi)
 set(_simpleapi_stub_generator ${CMAKE_SOURCE_DIR}/tools/python_typing/generate_simpleapi_stubs.py)
 # Python algorithms and the mantid package are read from the source tree
@@ -99,12 +104,22 @@ get_target_property(_simpleapi_stub_python_modules PythonInterface MANUALLY_ADDE
 # An empty user properties directory (HOME on Linux/macOS, APPDATA on Windows) keeps settings such as default.facility
 # out of the stub
 set(_simpleapi_stub_home ${CMAKE_CURRENT_BINARY_DIR}/simpleapi_stubs_home)
+set(_simpleapi_stub_command
+    ${CMAKE_COMMAND} -E env "PYTHONPATH=${_simpleapi_stub_module_dir}" "HOME=${_simpleapi_stub_home}"
+    "APPDATA=${_simpleapi_stub_home}" ${Python_EXECUTABLE} ${_simpleapi_stub_generator} ${SIMPLEAPI_STUBS_ARGS}
+)
+set(_simpleapi_stub_outputs ${_simpleapi_stub})
+set(_simpleapi_mpi_stub_commands)
+if(TARGET MPIAlgorithms)
+  list(APPEND _simpleapi_stub_python_modules MPIAlgorithms)
+  list(APPEND _simpleapi_stub_outputs ${CMAKE_CURRENT_SOURCE_DIR}/PythonInterface/mantid/_simpleapi_mpi.pyi)
+  set(_simpleapi_mpi_stub_commands COMMAND ${_simpleapi_stub_command} --mpi-only)
+endif()
 
 add_custom_command(
-  OUTPUT ${_simpleapi_stub}
+  OUTPUT ${_simpleapi_stub_outputs}
   COMMAND ${CMAKE_COMMAND} -E make_directory ${_simpleapi_stub_home}
-  COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${_simpleapi_stub_module_dir}" "HOME=${_simpleapi_stub_home}"
-          "APPDATA=${_simpleapi_stub_home}" ${Python_EXECUTABLE} ${_simpleapi_stub_generator} --all
+  COMMAND ${_simpleapi_stub_command} --all ${_simpleapi_mpi_stub_commands}
   DEPENDS ${FRAMEWORK_LIBS} ${_simpleapi_stub_python_modules} ${_simpleapi_stub_generator}
           ${_simpleapi_stub_python_sources}
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}

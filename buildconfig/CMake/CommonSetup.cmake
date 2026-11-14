@@ -23,7 +23,7 @@ option(USE_PYTHON_DYNAMIC_LIB "Dynamic link python libs" ON)
 option(MPI_BUILD "Enable MPI options (Linux / RedHat only)" OFF)
 
 add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
-make_directory(${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Testing)
+file(MAKE_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Testing")
 message(STATUS "Added target ('check') for unit tests")
 
 # Configure a variable to hold the required test timeout value for all tests

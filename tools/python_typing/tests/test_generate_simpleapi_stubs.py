@@ -363,6 +363,48 @@ class GenerateSimpleAPIStubsTest(unittest.TestCase):
 
         self.assertEqual(generator._mpi_algorithm_names(algorithm_factory), {"BroadcastWorkspace", "GatherWorkspaces"})
 
+    def _run_main(self, modules, *arguments):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            output = Path(temporary_directory) / "out.pyi"
+            argv = ["generate_simpleapi_stubs.py", *arguments, "--no-format", "--output", str(output)]
+            with (
+                patch.dict(sys.modules, modules),
+                patch.object(generator, "_format_with_ruff", side_effect=AssertionError("--no-format still formatted")),
+                patch.object(sys, "argv", argv),
+            ):
+                self.assertEqual(generator.main(), 0)
+            return output.read_text()
+
+    def test_main_stub_imports_mpi_stub_and_keeps_getattr_fallback(self):
+        stub = self._run_main(_mantid_modules(), "ConvertUnits")
+
+        self.assertIn("from mantid._simpleapi_mpi import *  # noqa: F403\n", stub)
+        self.assertIn("def ConvertUnits(", stub)
+        self.assertTrue(stub.endswith("def __getattr__(name: str) -> Any: ...\n"))
+
+    def test_mpi_only_emits_just_the_mpi_algorithms(self):
+        modules = _mantid_modules()
+        modules["mantid.api"].AlgorithmFactory = types.SimpleNamespace(
+            getRegisteredAlgorithms=lambda _include_hidden: {"BroadcastWorkspace": [1], "ConvertUnits": [1]},
+            getDescriptors=lambda _include_hidden: [
+                types.SimpleNamespace(name="BroadcastWorkspace", category="MPI"),
+                types.SimpleNamespace(name="ConvertUnits", category="Transforms\\Units"),
+            ],
+        )
+        stub = self._run_main(modules, "--mpi-only")
+
+        self.assertIn("def BroadcastWorkspace(", stub)
+        self.assertNotIn("def ConvertUnits(", stub)
+        self.assertNotIn("_simpleapi_mpi", stub)
+        self.assertNotIn("__getattr__", stub)
+
+    def test_mpi_only_fails_without_mpi_algorithms(self):
+        modules = _mantid_modules()
+        modules["mantid.api"].AlgorithmFactory.getDescriptors = lambda _include_hidden: []
+        with patch.dict(sys.modules, modules), patch.object(sys, "argv", ["generate_simpleapi_stubs.py", "--mpi-only"]):
+            with self.assertRaises(SystemExit), contextlib.redirect_stderr(io.StringIO()):
+                generator.main()
+
     def test_check_detects_stale_stub(self):
         with tempfile.TemporaryDirectory() as temporary_directory, patch.dict(sys.modules, _mantid_modules()):
             output = Path(temporary_directory) / "simpleapi.pyi"

@@ -57,6 +57,7 @@ _FITTING_ALGORITHMS = {
 }
 _CUSTOM_ALGORITHMS = {"Load", "StartLiveData", "CutMD", "RenameWorkspace"}
 _MPI_CATEGORY = "MPI"
+_MPI_STUB_MODULE = "mantid._simpleapi_mpi"
 
 
 def _mpi_algorithm_names(algorithm_factory) -> set[str]:
@@ -459,17 +460,38 @@ def _format_with_ruff(contents: str) -> str:
         temporary_path.unlink(missing_ok=True)
 
 
+def _selected_algorithm_names(args, parser, registered, algorithm_factory, simpleapi) -> list[str]:
+    """Return the sorted algorithm names that the command line asks for."""
+    if sum((args.all, args.mpi_only, bool(args.algorithms))) > 1:
+        parser.error("Use only one of --all, --mpi-only or explicit algorithm names")
+    if args.mpi_only:
+        names = _mpi_algorithm_names(algorithm_factory)
+        if not names:
+            parser.error("No MPI algorithms are registered; is the MPIAlgorithms plugin built?")
+        return sorted(names)
+    if args.all:
+        specialized = set(simpleapi.__SPECIALIZED_FUNCTIONS__)
+        mpi_only = _mpi_algorithm_names(algorithm_factory)
+        return sorted((set(registered) - specialized - mpi_only) | _FITTING_ALGORITHMS | _CUSTOM_ALGORITHMS)
+    return sorted(set(args.algorithms or ["ConvertUnits"]))
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("algorithms", nargs="*", help="specific algorithm names to emit (default: ConvertUnits)")
     parser.add_argument("--all", action="store_true", help="emit all registered algorithms")
     parser.add_argument(
-        "--output",
-        type=Path,
-        default=Path(__file__).parents[2] / "Framework/PythonInterface/mantid/simpleapi.pyi",
+        "--mpi-only",
+        action="store_true",
+        help=f"emit only the MPI algorithms, for the {_MPI_STUB_MODULE} stub that simpleapi.pyi imports from",
     )
+    parser.add_argument("--output", type=Path, help="output file (default: simpleapi.pyi, or _simpleapi_mpi.pyi with --mpi-only)")
     parser.add_argument("--check", action="store_true", help="fail if output differs instead of writing it")
+    parser.add_argument("--no-format", action="store_true", help="skip the Ruff formatting that requires prek or pre-commit")
     args = parser.parse_args()
+    if args.output is None:
+        stub_name = "_simpleapi_mpi.pyi" if args.mpi_only else "simpleapi.pyi"
+        args.output = Path(__file__).parents[2] / "Framework/PythonInterface/mantid" / stub_name
 
     # Importing simpleapi loads Mantid's registered Python and C++ algorithms.
     import mantid.simpleapi
@@ -510,14 +532,7 @@ def main() -> int:
         _workspace_import_names["IAlgorithm"] = "IAlgorithm"
 
     registered = AlgorithmFactory.getRegisteredAlgorithms(True)
-    if args.all and args.algorithms:
-        parser.error("Use either --all or explicit algorithm names")
-    if args.all:
-        specialized = set(mantid.simpleapi.__SPECIALIZED_FUNCTIONS__)
-        mpi_only = _mpi_algorithm_names(AlgorithmFactory)
-        algorithm_names = sorted((set(registered) - specialized - mpi_only) | _FITTING_ALGORITHMS | _CUSTOM_ALGORITHMS)
-    else:
-        algorithm_names = sorted(set(args.algorithms or ["ConvertUnits"]))
+    algorithm_names = _selected_algorithm_names(args, parser, registered, AlgorithmFactory, mantid.simpleapi)
 
     declarations = []
     return_declarations = []
@@ -565,6 +580,9 @@ def main() -> int:
         alias_imports = ["from collections.abc import Sequence"]
         if any("numpy." in _ARRAY_ALIAS_DEFINITIONS[alias] for alias in _used_array_aliases):
             import_lines.insert(0, "import numpy")
+    if not args.mpi_only:
+        # Typed only where the MPI build installed this stub; otherwise the names fall through to __getattr__
+        import_lines.append(f"from {_MPI_STUB_MODULE} import *  # noqa: F403")
     alias_declarations = [f"type {alias} = {_ARRAY_ALIAS_DEFINITIONS[alias]}" for alias in sorted(_used_array_aliases)]
     contents = "\n".join(
         [
@@ -577,11 +595,12 @@ def main() -> int:
             *alias_declarations,
             *return_declarations,
             *declarations,
-            "def __getattr__(name: str) -> Any: ...",
+            *([] if args.mpi_only else ["def __getattr__(name: str) -> Any: ..."]),
             "",
         ]
     )
-    contents = _format_with_ruff(contents)
+    if not args.no_format:
+        contents = _format_with_ruff(contents)
 
     if args.check:
         current = args.output.read_text() if args.output.exists() else ""

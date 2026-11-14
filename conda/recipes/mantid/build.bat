@@ -18,6 +18,7 @@ cmake ^
     -DENABLE_WORKBENCH=OFF ^
     -DWORKBENCH_SITE_PACKAGES=%SP_DIR% ^
     -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF ^
+    -DSIMPLEAPI_STUBS_ARGS=--no-format ^
     -DCMAKE_INSTALL_PREFIX=%LIBRARY_PREFIX% ^
     -DCMAKE_INSTALL_LIBDIR=%LIBRARY_LIB% ^
     -DCMAKE_PREFIX_PATH=%LIBRARY_PREFIX% ^
@@ -25,5 +26,8 @@ cmake ^
 
 if errorlevel 1 exit 1
 cmake --build . --config Release
+:: regenerate the type stubs from this build before install copies the mantid package
+cmake --build . --config Release --target simpleapi_stubs
+if errorlevel 1 exit 1
 cmake --build . --config Release --target install
 if errorlevel 1 exit 1
