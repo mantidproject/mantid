@@ -4,7 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import gc
 import unittest
+import weakref
 from testhelpers import create_algorithm, run_algorithm, can_be_instantiated, WorkspaceCreationHelper
 from mantid.api import (
     MatrixWorkspace,
@@ -742,6 +744,19 @@ class MatrixWorkspaceTest(unittest.TestCase):
         # Energy transfer needs direct or indirect geometry
         with self.assertRaises(ValueError):
             SpectraUnitConverter(ws, "DeltaE")
+
+    def test_SpectraUnitConverter_keeps_its_workspace_alive(self):
+        ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=1, StoreInADS=False)
+        workspace_ref = weakref.ref(ws)
+        unit_converter = SpectraUnitConverter(ws, "Wavelength")
+        del ws
+        gc.collect()
+        self.assertIsNotNone(workspace_ref())
+        workspace_ref().getXMinMax(unitConverter=unit_converter)
+        # Nothing else was keeping it alive
+        del unit_converter
+        gc.collect()
+        self.assertIsNone(workspace_ref())
 
     def test_unit_converter_must_be_made_for_the_same_workspace_not_one_like_it(self):
         ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=1, StoreInADS=False)

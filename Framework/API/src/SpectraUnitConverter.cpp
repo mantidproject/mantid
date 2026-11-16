@@ -18,6 +18,7 @@
 #include <limits>
 #include <memory>
 #include <stdexcept>
+#include <utility>
 
 namespace Mantid::API {
 using Kernel::UnitParams;
@@ -34,6 +35,13 @@ std::optional<QuickConversion> findQuickConversion(const Kernel::Unit &from, con
 
 std::unique_ptr<Kernel::Unit> cloneUnit(const Kernel::Unit &unit) {
   return std::unique_ptr<Kernel::Unit>(unit.clone());
+}
+
+/// The workspace to make a converter for, which must not be null
+const MatrixWorkspace &workspaceToConvert(const std::shared_ptr<const MatrixWorkspace> &workspace) {
+  if (!workspace)
+    throw std::invalid_argument("A unit converter needs a workspace to convert the units of");
+  return *workspace;
 }
 } // namespace
 
@@ -62,19 +70,19 @@ std::optional<double> unitConversionFixedEnergy(const MatrixWorkspace &workspace
 }
 
 /** Look up the geometry each spectrum of the workspace needs to be converted
- * @param workspace :: The workspace whose spectra are to be converted
+ * @param workspace :: The workspace whose spectra are to be converted, kept alive while this exists
  * @param unit :: The unit to convert between the workspace's X unit and, as ConvertUnits would convert to
  * @param emode :: The energy mode
  * @param efixed :: The fixed energy, if not taken from the instrument
  * @throw Kernel::Exception::NotFoundError :: If unit is not a unit
  * @throw std::runtime_error :: If the instrument has no source or sample
- * @throw std::invalid_argument :: If the units cannot be converted in the energy mode, e.g. to energy transfer when
- * elastic, or a spectrum throws any other error ConvertUnits would fail on
+ * @throw std::invalid_argument :: If workspace is null, or the units cannot be converted in the energy mode, e.g. to
+ * energy transfer when elastic, or a spectrum throws any other error ConvertUnits would fail on
  */
-SpectraUnitConverter::SpectraUnitConverter(const MatrixWorkspace &workspace, const std::string &unit,
+SpectraUnitConverter::SpectraUnitConverter(std::shared_ptr<const MatrixWorkspace> workspace, const std::string &unit,
                                            const Kernel::DeltaEMode::Type emode, const std::optional<double> efixed)
-    : m_workspace(&workspace), m_numberOfSpectra(workspace.getNumberHistograms()),
-      m_workspaceUnit(workspace.getAxis(0)->unit()), m_unit(Kernel::UnitFactory::Instance().create(unit)),
+    : m_workspace(std::move(workspace)), m_numberOfSpectra(workspaceToConvert(m_workspace).getNumberHistograms()),
+      m_workspaceUnit(m_workspace->getAxis(0)->unit()), m_unit(Kernel::UnitFactory::Instance().create(unit)),
       m_workspaceUnitID(m_workspaceUnit->unitID()), m_unitID(m_unit->unitID()), m_emode(emode),
       m_quickFromWorkspaceUnit(findQuickConversion<QuickConversion>(*m_workspaceUnit, *m_unit)),
       m_quickToWorkspaceUnit(findQuickConversion<QuickConversion>(*m_unit, *m_workspaceUnit)) {
@@ -84,15 +92,16 @@ SpectraUnitConverter::SpectraUnitConverter(const MatrixWorkspace &workspace, con
   if (m_quickFromWorkspaceUnit && m_quickToWorkspaceUnit)
     return;
 
-  const auto &spectrumInfo = workspace.spectrumInfo();
+  const auto &workspaceRef = *m_workspace;
+  const auto &spectrumInfo = workspaceRef.spectrumInfo();
   m_l1 = spectrumInfo.l1();
-  const bool signedTheta = unitConversionUsesSignedTwoTheta(workspace);
-  const auto fixedEnergy = unitConversionFixedEnergy(workspace, emode, efixed);
+  const bool signedTheta = unitConversionUsesSignedTwoTheta(workspaceRef);
+  const auto fixedEnergy = unitConversionFixedEnergy(workspaceRef, emode, efixed);
   m_parameters.resize(m_numberOfSpectra);
 
   // An error ConvertUnits would fail on rather than mask the spectrum, kept to be thrown outside the parallel loop
   std::exception_ptr failure;
-  PARALLEL_FOR_IF(Kernel::threadSafe(workspace))
+  PARALLEL_FOR_IF(Kernel::threadSafe(workspaceRef))
   for (int64_t i = 0; i < static_cast<int64_t>(m_numberOfSpectra); ++i) {
     Kernel::UnitParametersMap params{{UnitParams::delta, 0.0}};
     if (fixedEnergy)
@@ -105,7 +114,7 @@ SpectraUnitConverter::SpectraUnitConverter(const MatrixWorkspace &workspace, con
       const auto to = cloneUnit(*m_unit);
       from->initialize(m_l1, emode, params);
       to->initialize(m_l1, emode, params);
-      if (const auto &xData = workspace.x(static_cast<size_t>(i)); !xData.empty()) {
+      if (const auto &xData = workspaceRef.x(static_cast<size_t>(i)); !xData.empty()) {
         to->singleFromTOF(from->singleToTOF(xData.front()));
         to->singleFromTOF(from->singleToTOF(xData.back()));
       }
@@ -130,7 +139,7 @@ SpectraUnitConverter::SpectraUnitConverter(const MatrixWorkspace &workspace, con
 
 /// Whether this was made for the workspace, so has the geometry of its spectra
 bool SpectraUnitConverter::isFor(const MatrixWorkspace &workspace) const {
-  return &workspace == m_workspace && workspace.getNumberHistograms() == m_numberOfSpectra &&
+  return &workspace == m_workspace.get() && workspace.getNumberHistograms() == m_numberOfSpectra &&
          workspace.getAxis(0)->unit()->unitID() == m_workspaceUnitID;
 }
 

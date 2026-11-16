@@ -217,7 +217,7 @@ public:
   void testIntegratedCounts_in_another_unit_converts_the_limits_for_each_spectrum() {
     const auto tofWorkspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
     const auto &spectrumInfo = tofWorkspace->spectrumInfo();
-    const SpectraUnitConverter wavelengthConverter(*tofWorkspace, "Wavelength");
+    const SpectraUnitConverter wavelengthConverter(tofWorkspace, "Wavelength");
     for (const size_t index : {0, 1}) {
       const auto toWavelength = [&](const double tof) {
         return UnitConversion::run("TOF", "Wavelength", tof, spectrumInfo.l1(), spectrumInfo.l2(index),
@@ -232,7 +232,7 @@ public:
 
   void testIntegratedCounts_in_another_unit_keeps_limits_that_convert_to_infinity() {
     const auto tofWorkspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
-    const SpectraUnitConverter momentumTransferConverter(*tofWorkspace, "MomentumTransfer");
+    const SpectraUnitConverter momentumTransferConverter(tofWorkspace, "MomentumTransfer");
     // A momentum transfer of 0 is an infinite TOF, beyond every bin. Widening both infinite limits would make the
     // lower one NaN, which would integrate the whole spectrum instead.
     const auto counts =
@@ -244,7 +244,7 @@ public:
     const auto tofWorkspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
     tofWorkspace->setDistribution(true);
     const auto &spectrumInfo = tofWorkspace->spectrumInfo();
-    const SpectraUnitConverter wavelengthConverter(*tofWorkspace, "Wavelength");
+    const SpectraUnitConverter wavelengthConverter(tofWorkspace, "Wavelength");
     // Spectrum 1, as spectrum 0 is on the beam axis
     const auto toWavelength = [&](const double tof) {
       return UnitConversion::run("TOF", "Wavelength", tof, spectrumInfo.l1(), spectrumInfo.l2(1),
@@ -273,7 +273,7 @@ public:
     tofWorkspace->setDistribution(true);
     // ConvertUnits treats such data as dimensionless
     tofWorkspace->setYUnit("");
-    const SpectraUnitConverter wavelengthConverter(*tofWorkspace, "Wavelength");
+    const SpectraUnitConverter wavelengthConverter(tofWorkspace, "Wavelength");
     const auto counts = tofWorkspace->getIntegratedCountsForWorkspaceIndices({1}, 0.0, 0.0, true, &wavelengthConverter);
     TS_ASSERT_DELTA(counts[0], 20.0, 1e-10);
   }
@@ -281,7 +281,7 @@ public:
   void testIntegratedCounts_rejects_a_unit_converter_made_for_another_workspace() {
     const auto tofWorkspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
     const auto otherWorkspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 10);
-    const SpectraUnitConverter otherConverter(*otherWorkspace, "Wavelength");
+    const SpectraUnitConverter otherConverter(otherWorkspace, "Wavelength");
     TS_ASSERT_THROWS(tofWorkspace->getIntegratedCountsForWorkspaceIndices({0}, 1.0, 2.0, false, &otherConverter),
                      const std::invalid_argument &);
   }
@@ -289,21 +289,33 @@ public:
   void testUnitConverter_is_rejected_by_another_workspace_of_the_same_shape_and_unit() {
     const auto tofWorkspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
     const auto otherWorkspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
-    const SpectraUnitConverter otherConverter(*otherWorkspace, "Wavelength");
+    const SpectraUnitConverter otherConverter(otherWorkspace, "Wavelength");
     TS_ASSERT(otherConverter.isFor(*otherWorkspace));
     TS_ASSERT(!otherConverter.isFor(*tofWorkspace));
     TS_ASSERT_THROWS(tofWorkspace->getIntegratedCountsForWorkspaceIndices({1}, 1.0, 2.0, false, &otherConverter),
                      const std::invalid_argument &);
     TS_ASSERT_THROWS(tofWorkspace->getXMinMax({1}, false, &otherConverter), const std::invalid_argument &);
     // Even one leaving X values in the workspace unit
-    const SpectraUnitConverter otherTOFConverter(*otherWorkspace, "TOF");
+    const SpectraUnitConverter otherTOFConverter(otherWorkspace, "TOF");
     TS_ASSERT_THROWS(tofWorkspace->getXMinMax({1}, false, &otherTOFConverter), const std::invalid_argument &);
   }
 
   void testUnitConverter_rejects_a_unit_its_energy_mode_cannot_convert_to() {
     const auto tofWorkspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
     // Energy transfer needs direct or indirect geometry, which ConvertUnits would fail on rather than mask spectra for
-    TS_ASSERT_THROWS(SpectraUnitConverter(*tofWorkspace, "DeltaE"), const std::invalid_argument &);
+    TS_ASSERT_THROWS(SpectraUnitConverter(tofWorkspace, "DeltaE"), const std::invalid_argument &);
+  }
+
+  void testUnitConverter_keeps_its_workspace_alive() {
+    auto tofWorkspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
+    const std::weak_ptr<Workspace2D> weakWorkspace = tofWorkspace;
+    const SpectraUnitConverter converter(tofWorkspace, "Wavelength");
+    tofWorkspace.reset();
+    TS_ASSERT(!weakWorkspace.expired());
+  }
+
+  void testUnitConverter_rejects_a_null_workspace() {
+    TS_ASSERT_THROWS(SpectraUnitConverter(nullptr, "Wavelength"), const std::invalid_argument &);
   }
 
   void testIntegratedCounts_in_another_unit_over_a_spectrums_full_range_includes_every_bin() {
@@ -311,7 +323,7 @@ public:
     // Away from zero, so converting the ends of the range to TOF and back can round them inside the bins
     tofWorkspace->setBinEdges(1, BinEdges(11, LinearGenerator(1000.3, 7.1)));
     for (const std::string unit : {"Wavelength", "dSpacing", "MomentumTransfer", "Energy"}) {
-      const SpectraUnitConverter converter(*tofWorkspace, unit);
+      const SpectraUnitConverter converter(tofWorkspace, unit);
       const auto [xmin, xmax] = tofWorkspace->getXMinMax({1}, false, &converter);
       const auto counts = tofWorkspace->getIntegratedCountsForWorkspaceIndices({1}, xmin, xmax, false, &converter);
       // 10 bins each with 2 counts
@@ -321,7 +333,7 @@ public:
 
   void testIntegratedCounts_in_another_unit_over_the_entire_range_is_zero_for_a_spectrum_it_cannot_convert() {
     const auto tofWorkspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
-    const SpectraUnitConverter dSpacingConverter(*tofWorkspace, "dSpacing");
+    const SpectraUnitConverter dSpacingConverter(tofWorkspace, "dSpacing");
     // Spectrum 0 is on the beam axis, so has no d-spacing, and ConvertUnits would mask it
     TS_ASSERT(!dSpacingConverter.canConvert(0));
     TS_ASSERT(dSpacingConverter.canConvert(1));
@@ -333,7 +345,7 @@ public:
   void testUnitConverter_converts_quickly_without_an_instrument() {
     const auto wavelengthWorkspace = create2DWorkspaceBinned(1, 10, 1.0, 1.0);
     wavelengthWorkspace->getAxis(0)->setUnit("Wavelength");
-    const SpectraUnitConverter energyConverter(*wavelengthWorkspace, "Energy");
+    const SpectraUnitConverter energyConverter(wavelengthWorkspace, "Energy");
     TS_ASSERT(energyConverter.canConvert(0));
     const auto toEnergy = [](const double wavelength) {
       return UnitConversion::run("Wavelength", "Energy", wavelength, 0.0, 0.0, 0.0, DeltaEMode::Elastic, 0.0);

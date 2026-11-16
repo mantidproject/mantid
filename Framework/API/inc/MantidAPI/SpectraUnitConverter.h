@@ -11,6 +11,7 @@
 #include "MantidKernel/Unit.h"
 
 #include <array>
+#include <memory>
 #include <optional>
 #include <span>
 #include <string>
@@ -30,11 +31,11 @@ MANTID_API_DLL std::optional<double> unitConversionFixedEnergy(const MatrixWorks
 /** Converts X values of single spectra between a workspace's X unit and another unit, as ConvertUnits converts whole
  * spectra. The geometry each conversion needs is looked up for every spectrum once, on construction, so that
  * converting a few values of many spectra, e.g. integration limits, does not cost as much as converting the workspace.
- * It must be made again if the geometry of the workspace changes.
+ * It keeps the workspace alive, and must be made again if the geometry of the workspace changes.
  */
 class MANTID_API_DLL SpectraUnitConverter {
 public:
-  SpectraUnitConverter(const MatrixWorkspace &workspace, const std::string &unit,
+  SpectraUnitConverter(std::shared_ptr<const MatrixWorkspace> workspace, const std::string &unit,
                        const Kernel::DeltaEMode::Type emode = Kernel::DeltaEMode::Elastic,
                        const std::optional<double> efixed = std::nullopt);
 
@@ -62,8 +63,8 @@ private:
   void convert(const size_t index, std::span<double> values, const Kernel::Unit &from, const Kernel::Unit &to,
                const std::optional<QuickConversion> &quickConversion) const;
 
-  /// The workspace this was made for. Only compared with, never dereferenced, as it may since have been deleted
-  const MatrixWorkspace *m_workspace;
+  /// The workspace this was made for, kept alive so that another can never take its place in memory
+  std::shared_ptr<const MatrixWorkspace> m_workspace;
   size_t m_numberOfSpectra;
   Kernel::Unit_const_sptr m_workspaceUnit;
   Kernel::Unit_const_sptr m_unit;

@@ -12,7 +12,7 @@
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/make_constructor.hpp>
 
-using Mantid::API::MatrixWorkspace;
+using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::SpectraUnitConverter;
 using Mantid::Kernel::DeltaEMode;
 using namespace boost::python;
@@ -20,7 +20,9 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(SpectraUnitConverter)
 
 namespace {
-SpectraUnitConverter *createSpectraUnitConverter(const MatrixWorkspace &workspace, const std::string &unit,
+/// The workspace is taken as a shared pointer, which the converter keeps, and which from Python holds a reference to
+/// the Python workspace object, keeping that alive for as long as the converter too
+SpectraUnitConverter *createSpectraUnitConverter(const MatrixWorkspace_sptr &workspace, const std::string &unit,
                                                  const std::string &emode, const object &efixed) {
   const auto fixedEnergy = efixed.is_none() ? std::nullopt : std::optional<double>(extract<double>(efixed)());
   return new SpectraUnitConverter(workspace, unit, DeltaEMode::fromString(emode), fixedEnergy);
@@ -32,7 +34,7 @@ void export_SpectraUnitConverter() {
       "SpectraUnitConverter",
       "Converts X values of a workspace's spectra between its X unit and another unit, as ConvertUnits would, for "
       "the workspace methods that take a unitConverter. The geometry of each spectrum is looked up once, when it is "
-      "made, so it is worth keeping while the workspace and unit stay the same.",
+      "made, so it is worth keeping while the workspace and unit stay the same. It keeps the workspace alive.",
       no_init)
       .def("__init__",
            make_constructor(&createSpectraUnitConverter, default_call_policies(),

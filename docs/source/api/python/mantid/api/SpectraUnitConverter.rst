@@ -8,7 +8,8 @@ It lets :py:obj:`~mantid.api.MatrixWorkspace` methods that take a ``unitConverte
 much as if :ref:`ConvertUnits <algm-ConvertUnits>` had been run on the workspace first, but without converting or
 copying it. Only the values asked for are converted, using the geometry of each spectrum, which is looked up once when
 the converter is made. So a converter is worth keeping for as long as the workspace and unit stay the same, but must be
-made again if the workspace's instrument geometry changes. A workspace method given a converter made for any other
+made again if the workspace's instrument geometry changes. The converter keeps the workspace alive, even once it has
+been deleted from the Analysis Data Service. A workspace method given a converter made for any other
 workspace raises a ``ValueError``.
 
 .. testcode:: IntegrateInDSpacing
