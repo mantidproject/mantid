@@ -54,8 +54,7 @@ class LoadSANSMLZTest(unittest.TestCase):
         self.assertEqual(0.0, run.getProperty("scaling").value)
         self.assertEqual(0.0, run.getProperty("transmission").value)
 
-        det = ws.getDetector(0)
-        self.assertAlmostEqual(25.9118, -ws.detectorSignedTwoTheta(det) * 180 / np.pi, 4)
+        self.assertAlmostEqual(25.9118, -ws.spectrumInfo().signedTwoTheta(0) * 180 / np.pi, 4)
 
         component_info = ws.componentInfo()
         self.assertEqual(8.0, component_info.getNumberParameter("x-pixel-size")[0])

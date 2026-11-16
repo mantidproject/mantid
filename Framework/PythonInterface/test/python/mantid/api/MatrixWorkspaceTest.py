@@ -89,6 +89,20 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertEqual(detector_info.size(), 2)
         self.assertEqual(detector_info.detectorIDs()[0], 1)
 
+    def test_getDetector_is_deprecated(self):
+        with self.assertWarns(DeprecationWarning):
+            self._test_ws.getDetector(0)
+
+    def test_DetectorGroup_methods_are_deprecated(self):
+        ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=2, StoreInADS=False)
+        ws.getSpectrum(0).addDetectorID(5)
+        with self.assertWarns(DeprecationWarning):
+            group = ws.getDetector(0)
+        with self.assertWarns(DeprecationWarning):
+            self.assertEqual(list(group.getDetectorIDs()), [4, 5])
+        with self.assertWarns(DeprecationWarning):
+            self.assertEqual(group.getNameSeparator(), ";")
+
     def test_spectrum_retrieval(self):
         # Spectrum
         spec = self._test_ws.getSpectrum(1)
