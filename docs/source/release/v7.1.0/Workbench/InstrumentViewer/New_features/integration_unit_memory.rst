@@ -1,0 +1,1 @@
+- The new Instrument View no longer copies the workspace to colour the detectors, or converts it when the integration range is in another unit, which reduces its memory use, especially for event workspaces.

@@ -32,7 +32,7 @@ from mantid.simpleapi import (
     SaveDetectorsGrouping,
     DeleteWorkspace,
 )
-from mantid.api import MatrixWorkspace, WorkspaceUnitValidator
+from mantid.api import MatrixWorkspace, SpectraUnitConverter, WorkspaceUnitValidator
 from mantid.kernel import logger
 from pathlib import Path
 import numpy as np
@@ -134,7 +134,8 @@ class FullInstrumentViewModel:
         self._can_convert_units: Optional[bool] = None
         self._units_failed_to_convert: set[str] = set()
 
-        self._integration_workspace = self._workspace.clone(StoreInADS=False)
+        # Converts the integration range when it is in a unit other than the workspace's
+        self._integration_unit_converter: Optional[SpectraUnitConverter] = None
         self._calculate_and_set_full_integration_range(self._is_valid)
         # Update counts with default total range
         self.update_integration_range(True)
@@ -345,12 +346,13 @@ class FullInstrumentViewModel:
             return
 
         new_detector_counts = np.array(
-            self._integration_workspace.getIntegratedCountsForWorkspaceIndices(
+            self._workspace.getIntegratedCountsForWorkspaceIndices(
                 workspace_indices,
                 len(workspace_indices),
                 float(self.integration_limits[0]),
                 float(self.integration_limits[1]),
                 entire_range,
+                unitConverter=self._integration_unit_converter,
             ),
             dtype=int,
         )
@@ -374,16 +376,16 @@ class FullInstrumentViewModel:
 
     def _calculate_and_set_full_integration_range(self, valid_indices: np.ndarray) -> None:
         workspace_indices = self._workspace_indices[valid_indices]
-        self._integration_limits = self._extract_limits_from_workspace(self._integration_workspace, workspace_indices)
+        self._integration_limits = self._extract_limits_from_workspace(self._workspace, workspace_indices, self._integration_unit_converter)
         self.full_integration_limits = self._integration_limits
 
-    def _extract_limits_from_workspace(self, workspace, workspace_indices=None) -> tuple:
+    def _extract_limits_from_workspace(self, workspace, workspace_indices=None, unit_converter=None) -> tuple:
         if workspace_indices is not None and len(workspace_indices) == 0:
             return (0, 0)
 
         # Converting units can turn an x value of zero into an infinite one, e.g. TOF into momentum
         # transfer, and neither the sliders nor the plot axes can take infinite limits.
-        x_min, x_max = workspace.getXMinMax(workspace_indices, includeNonFiniteSpectra=True)
+        x_min, x_max = workspace.getXMinMax(workspace_indices, includeNonFiniteSpectra=True, unitConverter=unit_converter)
         if x_min > x_max:
             return (0, 0)
         return (x_min, x_max)
@@ -429,15 +431,26 @@ class FullInstrumentViewModel:
             return None
 
     def set_integration_units(self, unit):
-        converted = None
-        if self.can_convert_units and unit != self.workspace_base_unit:
-            converted = self._convert_units(self._workspace, unit)
-        if converted is None:
-            converted = self._workspace.clone(EnableLogging=False, StoreInADS=False)
-        self._integration_workspace = converted
+        """Integrate in unit from now on, or in the workspace unit if it cannot be converted to.
+
+        The integration limits are converted to the workspace unit spectrum by spectrum, so the
+        workspace itself is never converted. The converter looks up the geometry of every spectrum
+        once, here, so that moving the limits does not, and fails here if the workspace cannot be
+        converted at all, e.g. for an instrument with no source.
+        """
+        self._integration_unit_converter = None
+        if not self.can_convert_units or unit == self.workspace_base_unit:
+            return
+        try:
+            self._integration_unit_converter = SpectraUnitConverter(self._workspace, unit, "Elastic")
+        except (RuntimeError, ValueError) as e:
+            logger.warning(f"Could not convert {self._workspace.name()} to {unit}, showing {self.workspace_base_unit} instead: {e}")
+            self._units_failed_to_convert.add(unit)
 
     def get_integration_units(self):
-        return self._integration_workspace.getAxis(0).getUnit().unitID()
+        if self._integration_unit_converter is None:
+            return self.workspace_base_unit
+        return self._integration_unit_converter.unit()
 
     def _detector_table_indices_for_parent_subtree(self, selected_indices: np.ndarray) -> np.ndarray:
         return detector_table_indices_for_parent_subtrees(

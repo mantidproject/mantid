@@ -100,7 +100,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_workspace.getNumberHistograms.return_value = len(detector_ids)
         mock_workspace.x.return_value = np.arange(len(detector_ids))
 
-        def get_x_min_max(workspace_indices=None, includeNonFiniteSpectra=False):
+        def get_x_min_max(workspace_indices=None, includeNonFiniteSpectra=False, unitConverter=None):
             if workspace_indices is None:
                 workspace_indices = range(mock_workspace.getNumberHistograms())
             spectra = [mock_workspace.x(int(i)) for i in workspace_indices]
@@ -140,7 +140,8 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         integrated_spectra = [1, 20, 100]
         mock_workspace.getIntegratedCountsForWorkspaceIndices.return_value = integrated_spectra
         model.update_integration_range(False)
-        model._integration_workspace.getIntegratedCountsForWorkspaceIndices.assert_called()
+        mock_workspace.getIntegratedCountsForWorkspaceIndices.assert_called()
+        self.assertIsNone(mock_workspace.getIntegratedCountsForWorkspaceIndices.call_args.kwargs["unitConverter"])
         self.assertEqual(min(integrated_spectra), model._counts_limits[0])
         self.assertEqual(max(integrated_spectra), model._counts_limits[1])
         self.assertEqual(model._counts_limits, model.full_counts_limits)
@@ -501,7 +502,6 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_workspace.isCommonBins.return_value = True
         mock_workspace.x.return_value = np.array([1, 2, 3])
         model.setup()
-        model._integration_workspace = mock_workspace
         self.assertEqual(model.integration_limits, (1, 3))
 
     def test_integration_limits_on_ragged_workspace(self):
@@ -510,7 +510,6 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         data_x = {0: np.array([1, 2, 3]), 1: np.array([10, 20, 30, 40]), 2: np.array([10, 20, 30, 40, 50])}
         mock_workspace.x.side_effect = lambda i: data_x[i]
         model.setup()
-        model._integration_workspace = mock_workspace
         self.assertEqual(model.integration_limits, (1, 50))
 
     def test_integration_limits_on_non_ragged_workspace(self):
@@ -519,7 +518,6 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         data_x = np.array([[1, 2, 3], [10, 20, 30], [10, 20, 50]])
         mock_workspace.x.side_effect = lambda i: data_x[i]
         model.setup()
-        model._integration_workspace = mock_workspace
         self.assertEqual(model.integration_limits, (1, 50))
 
     def test_limits_ask_for_the_finite_values_of_non_finite_spectra(self):
@@ -529,7 +527,7 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         workspace_indices = np.array([0, 1])
 
         self.assertEqual((0.5, 3.0), model._extract_limits_from_workspace(workspace, workspace_indices))
-        workspace.getXMinMax.assert_called_once_with(workspace_indices, includeNonFiniteSpectra=True)
+        workspace.getXMinMax.assert_called_once_with(workspace_indices, includeNonFiniteSpectra=True, unitConverter=None)
 
     def test_limits_are_zero_when_no_x_value_is_finite(self):
         model, _ = self._setup_model([1, 2, 3])
@@ -795,39 +793,41 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         mock_convert_units.assert_not_called()
 
     @mock.patch.object(FullInstrumentViewModel, "calculate_and_set_full_integration_range")
+    @mock.patch("instrumentview.FullInstrumentViewModel.SpectraUnitConverter")
     @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
-    def test_set_integration_units_converts(self, mock_convert_units, mock_calculate_range):
-        model, _ = self._setup_model([1, 2, 3])
+    def test_set_integration_units_converts_the_limits_not_the_workspace(self, mock_convert_units, mock_converter, mock_calculate_range):
+        model, mock_workspace = self._setup_model([1, 2, 3])
+        mock_workspace.clone.reset_mock()
+        mock_converter.return_value.unit.return_value = "TOF"
 
         model.set_integration_units("TOF")
 
-        mock_convert_units.assert_called_once()
-        self.assertEqual("TOF", mock_convert_units.call_args.kwargs["Target"])
-        self.assertEqual(mock_convert_units.return_value, model._integration_workspace)
+        mock_converter.assert_called_once_with(mock_workspace, "TOF", "Elastic")
+        self.assertEqual("TOF", model.get_integration_units())
+        mock_convert_units.assert_not_called()
+        mock_workspace.clone.assert_not_called()
         # Left to the presenter's reset, which would otherwise integrate the whole workspace twice
         mock_calculate_range.assert_not_called()
 
     @mock.patch.object(FullInstrumentViewModel, "calculate_and_set_full_integration_range")
-    @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
-    def test_set_integration_units_does_not_convert_units_that_cannot_be_converted(self, mock_convert_units, mock_calculate_range):
-        model, mock_workspace = self._setup_model([1, 2, 3])
+    def test_set_integration_units_does_not_convert_units_that_cannot_be_converted(self, mock_calculate_range):
+        model, _ = self._setup_model([1, 2, 3])
         model._can_convert_units = False
 
         model.set_integration_units("TOF")
 
-        mock_convert_units.assert_not_called()
-        self.assertEqual(mock_workspace.clone.return_value, model._integration_workspace)
+        self.assertEqual("dSpacing", model.get_integration_units())
         mock_calculate_range.assert_not_called()
 
     @mock.patch.object(FullInstrumentViewModel, "calculate_and_set_full_integration_range")
-    @mock.patch("instrumentview.FullInstrumentViewModel.ConvertUnits")
-    def test_set_integration_units_falls_back_to_the_workspace_when_conversion_fails(self, mock_convert_units, mock_calculate_range):
-        model, mock_workspace = self._setup_model([1, 2, 3])
-        mock_convert_units.side_effect = RuntimeError("Unable to calculate source-sample distance")
+    @mock.patch("instrumentview.FullInstrumentViewModel.SpectraUnitConverter")
+    def test_set_integration_units_falls_back_to_the_workspace_when_conversion_fails(self, mock_converter, mock_calculate_range):
+        model, _ = self._setup_model([1, 2, 3])
+        mock_converter.side_effect = RuntimeError("Unable to calculate source-sample distance")
 
         model.set_integration_units("TOF")
 
-        self.assertEqual(mock_workspace.clone.return_value, model._integration_workspace)
+        self.assertEqual("dSpacing", model.get_integration_units())
         self.assertEqual({"TOF"}, model.units_failed_to_convert)
         mock_calculate_range.assert_not_called()
 
@@ -1299,8 +1299,6 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model, _ = self._setup_model([1, 2, 3])
         model._detector_is_picked = [True, False, False]
         # No workspace exists to assert removePeak calls; just ensure method didn’t crash.
-        model._integration_workspace = MagicMock()
-        model._integration_workspace.x = MagicMock(return_value=np.array([1, 2, 3]))
         self.assertEqual(None, model.delete_peak(5.0, []))
 
     @mock.patch("instrumentview.FullInstrumentViewModel.AnalysisDataService")

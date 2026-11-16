@@ -284,7 +284,7 @@ class TestFullInstrumentViewPresenter(unittest.TestCase):
     @mock.patch("instrumentview.FullInstrumentViewPresenter.FullInstrumentViewPresenter.on_integration_limits_reset_clicked")
     def test_sliders_unit_combo_put_back_to_the_workspace_unit_when_conversion_fails(self, _mock_reset_integration):
         """The model falls back to showing the workspace unit, so the combos must say so."""
-        self._model._convert_units = MagicMock(side_effect=lambda _ws, unit: self._model._units_failed_to_convert.add(unit))
+        self._model.set_integration_units = MagicMock(side_effect=lambda unit: self._model._units_failed_to_convert.add(unit))
         self._mock_view.current_selected_sliders_unit.return_value = "dSpacing"
         self._mock_view.current_selected_lineplot_unit.return_value = "Wavelength"
 
