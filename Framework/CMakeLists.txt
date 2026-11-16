@@ -109,11 +109,13 @@ endif()
 # generator whenever one is relinked. The Python extension modules are the dependencies of PythonInterface.
 get_target_property(_simpleapi_stub_python_modules PythonInterface MANUALLY_ADDED_DEPENDENCIES)
 # An empty user properties directory (HOME on Linux/macOS, APPDATA on Windows) keeps settings such as default.facility
-# out of the stub
+# out of the stub. Not writing bytecode keeps .pyc files for the imported (often noarch) packages out of the conda
+# package build prefix, where they would be packaged with mantid.
 set(_simpleapi_stub_home ${CMAKE_CURRENT_BINARY_DIR}/simpleapi_stubs_home)
 set(_simpleapi_stub_command
-    ${CMAKE_COMMAND} -E env "PYTHONPATH=${_simpleapi_stub_pythonpath}" "HOME=${_simpleapi_stub_home}"
-    "APPDATA=${_simpleapi_stub_home}" ${Python_EXECUTABLE} ${_simpleapi_stub_generator} ${SIMPLEAPI_STUBS_ARGS}
+    ${CMAKE_COMMAND} -E env "PYTHONDONTWRITEBYTECODE=1" "PYTHONPATH=${_simpleapi_stub_pythonpath}"
+    "HOME=${_simpleapi_stub_home}" "APPDATA=${_simpleapi_stub_home}" ${Python_EXECUTABLE} ${_simpleapi_stub_generator}
+    ${SIMPLEAPI_STUBS_ARGS}
 )
 set(_simpleapi_stub_outputs ${_simpleapi_stub})
 set(_simpleapi_mpi_stub_commands)
