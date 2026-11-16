@@ -17,8 +17,8 @@
 
 namespace Mantid::API {
 
-Mantid::Geometry::MDImplicitFunction_sptr ImplicitFunctionFactoryImpl::create(const std::string &className) const {
-  UNUSED_ARG(className);
+Mantid::Geometry::MDImplicitFunction_sptr
+ImplicitFunctionFactoryImpl::create([[maybe_unused]] const std::string &className) const {
   throw std::runtime_error("Use of create in this context is forbidden. Use "
                            "createUnwrappedInstead.");
 }
