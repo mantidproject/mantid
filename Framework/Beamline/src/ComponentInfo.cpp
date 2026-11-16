@@ -524,6 +524,10 @@ bool ComponentInfo::hasSource() const { return m_sourceIndex >= 0; }
  *
  * @returns true if sources are equivalent
  */
+/// True if both were cloned from the same base, i.e. they describe the same instrument. Clones share the
+/// structure arrays, which are never written after construction.
+bool ComponentInfo::hasSameBase(ComponentInfo const &other) const { return m_parentIndices == other.m_parentIndices; }
+
 bool ComponentInfo::hasEquivalentSource(const ComponentInfo &other) const {
   if (this->hasSource() && other.hasSource()) {
     return (this->sourcePosition() - other.sourcePosition()).norm() < 1e-9;

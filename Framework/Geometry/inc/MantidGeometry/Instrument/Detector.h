@@ -55,7 +55,6 @@ public:
   det_topology getTopology(Kernel::V3D &center) const override;
 
   const ParameterMap &parameterMap() const override;
-  size_t index() const override;
 
   virtual size_t registerContents(class ComponentVisitor &componentVisitor) const override;
 

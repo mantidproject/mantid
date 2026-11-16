@@ -1150,13 +1150,6 @@ const Geometry::InstrumentMetadata &ParameterMap::instrumentMetadata() const {
   return *m_instrumentMetadata;
 }
 
-/// Only for use by Detector. Returns a detector index for a detector ID.
-size_t ParameterMap::detectorIndex(const detid_t detID) const { return m_instrument->detectorIndex(detID); }
-
-size_t ParameterMap::componentIndex(const ComponentID componentId) const {
-  return m_componentInfo->indexOf(componentId);
-}
-
 /// Only for use by Instrument. Sets the pointer to the owning instrument.
 void ParameterMap::setInstrument(const Instrument *instrument) {
   if (instrument == m_instrument)
@@ -1176,13 +1169,11 @@ void ParameterMap::setInstrument(const Instrument *instrument) {
   m_instrument = instrument;
   // Assigned one at a time rather than through std::tie: the members are shared_ptr while
   // makeBeamline returns unique_ptr, and the conversion is clearer spelled out.
-  auto [newComponentInfo, newDetectorInfo] =
-      m_parameterInfo->empty() ? m_instrument->makeBeamlineNew(*this) : m_instrument->makeBeamline(*this);
+  auto [newComponentInfo, newDetectorInfo] = m_instrument->makeBeamline(*this);
   m_componentInfo = std::move(newComponentInfo);
   m_detectorInfo = std::move(newDetectorInfo);
-  // The visitor called rekey() while building the beamline, so this map and the new
-  // ComponentInfo now share one store. Re-point at it to be certain of that even on the
-  // makeBeamlineNew() path, where there were no parameters to rekey.
+  // makeBeamline() called rekey() while building the beamline, so this map and the new
+  // ComponentInfo now share one store. Re-point at it to be certain of that.
   if (m_componentInfo) {
     m_parameterInfo = m_componentInfo->sharedParameterInfo();
     seedLogfileParameters();

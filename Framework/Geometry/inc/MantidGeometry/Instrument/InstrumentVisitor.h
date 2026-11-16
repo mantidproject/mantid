@@ -145,6 +145,8 @@ private:
   /// Extract the common aspects relevant to all component types
   size_t commonRegistration(const Mantid::Geometry::IComponent &component);
 
+  void recordIndex(const Mantid::Geometry::IComponent &component, const size_t componentIndex) const;
+
 public:
   InstrumentVisitor(std::shared_ptr<const Instrument> instrument);
 
