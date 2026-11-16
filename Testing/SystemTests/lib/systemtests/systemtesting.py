@@ -1363,18 +1363,15 @@ def exit_code_to_str(exit_code):
 #########################################################################
 def isValidTestClass(class_obj):
     """Returns true if the test is a valid test class. It is valid
-    if: the class subclassses MantidSystemTest and has no abstract methods
+    if: the class subclasses MantidSystemTest and is not an abstract base class.
     """
-    if not issubclass(class_obj, MantidSystemTest):
+    if not issubclass(class_obj, MantidSystemTest) or class_obj is MantidSystemTest:
         return False
-    # Check if the get_reference_file is abstract or not
-    if hasattr(class_obj, "__abstractmethods__"):
-        if len(class_obj.__abstractmethods__) == 0:
-            return True
-        else:
-            return False
-    else:
-        return True
+    if class_obj.__name__.endswith("Base"):
+        return False
+    if inspect.isabstract(class_obj) and bool(class_obj.__subclasses__()):
+        return False
+    return True
 
 #########################################################################
 # Function to return a string describing the environment
