@@ -230,6 +230,44 @@ public:
     }
   }
 
+  void testIntegratedCounts_in_another_unit_rescales_a_distribution_by_its_bin_widths() {
+    const auto tofWorkspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
+    tofWorkspace->setDistribution(true);
+    const auto &spectrumInfo = tofWorkspace->spectrumInfo();
+    const SpectraUnitConverter wavelengthConverter(*tofWorkspace, "Wavelength");
+    // Spectrum 1, as spectrum 0 is on the beam axis
+    const auto toWavelength = [&](const double tof) {
+      return UnitConversion::run("TOF", "Wavelength", tof, spectrumInfo.l1(), spectrumInfo.l2(1),
+                                 spectrumInfo.twoTheta(1), DeltaEMode::Elastic, 0.0);
+    };
+    // As ConvertUnits would rescale them: each bin of 2 counts per us is multiplied by its width in us over its width
+    // in Angstrom
+    const auto rescaledSum = [&](const int firstBin, const int lastBin) {
+      double sum = 0.0;
+      for (int bin = firstBin; bin <= lastBin; ++bin)
+        sum += 2.0 / (toWavelength(bin + 1.0) - toWavelength(bin));
+      return sum;
+    };
+
+    // 2.5 to 6.5 us takes the bins from 3 to 6 us and the one straddling 6.5 us
+    const auto counts = tofWorkspace->getIntegratedCountsForWorkspaceIndices({1}, toWavelength(2.5), toWavelength(6.5),
+                                                                             false, &wavelengthConverter);
+    TS_ASSERT_DELTA(counts[0], rescaledSum(3, 6), 1e-10);
+    const auto entireRangeCounts =
+        tofWorkspace->getIntegratedCountsForWorkspaceIndices({1}, 0.0, 0.0, true, &wavelengthConverter);
+    TS_ASSERT_DELTA(entireRangeCounts[0], rescaledSum(0, 9), 1e-10);
+  }
+
+  void testIntegratedCounts_in_another_unit_does_not_rescale_a_distribution_without_a_Y_unit() {
+    const auto tofWorkspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
+    tofWorkspace->setDistribution(true);
+    // ConvertUnits treats such data as dimensionless
+    tofWorkspace->setYUnit("");
+    const SpectraUnitConverter wavelengthConverter(*tofWorkspace, "Wavelength");
+    const auto counts = tofWorkspace->getIntegratedCountsForWorkspaceIndices({1}, 0.0, 0.0, true, &wavelengthConverter);
+    TS_ASSERT_DELTA(counts[0], 20.0, 1e-10);
+  }
+
   void testIntegratedCounts_rejects_a_unit_converter_made_for_another_workspace() {
     const auto tofWorkspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
     const auto otherWorkspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 10);

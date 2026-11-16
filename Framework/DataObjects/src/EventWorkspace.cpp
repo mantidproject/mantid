@@ -724,10 +724,12 @@ void EventWorkspace::sortAll(EventSortType sortType, Mantid::API::Progress *prog
  * @param minX :: minimum X value to use in integrating.
  * @param maxX :: maximum X value to use in integrating.
  * @param entireRange :: set to true to use the entire range. minX and maxX are then ignored!
+ * @param binWidthConverter :: Ignored, as events have no bins to scale, which ConvertUnits does not scale either
  * @return The integrated counts
  */
 double EventWorkspace::integrateSpectrum(const size_t index, const double minX, const double maxX,
-                                         const bool entireRange) const {
+                                         const bool entireRange,
+                                         [[maybe_unused]] const API::SpectraUnitConverter *binWidthConverter) const {
   return this->data[index]->integrate(minX, maxX, entireRange);
 }
 

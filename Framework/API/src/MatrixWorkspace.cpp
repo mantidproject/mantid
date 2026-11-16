@@ -202,6 +202,34 @@ std::pair<double, double> findXMinMax(const MatrixWorkspace &workspace, const Wo
  */
 constexpr double CONVERTED_LIMIT_TOLERANCE = 1e-12;
 
+/** Sum the Y values of a range of bins, each multiplied by its width over its width converted to another unit, as
+ * ConvertUnits rescales a distribution when converting it.
+ * @param converter :: Converts the bin edges to the other unit
+ * @param index :: The workspace index of the spectrum
+ * @param xData :: The bin edges of the spectrum
+ * @param yData :: The Y values of the spectrum
+ * @param first :: The index of the first bin to sum
+ * @param last :: One past the index of the last bin to sum
+ * @return The sum, skipping non-finite terms as accumulate_if_finite skips non-finite Y values
+ */
+double sumOverConvertedBinWidths(const SpectraUnitConverter &converter, const size_t index,
+                                 const HistogramData::HistogramX &xData, const HistogramData::HistogramY &yData,
+                                 const size_t first, const size_t last) {
+  if (first >= last)
+    return 0.0;
+  // The edges of the bins are converted together, as each conversion has a cost on top of that of each value
+  std::vector<double> convertedEdges(xData.cbegin() + first, xData.cbegin() + last + 1);
+  converter.fromWorkspaceUnit(index, convertedEdges);
+  double sum = 0.0;
+  for (size_t bin = first; bin < last; ++bin) {
+    const double width = std::abs(xData[bin + 1] - xData[bin]);
+    const double convertedWidth = std::abs(convertedEdges[bin + 1 - first] - convertedEdges[bin - first]);
+    if (const double term = yData[bin] * width / convertedWidth; std::isfinite(term))
+      sum += term;
+  }
+  return sum;
+}
+
 } // namespace
 const std::string MatrixWorkspace::xDimensionId = "xDimension";
 const std::string MatrixWorkspace::yDimensionId = "yDimension";
@@ -906,7 +934,7 @@ void MatrixWorkspace::getIntegratedSpectra(std::vector<double> &out, const doubl
   // Run in parallel if the implementation is threadsafe
   PARALLEL_FOR_IF(this->threadSafe())
   for (int wksp_index = 0; wksp_index < static_cast<int>(this->getNumberHistograms()); wksp_index++) {
-    out[wksp_index] = integrateSpectrum(wksp_index, minX, maxX, entireRange);
+    out[wksp_index] = integrateSpectrum(wksp_index, minX, maxX, entireRange, nullptr);
   }
 }
 
@@ -915,19 +943,22 @@ void MatrixWorkspace::getIntegratedSpectra(std::vector<double> &out, const doubl
  * @param minX :: minimum X bin to use in integrating.
  * @param maxX :: maximum X bin to use in integrating.
  * @param entireRange :: set to true to use the entire range. minX and maxX are then ignored!
+ * @param binWidthConverter :: If not null, each bin is multiplied by its width over its width converted by this, as
+ * ConvertUnits rescales a distribution. Point data, which have no bin widths, are not rescaled.
  * @return The integrated counts
  */
 double MatrixWorkspace::integrateSpectrum(const size_t index, const double minX, const double maxX,
-                                          const bool entireRange) const {
+                                          const bool entireRange, const SpectraUnitConverter *binWidthConverter) const {
   // Get Handle to data
   const Mantid::HistogramData::HistogramX &xData = this->x(index);
   const auto &yData = this->y(index);
   // offset for histogram data, because the x axis is not the same size for histogram and point data. Worked out from
   // this spectrum, as isHistogramData() copies the histogram of the first, which all threads would contend for.
   const size_t histogramOffset = xData.size() != yData.size() ? 1 : 0;
+  const auto *widthConverter = histogramOffset == 1 ? binWidthConverter : nullptr;
   // If it is a 1D workspace, no need to integrate
   if ((xData.size() <= 1 + histogramOffset) && (!yData.empty()))
-    return yData[0];
+    return widthConverter ? sumOverConvertedBinWidths(*widthConverter, index, xData, yData, 0, 1) : yData[0];
 
   // Iterators for limits - whole range by default
   Mantid::MantidVec::const_iterator lowit, highit;
@@ -949,6 +980,9 @@ double MatrixWorkspace::integrateSpectrum(const size_t index, const double minX,
   Mantid::MantidVec::difference_type distmax = std::distance(xData.begin(), highit);
   if (distmin > distmax)
     return 0.0;
+  if (widthConverter)
+    return sumOverConvertedBinWidths(*widthConverter, index, xData, yData, static_cast<size_t>(distmin),
+                                     static_cast<size_t>(distmax));
   return std::accumulate(yData.begin() + distmin, yData.begin() + distmax, 0.0, accumulate_if_finite);
 }
 
@@ -961,7 +995,9 @@ double MatrixWorkspace::integrateSpectrum(const size_t index, const double minX,
  * workspace. Converting the limits rather than the workspace selects the same events, or bins, as integrating
  * ConvertUnits' output. For a unit that reverses the order of the bins, e.g. energy, the bin straddling each limit can
  * differ, as it is kept at the upper end of the range in the X unit rather than in the converter's unit. A spectrum
- * the converter cannot convert, which ConvertUnits would mask, integrates to 0, even over the entire range.
+ * the converter cannot convert, which ConvertUnits would mask, integrates to 0, even over the entire range. For a
+ * distribution with a Y unit, each bin is multiplied by its width over its converted width, as ConvertUnits rescales
+ * it; event data are never rescaled.
  * @return The integrated counts, in the order of workspaceIndices
  * @throw std::invalid_argument :: If unitConverter was not made for this workspace
  */
@@ -970,13 +1006,15 @@ MatrixWorkspace::getIntegratedCountsForWorkspaceIndices(const std::vector<size_t
                                                         const double maxX, const bool entireRange,
                                                         const SpectraUnitConverter *unitConverter) const {
   if (const auto *converter = unitsToConvertWith(unitConverter, *this)) {
+    // ConvertUnits only rescales a distribution with a Y unit, treating one without as dimensionless
+    const auto *binWidthConverter = isDistribution() && !YUnit().empty() ? converter : nullptr;
     std::vector<double> detectorCounts(workspaceIndices.size(), 0.0);
     PARALLEL_FOR_IF(this->threadSafe())
     for (int64_t i = 0; i < static_cast<int64_t>(workspaceIndices.size()); ++i) {
       const auto index = workspaceIndices[i];
       if (entireRange) {
         if (converter->canConvert(index))
-          detectorCounts[i] = integrateSpectrum(index, minX, maxX, true);
+          detectorCounts[i] = integrateSpectrum(index, minX, maxX, true, binWidthConverter);
         continue;
       }
       std::array limits{minX, maxX};
@@ -987,7 +1025,7 @@ MatrixWorkspace::getIntegratedCountsForWorkspaceIndices(const std::vector<size_t
       std::ranges::sort(limits);
       limits[0] -= std::abs(limits[0]) * CONVERTED_LIMIT_TOLERANCE;
       limits[1] += std::abs(limits[1]) * CONVERTED_LIMIT_TOLERANCE;
-      detectorCounts[i] = integrateSpectrum(index, limits[0], limits[1], false);
+      detectorCounts[i] = integrateSpectrum(index, limits[0], limits[1], false, binWidthConverter);
     }
     return detectorCounts;
   }

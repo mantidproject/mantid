@@ -702,6 +702,36 @@ class MatrixWorkspaceTest(unittest.TestCase):
                     )
                     np.testing.assert_allclose(expected, counts, rtol=1e-10)
 
+    def test_getIntegratedCountsForWorkspaceIndices_in_a_unit_rescales_a_distribution_as_converting_the_workspace(self):
+        ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=2, StoreInADS=False)
+        # Only the flag matters, as the counts are compared with those of the same workspace converted
+        ws.setDistribution(True)
+        self.assertNotEqual("", ws.YUnit())
+        all_indices = list(range(ws.getNumberHistograms()))
+        off_beam_axis_indices = np.array(self._off_beam_axis_indices(ws))
+        for unit in ("dSpacing", "Wavelength", "Energy", "MomentumTransfer"):
+            with self.subTest(unit=unit):
+                converted = ConvertUnits(ws, Target=unit, StoreInADS=False)
+                unit_converter = SpectraUnitConverter(ws, unit)
+                expected = converted.getIntegratedCountsForWorkspaceIndices(all_indices, len(all_indices), 0.0, 0.0, True)
+                counts = ws.getIntegratedCountsForWorkspaceIndices(
+                    all_indices, len(all_indices), 0.0, 0.0, True, unitConverter=unit_converter
+                )
+                np.testing.assert_allclose(expected, counts, rtol=1e-10)
+                if unit not in ("dSpacing", "Wavelength"):
+                    # The bin straddling each limit differs for units that reverse the order of the bins
+                    continue
+                x_values = np.asarray(converted.x(int(off_beam_axis_indices[0])))
+                x_min, x_max = np.quantile(x_values[np.isfinite(x_values)], [0.3137, 0.7071])
+                expected = converted.getIntegratedCountsForWorkspaceIndices(
+                    off_beam_axis_indices, len(off_beam_axis_indices), x_min, x_max, False
+                )
+                counts = ws.getIntegratedCountsForWorkspaceIndices(
+                    off_beam_axis_indices, len(off_beam_axis_indices), x_min, x_max, False, unitConverter=unit_converter
+                )
+                self.assertGreater(min(counts), 0)
+                np.testing.assert_allclose(expected, counts, rtol=1e-10)
+
     def test_SpectraUnitConverter_rejects_an_unknown_unit(self):
         ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=1, StoreInADS=False)
         with self.assertRaises(RuntimeError):

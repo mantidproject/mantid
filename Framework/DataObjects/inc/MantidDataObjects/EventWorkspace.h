@@ -156,8 +156,8 @@ public:
   EventWorkspace &operator=(const EventWorkspace &other) = delete;
 
 protected:
-  double integrateSpectrum(const size_t index, const double minX, const double maxX,
-                           const bool entireRange) const override;
+  double integrateSpectrum(const size_t index, const double minX, const double maxX, const bool entireRange,
+                           const API::SpectraUnitConverter *binWidthConverter) const override;
   /// Protected copy constructor. May be used by childs for cloning.
   EventWorkspace(const EventWorkspace &other);
 
