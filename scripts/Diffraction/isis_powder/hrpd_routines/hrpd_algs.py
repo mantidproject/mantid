@@ -7,7 +7,7 @@
 import mantid.simpleapi as mantid
 
 from Diffraction.isis_powder.hrpd_routines import hrpd_advanced_config
-from Diffraction.isis_powder.routines import common, absorb_corrections, sample_details, common_enums
+from Diffraction.isis_powder.routines import common, absorb_corrections, common_enums
 from Diffraction.isis_powder.routines.run_details import create_run_details_object, get_cal_mapping_dict
 
 
@@ -33,7 +33,7 @@ def calculate_slab_absorb_corrections(ws_to_correct, sample_details_obj):
     :return: The corrected workspace
     """
 
-    if not isinstance(sample_details_obj, sample_details.SampleDetails):
+    if sample_details_obj is None:
         raise RuntimeError(
             "A SampleDetails object was not set or a different object type was found when sample"
             " absorption corrections were requested. If you want sample absorption corrections please "
