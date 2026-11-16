@@ -28,7 +28,7 @@ FuncMinimizerFactoryImpl::FuncMinimizerFactoryImpl() : Kernel::DynamicFactory<IF
  */
 std::shared_ptr<IFuncMinimizer> FuncMinimizerFactoryImpl::createMinimizer(const std::string &str) const {
   // check if there are any properties defined - look for a comma
-  if (str.find(',') == std::string::npos) { // no properties - create minimizer and return
+  if (!str.contains(',')) { // no properties - create minimizer and return
     return create(str);
   }
 

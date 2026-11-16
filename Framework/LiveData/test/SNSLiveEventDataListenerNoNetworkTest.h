@@ -558,7 +558,7 @@ public:
       (void)listener.runState();
     } catch (const std::runtime_error &e) {
       threw = true;
-      TS_ASSERT(std::string(e.what()).find("first precise message") != std::string::npos);
+      TS_ASSERT(std::string(e.what()).contains("first precise message"));
     }
     TS_ASSERT(threw);
   }

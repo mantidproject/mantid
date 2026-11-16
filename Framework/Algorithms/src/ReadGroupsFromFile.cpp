@@ -91,7 +91,7 @@ void ReadGroupsFromFile::exec() {
   if (!groupfile.empty()) {
     std::string filename(groupfile);
     std::transform(filename.begin(), filename.end(), filename.begin(), tolower);
-    if (filename.find(".xml") != std::string::npos) {
+    if (filename.contains(".xml")) {
       readXMLGroupingFile(groupfile);
     } else {
       readGroupingFile(groupfile);

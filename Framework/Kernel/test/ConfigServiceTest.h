@@ -432,7 +432,7 @@ public:
     const std::string contents = readFile(settings.getUserFilename());
     // No mention of mantid.legs but not empty
     TS_ASSERT(!contents.empty());
-    TS_ASSERT(contents.find("mantid.legs") == std::string::npos);
+    TS_ASSERT(!contents.contains("mantid.legs"));
 
     try {
       std::filesystem::rename(userFileBackup, settings.getUserFilename());
@@ -472,8 +472,8 @@ public:
     settings.saveConfig(settings.getUserFilename());
     const std::string contents = readFile(settings.getUserFilename());
     TS_ASSERT(!contents.empty());
-    TS_ASSERT(contents.find(garbage) == std::string::npos);
-    TS_ASSERT(contents.find(keeps) != std::string::npos);
+    TS_ASSERT(!contents.contains(garbage));
+    TS_ASSERT(contents.contains(keeps));
 
     // restore the old file
     try {

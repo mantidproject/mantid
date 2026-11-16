@@ -115,26 +115,26 @@ public:
     // request to ping the site
     if (local_file_path.empty())
       return;
-    if (url_file.find("https://") == std::string::npos) {
+    if (!url_file.contains("https://")) {
       throw ScriptRepoException("Invalid url to download");
     }
     std::ofstream _out(local_file_path);
 
-    if (url_file.find("repository.json") != std::string::npos) {
+    if (url_file.contains("repository.json")) {
       // request to download repository.json
       _out << repository_json_content;
       _out.close();
       return;
     }
 
-    if (url_file.find("TofConv/README.txt") != std::string::npos) {
+    if (url_file.contains("TofConv/README.txt")) {
       // request to download TofConv/README.txt
       _out << tofconv_readme_content;
       _out.close();
       return;
     }
 
-    if (url_file.find("TofConv/TofConverter.py") != std::string::npos) {
+    if (url_file.contains("TofConv/TofConverter.py")) {
       // request to download TofConv/TofConverter.py
       _out << tofconv_tofconverter_content;
       _out.close();
@@ -761,7 +761,7 @@ public:
     boost::replace_all(curr_python_direc, "\\", "/");
     boost::replace_all(direc, "\\", "/");
 
-    TS_ASSERT(curr_python_direc.find(direc) != std::string::npos);
+    TS_ASSERT(curr_python_direc.contains(direc));
 
     config.setString("pythonscripts.directories", backup_python_directories);
     config.saveConfig(config.getUserFilename());

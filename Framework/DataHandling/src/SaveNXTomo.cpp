@@ -108,8 +108,7 @@ void SaveNXTomo::processAll() {
   for (auto &workspace : m_workspaces) {
     const std::string workspaceID = workspace->id();
 
-    if ((workspaceID.find("Workspace2D") == std::string::npos) &&
-        (workspaceID.find("RebinnedOutput") == std::string::npos))
+    if ((!workspaceID.contains("Workspace2D")) && (!workspaceID.contains("RebinnedOutput")))
       throw Exception::NotImplementedError("SaveNXTomo passed invalid workspaces. Must be Workspace2D");
   }
 

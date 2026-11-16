@@ -425,7 +425,7 @@ public:
       for (const auto &item : datamap) {
         if (contain.empty()) {
           foundNames.emplace_back(item.first);
-        } else if (item.first.find(contain) != std::string::npos) {
+        } else if (item.first.contains(contain)) {
           foundNames.emplace_back(item.first);
         }
       }
@@ -438,7 +438,7 @@ public:
           // This item is not hidden add it
           if (contain.empty()) {
             foundNames.emplace_back(item.first);
-          } else if (item.first.find(contain) != std::string::npos) {
+          } else if (item.first.contains(contain)) {
             foundNames.emplace_back(item.first);
           }
         }

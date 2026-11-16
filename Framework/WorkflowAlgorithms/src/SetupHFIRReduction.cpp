@@ -596,7 +596,7 @@ void SetupHFIRReduction::exec() {
 
   // Normalization
   const std::string normalization = getProperty("Normalisation");
-  if (!boost::contains(normalization, "None")) {
+  if (!normalization.contains("None")) {
     auto normAlg = createChildAlgorithm("HFIRSANSNormalise");
     normAlg->setProperty("NormalisationType", normalization);
     auto normAlgProp = std::make_unique<AlgorithmProperty>("NormaliseAlgorithm");

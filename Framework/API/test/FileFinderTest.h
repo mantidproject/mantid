@@ -319,8 +319,8 @@ public:
     TS_ASSERT_EQUALS(files.size(), 2);
     TS_ASSERT(std::filesystem::exists(files[0]));
     TS_ASSERT(std::filesystem::exists(files[1]));
-    TS_ASSERT(files[0].filename().string().find("15191") != std::string::npos);
-    TS_ASSERT(files[1].filename().string().find("15189") != std::string::npos);
+    TS_ASSERT(files[0].filename().string().contains("15191"));
+    TS_ASSERT(files[1].filename().string().contains("15189"));
   }
 
   void testThatGetUniqueExtensionsPreservesOrder() {
@@ -432,7 +432,7 @@ public:
 
     ConfigService::Instance().setString("datasearch.searcharchive", "Off");
     std::string path = FileFinder::Instance().findRun("CSP78173.raw").result().string();
-    TS_ASSERT(path.find("CSP78173.raw") != std::string::npos);
+    TS_ASSERT(path.contains("CSP78173.raw"));
     TS_ASSERT(std::filesystem::exists(path));
 
     path = FileFinder::Instance().findRun("OFFSPEC4622.log").result().string();

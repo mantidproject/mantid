@@ -232,7 +232,7 @@ void Decoder::updateRunsTableViewFromModel(QtRunsTableView *view, const Reductio
     auto const &modelName = groups[groupIndex].name();
     // If name doesn't contain "HiddenGroupName" update groupname as it
     // represents a none user defined name
-    if (modelName.find("HiddenGroupName") == std::string::npos) {
+    if (!modelName.contains("HiddenGroupName")) {
       MantidQt::MantidWidgets::Batch::RowLocation location({static_cast<int>(groupIndex)});
       MantidQt::MantidWidgets::Batch::Cell groupCell(modelName);
       jobTreeView->setCellAt({location}, 0, groupCell);

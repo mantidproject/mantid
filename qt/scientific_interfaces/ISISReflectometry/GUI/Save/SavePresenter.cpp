@@ -224,7 +224,7 @@ void SavePresenter::filterWorkspaceNames() {
   } else {
     // Otherwise simply add names where the filter string is found in
     it = std::copy_if(wsNames.begin(), wsNames.end(), validNames.begin(),
-                      [filter](const std::string &s) { return s.find(filter) != std::string::npos; });
+                      [filter](const std::string &s) { return s.contains(filter); });
   }
 
   validNames.resize(std::distance(validNames.begin(), it));

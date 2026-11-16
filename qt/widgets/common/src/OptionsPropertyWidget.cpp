@@ -43,7 +43,7 @@ OptionsPropertyWidget::OptionsPropertyWidget(Mantid::Kernel::Property *prop, QWi
   // output box and used the saved combo box
   m_combo = new QComboBox(this);
   m_combo->setToolTip(m_doc);
-  if (std::string(prop->type()).find("Workspace") != std::string::npos) {
+  if (std::string(prop->type()).contains("Workspace")) {
     m_combo->setEditable(true);
     m_combo->setInsertPolicy(QComboBox::NoInsert);
     m_combo->completer()->setCompletionMode(QCompleter::PopupCompletion);

@@ -834,8 +834,7 @@ public:
     } catch (std::runtime_error &e) {
       std::string msg(e.what());
 
-      TSM_ASSERT("Error message should contain original error",
-                 msg.find(FailingAlgorithm::FAIL_MSG) != std::string::npos);
+      TSM_ASSERT("Error message should contain original error", msg.contains(FailingAlgorithm::FAIL_MSG));
     }
   }
 

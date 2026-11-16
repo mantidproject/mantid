@@ -123,7 +123,7 @@ bool BoxControllerNeXusIO::openFile(const std::string &fileName, const std::stri
 
   std::lock_guard<std::mutex> _lock(m_fileMutex);
   m_ReadOnly = true;
-  if (mode.find('w') != std::string::npos || mode.find('W') != std::string::npos) {
+  if (mode.contains('w') || mode.contains('W')) {
     m_ReadOnly = false;
   }
 

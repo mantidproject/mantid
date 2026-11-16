@@ -270,8 +270,8 @@ void LoadGSASInstrumentFile::scanBanks(const std::vector<std::string> &lines, st
   // to their order in the file.
   for (size_t i = 0; i < lines.size(); ++i) {
     string line = lines[i];
-    if (line.substr(0, 3) == "INS") {            // Ignore all lines that don't begin with INS
-      if (line.find("BNKPAR") != string::npos) { // We've found start of a new bank
+    if (line.substr(0, 3) == "INS") { // Ignore all lines that don't begin with INS
+      if (line.contains("BNKPAR")) {  // We've found start of a new bank
         bankStartIndex.emplace_back(i);
       }
     } // INS

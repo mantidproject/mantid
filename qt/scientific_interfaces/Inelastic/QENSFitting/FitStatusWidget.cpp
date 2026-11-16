@@ -20,11 +20,11 @@ const std::string CHANGESTOOSMALL{"Changes"};
 namespace {
 QPalette getFitStatusColor(const std::string &status) {
   QPalette statusPalette;
-  if (status.find(FitStatusStrings::SUCCESS) != std::string::npos) {
+  if (status.contains(FitStatusStrings::SUCCESS)) {
     statusPalette.setColor(QPalette::WindowText, Qt::green);
-  } else if (status.find(FitStatusStrings::FAILED) != std::string::npos) {
+  } else if (status.contains(FitStatusStrings::FAILED)) {
     statusPalette.setColor(QPalette::WindowText, Qt::red);
-  } else if (status.find(FitStatusStrings::CHANGESTOOSMALL) != std::string::npos) {
+  } else if (status.contains(FitStatusStrings::CHANGESTOOSMALL)) {
     statusPalette.setColor(QPalette::WindowText, QColor(255, 165, 0));
   } else {
     statusPalette.setColor(QPalette::WindowText, Qt::black);

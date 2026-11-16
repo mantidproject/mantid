@@ -956,7 +956,7 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(const std::map<std::string
     auto value = p.second;
     // value starts with QDimension0, then other stuff
     // do not use ==
-    if (value.find("QDimension0") != std::string::npos) {
+    if (value.contains("QDimension0")) {
       dimensionIndex[0] = parametersIndex;
       const std::string dimXName = tempDataWS->getDimension(parametersIndex)->getName();
       if (m_isRLU) { // hkl
@@ -982,7 +982,7 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(const std::map<std::string
           throw(std::invalid_argument(errorMessage.str()));
         }
       }
-    } else if (value.find("QDimension1") != std::string::npos) {
+    } else if (value.contains("QDimension1")) {
       dimensionIndex[1] = parametersIndex;
       const std::string dimYName = tempDataWS->getDimension(parametersIndex)->getName();
       if (m_isRLU) { // hkl
@@ -1008,7 +1008,7 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(const std::map<std::string
           throw(std::invalid_argument(errorMessage.str()));
         }
       }
-    } else if (value.find("QDimension2") != std::string::npos) {
+    } else if (value.contains("QDimension2")) {
       dimensionIndex[2] = parametersIndex;
       const std::string dimZName = tempDataWS->getDimension(parametersIndex)->getName();
       if (m_isRLU) { // hkl
@@ -1092,7 +1092,7 @@ inline DblMatrix MDNorm::buildSymmetryMatrix(const Geometry::SymmetryOperation &
 inline void MDNorm::determineBasisVector(const size_t &qindex, const std::string &value,
                                          const Mantid::Kernel::DblMatrix &Qtransform, std::vector<double> &projection,
                                          std::stringstream &basisVector, std::vector<size_t> &qDimensionIndices) {
-  if (value.find("QDimension0") != std::string::npos) {
+  if (value.contains("QDimension0")) {
     m_hIdx = qindex;
     if (!m_isRLU) {
       projection[0] = 1.;
@@ -1104,7 +1104,7 @@ inline void MDNorm::determineBasisVector(const size_t &qindex, const std::string
       projection[2] = Qtransform[2][0];
       basisVector << QDimensionName(m_Q0Basis) << ", r.l.u.";
     }
-  } else if (value.find("QDimension1") != std::string::npos) {
+  } else if (value.contains("QDimension1")) {
     m_kIdx = qindex;
     if (!m_isRLU) {
       projection[1] = 1.;
@@ -1116,7 +1116,7 @@ inline void MDNorm::determineBasisVector(const size_t &qindex, const std::string
       projection[2] = Qtransform[2][1];
       basisVector << QDimensionName(m_Q1Basis) << ", r.l.u.";
     }
-  } else if (value.find("QDimension2") != std::string::npos) {
+  } else if (value.contains("QDimension2")) {
     m_lIdx = qindex;
     if (!m_isRLU) {
       projection[2] = 1.;
@@ -1128,7 +1128,7 @@ inline void MDNorm::determineBasisVector(const size_t &qindex, const std::string
       projection[2] = Qtransform[2][2];
       basisVector << QDimensionName(m_Q2Basis) << ", r.l.u.";
     }
-  } else if (value.find("DeltaE") != std::string::npos) {
+  } else if (value.contains("DeltaE")) {
     m_eIdx = qindex;
     m_dEIntegrated = false;
   }

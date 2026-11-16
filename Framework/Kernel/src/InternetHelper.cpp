@@ -204,7 +204,7 @@ InternetHelper::HTTPStatus InternetHelper::sendRequest(const std::string &url, s
  */
 void InternetHelper::logDebugRequestSending(const std::string &schemeName, const std::string &url) const {
   const std::string insecString = "password=";
-  if (std::string::npos == url.find(insecString)) {
+  if (!url.contains(insecString)) {
     g_log.debug() << "Sending " << schemeName << " " << m_method << " request to: " << url << "\n";
   } else {
     g_log.debug() << "Sending " << schemeName << " " << m_method

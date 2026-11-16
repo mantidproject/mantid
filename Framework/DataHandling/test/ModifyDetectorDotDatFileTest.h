@@ -81,7 +81,7 @@ public:
 
       // Check header has name of algorithm in it
       getline(in, header);
-      bool headerHasNameOfAlgorithmInIt = header.find("ModifyDetectorDotDatFile") != std::string::npos;
+      bool headerHasNameOfAlgorithmInIt = header.contains("ModifyDetectorDotDatFile");
       TS_ASSERT(headerHasNameOfAlgorithmInIt);
 
       // Ignore 2nd line

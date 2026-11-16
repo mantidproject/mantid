@@ -282,7 +282,7 @@ namespace {
 /// Define operator for checking for new-style icp events
 struct hasNewStyleCommands {
   bool operator()(const std::pair<Mantid::Types::Core::DateAndTime, std::string> &p) {
-    return p.second.find(START_COLLECTION) != std::string::npos || p.second.find(STOP_COLLECTION) != std::string::npos;
+    return p.second.contains(START_COLLECTION) || p.second.contains(STOP_COLLECTION);
   }
 };
 } // namespace

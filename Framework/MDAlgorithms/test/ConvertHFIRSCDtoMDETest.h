@@ -450,7 +450,7 @@ private:
     const auto errors = alg.validateInputs();
     TS_ASSERT_EQUALS(errors.count(property), 1);
     if (errors.count(property) == 1)
-      TS_ASSERT(errors.at(property).find(expected) != std::string::npos);
+      TS_ASSERT(errors.at(property).contains(expected));
     TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
   }
 
@@ -519,7 +519,7 @@ private:
     const auto errors = alg.validateInputs();
     TS_ASSERT_EQUALS(errors.count("Wavelength"), 1);
     if (errors.count("Wavelength") == 1)
-      TS_ASSERT(errors.at("Wavelength").find(expected) != std::string::npos);
+      TS_ASSERT(errors.at("Wavelength").contains(expected));
     TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
   }
 };
