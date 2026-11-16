@@ -153,8 +153,9 @@ void SpectraUnitConverter::convert(const size_t index, std::span<double> values,
                                    const Kernel::Unit &to,
                                    const std::optional<QuickConversion> &quickConversion) const {
   if (quickConversion) {
-    for (auto &value : values)
-      value = quickConversion->factor * std::pow(value, quickConversion->power);
+    std::transform(values.begin(), values.end(), values.begin(), [&quickConversion](const double value) {
+      return quickConversion->factor * std::pow(value, quickConversion->power);
+    });
     return;
   }
   const auto &stored = m_parameters[index];
