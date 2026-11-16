@@ -55,8 +55,7 @@ GeneralDomainCreator::GeneralDomainCreator(const API::IFunctionGeneral &fun, Ker
 /// @param suffix :: A suffix to give to all new properties.
 /// @param addProp :: If false don't actually declare new properties but do
 /// other stuff if needed
-void GeneralDomainCreator::declareDatasetProperties(const std::string &suffix, bool addProp) {
-  UNUSED_ARG(suffix);
+void GeneralDomainCreator::declareDatasetProperties([[maybe_unused]] const std::string &suffix, bool addProp) {
   if (addProp) {
     for (const auto &propName : m_domainColumnNames) {
       declareProperty(new Kernel::PropertyWithValue<std::string>(propName, ""), "A name of a domain column.");

@@ -583,7 +583,7 @@ add_subdirectory(test)
 target_include_directories(
   CurveFitting PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/CurveFitting> $<INSTALL_INTERFACE:include/Mantid>
 )
-generate_mantid_export_header(CurveFitting FALSE GENERATE_UNUSED_ARG)
+generate_mantid_export_header(CurveFitting FALSE)
 
 # Installation settings
 mtd_install_framework_lib(TARGETS CurveFitting PLUGIN_LIB)

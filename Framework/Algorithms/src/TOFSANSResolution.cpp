@@ -55,10 +55,7 @@ void TOFSANSResolution::init() {
 /*
  * Double Boltzmann fit to the TOF resolution as a function of wavelength
  */
-double TOFSANSResolution::getTOFResolution(double wl) {
-  UNUSED_ARG(wl);
-  return m_wl_resolution;
-}
+double TOFSANSResolution::getTOFResolution([[maybe_unused]] double wl) { return m_wl_resolution; }
 
 /*
  * Return the effective pixel size in X, in meters

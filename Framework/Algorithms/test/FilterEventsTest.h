@@ -1881,10 +1881,8 @@ public:
    *int64_t format of unit nanosecond
    * @param numpulses : number of pulses in the event workspace
    */
-  SplittersWorkspace_sptr createFastFreqLogSplitter(int64_t runstart_i64, int64_t pulsedt, int64_t tofdt,
-                                                    size_t numpulses) {
-
-    UNUSED_ARG(tofdt);
+  SplittersWorkspace_sptr createFastFreqLogSplitter(int64_t runstart_i64, int64_t pulsedt,
+                                                    [[maybe_unused]] int64_t tofdt, size_t numpulses) {
 
     // 1. Create an empty splitter workspace
     SplittersWorkspace_sptr splitterws = std::make_shared<SplittersWorkspace>();

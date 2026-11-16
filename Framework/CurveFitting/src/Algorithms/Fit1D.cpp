@@ -215,11 +215,8 @@ derivative free simplex minimization
 * @param xValues :: X values for data points
 * @param nData :: Number of data points
  */
-void Fit1D::functionDeriv(const double *in, Jacobian *out, const double *xValues, const size_t nData) {
-  UNUSED_ARG(in);
-  UNUSED_ARG(out);
-  UNUSED_ARG(xValues);
-  UNUSED_ARG(nData);
+void Fit1D::functionDeriv([[maybe_unused]] const double *in, [[maybe_unused]] Jacobian *out,
+                          [[maybe_unused]] const double *xValues, [[maybe_unused]] const size_t nData) {
   throw Exception::NotImplementedError("No derivative function provided");
 }
 
@@ -382,7 +379,6 @@ void Fit1D::exec() {
   // coincides with) it
   if (endX >= XValues.back() || endX < startX) {
     g_log.warning("EndX out of range! Set to end of frame");
-    endX = XValues.back();
     m_maxX = static_cast<int>(YValues.size());
   } else {
     for (m_maxX = m_minX; XValues[m_maxX] < endX; ++m_maxX) {

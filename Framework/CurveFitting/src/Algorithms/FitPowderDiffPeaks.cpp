@@ -818,10 +818,8 @@ bool FitPowderDiffPeaks::doFit1PeakBackground(const Workspace2D_sptr &dataws, si
 //----------------------------------------------------------------------------------------------
 /** Fit signle peak by Monte Carlo/simulated annealing
  */
-bool FitPowderDiffPeaks::fitSinglePeakSimulatedAnnealing(const BackToBackExponential_sptr &peak,
-                                                         const vector<string> &paramtodomc) {
-  UNUSED_ARG(peak);
-  UNUSED_ARG(paramtodomc);
+bool FitPowderDiffPeaks::fitSinglePeakSimulatedAnnealing([[maybe_unused]] const BackToBackExponential_sptr &peak,
+                                                         [[maybe_unused]] const vector<string> &paramtodomc) {
   throw runtime_error("To Be Implemented Soon!");
 
   /*
