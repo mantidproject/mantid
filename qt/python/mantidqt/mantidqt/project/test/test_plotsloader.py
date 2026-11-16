@@ -128,6 +128,9 @@ class PlotsLoaderTest(unittest.TestCase):
             "yAxisTitle": "",
         }
 
+    def tearDown(self):
+        ADS.clear()
+
     def test_load_plots_does_the_right_calls(self):
         self.plots_loader.make_fig = mock.MagicMock()
         self.plots_loader.load_plots(["plot1", "plot2"])

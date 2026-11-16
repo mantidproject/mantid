@@ -193,6 +193,7 @@ class PlotsSaverTest(unittest.TestCase):
         self.plot_saver = PlotsSaver()
 
     def tearDown(self):
+        plt.close("all")
         ADS.clear()
 
     def test_save_plots(self):
@@ -225,6 +226,15 @@ class PlotsSaverTest(unittest.TestCase):
 
         self.assertEqual([[{"workspaces": "ws1", "function": "plot_surface"}]], return_value["creationArguments"])
         self.assertEqual([], return_value["axes"])
+
+    def test_get_dict_from_fig_skips_3d_plot_of_arrays(self):
+        fig, ax = plt.subplots(subplot_kw={"projection": "mantid3d"})
+        x, y = np.meshgrid(np.arange(3), np.arange(3))
+        ax.plot_surface(x, y, x * y)
+
+        return_value = self.plot_saver.get_dict_from_fig(fig)
+
+        self.assertEqual([], return_value["creationArguments"])
 
     def test_get_dict_from_fig_converts_numpy_array_arguments_to_lists(self):
         fig, ax = plt.subplots(subplot_kw={"projection": "mantid"})

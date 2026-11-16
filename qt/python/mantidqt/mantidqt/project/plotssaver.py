@@ -83,6 +83,10 @@ class PlotsSaver(object):
         axes_list = []
         create_list = []
         for ax in fig.axes:
+            if isinstance(ax, MantidAxes3D) and not ax.creation_args:
+                # A 3D plot of arrays rather than workspaces cannot be recreated, so skip it as for any other axes
+                # without creation_args
+                continue
             try:
                 creation_args = deepcopy(ax.creation_args)
                 # convert the normalise object (if present) into a dict so that it can be json serialised
