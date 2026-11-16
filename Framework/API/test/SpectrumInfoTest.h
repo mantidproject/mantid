@@ -212,7 +212,7 @@ public:
   // removed at some point.
   void test_twoThetaLegacy() {
     const auto &spectrumInfo = m_workspace.spectrumInfo();
-    auto det = m_workspace.getDetector(2);
+    ALLOW_DEPRECATED(auto det = m_workspace.getDetector(2));
     TS_ASSERT_EQUALS(spectrumInfo.twoTheta(2), m_workspace.detectorTwoTheta(*det));
   }
 
@@ -220,7 +220,7 @@ public:
   // removed at some point.
   void test_grouped_twoThetaLegacy() {
     const auto &spectrumInfo = m_grouped.spectrumInfo();
-    auto det = m_grouped.getDetector(GroupOfDets1And2);
+    ALLOW_DEPRECATED(auto det = m_grouped.getDetector(GroupOfDets1And2));
     TS_ASSERT_EQUALS(spectrumInfo.twoTheta(GroupOfDets1And2), m_grouped.detectorTwoTheta(*det));
   }
 
@@ -245,7 +245,7 @@ public:
   // be removed at some point.
   void test_signedTwoThetaLegacy() {
     const auto &spectrumInfo = m_workspace.spectrumInfo();
-    auto det = m_workspace.getDetector(2);
+    ALLOW_DEPRECATED(auto det = m_workspace.getDetector(2));
     TS_ASSERT_EQUALS(spectrumInfo.signedTwoTheta(2), m_workspace.detectorSignedTwoTheta(*det));
   }
 
@@ -253,7 +253,7 @@ public:
   // be removed at some point.
   void test_grouped_signedTwoThetaLegacy() {
     const auto &spectrumInfo = m_grouped.spectrumInfo();
-    auto det = m_grouped.getDetector(GroupOfDets1And2);
+    ALLOW_DEPRECATED(auto det = m_grouped.getDetector(GroupOfDets1And2));
     TS_ASSERT_EQUALS(spectrumInfo.signedTwoTheta(GroupOfDets1And2), m_grouped.detectorSignedTwoTheta(*det));
   }
 
@@ -294,7 +294,7 @@ public:
     const auto &spectrumInfo = ws.spectrumInfo();
     TS_ASSERT_DELTA(spectrumInfo.phi(0), M_PI, 1e-12);
     TS_ASSERT_DELTA(spectrumInfo.phiOffset(0, M_PI), 0.0, 1e-12);
-    TS_ASSERT_DELTA(spectrumInfo.phi(0), ws.getDetector(0)->getPhi(), 1e-12);
+    ALLOW_DEPRECATED(TS_ASSERT_DELTA(spectrumInfo.phi(0), ws.getDetector(0)->getPhi(), 1e-12));
   }
 
   void test_angles_with_observer_no_detectors() {
@@ -639,7 +639,7 @@ private:
     const V3D axis(0.0, 0.1, 1.0);
     const V3D up(0.3, 1.0, 0.0);
     for (const auto i : indices) {
-      const auto det = ws.getDetector(i);
+      ALLOW_DEPRECATED(const auto det = ws.getDetector(i));
       TS_ASSERT_DELTA(spectrumInfo.twoTheta(i, observer, axis), det->getTwoTheta(observer, axis), 1e-12);
       TS_ASSERT_DELTA(spectrumInfo.signedTwoTheta(i, observer, axis, up), det->getSignedTwoTheta(observer, axis, up),
                       1e-12);

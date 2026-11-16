@@ -624,6 +624,15 @@ boost::python::dict getDetectorIDToWorkspaceIndexMap(MatrixWorkspace &self, bool
   return pythonDict;
 }
 
+std::shared_ptr<Mantid::Geometry::IDetector const> getDetectorDeprecated(MatrixWorkspace const &self, size_t const wi) {
+  if (PyErr_Warn(PyExc_DeprecationWarning,
+                 "'MatrixWorkspace.getDetector' is deprecated in Mantid 7.1. "
+                 "For more information, see the instrument access layers concept page: "
+                 "https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html") < 0)
+    throw boost::python::error_already_set();
+  ALLOW_DEPRECATED(return self.getDetector(wi));
+}
+
 } // namespace
 
 /** Python exports of the Mantid::API::MatrixWorkspace class. */
@@ -677,7 +686,7 @@ void export_MatrixWorkspace() {
            (arg("self"), arg("throwIfMultipleDets"), arg("ignoreIfNoValidDets")),
            " Return a map where the key is detector ID (pixel ID), and the value at that index = the corresponding "
            "workspace index")
-      .def("getDetector", &MatrixWorkspace::getDetector, return_value_policy<RemoveConstSharedPtr>(),
+      .def("getDetector", &getDetectorDeprecated, return_value_policy<RemoveConstSharedPtr>(),
            (arg("self"), arg("workspaceIndex")),
            "Return the :class:`~mantid.geometry.Detector` or "
            ":class:`~mantid.geometry.DetectorGroup` that is linked to "

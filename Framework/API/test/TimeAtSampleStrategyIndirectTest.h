@@ -11,6 +11,7 @@
 #include "MantidAPI/TimeAtSampleStrategyIndirect.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/V3D.h"
@@ -42,12 +43,9 @@ public:
     constexpr double TWO_MEV_OVER_MASS = 2. * Mantid::PhysicalConstants::meV / Mantid::PhysicalConstants::NeutronMass;
     auto ws = WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument();
     // set efixed
-    auto instrument = ws->getInstrument();
-    auto detector = ws->getDetector(detectorIndex);
-    auto &paramMap = ws->instrumentParameters();
-    paramMap.addDouble(detector.get(), "Efixed", efixed); // meV
-
     const auto &spectrumInfo = ws->spectrumInfo();
+    auto const detIndex = spectrumInfo.firstDetectorIndex(detectorIndex);
+    ws->mutableComponentInfo().addDouble(detIndex, "Efixed", efixed); // meV)
 
     const double l2 = spectrumInfo.l2(detectorIndex);
     const double expectedShift = -1. * l2 / sqrt(efixed * TWO_MEV_OVER_MASS);

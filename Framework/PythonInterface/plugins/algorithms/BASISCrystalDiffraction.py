@@ -538,8 +538,9 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
         ws = LoadNexus(Filename=self._solid_angle_ws_, OutputWorkspace=name)
         ClearMaskFlag(ws)
         MaskDetectors(ws, MaskedWorkspace=self._t_mask)
+        spectrum_info = ws.spectrumInfo()
         for i in range(ws.getNumberHistograms()):
-            ws.mutableY(i)[0] = 0.0 if ws.getDetector(i).isMasked() else 1.0
+            ws.mutableY(i)[0] = 0.0 if spectrum_info.isMasked(i) else 1.0
             ws.setSharedX(i, self._momentum_range)
         return ws
 

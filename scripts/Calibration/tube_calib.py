@@ -73,8 +73,8 @@ def create_tube_calibration_ws_by_ws_index_list(integrated_workspace, output_wor
 # Return the udet number and [x,y,z] position of the detector (or virtual detector) corresponding to spectra spectra_number
 # Thanks to Pascal Manuel for this function
 def get_detector_pos(work_handle, spectra_number):
-    udet = work_handle.getDetector(spectra_number)
-    return udet.getID(), udet.getPos()
+    detector_id = work_handle.getSpectrum(spectra_number).getDetectorIDs()[0]
+    return detector_id, work_handle.spectrumInfo().position(spectra_number)
 
 
 # Given the center of a slit in pixels return the interpolated y

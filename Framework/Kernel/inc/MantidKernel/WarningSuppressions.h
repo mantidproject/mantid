@@ -118,10 +118,10 @@
 #endif
 
 #ifndef ALLOW_DEPRECATED
-#define ALLOW_DEPRECATED(command)                                                                                      \
+#define ALLOW_DEPRECATED(...)                                                                                          \
   GNU_DIAG_OFF("deprecated-declarations")                                                                              \
   MSVC_DIAG_OFF(4996)                                                                                                  \
-  command;                                                                                                             \
+  __VA_ARGS__;                                                                                                         \
   MSVC_DIAG_ON(4996)                                                                                                   \
   GNU_DIAG_ON("deprecated-declarations")
 #endif
