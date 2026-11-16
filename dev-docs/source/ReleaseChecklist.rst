@@ -462,6 +462,16 @@ Code Freeze
     (although this can be corrected afterwards). All branches and PRs that were created
     before this release branch was created are fine, as their history is the same as ``main``.
 
+**Update the SimpleAPI Type Stub**
+
+* During the code freeze, regenerate and review the committed
+  ``Framework/PythonInterface/mantid/simpleapi.pyi`` from a build of
+  ``release-next`` after the relevant algorithm changes have been merged.
+  From the build directory, run ``ninja simpleapi_stubs``, then submit the
+  generated change to ``release-next`` in a pull request. Follow the
+  :ref:`Python type stubs guide <PythonTypeStubs>` for requirements and
+  validation. Repeat if later release changes affect algorithm declarations.
+
 **Create Release Notes Skeleton**
 
 *  Create a skeleton set of release notes and subfolders on ``main`` for the next version using the

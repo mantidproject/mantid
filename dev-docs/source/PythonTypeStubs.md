@@ -73,23 +73,51 @@ To generate a small subset while developing the generator, pass algorithm names
 instead of `--all`. The committed file should be generated with `--all`.
 
 Algorithms in the `MPI` category (`BroadcastWorkspace`, `GatherWorkspaces`)
-are left out of the stub. They are only registered when Mantid is built with
-`MPI_BUILD` on Linux, and including them would make the committed stub depend
-on where it was generated.
+are left out of `simpleapi.pyi`, because the `MPIAlgorithms` plugin is only
+built on Linux and including them would make the committed stub depend on
+where it was generated. Instead, `simpleapi.pyi` star-imports
+`mantid._simpleapi_mpi`, a stub that `--mpi-only` writes to
+`Framework/PythonInterface/mantid/_simpleapi_mpi.pyi`. `ninja simpleapi_stubs`
+generates it wherever the plugin is built. It is ignored by git and shipped
+only in the `mantidmpi` conda package. Where it is missing, type checkers
+resolve the MPI algorithms through the stub's `__getattr__` fallback as `Any`.
 
 Do not format the stub by hand. The generator runs Ruff on the generated file.
 When formatting or output needs correction, update the generator or its
 explicit wrapper-specific declarations, regenerate the file, and review the
 resulting diff.
 
-## Validate and review
+## Packages and the committed stub
 
-Check that the committed stub matches the current build's registered
-algorithms:
+The conda package build regenerates both stubs from the build it is packaging,
+by running the `simpleapi_stubs` target before install with
+`-DSIMPLEAPI_STUBS_ARGS=--no-format`. Packaged stubs therefore always match
+their algorithms. `--no-format` skips Ruff formatting, which needs `prek` or
+`pre-commit` and a git checkout. Formatting matters only for the reviewed diff
+of the committed file.
+
+Generating the stub imports every Python algorithm plugin, so the staging
+`host` requirements in `conda/recipes/mantid/recipe.yaml` must include the
+Python packages that plugins import when they load. Required packages are also
+in the `mantid` run requirements. Optional packages that decide whether an
+algorithm is registered, such as `pystog`, are only in `host` and
+`run_constraints`. `pystog` comes from the `neutrons` channel, which
+`buildconfig/Jenkins/Conda/package-conda` passes to the `mantid` build. If a
+plugin fails to load, the generator stops with a list of the failed files
+rather than writing a stub without their algorithms. An optional import that
+only skips registering an algorithm cannot be detected; that algorithm is then
+missing from the packaged stub until its package is added to `host`.
+
+The committed stub is not checked for freshness in CI, so pull requests that
+change algorithm properties do not need to regenerate it, and feature branches
+do not conflict over it. It may lag behind the algorithms on `main` until
+someone regenerates it. To check whether it is stale, run:
 
 ```sh
 python tools/python_typing/generate_simpleapi_stubs.py --all --check
 ```
+
+## Validate and review
 
 The Python typing tests are registered with CTest under the `UnitTest` label.
 From the configured build directory, run the focused tests with:
@@ -98,8 +126,8 @@ From the configured build directory, run the focused tests with:
 ctest -R 'tools\.python_typing\.' --output-on-failure
 ```
 
-The tests cover generator behavior, stub freshness, and an analyzer smoke check
-for the `ConvertUnits` signature that requires Pyright to reject an invalid
+The tests cover generator behavior and an analyzer smoke check for the
+`ConvertUnits` signature that requires Pyright to reject an invalid
 `Target` value. The PR workflow runs these tests as part of its `UnitTest`
 selection.
 
@@ -113,9 +141,9 @@ pyright check_mantid_types.py
 `check` is not a Pyright subcommand. The command above uses the project's
 `pyrightconfig.json` automatically when run from its directory.
 
-Keep stub freshness and analyzer checks in CTest/CI. They need the Mantid
-bindings and registered algorithms from the build; pre-commit remains
-responsible for formatting and ordinary static checks.
+Keep analyzer checks in CTest/CI. They need the Mantid bindings and
+registered algorithms from the build; pre-commit remains responsible for
+formatting and ordinary static checks.
 
 When algorithm property metadata or simpleapi wrapper behavior changes, review
 the generated declarations and update generator overrides and tests as needed.
