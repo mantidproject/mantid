@@ -24,3 +24,6 @@ class OFFSPECLoadingTest(LoadAndCheckBase):
 
     def get_integrated_reference_workspace_filename(self):
         return "OFFSPEC00010791_1Integrated.nxs"
+
+    def get_expected_instrument_name(self):
+        return "OFFSPEC"
