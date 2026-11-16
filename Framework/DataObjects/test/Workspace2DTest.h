@@ -9,12 +9,14 @@
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/SpectraUnitConverter.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/UnitConversion.h"
 #include "PropertyManagerHelper.h"
 #include <cxxtest/TestSuite.h>
 
@@ -210,6 +212,30 @@ public:
       TS_ASSERT_EQUALS(sums[i], 4.0);
       ;
     }
+  }
+
+  void testIntegratedCounts_in_another_unit_converts_the_limits_for_each_spectrum() {
+    const auto tofWorkspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
+    const auto &spectrumInfo = tofWorkspace->spectrumInfo();
+    const SpectraUnitConverter wavelengthConverter(*tofWorkspace, "Wavelength");
+    for (const size_t index : {0, 1}) {
+      const auto toWavelength = [&](const double tof) {
+        return UnitConversion::run("TOF", "Wavelength", tof, spectrumInfo.l1(), spectrumInfo.l2(index),
+                                   spectrumInfo.twoTheta(index), DeltaEMode::Elastic, 0.0);
+      };
+      // 2.5 to 6.5 us takes the bins from 3 to 6 us and the one straddling 6.5 us, each with 2 counts
+      const auto counts = tofWorkspace->getIntegratedCountsForWorkspaceIndices(
+          {index}, toWavelength(2.5), toWavelength(6.5), false, &wavelengthConverter);
+      TS_ASSERT_DELTA(counts[0], 8.0, 1e-10);
+    }
+  }
+
+  void testIntegratedCounts_rejects_a_unit_converter_made_for_another_workspace() {
+    const auto tofWorkspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
+    const auto otherWorkspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 10);
+    const SpectraUnitConverter otherConverter(*otherWorkspace, "Wavelength");
+    TS_ASSERT_THROWS(tofWorkspace->getIntegratedCountsForWorkspaceIndices({0}, 1.0, 2.0, false, &otherConverter),
+                     const std::invalid_argument &);
   }
 
   void test_generateHistogram() {

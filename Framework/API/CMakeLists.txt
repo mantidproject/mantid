@@ -147,6 +147,7 @@ set(SRC_FILES
     src/SingleCountValidator.cpp
     src/SpectraAxis.cpp
     src/SpectraAxisValidator.cpp
+    src/SpectraUnitConverter.cpp
     src/SpectrumDetectorMapping.cpp
     src/SpectrumInfo.cpp
     src/TableRow.cpp
@@ -351,6 +352,7 @@ set(INC_FILES
     inc/MantidAPI/SingleValueParameterParser.h
     inc/MantidAPI/SpectraAxis.h
     inc/MantidAPI/SpectraAxisValidator.h
+    inc/MantidAPI/SpectraUnitConverter.h
     inc/MantidAPI/SpectrumDetectorMapping.h
     inc/MantidAPI/SpectrumInfo.h
     inc/MantidAPI/SpectrumInfoItem.h

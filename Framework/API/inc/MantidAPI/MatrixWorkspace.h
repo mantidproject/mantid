@@ -79,6 +79,7 @@ const std::vector<std::string> validMarkerStyles{"square",
 
 namespace API {
 class Axis;
+class SpectraUnitConverter;
 class SpectrumDetectorMapping;
 
 /// typedef for the image type
@@ -377,7 +378,8 @@ public:
   virtual double getXMax() const;
   [[nodiscard]] virtual std::pair<double, double> getXMinMax() const;
   [[nodiscard]] std::pair<double, double> getXMinMax(const std::vector<size_t> &workspaceIndices,
-                                                     const bool includeNonFiniteSpectra = false) const;
+                                                     const bool includeNonFiniteSpectra = false,
+                                                     const SpectraUnitConverter *unitConverter = nullptr) const;
 
   /// Deprecated, use sharedX() instead. Returns a pointer to the x data
   [[deprecated("use sharedX() instead")]]
@@ -418,7 +420,8 @@ public:
 
   std::vector<double> getIntegratedCountsForWorkspaceIndices(const std::vector<size_t> &workspaceIndices,
                                                              const double minX, const double maxX,
-                                                             const bool entireRange) const;
+                                                             const bool entireRange,
+                                                             const SpectraUnitConverter *unitConverter = nullptr) const;
 
   /// Return an index in the X vector for an x-value close to a given value
   std::pair<size_t, double> getXIndex(size_t i, double x, bool isLeft = true, size_t start = 0) const;

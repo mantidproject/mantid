@@ -12,6 +12,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/SpectraUnitConverter.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -36,6 +37,7 @@
 #include <boost/algorithm/string/regex.hpp>
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <functional>
 #include <numeric>
@@ -108,32 +110,52 @@ std::string replacePerWithLatex(std::string yLabel) {
   return yLabel;
 }
 
+/// Throw if the converter was not made for the workspace, whose spectra it would not have the geometry of
+void checkConverterIsForWorkspace(const SpectraUnitConverter &converter, const MatrixWorkspace &workspace) {
+  if (converter.size() != workspace.getNumberHistograms() ||
+      converter.workspaceUnit() != workspace.getAxis(0)->unit()->unitID())
+    throw std::invalid_argument("The unit converter was made for a different workspace");
+}
+
+/// Leaves X values in the workspace unit
+struct NoUnitConversion {
+  double operator()(const size_t /*index*/, const double value) const { return value; }
+};
+
 /** Get the X range of the given spectra.
  * @param workspace :: The workspace
  * @param workspaceIndices :: A range of the spectra to include
  * @param includeNonFiniteSpectra :: A spectrum with a non-finite first or last value contributes its finite values if
  * true, and is skipped if false
+ * @param convert :: Converts an X value of a spectrum, given its workspace index, to the unit the range is wanted in
  * @return The lowest and highest X values, or the largest and lowest doubles if no spectrum contributes
  */
-template <typename WorkspaceIndices>
+template <typename WorkspaceIndices, typename Convert = NoUnitConversion>
 std::pair<double, double> findXMinMax(const MatrixWorkspace &workspace, const WorkspaceIndices &workspaceIndices,
-                                      const bool includeNonFiniteSpectra) {
+                                      const bool includeNonFiniteSpectra, const Convert &convert = {}) {
   double xmin = std::numeric_limits<double>::max();
   double xmax = -1.0 * xmin;
   const auto isFinite = [](const double value) { return std::isfinite(value); };
 
   for (const auto workspaceIndex : workspaceIndices) {
-    const auto &xData = workspace.x(workspaceIndex);
+    const auto xData =
+        workspace.x(workspaceIndex) | std::views::transform([&](const double x) { return convert(workspaceIndex, x); });
     auto xfront = xData.front();
     auto xback = xData.back();
     if (!isFinite(xfront) || !isFinite(xback)) {
       if (!includeNonFiniteSpectra)
         continue;
-      const auto firstFinite = std::find_if(xData.cbegin(), xData.cend(), isFinite);
-      if (firstFinite == xData.cend())
+      const auto firstFinite = std::ranges::find_if(xData, isFinite);
+      if (firstFinite == xData.end())
         continue;
       xfront = *firstFinite;
-      xback = *std::find_if(xData.crbegin(), xData.crend(), isFinite);
+      const auto reversedXData = xData | std::views::reverse;
+      xback = *std::ranges::find_if(reversedXData, isFinite);
+    }
+    // Converting units can reverse the order of the X values, e.g. from TOF to energy
+    if constexpr (!std::is_same_v<Convert, NoUnitConversion>) {
+      if (xfront > xback)
+        std::swap(xfront, xback);
     }
     xmin = std::min(xmin, xfront);
     xmax = std::max(xmax, xback);
@@ -803,11 +825,33 @@ std::pair<double, double> MatrixWorkspace::getXMinMax() const {
  * @param workspaceIndices :: The spectra to include
  * @param includeNonFiniteSpectra :: A spectrum with a non-finite first or last value contributes its finite values if
  * true, and is skipped if false
+ * @param unitConverter :: Converts the X values to the unit to give the range in, if given. It must have been made
+ * for this workspace
  * @return The lowest and highest X values, or the largest and lowest doubles if no spectrum contributes
  */
 std::pair<double, double> MatrixWorkspace::getXMinMax(const std::vector<size_t> &workspaceIndices,
-                                                      const bool includeNonFiniteSpectra) const {
-  return findXMinMax(*this, workspaceIndices, includeNonFiniteSpectra);
+                                                      const bool includeNonFiniteSpectra,
+                                                      const SpectraUnitConverter *unitConverter) const {
+  if (!unitConverter || unitConverter->unit() == unitConverter->workspaceUnit())
+    return findXMinMax(*this, workspaceIndices, includeNonFiniteSpectra);
+  checkConverterIsForWorkspace(*unitConverter, *this);
+  const auto convert = [unitConverter](const size_t index, double x) {
+    unitConverter->fromWorkspaceUnit(index, std::span(&x, 1));
+    return x;
+  };
+  // Unlike reading X values, converting them is slow enough to be worth sharing between threads
+  std::vector<std::pair<double, double>> spectrumRanges(workspaceIndices.size());
+  PARALLEL_FOR_IF(this->threadSafe())
+  for (int64_t i = 0; i < static_cast<int64_t>(workspaceIndices.size()); ++i) {
+    spectrumRanges[i] = findXMinMax(*this, std::views::single(workspaceIndices[i]), includeNonFiniteSpectra, convert);
+  }
+  double xmin = std::numeric_limits<double>::max();
+  double xmax = -1.0 * xmin;
+  for (const auto &[spectrumMin, spectrumMax] : spectrumRanges) {
+    xmin = std::min(xmin, spectrumMin);
+    xmax = std::max(xmax, spectrumMax);
+  }
+  return {xmin, xmax};
 }
 
 /** Integrate all the spectra in the matrix workspace within the range given.
@@ -876,9 +920,38 @@ double MatrixWorkspace::integrateSpectrum(const size_t index, const double minX,
   return std::accumulate(yData.begin() + distmin, yData.begin() + distmax, 0.0, accumulate_if_finite);
 }
 
-std::vector<double> MatrixWorkspace::getIntegratedCountsForWorkspaceIndices(const std::vector<size_t> &workspaceIndices,
-                                                                            const double minX, const double maxX,
-                                                                            const bool entireRange) const {
+/** Integrate the given spectra within the range given. NaN and Infinite values are ignored.
+ * @param workspaceIndices :: The spectra to integrate
+ * @param minX :: The lower limit of the range, in the unit of unitConverter if given, else the X unit
+ * @param maxX :: The upper limit of the range, in the unit of unitConverter if given, else the X unit
+ * @param entireRange :: set to true to use the entire range. minX and maxX are then ignored!
+ * @param unitConverter :: Converts the limits to the X unit of each spectrum, if given. It must have been made for this
+ * workspace. Converting the limits rather than the workspace selects the same events, or bins, as integrating
+ * ConvertUnits' output. For a unit that reverses the order of the bins, e.g. energy, the bin straddling each limit can
+ * differ, as it is kept at the upper end of the range in the X unit rather than in the converter's unit. A spectrum
+ * whose limits cannot be converted integrates to 0.
+ * @return The integrated counts, in the order of workspaceIndices
+ */
+std::vector<double>
+MatrixWorkspace::getIntegratedCountsForWorkspaceIndices(const std::vector<size_t> &workspaceIndices, const double minX,
+                                                        const double maxX, const bool entireRange,
+                                                        const SpectraUnitConverter *unitConverter) const {
+  if (!entireRange && unitConverter && unitConverter->unit() != unitConverter->workspaceUnit()) {
+    checkConverterIsForWorkspace(*unitConverter, *this);
+    std::vector<double> detectorCounts(workspaceIndices.size(), 0.0);
+    PARALLEL_FOR_IF(this->threadSafe())
+    for (int i = 0; i < static_cast<int>(workspaceIndices.size()); ++i) {
+      std::array limits{minX, maxX};
+      unitConverter->toWorkspaceUnit(workspaceIndices[i], limits);
+      if (std::isnan(limits[0]) || std::isnan(limits[1]))
+        continue;
+      // Converting units can reverse the order of the limits, e.g. from energy to TOF
+      std::ranges::sort(limits);
+      detectorCounts[i] = integrateSpectrum(workspaceIndices[i], limits[0], limits[1], false);
+    }
+    return detectorCounts;
+  }
+
   std::vector<double> integratedSpectra;
   getIntegratedSpectra(integratedSpectra, minX, maxX, entireRange);
   std::vector<double> detectorCounts;

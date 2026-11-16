@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectraUnitConverter.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidHistogramData/HistogramDx.h"
@@ -441,10 +442,18 @@ void setSharedDxFromPyObject(MatrixWorkspace &self, const size_t wsIndex, const 
   self.setSharedDx(wsIndex, make_cow<Mantid::HistogramData::HistogramDx>(extractVectorFromPyObject(values)));
 }
 
+/// The unit converter given in Python, or null if there is none
+const SpectraUnitConverter *toUnitConverter(const boost::python::object &unitConverter) {
+  if (unitConverter.is_none())
+    return nullptr;
+  return &extract<const SpectraUnitConverter &>(unitConverter)();
+}
+
 std::vector<double> getIntegratedCountsForWorkspaceIndices(MatrixWorkspace &self,
                                                            const boost::python::object &workspaceIndices,
                                                            const size_t numberOfWorkspaces, const double minX,
-                                                           const double maxX, const bool entireRange) {
+                                                           const double maxX, const bool entireRange,
+                                                           const boost::python::object &unitConverter) {
 
   std::vector<size_t> sWorkspaceIndices(numberOfWorkspaces);
   if (NDArray::check(workspaceIndices)) {
@@ -455,12 +464,14 @@ std::vector<double> getIntegratedCountsForWorkspaceIndices(MatrixWorkspace &self
     converter.copyTo(sWorkspaceIndices);
   }
 
-  return self.getIntegratedCountsForWorkspaceIndices(sWorkspaceIndices, minX, maxX, entireRange);
+  return self.getIntegratedCountsForWorkspaceIndices(sWorkspaceIndices, minX, maxX, entireRange,
+                                                     toUnitConverter(unitConverter));
 }
 
 boost::python::tuple getXMinMaxForWorkspaceIndices(const MatrixWorkspace &self,
                                                    const boost::python::object &workspaceIndices,
-                                                   const bool includeNonFiniteSpectra) {
+                                                   const bool includeNonFiniteSpectra,
+                                                   const boost::python::object &unitConverter) {
   std::vector<size_t> sWorkspaceIndices;
   if (workspaceIndices.is_none()) {
     sWorkspaceIndices.resize(self.getNumberHistograms());
@@ -473,7 +484,7 @@ boost::python::tuple getXMinMaxForWorkspaceIndices(const MatrixWorkspace &self,
     sWorkspaceIndices = converter();
   }
 
-  const auto [xmin, xmax] = self.getXMinMax(sWorkspaceIndices, includeNonFiniteSpectra);
+  const auto [xmin, xmax] = self.getXMinMax(sWorkspaceIndices, includeNonFiniteSpectra, toUnitConverter(unitConverter));
   return make_tuple(xmin, xmax);
 }
 
@@ -865,14 +876,20 @@ void export_MatrixWorkspace() {
       .def("getSignalAtCoord", &getSignalAtCoord, args("self", "coords", "normalization"),
            "Return signal for array of coordinates")
       .def("getIntegratedCountsForWorkspaceIndices", &getIntegratedCountsForWorkspaceIndices,
-           args("self", "workspaceIndices", "numberOfWorkspaces", "minX", "maxX", "entireRange"),
-           "Return a vector with the integrated counts within the given range for the given workspace indices")
+           (arg("self"), arg("workspaceIndices"), arg("numberOfWorkspaces"), arg("minX"), arg("maxX"),
+            arg("entireRange"), arg("unitConverter") = boost::python::object()),
+           "Return a vector with the integrated counts within the given range for the given workspace indices. "
+           "minX and maxX are in the unit of unitConverter, a SpectraUnitConverter made for this workspace, if it is "
+           "given, and in the X unit otherwise. Rather than converting the workspace, they are converted to the X "
+           "unit of each spectrum. A spectrum they cannot be converted for integrates to 0.")
       .def("getXMinMax", &getXMinMaxForWorkspaceIndices,
-           (arg("self"), arg("workspaceIndices") = boost::python::object(), arg("includeNonFiniteSpectra") = false),
+           (arg("self"), arg("workspaceIndices") = boost::python::object(), arg("includeNonFiniteSpectra") = false,
+            arg("unitConverter") = boost::python::object()),
            "Return a tuple of the lowest and highest X values of the given workspace indices, or of all spectra if "
            "workspaceIndices is None. A spectrum with a non-finite first or last value contributes its finite values "
            "if includeNonFiniteSpectra is True, and is skipped otherwise. The lowest value is greater than the "
-           "highest if no spectrum contributes.")
+           "highest if no spectrum contributes. The values are in the unit of unitConverter, a SpectraUnitConverter "
+           "made for this workspace, if it is given, and in the X unit otherwise.")
       //-------------------------------------- Operators
       //-----------------------------------
       .def("equals", &Mantid::API::equals, args("self", "other", "tolerance"),

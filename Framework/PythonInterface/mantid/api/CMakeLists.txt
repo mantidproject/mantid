@@ -63,6 +63,7 @@ set(EXPORT_FILES
     src/Exports/Sample.cpp
     src/Exports/ScriptRepository.cpp
     src/Exports/ScriptRepositoryFactory.cpp
+    src/Exports/SpectraUnitConverter.cpp
     src/Exports/SpectrumInfo.cpp
     src/Exports/Run.cpp
     src/Exports/WorkspaceFactory.cpp

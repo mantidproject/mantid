@@ -13,8 +13,9 @@ from mantid.api import (
     AnalysisDataService,
     WorkspaceFactory,
     NumericAxis,
+    SpectraUnitConverter,
 )
-from mantid.simpleapi import CreateSampleWorkspace, Rebin, RebinRagged
+from mantid.simpleapi import ConvertUnits, CreateSampleWorkspace, Rebin, RebinRagged
 import numpy as np
 
 
@@ -633,6 +634,58 @@ class MatrixWorkspaceTest(unittest.TestCase):
         ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=2, XMin=0, XMax=100, BinWidth=10, StoreInADS=False)
         ragged = RebinRagged(InputWorkspace=ws, XMin=[0, 0, 0, 0], XMax=[100, 90, 80, 70], Delta=[10, 10, 10, 10], StoreInADS=False)
         self.assertEqual((0.0, 90.0), ragged.getXMinMax([1, 3]))
+
+    @staticmethod
+    def _off_beam_axis_indices(ws):
+        """The spectra away from the beam axis. ConvertUnits masks one on it rather than converting it to
+        d-spacing, and leaves its X values in TOF, while converting it to momentum transfer makes every X zero."""
+        spectrum_info = ws.spectrumInfo()
+        return [i for i in range(ws.getNumberHistograms()) if spectrum_info.twoTheta(i) > 0]
+
+    def test_getXMinMax_in_a_unit_matches_converting_the_workspace(self):
+        for ws_type in ("Histogram", "Event"):
+            ws = CreateSampleWorkspace(WorkspaceType=ws_type, NumBanks=1, BankPixelWidth=2, StoreInADS=False)
+            indices = self._off_beam_axis_indices(ws)
+            for unit in ("dSpacing", "Wavelength", "Energy", "MomentumTransfer"):
+                with self.subTest(ws_type=ws_type, unit=unit):
+                    converted = ConvertUnits(ws, Target=unit, StoreInADS=False)
+                    np.testing.assert_allclose(
+                        converted.getXMinMax(indices, includeNonFiniteSpectra=True),
+                        ws.getXMinMax(indices, includeNonFiniteSpectra=True, unitConverter=SpectraUnitConverter(ws, unit)),
+                        rtol=1e-10,
+                    )
+
+    def test_getIntegratedCountsForWorkspaceIndices_in_a_unit_matches_converting_the_workspace(self):
+        # Units that reverse the order of the bins only match for events, as the bin straddling a
+        # limit is kept at the upper end of the range, which converting the limits moves to the lower
+        all_units = ("dSpacing", "Wavelength", "Energy", "MomentumTransfer")
+        for ws_type, units in (("Histogram", all_units[:2]), ("Event", all_units)):
+            ws = CreateSampleWorkspace(WorkspaceType=ws_type, NumBanks=1, BankPixelWidth=2, StoreInADS=False)
+            indices = np.array(self._off_beam_axis_indices(ws))
+            for unit in units:
+                with self.subTest(ws_type=ws_type, unit=unit):
+                    converted = ConvertUnits(ws, Target=unit, StoreInADS=False)
+                    # Limits within the range of the data, but away from the bin edges of the first spectrum
+                    x_values = np.asarray(converted.x(int(indices[0])))
+                    x_min, x_max = np.quantile(x_values[np.isfinite(x_values)], [0.3137, 0.7071])
+                    expected = converted.getIntegratedCountsForWorkspaceIndices(indices, len(indices), x_min, x_max, False)
+                    unit_converter = SpectraUnitConverter(ws, unit)
+                    counts = ws.getIntegratedCountsForWorkspaceIndices(
+                        indices, len(indices), x_min, x_max, False, unitConverter=unit_converter
+                    )
+                    self.assertGreater(min(counts), 0)
+                    np.testing.assert_allclose(expected, counts, rtol=1e-10)
+
+    def test_SpectraUnitConverter_rejects_an_unknown_unit(self):
+        ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=1, StoreInADS=False)
+        with self.assertRaises(RuntimeError):
+            SpectraUnitConverter(ws, "NotAUnit")
+
+    def test_unit_converter_must_be_made_for_the_workspace(self):
+        ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=1, StoreInADS=False)
+        other = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=2, StoreInADS=False)
+        with self.assertRaises(ValueError):
+            ws.getIntegratedCountsForWorkspaceIndices([0], 1, 1.0, 2.0, False, unitConverter=SpectraUnitConverter(other, "Wavelength"))
 
     def test_hasMaskedBins(self):
         numBins = 10
