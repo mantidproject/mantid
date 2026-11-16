@@ -33,10 +33,7 @@ template <class T> struct not_finite {
   T first_argument_type;
   T second_argument_type;
 
-  constexpr bool operator()(const T &value, const T &ignored) const {
-    UNUSED_ARG(ignored);
-    return !std::isfinite(value);
-  };
+  constexpr bool operator()(const T &value, [[maybe_unused]] const T &ignored) const { return !std::isfinite(value); };
 };
 } // namespace
 
