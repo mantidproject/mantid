@@ -113,10 +113,6 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, [[maybe_unused]] const 
   const double scalex = getParameter("ScaleX");
   const double scaley = getParameter("ScaleY");
 
-  //-- NOTE: given that these components are never used as
-  //         one vector, there is no need to construct a
-  //         xValues
-
   // -- always working on a copy only
   IPeaksWorkspace_sptr pws = m_pws->clone();
 

@@ -370,12 +370,9 @@ void MDWSTransform::setQ3DDimensionsNames(MDWSDescription &TargWSDescription, Cn
   }
 }
 
-void MDWSTransform::setModQDimensionsNames(
-    [[maybe_unused]] MDWSDescription &TargWSDescription,
-    [[maybe_unused]] const std::string &QScaleRequested) const { // TODO: nothing meaningful has
-                                                                 // been done at the moment,
-                                                                 // should enable scaling if
-                                                                 // different coord transf modes?
+void MDWSTransform::setModQDimensionsNames([[maybe_unused]] MDWSDescription &TargWSDescription,
+                                           [[maybe_unused]] const std::string &QScaleRequested) const {
+  // TODO: nothing meaningful has been done at the moment, should enable scaling if different coord transf modes?
 }
 /** check if input vector is defined */
 bool MDWSTransform::v3DIsDefault(const std::vector<double> &vect, const std::string &message) const {

@@ -24,6 +24,7 @@
 #include <filesystem>
 #include <map>
 #include <memory>
+#include <tuple>
 #include <utility>
 
 using namespace Mantid;
@@ -324,10 +325,9 @@ public:
 
     {
       // Now getEvents in a const way then call addEvent()
-      const std::vector<MDLeanEvent<3>> &events2 = c.getConstEvents();
+      std::ignore = c.getConstEvents();
       TSM_ASSERT("Data is not flagged as modified because it was accessed as const",
                  !c.getISaveable()->isDataChanged());
-      (void)events2;
       c.addEvent(ev);
 
       TSM_ASSERT("Data is still not flagged as modified because it was "
@@ -352,8 +352,7 @@ public:
 
     {
       // Now getEvents in a non-const way then call addEvent()
-      std::vector<MDLeanEvent<3>> &events3 = c.getEvents();
-      (void)events3;
+      std::ignore = c.getEvents();
       c.addEvent(ev);
       TSM_ASSERT_EQUALS("Still 1002 events on file", c.getISaveable()->getFileSize(), 1002);
       TSM_ASSERT_EQUALS("And 1003 events in memory", c.getTotalDataSize(), 1003);
