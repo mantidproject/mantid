@@ -827,46 +827,53 @@ void MatrixWorkspace::getIntegratedSpectra(std::vector<double> &out, const doubl
                                            const bool entireRange) const {
   out.resize(this->getNumberHistograms(), 0.0);
 
-  // offset for histogram data, because the x axis is not the same size for histogram and point data.
-  const size_t histogramOffset = this->isHistogramData() ? 1 : 0;
-
   // Run in parallel if the implementation is threadsafe
   PARALLEL_FOR_IF(this->threadSafe())
   for (int wksp_index = 0; wksp_index < static_cast<int>(this->getNumberHistograms()); wksp_index++) {
-    // Get Handle to data
-    const Mantid::HistogramData::HistogramX &xData = this->x(wksp_index);
-    const auto &yData = this->y(wksp_index);
-    // If it is a 1D workspace, no need to integrate
-    if ((xData.size() <= 1 + histogramOffset) && (!yData.empty())) {
-      out[wksp_index] = yData[0];
-    } else {
-      // Iterators for limits - whole range by default
-      Mantid::MantidVec::const_iterator lowit, highit;
-      lowit = xData.begin();
-      highit = xData.end() - histogramOffset;
-
-      // But maybe we don't want the entire range?
-      if (!entireRange) {
-        // If the first element is lower that the xmin then search for new lowit
-        if ((*lowit) < minX)
-          lowit = std::lower_bound(xData.begin(), xData.end(), minX);
-        // If the last element is higher that the xmax then search for new highit
-        if (*(highit - 1 + histogramOffset) > maxX)
-          highit = std::upper_bound(lowit, xData.end(), maxX);
-      }
-
-      // Get the range for the y vector
-      Mantid::MantidVec::difference_type distmin = std::distance(xData.begin(), lowit);
-      Mantid::MantidVec::difference_type distmax = std::distance(xData.begin(), highit);
-      double sum(0.0);
-      if (distmin <= distmax) {
-        // Integrate
-        sum = std::accumulate(yData.begin() + distmin, yData.begin() + distmax, 0.0, accumulate_if_finite);
-      }
-      // Save it in the vector
-      out[wksp_index] = sum;
-    }
+    out[wksp_index] = integrateSpectrum(wksp_index, minX, maxX, entireRange);
   }
+}
+
+/** Integrate one spectrum within the range given. NaN and Infinite values are ignored.
+ * @param index :: The workspace index of the spectrum
+ * @param minX :: minimum X bin to use in integrating.
+ * @param maxX :: maximum X bin to use in integrating.
+ * @param entireRange :: set to true to use the entire range. minX and maxX are then ignored!
+ * @return The integrated counts
+ */
+double MatrixWorkspace::integrateSpectrum(const size_t index, const double minX, const double maxX,
+                                          const bool entireRange) const {
+  // offset for histogram data, because the x axis is not the same size for histogram and point data.
+  const size_t histogramOffset = this->isHistogramData() ? 1 : 0;
+
+  // Get Handle to data
+  const Mantid::HistogramData::HistogramX &xData = this->x(index);
+  const auto &yData = this->y(index);
+  // If it is a 1D workspace, no need to integrate
+  if ((xData.size() <= 1 + histogramOffset) && (!yData.empty()))
+    return yData[0];
+
+  // Iterators for limits - whole range by default
+  Mantid::MantidVec::const_iterator lowit, highit;
+  lowit = xData.begin();
+  highit = xData.end() - histogramOffset;
+
+  // But maybe we don't want the entire range?
+  if (!entireRange) {
+    // If the first element is lower that the xmin then search for new lowit
+    if ((*lowit) < minX)
+      lowit = std::lower_bound(xData.begin(), xData.end(), minX);
+    // If the last element is higher that the xmax then search for new highit
+    if (*(highit - 1 + histogramOffset) > maxX)
+      highit = std::upper_bound(lowit, xData.end(), maxX);
+  }
+
+  // Get the range for the y vector
+  Mantid::MantidVec::difference_type distmin = std::distance(xData.begin(), lowit);
+  Mantid::MantidVec::difference_type distmax = std::distance(xData.begin(), highit);
+  if (distmin > distmax)
+    return 0.0;
+  return std::accumulate(yData.begin() + distmin, yData.begin() + distmax, 0.0, accumulate_if_finite);
 }
 
 std::vector<double> MatrixWorkspace::getIntegratedCountsForWorkspaceIndices(const std::vector<size_t> &workspaceIndices,

@@ -571,6 +571,10 @@ protected:
 
   virtual ISpectrum &getSpectrumWithoutInvalidation(const size_t index) = 0;
 
+  /// Return the integrated counts of one spectrum within the given range
+  virtual double integrateSpectrum(const size_t index, const double minX, const double maxX,
+                                   const bool entireRange) const;
+
   void updateCachedDetectorGrouping(const size_t index) const override;
 
   /// A vector of pointers to the axes for this workspace

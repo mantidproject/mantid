@@ -719,32 +719,16 @@ void EventWorkspace::sortAll(EventSortType sortType, Mantid::API::Progress *prog
   tbb::parallel_for(tbb::blocked_range<size_t>(0, data.size(), grainsize), task);
 }
 
-/** Integrate all the spectra in the matrix workspace within the range given.
- * Default implementation, can be overridden by base classes if they know
- *something smarter!
- *
- * @param out :: returns the vector where there is one entry per spectrum in the
- *workspace. Same
- *            order as the workspace indices.
- * @param minX :: minimum X bin to use in integrating.
- * @param maxX :: maximum X bin to use in integrating.
- * @param entireRange :: set to true to use the entire range. minX and maxX are
- *then ignored!
+/** Integrate the events of one spectrum within the range given.
+ * @param index :: The workspace index of the spectrum
+ * @param minX :: minimum X value to use in integrating.
+ * @param maxX :: maximum X value to use in integrating.
+ * @param entireRange :: set to true to use the entire range. minX and maxX are then ignored!
+ * @return The integrated counts
  */
-void EventWorkspace::getIntegratedSpectra(std::vector<double> &out, const double minX, const double maxX,
-                                          const bool entireRange) const {
-  // Start with empty vector
-  out.resize(this->getNumberHistograms(), 0.0);
-
-  // We can run in parallel since there is no cross-reading of event lists
-  PARALLEL_FOR_NO_WSP_CHECK()
-  for (int wksp_index = 0; wksp_index < int(this->getNumberHistograms()); wksp_index++) {
-    // Get Handle to data
-    EventList const *el = this->data[wksp_index].get();
-
-    // Let the eventList do the integration
-    out[wksp_index] = el->integrate(minX, maxX, entireRange);
-  }
+double EventWorkspace::integrateSpectrum(const size_t index, const double minX, const double maxX,
+                                         const bool entireRange) const {
+  return this->data[index]->integrate(minX, maxX, entireRange);
 }
 
 } // namespace Mantid::DataObjects

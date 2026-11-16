@@ -153,11 +153,11 @@ public:
   // Sort all event lists. Uses a parallelized algorithm
   void sortAll(EventSortType sortType, Mantid::API::Progress *prog) const;
 
-  void getIntegratedSpectra(std::vector<double> &out, const double minX, const double maxX,
-                            const bool entireRange) const override;
   EventWorkspace &operator=(const EventWorkspace &other) = delete;
 
 protected:
+  double integrateSpectrum(const size_t index, const double minX, const double maxX,
+                           const bool entireRange) const override;
   /// Protected copy constructor. May be used by childs for cloning.
   EventWorkspace(const EventWorkspace &other);
 
