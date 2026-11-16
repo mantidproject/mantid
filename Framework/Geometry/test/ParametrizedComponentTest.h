@@ -7,7 +7,11 @@
 #pragma once
 
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
@@ -200,43 +204,46 @@ private:
   }
 
   Component *createSingleParameterizedComponent() {
-    m_parentComp = new Component("Parent", V3D(1, 1, 1));
-    m_paramMap = std::make_shared<ParameterMap>();
-
-    m_paramMap->add("string", m_parentComp, m_strName, m_strValue);
-    m_paramMap->add("double", m_parentComp, m_dblName, m_dblValue);
-    m_paramMap->add("V3D", m_parentComp, m_posName, m_posValue);
-    m_paramMap->add("Quat", m_parentComp, m_quatName, m_quatValue);
-
+    createParameterizedTree();
     ParameterMap_const_sptr const_pmap = std::dynamic_pointer_cast<const ParameterMap>(m_paramMap);
     return new Component(m_parentComp, const_pmap.get());
   }
 
+  /// An instrument holding Parent -> Child1 -> Child2, with a map attached to it. The parameters are written by
+  /// component index: on Parent the four base parameters, and on each child one string parameter of its own.
   void createParameterizedTree() {
-    m_parentComp = new Component("Parent", V3D(1, 1, 1));
+    m_instrument = std::make_shared<Instrument>("Instrument");
+    auto *const parent = new CompAssembly("Parent", m_instrument.get());
+    parent->setPos(V3D(1, 1, 1));
+    auto *const childOne = new CompAssembly("Child1", parent);
+    childOne->setPos(V3D(1, 2, 3));
+    m_childTwoComp = new Component("Child2", V3D(3, 2, 1), childOne);
+    childOne->add(m_childTwoComp);
+    m_parentComp = parent;
+    m_childOneComp = childOne;
+
     m_paramMap = std::make_shared<ParameterMap>();
-
-    m_paramMap->add("string", m_parentComp, m_strName, m_strValue);
-    m_paramMap->add("double", m_parentComp, m_dblName, m_dblValue);
-    m_paramMap->add("V3D", m_parentComp, m_posName, m_posValue);
-    m_paramMap->add("Quat", m_parentComp, m_quatName, m_quatValue);
-
-    m_childOneComp = new Component("Child1", V3D(1, 2, 3), m_parentComp);
-    m_paramMap->add("string", m_childOneComp, m_strName + "_child1", m_strValue + "_child1");
-    m_childTwoComp = new Component("Child2", V3D(3, 2, 1), m_childOneComp);
-    m_paramMap->add("string", m_childTwoComp, m_strName + "_child2", m_strValue + "_child2");
+    m_paramMap->setInstrument(m_instrument.get());
+    auto &componentInfo = m_paramMap->mutableComponentInfo();
+    auto const parentIndex = componentInfo.indexOf(m_parentComp);
+    componentInfo.addString(parentIndex, m_strName, m_strValue);
+    componentInfo.addDouble(parentIndex, m_dblName, m_dblValue);
+    componentInfo.addV3D(parentIndex, m_posName, m_posValue);
+    componentInfo.addQuat(parentIndex, m_quatName, m_quatValue);
+    componentInfo.addString(componentInfo.indexOf(m_childOneComp), m_strName + "_child1", m_strValue + "_child1");
+    componentInfo.addString(componentInfo.indexOf(m_childTwoComp), m_strName + "_child2", m_strValue + "_child2");
   }
 
+  /// The components are owned by the instrument
   void cleanUpComponent() {
-    delete m_parentComp;
+    m_paramMap.reset();
+    m_instrument.reset();
     m_parentComp = nullptr;
-    delete m_childOneComp;
     m_childOneComp = nullptr;
-    delete m_childTwoComp;
     m_childTwoComp = nullptr;
-    // delete m_paramMap;    m_paramMap = NULL;
   }
 
+  std::shared_ptr<Instrument> m_instrument;
   Component *m_parentComp, *m_childOneComp, *m_childTwoComp;
   ParameterMap_sptr m_paramMap;
 

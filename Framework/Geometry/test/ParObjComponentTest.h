@@ -6,7 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/CompAssembly.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"
@@ -236,22 +240,24 @@ public:
     // Check that getBoundingBox transforms input guess to Object coordinates
     // and
     // result back to ObjComponent
-    ObjComponent A("ocyl", createCappedCylinder());
-    A.setPos(10, 0, 0);
-    A.setRot(Quat(90.0, V3D(0, 0, 1)));
-    ParameterMap_sptr pmap(new ParameterMap());
-    pmap->addV3D(&A, "pos", V3D(11, 0, 0));
-    ObjComponent pA(&A, pmap.get());
+    // The cylinder sits at (10, 0, 0), rotated, and is then moved to (11, 0, 0) through ComponentInfo
+    auto const [instrument, pmap, A] = cylinderUnder(V3D(), Quat());
+    auto &componentInfo = pmap->mutableComponentInfo();
+    componentInfo.setPosition(componentInfo.indexOf(A), V3D(11, 0, 0));
+    ObjComponent pA(A, pmap.get());
 
     BoundingBox absoluteBox;
     pA.getBoundingBox(absoluteBox);
     TS_ASSERT_DELTA(absoluteBox.xMin(), 10.5, 1e-5);
     TS_ASSERT_DELTA(absoluteBox.xMax(), 11.5, 1e-5);
-    // Add a parent with a rotation of its own;
-    Component parent("parent", V3D(0, 10, 0), Quat(90.0, V3D(0, 1, 0)));
-    A.setParent(&parent);
-    // note that input values are ignored in this case as cached results used.
-    pA.getBoundingBox(absoluteBox);
+    // The same, under a parent with a rotation of its own. The move to (11, 0, 0) relative to the parent puts the
+    // cylinder at (0, 10, -11).
+    auto const [instrumentWithParent, pmapWithParent, AWithParent] =
+        cylinderUnder(V3D(0, 10, 0), Quat(90.0, V3D(0, 1, 0)));
+    auto &componentInfoWithParent = pmapWithParent->mutableComponentInfo();
+    componentInfoWithParent.setPosition(componentInfoWithParent.indexOf(AWithParent), V3D(0, 10, -11));
+    ObjComponent pAWithParent(AWithParent, pmapWithParent.get());
+    pAWithParent.getBoundingBox(absoluteBox);
     TS_ASSERT_DELTA(absoluteBox.zMax(), -10.5, 1e-08);
     TS_ASSERT_DELTA(absoluteBox.zMin(), -11.5, 1e-08);
   }
@@ -299,6 +305,27 @@ public:
   }
 
 private:
+  struct PlacedCylinder {
+    std::shared_ptr<Instrument> instrument;
+    ParameterMap_sptr pmap;
+    ObjComponent *component;
+  };
+  /// An instrument holding a capped cylinder at (10, 0, 0), rotated by 90 degrees about z, under a parent at
+  /// parentPos with rotation parentRot. The instrument owns the components and has a map attached to it.
+  PlacedCylinder cylinderUnder(const V3D &parentPos, const Quat &parentRot) {
+    auto instrument = std::make_shared<Instrument>("Instrument");
+    auto *const parent = new CompAssembly("parent", instrument.get());
+    parent->setPos(parentPos);
+    parent->setRot(parentRot);
+    auto *const cylinder = new ObjComponent("ocyl", createCappedCylinder(), parent);
+    parent->add(cylinder);
+    cylinder->setPos(10, 0, 0);
+    cylinder->setRot(Quat(90.0, V3D(0, 0, 1)));
+    auto pmap = std::make_shared<ParameterMap>();
+    pmap->setInstrument(instrument.get());
+    return {instrument, pmap, cylinder};
+  }
+
   std::shared_ptr<CSGObject> createCappedCylinder() {
     std::string C31 = "cx 0.5"; // cylinder x-axis radius 0.5
     std::string C32 = "px 1.2";

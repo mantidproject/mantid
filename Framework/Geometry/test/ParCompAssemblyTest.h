@@ -6,7 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
 #include <cmath>
@@ -76,7 +79,9 @@ public:
   }
 
   void testAdd() {
-    CompAssembly bank("BankName");
+    // The bank sits in an instrument, which owns it, so that the map can be attached
+    auto const instrument = std::make_shared<Instrument>("Instrument");
+    CompAssembly &bank = *new CompAssembly("BankName", instrument.get());
     Component *det1 = new Component("Det1Name");
     Component *det2 = new Component("Det2Name");
     Component *det3 = new Component("Det3Name");
@@ -87,6 +92,7 @@ public:
     bank.add(det3);
 
     ParameterMap_sptr pmap(new ParameterMap());
+    pmap->setInstrument(instrument.get());
     CompAssembly pbank(&bank, pmap.get()); // parametrized one
 
     TS_ASSERT_EQUALS(pbank.nelements(), 3);
@@ -98,7 +104,8 @@ public:
     det1->setName("ChangedName");
     TS_ASSERT_EQUALS(det1->getName(), det1copy->getName());
 
-    pmap->addV3D(det2, "pos", V3D(1, 1, 1));
+    auto &componentInfo = pmap->mutableComponentInfo();
+    componentInfo.setPosition(componentInfo.indexOf(det2), V3D(1, 1, 1));
     std::shared_ptr<IComponent> det2copy;
     TS_ASSERT_THROWS_NOTHING(det2copy = pbank[1]);
     TS_ASSERT_DIFFERS(det2->getPos(), det2copy->getPos());

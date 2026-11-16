@@ -202,7 +202,8 @@ public:
   }
 
   void test_add_string_with_spaces() {
-    ParameterMap pmap;
+    auto const pmapHolder = attachedMap();
+    auto &pmap = *pmapHolder;
     auto const comp = m_testInstrument.get();
     pmap.add("string", comp, "name", std::string("A B C"));
     auto value = pmap.get(comp, "name");
@@ -214,7 +215,8 @@ public:
     IComponent_sptr comp = m_testInstrument->getChild(0);
     const std::string name("TestName");
     const double value(5.1);
-    ParameterMap pmap;
+    auto const pmapHolder = attachedMap();
+    auto &pmap = *pmapHolder;
     TS_ASSERT_EQUALS(pmap.size(), 0);
     TSM_ASSERT("Newly created parameter map should be empty", pmap.empty())
     pmap.addDouble(comp.get(), name, value);
@@ -230,7 +232,8 @@ public:
     // Add a parameter for the first component of the instrument
     IComponent_sptr comp = m_testInstrument->getChild(0);
     const std::string name("TestName");
-    ParameterMap pmap;
+    auto const pmapHolder = attachedMap();
+    auto &pmap = *pmapHolder;
     pmap.addDouble(comp.get(), name, 5.1);
     TS_ASSERT_EQUALS(pmap.size(), 1);
     const double finalValue(10.1);
@@ -328,7 +331,8 @@ public:
   void test_Replacing_Existing_Parameter_On_A_Copy_Does_Not_Update_Original_Value_Using_AddPosition_Helper() {
     using namespace Mantid::Kernel;
 
-    ParameterMap pmap;
+    auto const pmapHolder = attachedMap();
+    auto &pmap = *pmapHolder;
     V3D origValue(1, 2, 3);
     pmap.addV3D(m_testInstrument.get(), ParameterMap::pos(), origValue);
 
@@ -350,7 +354,8 @@ public:
   void test_Replacing_Existing_Parameter_On_A_Copy_Does_Not_Update_Original_Value_Using_AddRotation_Helper() {
     using namespace Mantid::Kernel;
 
-    ParameterMap pmap;
+    auto const pmapHolder = attachedMap();
+    auto &pmap = *pmapHolder;
     Quat origValue(45.0, V3D(0, 0, 1));
     pmap.addQuat(m_testInstrument.get(), ParameterMap::rot(), origValue);
 
@@ -372,7 +377,8 @@ public:
   }
 
   void testMap_Contains_Newly_Added_Value_For_Correct_Component() {
-    ParameterMap pmap;
+    auto const pmapHolder = attachedMap();
+    auto &pmap = *pmapHolder;
     const std::string name("NewValue");
     pmap.addInt(m_testInstrument.get(), name, 1);
     TS_ASSERT_EQUALS(pmap.contains(m_testInstrument.get(), name), true);
@@ -381,7 +387,8 @@ public:
   }
 
   void testMap_Contains_Newly_Added_Value_For_Correct_Component_Of_Correct_Type() {
-    ParameterMap pmap;
+    auto const pmapHolder = attachedMap();
+    auto &pmap = *pmapHolder;
     const std::string name("MyValue");
     const std::string type(ParameterMap::pInt());
     const int value(1);
@@ -391,7 +398,8 @@ public:
   }
 
   void testMap_Contains_Parameter() {
-    ParameterMap pmap;
+    auto const pmapHolder = attachedMap();
+    auto &pmap = *pmapHolder;
     const std::string name("NewValue");
     pmap.addInt(m_testInstrument.get(), name, 1);
     auto param = pmap.get(m_testInstrument.get(), name);
@@ -405,7 +413,8 @@ public:
     IComponent_sptr parametrized = m_testInstrument->getChild(0);
     const std::string camelCase("TestCase");
     const double value(10.01);
-    ParameterMap pmap;
+    auto const pmapHolder = attachedMap();
+    auto &pmap = *pmapHolder;
     pmap.addDouble(parametrized.get(), camelCase, value);
     Parameter_sptr fetched = pmap.get(parametrized.get(), "TESTCASE");
     TSM_ASSERT("The parameter should be found by a case insensitive search", fetched);
@@ -415,7 +424,8 @@ public:
     // Attach 2 parameters to the instrument
     const std::string topLevel1("top1"), topLevel2("top2");
     const int value1(2), value2(3);
-    ParameterMap pmap;
+    auto const pmapHolder = attachedMap();
+    auto &pmap = *pmapHolder;
     pmap.addInt(m_testInstrument.get(), topLevel1, value1);
     pmap.addInt(m_testInstrument.get(), topLevel2, value2);
     // Ask for the parameter on a child
@@ -437,7 +447,8 @@ public:
   }
 
   void testClearByName_Only_Removes_Named_Parameter() {
-    ParameterMap pmap;
+    auto const pmapHolder = attachedMap();
+    auto &pmap = *pmapHolder;
     pmap.addDouble(m_testInstrument.get(), "first", 5.4);
     pmap.addDouble(m_testInstrument.get(), "second", 10.3);
     TS_ASSERT_EQUALS(pmap.size(), 2);
@@ -451,7 +462,8 @@ public:
   }
 
   void testClearByName_Only_Removes_Named_Parameter_for_Cmpt() {
-    ParameterMap pmap;
+    auto const pmapHolder = attachedMap();
+    auto &pmap = *pmapHolder;
     pmap.addDouble(m_testInstrument.get(), "first", 5.4);
     pmap.addDouble(m_testInstrument.get(), "second", 10.3);
     IComponent_sptr comp = m_testInstrument->getChild(0);
@@ -469,7 +481,8 @@ public:
   }
 
   void testClear_Results_In_Empty_Map() {
-    ParameterMap pmap;
+    auto const pmapHolder = attachedMap();
+    auto &pmap = *pmapHolder;
     pmap.addInt(m_testInstrument.get(), "P1", 1);
     pmap.addInt(m_testInstrument.get(), "P2", 2);
     TS_ASSERT_EQUALS(pmap.size(), 2);
@@ -481,13 +494,13 @@ public:
   void testClear_Keeps_Index_Domain_Shared_With_ComponentInfo() {
     ParameterMap pmap;
     const auto comp = m_testInstrument->getChild(0);
-    pmap.addInt(comp.get(), "P1", 1);
     auto [componentInfo, detectorInfo] = InstrumentVisitor::makeWrappers(*m_testInstrument, &pmap);
+    const auto index = componentInfo->indexOf(comp->getComponentID());
+    componentInfo->addInt(index, "P1", 1);
     pmap.clear();
     TS_ASSERT(pmap.empty());
 
     // A write by component index after clearing must still be visible through the component
-    const auto index = componentInfo->indexOf(comp->getComponentID());
     componentInfo->addInt(index, "P2", 2);
     const auto parameter = pmap.get(comp.get(), "P2");
     TS_ASSERT(parameter);
@@ -523,9 +536,10 @@ public:
     auto instrument = ComponentCreationHelper::createTestInstrumentCylindrical(1);
     instrument->setPhysicalInstrument(std::make_unique<Instrument>(*instrument));
     ParameterMap pmap;
-    pmap.addDouble(instrument.get(), "P", 1.5);
-    pmap.addInt(instrument->getChild(0).get(), "Q", 2);
     pmap.setInstrument(instrument.get());
+    auto &componentInfo = pmap.mutableComponentInfo();
+    componentInfo.addDouble(componentInfo.root(), "P", 1.5);
+    componentInfo.addInt(componentInfo.indexOf(instrument->getChild(0)->getComponentID()), "Q", 2);
 
     const auto &metadata = pmap.instrumentMetadata();
     TS_ASSERT(metadata.hasPhysicalInstrument());
@@ -533,7 +547,6 @@ public:
     for (size_t index = 0; index < physicalComponentInfo.size(); ++index) {
       TS_ASSERT(physicalComponentInfo.parameters(index).empty());
     }
-    const auto &componentInfo = pmap.componentInfo();
     TS_ASSERT_EQUALS(componentInfo.getNumberParameter(componentInfo.root(), "P", false), std::vector<double>{1.5});
   }
 
@@ -549,10 +562,18 @@ public:
     TS_ASSERT_EQUALS(entries[0].second->value<int>(), 3);
   }
 
-  void test_entries_of_a_detached_map_throw() {
+  void test_writing_to_a_detached_map_throws() {
     ParameterMap pmap;
-    pmap.addInt(m_testInstrument->getChild(0).get(), "P", 3);
+    TS_ASSERT_THROWS(pmap.addInt(m_testInstrument->getChild(0).get(), "P", 3), const std::logic_error &);
+    size_t const index = 0;
+    std::string const name("P"), value("3");
+    TS_ASSERT_THROWS(pmap.add(ParameterMap::pInt(), index, name, value), const std::logic_error &);
+    TS_ASSERT_THROWS(pmap.addFittingParameter(index, name, "Gaussian", value), const std::logic_error &);
+    TS_ASSERT(pmap.empty());
+  }
 
+  void test_entries_of_a_detached_map_throw() {
+    ParameterMap const pmap;
     TS_ASSERT_THROWS(pmap.entries(), const std::logic_error &);
   }
 
@@ -570,11 +591,9 @@ public:
   }
 
   void test_asString_names_components_of_an_attached_map() {
-    auto pmap = std::make_shared<ParameterMap>();
+    auto const pmap = attachedMap();
     const auto comp = m_testInstrument->getChild(0);
     pmap->addInt(comp.get(), "P", 5);
-    const Instrument parametrized(m_testInstrument, pmap);
-    pmap->setInstrument(m_testInstrument.get());
 
     TS_ASSERT_EQUALS(pmap->asString(), comp->getFullName() + ";int;P;5;visible:true|");
   }
@@ -583,7 +602,8 @@ public:
     // Add a parameter for the first component of the instrument
     IComponent_sptr comp = m_testInstrument->getChild(0);
     // Create the parameter map with a single boolean type.
-    ParameterMap pmap;
+    auto const pmapHolder = attachedMap();
+    auto &pmap = *pmapHolder;
     TS_ASSERT_EQUALS(pmap.size(), 0);
     pmap.addBool(comp.get(), "A", true);
     TS_ASSERT_EQUALS(pmap.size(), 1);
@@ -596,7 +616,8 @@ public:
     // Add a parameter for the first component of the instrument
     IComponent_sptr comp = m_testInstrument->getChild(0);
     // Create the parameter map and add some new parameters.
-    ParameterMap pmap;
+    auto const pmapHolder = attachedMap();
+    auto &pmap = *pmapHolder;
     TS_ASSERT_EQUALS(pmap.size(), 0);
     pmap.addDouble(comp.get(), "A", 1.2);
     pmap.addBool(comp.get(), "B", true);
@@ -619,7 +640,8 @@ public:
     IComponent_sptr component = m_testInstrument;
 
     // Add something to the parent component ONLY.
-    ParameterMap pmap;
+    auto const pmapHolder = attachedMap();
+    auto &pmap = *pmapHolder;
     pmap.addBool(component.get(), "A", true);
 
     // Find it via the component
@@ -635,7 +657,8 @@ public:
     IComponent_sptr parentComponent = m_testInstrument;
 
     // Add something to the parent component ONLY.
-    ParameterMap pmap;
+    auto const pmapHolder = attachedMap();
+    auto &pmap = *pmapHolder;
     pmap.addBool(parentComponent.get(), "A", true);
 
     // Find it via the child
@@ -651,7 +674,8 @@ public:
     IComponent_sptr parentComponent = m_testInstrument;
 
     // Add something to the child component.
-    ParameterMap pmap;
+    auto const pmapHolder = attachedMap();
+    auto &pmap = *pmapHolder;
     pmap.addBool(childComponent.get(), "A", false);
 
     // Add something with the SAME TYPE TO THE PARENT TOO.
@@ -671,7 +695,8 @@ public:
     // Add a parameter for the first component of the instrument with visible attribute
     IComponent_sptr comp = m_testInstrument->getChild(0);
     // Create the parameter map with a single boolean type.
-    ParameterMap pmap;
+    auto const pmapHolder = attachedMap();
+    auto &pmap = *pmapHolder;
     TS_ASSERT_EQUALS(pmap.size(), 0);
     std::string descr("Test description");
     pmap.addDouble(comp.get(), "A", 2.71, &descr, "false");
@@ -686,11 +711,13 @@ public:
     IComponent_sptr oldComp = m_testInstrument->getChild(0);
     IComponent_sptr newComp = m_testInstrument->getChild(1);
 
-    ParameterMap oldPMap;
+    auto const oldPMapHolder = attachedMap();
+    auto &oldPMap = *oldPMapHolder;
     oldPMap.addBool(oldComp.get(), "A", false);
     oldPMap.addDouble(oldComp.get(), "B", 1.2);
 
-    ParameterMap newPMap;
+    auto const newPMapHolder = attachedMap();
+    auto &newPMap = *newPMapHolder;
 
     TS_ASSERT_DIFFERS(oldPMap, newPMap);
 
@@ -711,7 +738,8 @@ public:
   }
 
   void test_asString_for_doubles() {
-    ParameterMap pmap;
+    auto const pmapHolder = attachedMap();
+    auto &pmap = *pmapHolder;
     auto comp = m_testInstrument.get();
     pmap.addDouble(comp, "d", 0.123456789012345);
     pmap.addV3D(comp, "v", Mantid::Kernel::V3D(0.123456789012345, 0.123456789012345, 0.123456789012345));
@@ -723,7 +751,8 @@ public:
     // Two functions on the same component declare a parameter with the same short name
     // (e.g. Bk2BkExpConvPV:Gamma and IkedaCarpenterPV:Gamma). addFittingParameter must
     // dedupe by (name, function), so both entries should coexist.
-    ParameterMap pmap;
+    auto const pmapHolder = attachedMap();
+    auto &pmap = *pmapHolder;
     IComponent_sptr comp = m_testInstrument->getChild(0);
     pmap.addFittingParameter(comp.get(), "Gamma", "Bk2BkExpConvPV", "1.5 , Bk2BkExpConvPV , Gamma");
     pmap.addFittingParameter(comp.get(), "Gamma", "IkedaCarpenterPV", "2.5 , IkedaCarpenterPV , Gamma");
@@ -746,7 +775,8 @@ public:
 
   void test_addFittingParameter_replaces_only_same_function_entry() {
     // A second add for the SAME (name, function) must replace, not duplicate.
-    ParameterMap pmap;
+    auto const pmapHolder = attachedMap();
+    auto &pmap = *pmapHolder;
     IComponent_sptr comp = m_testInstrument->getChild(0);
     pmap.addFittingParameter(comp.get(), "Gamma", "Bk2BkExpConvPV", "1.5 , Bk2BkExpConvPV , Gamma");
     pmap.addFittingParameter(comp.get(), "Gamma", "IkedaCarpenterPV", "2.5 , IkedaCarpenterPV , Gamma");
@@ -767,7 +797,8 @@ public:
 
   void test_getRecursiveFittingParameter_walks_up_component_tree() {
     // Parameter declared on the parent should be visible from a child component.
-    ParameterMap pmap;
+    auto const pmapHolder = attachedMap();
+    auto &pmap = *pmapHolder;
     IComponent_sptr parent = m_testInstrument; // the instrument itself
     IComponent_sptr child = m_testInstrument->getChild(0);
     pmap.addFittingParameter(parent.get(), "Gamma", "IkedaCarpenterPV", "3.3 , IkedaCarpenterPV , Gamma");
@@ -780,7 +811,8 @@ public:
   void test_getRecursive_still_finds_one_entry_after_addFittingParameter() {
     // Backwards-compat: callers that don't care which function the param belongs to should
     // still get a hit from the plain getRecursive("Gamma", "fitting") path.
-    ParameterMap pmap;
+    auto const pmapHolder = attachedMap();
+    auto &pmap = *pmapHolder;
     IComponent_sptr comp = m_testInstrument->getChild(0);
     pmap.addFittingParameter(comp.get(), "Gamma", "Bk2BkExpConvPV", "1.5 , Bk2BkExpConvPV , Gamma");
     pmap.addFittingParameter(comp.get(), "Gamma", "IkedaCarpenterPV", "2.5 , IkedaCarpenterPV , Gamma");
@@ -804,7 +836,8 @@ private:
   template <typename ValueType>
   void doCopyAndUpdateTestUsingGenericAdd(const std::string &type, const ValueType &origValue,
                                           const ValueType &newValue) {
-    ParameterMap pmap;
+    auto const pmapHolder = attachedMap();
+    auto &pmap = *pmapHolder;
     const std::string name = "Parameter";
     pmap.add<ValueType>(type, m_testInstrument.get(), name, origValue, nullptr);
 
@@ -825,7 +858,8 @@ private:
   template <typename FuncType, typename ValueType>
   void doCopyAndUpdateTestUsingAddHelpers(const FuncType &addFunc, const std::string &name, const ValueType &origValue,
                                           const ValueType &newValue) {
-    ParameterMap pmap;
+    auto const pmapHolder = attachedMap();
+    auto &pmap = *pmapHolder;
     addFunc(&pmap, m_testInstrument.get(), name, origValue, NULL, "true");
     ParameterMap copy(pmap); // invoke copy constructor
 
@@ -844,7 +878,8 @@ private:
   template <typename FuncType, typename ValueType>
   void doCopyAndUpdateTestUsingAddHelpersPositions(const FuncType &addFunc, const std::string &name,
                                                    const ValueType &origValue, const ValueType &newValue) {
-    ParameterMap pmap;
+    auto const pmapHolder = attachedMap();
+    auto &pmap = *pmapHolder;
     addFunc(&pmap, m_testInstrument.get(), name, origValue, NULL);
     ParameterMap copy(pmap); // invoke copy constructor
 
@@ -866,7 +901,8 @@ private:
     std::string origValue = boost::lexical_cast<std::string>(origTypedValue);
     std::string newValue = boost::lexical_cast<std::string>(newTypedValue);
 
-    ParameterMap pmap;
+    auto const pmapHolder = attachedMap();
+    auto &pmap = *pmapHolder;
     addFunc(&pmap, m_testInstrument.get(), name, origValue, NULL, "true");
 
     ParameterMap copy(pmap); // invoke copy constructor
@@ -890,7 +926,8 @@ public:
   }
 
   void test_getMemorySize_grows_with_parameters() {
-    ParameterMap pmap;
+    auto const pmapHolder = attachedMap();
+    auto &pmap = *pmapHolder;
     const size_t before = pmap.getMemorySize();
     auto comp = m_testInstrument->getChild(0);
     pmap.addDouble(comp.get(), "testparam", 3.14);
