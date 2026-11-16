@@ -35,7 +35,7 @@ class KafkaEventStreamDecoder;
 class MANTID_LIVEDATA_DLL KafkaEventListener : public API::LiveListener {
 public:
   KafkaEventListener();
-  ~KafkaEventListener() override = default;
+  ~KafkaEventListener() override;
 
   //----------------------------------------------------------------------
   // Static properties
@@ -68,7 +68,7 @@ public:
   bool dataReset() override;
 
 private:
-  std::unique_ptr<KafkaEventStreamDecoder> m_decoder = nullptr;
+  std::unique_ptr<KafkaEventStreamDecoder> m_decoder;
   std::string m_instrumentName;
 };
 

@@ -92,6 +92,8 @@ namespace Mantid::NexusGeometry {
 JSONInstrumentBuilder::JSONInstrumentBuilder(const std::string &jsonGeometry)
     : m_parser(std::make_unique<JSONGeometryParser>(jsonGeometry)) {}
 
+JSONInstrumentBuilder::~JSONInstrumentBuilder() = default;
+
 const std::vector<Chopper> &JSONInstrumentBuilder::choppers() const { return m_parser->choppers(); }
 
 Geometry::Instrument_const_uptr JSONInstrumentBuilder::buildGeometry() const {

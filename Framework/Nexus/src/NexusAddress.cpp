@@ -8,6 +8,7 @@
 #include "MantidNexus/NexusAddress.h"
 
 #include <filesystem>
+#include <ostream>
 #include <string>
 
 namespace Mantid::Nexus {

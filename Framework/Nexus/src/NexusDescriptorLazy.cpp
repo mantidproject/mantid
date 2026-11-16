@@ -19,6 +19,7 @@
 #include <cstring> // strcpy
 #include <filesystem>
 #include <map>
+#include <mutex>
 #include <stdexcept> // std::invalid_argument
 #include <unordered_set>
 #include <utility>
