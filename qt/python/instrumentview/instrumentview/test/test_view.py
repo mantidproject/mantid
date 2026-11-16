@@ -50,6 +50,9 @@ class TestFullInstrumentViewView(unittest.TestCase):
     def test_plotters_created(self):
         self._mock_plotter.assert_called_once()
 
+    def test_plotter_does_not_change_app_icon(self):
+        self.assertIs(self._mock_plotter.call_args.kwargs["update_app_icon"], False)
+
     def test_select_bank_tube_button_is_checkable(self):
         self.assertEqual(self._view._select_bank_tube.text(), "Select Bank/Tube")
         self.assertTrue(self._view._select_bank_tube.isCheckable())

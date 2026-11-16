@@ -55,7 +55,7 @@ class ReflectometryInstrumentViewView(QWidget):
             return
         self._initialised = True
 
-        self.main_plotter = BackgroundPlotter(show=False, menu_bar=False, toolbar=False, off_screen=False)
+        self.main_plotter = BackgroundPlotter(show=False, menu_bar=False, toolbar=False, off_screen=False, update_app_icon=False)
         self.layout().addWidget(self.main_plotter.app_window)
 
     def set_on_resize_callback(self, callback) -> None:
