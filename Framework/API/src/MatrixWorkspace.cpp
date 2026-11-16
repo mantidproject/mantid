@@ -1023,8 +1023,10 @@ MatrixWorkspace::getIntegratedCountsForWorkspaceIndices(const std::vector<size_t
         continue;
       // Converting units can reverse the order of the limits, e.g. from energy to TOF
       std::ranges::sort(limits);
-      limits[0] -= std::abs(limits[0]) * CONVERTED_LIMIT_TOLERANCE;
-      limits[1] += std::abs(limits[1]) * CONVERTED_LIMIT_TOLERANCE;
+      if (std::isfinite(limits[0]))
+        limits[0] -= std::abs(limits[0]) * CONVERTED_LIMIT_TOLERANCE;
+      if (std::isfinite(limits[1]))
+        limits[1] += std::abs(limits[1]) * CONVERTED_LIMIT_TOLERANCE;
       detectorCounts[i] = integrateSpectrum(index, limits[0], limits[1], false, binWidthConverter);
     }
     return detectorCounts;

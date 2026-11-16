@@ -230,6 +230,16 @@ public:
     }
   }
 
+  void testIntegratedCounts_in_another_unit_keeps_limits_that_convert_to_infinity() {
+    const auto tofWorkspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
+    const SpectraUnitConverter momentumTransferConverter(*tofWorkspace, "MomentumTransfer");
+    // A momentum transfer of 0 is an infinite TOF, beyond every bin. Widening both infinite limits would make the
+    // lower one NaN, which would integrate the whole spectrum instead.
+    const auto counts =
+        tofWorkspace->getIntegratedCountsForWorkspaceIndices({1}, 0.0, 0.0, false, &momentumTransferConverter);
+    TS_ASSERT_DELTA(counts[0], 0.0, 1e-10);
+  }
+
   void testIntegratedCounts_in_another_unit_rescales_a_distribution_by_its_bin_widths() {
     const auto tofWorkspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
     tofWorkspace->setDistribution(true);
