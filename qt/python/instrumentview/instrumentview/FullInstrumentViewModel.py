@@ -34,10 +34,26 @@ from mantid.simpleapi import (
 )
 from mantid.api import MatrixWorkspace, SpectraUnitConverter, WorkspaceUnitValidator
 from mantid.kernel import logger
+from contextlib import contextmanager
 from pathlib import Path
 import numpy as np
 from enum import Enum
 from typing import Optional
+
+
+@contextmanager
+def _read_locked(workspace):
+    """Hold a read lock on the workspace while its methods read it.
+
+    An algorithm locks the workspaces it reads and writes, but a workspace's own methods do not,
+    so without this an algorithm changing the workspace in place, e.g. live data adding events,
+    could change it while it is read.
+    """
+    workspace.readLock()
+    try:
+        yield
+    finally:
+        workspace.unlock()
 
 
 class PeakPickingStatus(Enum):
@@ -345,17 +361,22 @@ class FullInstrumentViewModel:
             self.full_counts_limits = self._counts_limits
             return
 
-        new_detector_counts = np.array(
-            self._workspace.getIntegratedCountsForWorkspaceIndices(
-                workspace_indices,
-                len(workspace_indices),
-                float(self.integration_limits[0]),
-                float(self.integration_limits[1]),
-                entire_range,
-                unitConverter=self._integration_unit_converter,
-            ),
-            dtype=int,
-        )
+        try:
+            with _read_locked(self._workspace):
+                integrated_counts = self._workspace.getIntegratedCountsForWorkspaceIndices(
+                    workspace_indices,
+                    len(workspace_indices),
+                    float(self.integration_limits[0]),
+                    float(self.integration_limits[1]),
+                    entire_range,
+                    unitConverter=self._integration_unit_converter,
+                )
+        except ValueError as e:
+            if self._integration_unit_converter is None:
+                raise
+            self._warn_unit_converter_out_of_date(e)
+            return
+        new_detector_counts = np.array(integrated_counts, dtype=int)
         self._counts_limits = (np.min(new_detector_counts), np.max(new_detector_counts))
         self.full_counts_limits = self._counts_limits
         self._counts[self.is_pickable] = new_detector_counts
@@ -376,8 +397,21 @@ class FullInstrumentViewModel:
 
     def _calculate_and_set_full_integration_range(self, valid_indices: np.ndarray) -> None:
         workspace_indices = self._workspace_indices[valid_indices]
-        self._integration_limits = self._extract_limits_from_workspace(self._workspace, workspace_indices, self._integration_unit_converter)
+        try:
+            limits = self._extract_limits_from_workspace(self._workspace, workspace_indices, self._integration_unit_converter)
+        except ValueError as e:
+            if self._integration_unit_converter is None:
+                raise
+            self._warn_unit_converter_out_of_date(e)
+            return
+        self._integration_limits = limits
         self.full_integration_limits = self._integration_limits
+
+    def _warn_unit_converter_out_of_date(self, error: ValueError) -> None:
+        """The workspace was changed in place after the integration unit converter was made for it,
+        e.g. converted to another unit. Nothing is updated until setting up again for the changed
+        workspace, which was queued when it was replaced, makes a new converter."""
+        logger.warning(f"{self._workspace.name()} has changed, so its counts are not updated until it is shown again: {error}")
 
     def _extract_limits_from_workspace(self, workspace, workspace_indices=None, unit_converter=None) -> tuple:
         if workspace_indices is not None and len(workspace_indices) == 0:
@@ -385,7 +419,8 @@ class FullInstrumentViewModel:
 
         # Converting units can turn an x value of zero into an infinite one, e.g. TOF into momentum
         # transfer, and neither the sliders nor the plot axes can take infinite limits.
-        x_min, x_max = workspace.getXMinMax(workspace_indices, includeNonFiniteSpectra=True, unitConverter=unit_converter)
+        with _read_locked(workspace):
+            x_min, x_max = workspace.getXMinMax(workspace_indices, includeNonFiniteSpectra=True, unitConverter=unit_converter)
         if x_min > x_max:
             return (0, 0)
         return (x_min, x_max)
@@ -442,7 +477,8 @@ class FullInstrumentViewModel:
         if not self.can_convert_units or unit == self.workspace_base_unit:
             return
         try:
-            self._integration_unit_converter = SpectraUnitConverter(self._workspace, unit, "Elastic")
+            with _read_locked(self._workspace):
+                self._integration_unit_converter = SpectraUnitConverter(self._workspace, unit, "Elastic")
         except (RuntimeError, ValueError) as e:
             logger.warning(f"Could not convert {self._workspace.name()} to {unit}, showing {self.workspace_base_unit} instead: {e}")
             self._units_failed_to_convert.add(unit)

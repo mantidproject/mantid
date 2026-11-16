@@ -881,7 +881,8 @@ void export_MatrixWorkspace() {
            "Return a vector with the integrated counts within the given range for the given workspace indices. "
            "minX and maxX are in the unit of unitConverter, a SpectraUnitConverter made for this workspace, if it is "
            "given, and in the X unit otherwise. Rather than converting the workspace, they are converted to the X "
-           "unit of each spectrum. A spectrum they cannot be converted for integrates to 0.")
+           "unit of each spectrum. A spectrum the converter cannot convert, which ConvertUnits would mask, integrates "
+           "to 0, even over the entire range.")
       .def("getXMinMax", &getXMinMaxForWorkspaceIndices,
            (arg("self"), arg("workspaceIndices") = boost::python::object(), arg("includeNonFiniteSpectra") = false,
             arg("unitConverter") = boost::python::object()),

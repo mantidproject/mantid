@@ -676,10 +676,48 @@ class MatrixWorkspaceTest(unittest.TestCase):
                     self.assertGreater(min(counts), 0)
                     np.testing.assert_allclose(expected, counts, rtol=1e-10)
 
+    def test_getIntegratedCountsForWorkspaceIndices_in_a_unit_over_its_full_range_includes_every_bin(self):
+        # Away from zero, so converting the ends of the range to TOF and back can round them inside the bins
+        ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=2, XMin=100.3, XMax=20000, BinWidth=199.7, StoreInADS=False)
+        for index in self._off_beam_axis_indices(ws):
+            entire_range = ws.getIntegratedCountsForWorkspaceIndices([index], 1, 0.0, 0.0, True)
+            for unit in ("dSpacing", "Wavelength", "Energy", "MomentumTransfer"):
+                with self.subTest(index=index, unit=unit):
+                    unit_converter = SpectraUnitConverter(ws, unit)
+                    x_min, x_max = ws.getXMinMax([index], unitConverter=unit_converter)
+                    counts = ws.getIntegratedCountsForWorkspaceIndices([index], 1, x_min, x_max, False, unitConverter=unit_converter)
+                    np.testing.assert_allclose(entire_range, counts, rtol=1e-10)
+
+    def test_getIntegratedCountsForWorkspaceIndices_in_a_unit_over_the_entire_range_matches_converting_the_workspace(self):
+        """Including the spectrum on the beam axis, which ConvertUnits masks rather than converting it to d-spacing."""
+        for ws_type in ("Histogram", "Event"):
+            ws = CreateSampleWorkspace(WorkspaceType=ws_type, NumBanks=1, BankPixelWidth=2, StoreInADS=False)
+            indices = list(range(ws.getNumberHistograms()))
+            for unit in ("dSpacing", "Wavelength", "Energy", "MomentumTransfer"):
+                with self.subTest(ws_type=ws_type, unit=unit):
+                    converted = ConvertUnits(ws, Target=unit, StoreInADS=False)
+                    expected = converted.getIntegratedCountsForWorkspaceIndices(indices, len(indices), 0.0, 0.0, True)
+                    counts = ws.getIntegratedCountsForWorkspaceIndices(
+                        indices, len(indices), 0.0, 0.0, True, unitConverter=SpectraUnitConverter(ws, unit)
+                    )
+                    np.testing.assert_allclose(expected, counts, rtol=1e-10)
+
     def test_SpectraUnitConverter_rejects_an_unknown_unit(self):
         ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=1, StoreInADS=False)
         with self.assertRaises(RuntimeError):
             SpectraUnitConverter(ws, "NotAUnit")
+
+    def test_SpectraUnitConverter_rejects_a_unit_its_energy_mode_cannot_convert_to(self):
+        ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=1, StoreInADS=False)
+        # Energy transfer needs direct or indirect geometry
+        with self.assertRaises(ValueError):
+            SpectraUnitConverter(ws, "DeltaE")
+
+    def test_unit_converter_must_be_made_for_the_same_workspace_not_one_like_it(self):
+        ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=1, StoreInADS=False)
+        other = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=1, StoreInADS=False)
+        with self.assertRaises(ValueError):
+            ws.getXMinMax(unitConverter=SpectraUnitConverter(other, "Wavelength"))
 
     def test_unit_converter_must_be_made_for_the_workspace(self):
         ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=1, StoreInADS=False)

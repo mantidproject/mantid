@@ -7,7 +7,9 @@ This is a Python binding to the C++ class Mantid::API::SpectraUnitConverter.
 It lets :py:obj:`~mantid.api.MatrixWorkspace` methods that take a ``unitConverter`` work with X values in another unit,
 much as if :ref:`ConvertUnits <algm-ConvertUnits>` had been run on the workspace first, but without converting or
 copying it. Only the values asked for are converted, using the geometry of each spectrum, which is looked up once when
-the converter is made. So a converter is worth keeping for as long as the workspace and unit stay the same.
+the converter is made. So a converter is worth keeping for as long as the workspace and unit stay the same, but must be
+made again if the workspace's instrument geometry changes. A workspace method given a converter made for any other
+workspace raises a ``ValueError``.
 
 .. testcode:: IntegrateInDSpacing
 

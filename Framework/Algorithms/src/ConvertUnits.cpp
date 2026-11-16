@@ -8,6 +8,7 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectraUnitConverter.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -375,16 +376,11 @@ MatrixWorkspace_sptr ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUni
   const std::string emodeStr = getProperty("EMode");
   DeltaEMode::Type emode = DeltaEMode::fromString(emodeStr);
 
-  double efixedProp = getProperty("Efixed");
-  if (efixedProp == EMPTY_DBL() && emode == DeltaEMode::Type::Direct) {
-    try {
-      efixedProp = inputWS->getEFixedGivenEMode(nullptr, emode);
-    } catch (std::runtime_error &) {
-    }
-  }
-
-  std::vector<std::string> parameters = inputWS->getInstrument()->getStringParameter("show-signed-theta");
-  bool signedTheta = (!parameters.empty()) && find(parameters.begin(), parameters.end(), "Always") != parameters.end();
+  // Shared with SpectraUnitConverter, so that it converts as this does
+  const double efixedProperty = getProperty("Efixed");
+  const auto efixedProp = unitConversionFixedEnergy(
+      *inputWS, emode, efixedProperty == EMPTY_DBL() ? std::nullopt : std::optional<double>(efixedProperty));
+  const bool signedTheta = unitConversionUsesSignedTwoTheta(*inputWS);
 
   auto checkFromUnit = std::unique_ptr<Unit>(fromUnit->clone());
   auto checkOutputUnit = std::unique_ptr<Unit>(outputUnit->clone());
@@ -392,8 +388,8 @@ MatrixWorkspace_sptr ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUni
   // Perform Sanity Validation before creating workspace
   const double checkdelta = 0.0;
   UnitParametersMap upmap = {{UnitParams::delta, checkdelta}};
-  if (efixedProp != EMPTY_DBL()) {
-    upmap[UnitParams::efixed] = efixedProp;
+  if (efixedProp) {
+    upmap[UnitParams::efixed] = *efixedProp;
   }
   size_t checkIndex = 0;
   spectrumInfo.getDetectorValues(*fromUnit, *outputUnit, emode, signedTheta, checkIndex, upmap);
@@ -417,8 +413,6 @@ MatrixWorkspace_sptr ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUni
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int64_t i = 0; i < numberOfSpectra_i; ++i) {
     PARALLEL_START_INTERRUPT_REGION
-    double efixed = efixedProp;
-
     // Now get the detector object for this histogram
     /// @todo Don't yet consider hold-off (delta)
     const double delta = 0.0;
@@ -428,8 +422,8 @@ MatrixWorkspace_sptr ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUni
 
     // TODO toTOF and fromTOF need to be reimplemented outside of kernel
     UnitParametersMap pmap = {{UnitParams::delta, delta}};
-    if (efixedProp != EMPTY_DBL()) {
-      pmap[UnitParams::efixed] = efixed;
+    if (efixedProp) {
+      pmap[UnitParams::efixed] = *efixedProp;
     }
     outSpectrumInfo.getDetectorValues(*fromUnit, *outputUnit, emode, signedTheta, i, pmap);
     try {
@@ -469,10 +463,10 @@ MatrixWorkspace_sptr ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUni
 
   if (emode == 1) {
     //... direct efixed gather
-    if (efixedProp != EMPTY_DBL()) {
+    if (efixedProp) {
       // set the Ei value in the run parameters
       API::Run &run = outputWS->mutableRun();
-      run.addProperty<double>("Ei", efixedProp, true);
+      run.addProperty<double>("Ei", *efixedProp, true);
     }
   }
 

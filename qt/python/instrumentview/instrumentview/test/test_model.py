@@ -146,6 +146,64 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         self.assertEqual(max(integrated_spectra), model._counts_limits[1])
         self.assertEqual(model._counts_limits, model.full_counts_limits)
 
+    def test_update_integration_range_reads_the_workspace_under_a_read_lock(self):
+        model, mock_workspace = self._setup_model([1, 2, 3])
+        calls = []
+        mock_workspace.readLock.side_effect = lambda: calls.append("readLock")
+        mock_workspace.unlock.side_effect = lambda: calls.append("unlock")
+        mock_workspace.getIntegratedCountsForWorkspaceIndices.side_effect = lambda *args, **kwargs: calls.append("integrate") or [1, 2, 3]
+
+        model.update_integration_range(False)
+
+        self.assertEqual(["readLock", "integrate", "unlock"], calls)
+
+    def test_limits_are_read_under_a_read_lock(self):
+        model, _ = self._setup_model([1, 2, 3])
+        workspace = MagicMock()
+        calls = []
+        workspace.readLock.side_effect = lambda: calls.append("readLock")
+        workspace.unlock.side_effect = lambda: calls.append("unlock")
+        workspace.getXMinMax.side_effect = lambda *args, **kwargs: calls.append("getXMinMax") or (1.0, 2.0)
+
+        model._extract_limits_from_workspace(workspace, np.array([0]))
+
+        self.assertEqual(["readLock", "getXMinMax", "unlock"], calls)
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.logger")
+    def test_counts_are_kept_when_the_unit_converter_no_longer_fits_the_workspace(self, mock_logger):
+        """The workspace was changed in place, e.g. to another unit, and setting up again is queued."""
+        model, mock_workspace = self._setup_model([1, 2, 3])
+        model._integration_unit_converter = MagicMock()
+        counts_before = model._counts.copy()
+        mock_workspace.getIntegratedCountsForWorkspaceIndices.side_effect = ValueError(
+            "The unit converter was made for a different workspace"
+        )
+
+        model.update_integration_range(False)
+
+        np.testing.assert_array_equal(counts_before, model._counts)
+        mock_logger.warning.assert_called_once()
+        mock_workspace.unlock.assert_called()
+
+    @mock.patch("instrumentview.FullInstrumentViewModel.logger")
+    def test_limits_are_kept_when_the_unit_converter_no_longer_fits_the_workspace(self, mock_logger):
+        model, mock_workspace = self._setup_model([1, 2, 3])
+        model._integration_unit_converter = MagicMock()
+        limits_before = model.full_integration_limits
+        mock_workspace.getXMinMax.side_effect = ValueError("The unit converter was made for a different workspace")
+
+        model._calculate_and_set_full_integration_range(model.is_pickable)
+
+        self.assertEqual(limits_before, model.full_integration_limits)
+        mock_logger.warning.assert_called_once()
+
+    def test_update_integration_range_raises_errors_not_from_a_unit_converter(self):
+        model, mock_workspace = self._setup_model([1, 2, 3])
+        mock_workspace.getIntegratedCountsForWorkspaceIndices.side_effect = ValueError("Something else")
+
+        with self.assertRaises(ValueError):
+            model.update_integration_range(False)
+
     @mock.patch("instrumentview.FullInstrumentViewModel.DetectorInfo")
     def test_picked_detectors_info_text(self, det_info_mock):
         model, mock_workspace = self._setup_model([1, 20, 300])

@@ -238,6 +238,67 @@ public:
                      const std::invalid_argument &);
   }
 
+  void testUnitConverter_is_rejected_by_another_workspace_of_the_same_shape_and_unit() {
+    const auto tofWorkspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
+    const auto otherWorkspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
+    const SpectraUnitConverter otherConverter(*otherWorkspace, "Wavelength");
+    TS_ASSERT(otherConverter.isFor(*otherWorkspace));
+    TS_ASSERT(!otherConverter.isFor(*tofWorkspace));
+    TS_ASSERT_THROWS(tofWorkspace->getIntegratedCountsForWorkspaceIndices({1}, 1.0, 2.0, false, &otherConverter),
+                     const std::invalid_argument &);
+    TS_ASSERT_THROWS(tofWorkspace->getXMinMax({1}, false, &otherConverter), const std::invalid_argument &);
+    // Even one leaving X values in the workspace unit
+    const SpectraUnitConverter otherTOFConverter(*otherWorkspace, "TOF");
+    TS_ASSERT_THROWS(tofWorkspace->getXMinMax({1}, false, &otherTOFConverter), const std::invalid_argument &);
+  }
+
+  void testUnitConverter_rejects_a_unit_its_energy_mode_cannot_convert_to() {
+    const auto tofWorkspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
+    // Energy transfer needs direct or indirect geometry, which ConvertUnits would fail on rather than mask spectra for
+    TS_ASSERT_THROWS(SpectraUnitConverter(*tofWorkspace, "DeltaE"), const std::invalid_argument &);
+  }
+
+  void testIntegratedCounts_in_another_unit_over_a_spectrums_full_range_includes_every_bin() {
+    const auto tofWorkspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
+    // Away from zero, so converting the ends of the range to TOF and back can round them inside the bins
+    tofWorkspace->setBinEdges(1, BinEdges(11, LinearGenerator(1000.3, 7.1)));
+    for (const std::string unit : {"Wavelength", "dSpacing", "MomentumTransfer", "Energy"}) {
+      const SpectraUnitConverter converter(*tofWorkspace, unit);
+      const auto [xmin, xmax] = tofWorkspace->getXMinMax({1}, false, &converter);
+      const auto counts = tofWorkspace->getIntegratedCountsForWorkspaceIndices({1}, xmin, xmax, false, &converter);
+      // 10 bins each with 2 counts
+      TSM_ASSERT_DELTA(unit.c_str(), counts[0], 20.0, 1e-10);
+    }
+  }
+
+  void testIntegratedCounts_in_another_unit_over_the_entire_range_is_zero_for_a_spectrum_it_cannot_convert() {
+    const auto tofWorkspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
+    const SpectraUnitConverter dSpacingConverter(*tofWorkspace, "dSpacing");
+    // Spectrum 0 is on the beam axis, so has no d-spacing, and ConvertUnits would mask it
+    TS_ASSERT(!dSpacingConverter.canConvert(0));
+    TS_ASSERT(dSpacingConverter.canConvert(1));
+    const auto counts =
+        tofWorkspace->getIntegratedCountsForWorkspaceIndices({0, 1}, 0.0, 0.0, true, &dSpacingConverter);
+    TS_ASSERT_EQUALS(counts, (std::vector<double>{0.0, 20.0}));
+  }
+
+  void testUnitConverter_converts_quickly_without_an_instrument() {
+    const auto wavelengthWorkspace = create2DWorkspaceBinned(1, 10, 1.0, 1.0);
+    wavelengthWorkspace->getAxis(0)->setUnit("Wavelength");
+    const SpectraUnitConverter energyConverter(*wavelengthWorkspace, "Energy");
+    TS_ASSERT(energyConverter.canConvert(0));
+    const auto toEnergy = [](const double wavelength) {
+      return UnitConversion::run("Wavelength", "Energy", wavelength, 0.0, 0.0, 0.0, DeltaEMode::Elastic, 0.0);
+    };
+    const auto [emin, emax] = wavelengthWorkspace->getXMinMax({0}, false, &energyConverter);
+    TS_ASSERT_DELTA(emin, toEnergy(11.0), 1e-10);
+    TS_ASSERT_DELTA(emax, toEnergy(1.0), 1e-10);
+    // 2.5 to 6.5 Angstrom takes the bins from 3 to 6 Angstrom and the one straddling 6.5, each with 2 counts
+    const auto counts = wavelengthWorkspace->getIntegratedCountsForWorkspaceIndices({0}, toEnergy(6.5), toEnergy(2.5),
+                                                                                    false, &energyConverter);
+    TS_ASSERT_DELTA(counts[0], 8.0, 1e-10);
+  }
+
   void test_generateHistogram() {
     Workspace2D_sptr ws = create2DWorkspaceBinned(2, 5);
     MantidVec X, Y, E;
