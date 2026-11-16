@@ -63,9 +63,7 @@ double RefAxis::operator()(const std::size_t &index, const std::size_t &vertical
  * @param index location for setting
  * @param value the value to set
  */
-void RefAxis::setValue(const std::size_t &index, const double &value) {
-  UNUSED_ARG(index);
-  UNUSED_ARG(value);
+void RefAxis::setValue([[maybe_unused]] const std::size_t &index, [[maybe_unused]] const double &value) {
   throw std::domain_error("This method cannot be used on a RefAxis.");
 }
 
@@ -86,13 +84,11 @@ bool RefAxis::operator==(const Axis &axis2) const {
  *  @param tolerance :: Tolerance to compare to
  *  @return true if self and second axis are equal
  */
-bool RefAxis::equalWithinTolerance(const Axis &axis2, const double tolerance) const {
-  UNUSED_ARG(tolerance);
+bool RefAxis::equalWithinTolerance(const Axis &axis2, [[maybe_unused]] const double tolerance) const {
   return this->operator==(axis2);
 }
 
-size_t RefAxis::indexOfValue(const double value) const {
-  UNUSED_ARG(value);
+size_t RefAxis::indexOfValue([[maybe_unused]] const double value) const {
   throw std::runtime_error("Calling indexOfValue() on RefAxis is forbidden.");
 }
 
