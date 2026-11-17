@@ -1671,6 +1671,26 @@ public:
     TS_ASSERT_DELTA(zmin, -3.0, 0.0001);
   }
 
+  void testGetBoundingBoxForTiltedHollowCylinder() {
+    // A tilted axis defeats the rule-based box, so this one comes from the shape's geometry, which used to
+    // leave hollow cylinders out and fall back to a 200 m box.
+    const std::string xml = "<hollow-cylinder id=\"can\">"
+                            "<centre-of-bottom-base x=\"0\" y=\"-0.02\" z=\"0\"/>"
+                            "<axis x=\"0\" y=\"1\" z=\"0\"/>"
+                            "<height val=\"0.04\"/>"
+                            "<inner-radius val=\"0.005\"/>"
+                            "<outer-radius val=\"0.006\"/>"
+                            "</hollow-cylinder>"
+                            "<rotate-all x=\"0\" y=\"0\" z=\"30\"/>";
+    const auto width = ShapeFactory().createShape(xml)->getBoundingBox().width();
+
+    // The axis turns to (-sin 30, cos 30, 0). Each extent is the axis's projection plus the outer rim's.
+    const double sin30 = 0.5, cos30 = std::sqrt(3.0) / 2;
+    TS_ASSERT_DELTA(width.X(), 0.04 * sin30 + 2 * 0.006 * cos30, 1e-6);
+    TS_ASSERT_DELTA(width.Y(), 0.04 * cos30 + 2 * 0.006 * sin30, 1e-6);
+    TS_ASSERT_DELTA(width.Z(), 2 * 0.006, 1e-6);
+  }
+
   void testGetBoundingBoxForCone() {
     // the XML axis points from the base to the tip, so the cone lies below its tip
     const auto cone = createCone();
