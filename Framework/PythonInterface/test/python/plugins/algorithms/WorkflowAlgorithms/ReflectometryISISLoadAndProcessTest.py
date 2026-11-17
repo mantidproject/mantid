@@ -636,7 +636,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args["NumberOfSlices"] = 2
         args["ProcessingInstructions"] = "4"
         outputs = self._expected_time_sliced_group_outputs
-        self._assert_run_algorithm_succeeds(args, outputs)
+        self._assert_run_algorithm_succeeds(args, outputs, True)
         history = ["ReflectometryReductionOneAuto", "ReflectometryReductionOneAuto", "ReflectometryReductionOneAuto", "GroupWorkspaces"]
         self._check_history(
             AnalysisDataService.retrieve("IvsQ_binned_TOF_38426_sliced_0_1800_2_TOF_38426_2_monitors_TOF_38426_sliced_1_0_1800"),
@@ -1429,12 +1429,14 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         for prop, val in property_values.items():
             self.assertEqual(child_hist.getPropertyValue(prop), val)
 
-    def _assert_run_algorithm_succeeds(self, args, expected=None):
+    def _assert_run_algorithm_succeeds(self, args, expected=None, expect_multi_output=False):
         """Run the algorithm with the given args and check it succeeds,
         and that the additional workspaces produced match the expected list.
         Clear these additional workspaces from the ADS"""
         alg = create_algorithm("ReflectometryISISLoadAndProcess", **args)
         assertRaisesNothing(self, alg.execute)
+        if expect_multi_output:
+            self.assertTrue(alg.getProperty("UsingMultiOutputs").value)
         actual = AnalysisDataService.getObjectNames()
         if expected is not None:
             self.assertEqual(set(actual), set(expected))

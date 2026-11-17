@@ -213,6 +213,7 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
             "OutputWorkspaces",
             "OutputWorkspacesWavelength",
             "OutputWorkspacesBinned",
+            "UsingMultiOutputs",
         ]
         child_props = set([prop.name for prop in child_alg.getProperties() if prop.name not in excluded])
         # Check the child properties exist in the parent algorithm
