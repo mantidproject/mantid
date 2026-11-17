@@ -24,7 +24,7 @@ integration is carried out using these path lengths over the volume
 elements.
 
 The output workspace will be a :py:obj:`WorkspaceGroup <mantid.api.WorkspaceGroup>`
-containing workpsace with the attenuation factors for :math:`A_{s,s}`,
+containing workspace with the attenuation factors for :math:`A_{s,s}`,
 :math:`A_{s,sc}`, :math:`A_{c,c}` and :math:`A_{c,sc}`. This output
 can be applied as the :literal:`CorrectionsWorkspace` input of
 :ref:`algm-ApplyPaalmanPingsCorrection`.

@@ -25,7 +25,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 - {ref}`PredictPeaks <algm-PredictPeaks>` (New)
 - FindUBUsingMinMaxD (Improved)
 
-## Other Noteable Features
+## Other Notable Features
 
 - Binary and Unary Algorithms for MDHistoWorkspaces(New)
 - Plotting for MDWorkspaces (New)

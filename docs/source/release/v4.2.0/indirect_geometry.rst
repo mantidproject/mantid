@@ -8,7 +8,7 @@ Improvements
 
 - Instrument definition is improved for IN16B to have the physical detector on the correct side of the beam axis, and different analyser focus for single detectors.
 - Able to choose a list of spectra for plotting for all Indirect Interfaces. For example, under Data Analysis>Elwin, entering 0-2,4,6-8 and clicking **Plot Spectra** will plot the workspace indices 0, 1, 2, 4, 6, 7 and 8. The same can be done for **Plot Tiled** on the Iqt tab. It is  also possible to produce a contour plot using **Plot Contour** on the Diffraction Interface.
-- Intial parameters now estimated when user adds an expononential function in I(Q,t) Fit.
+- Initial parameters now estimated when user adds an expononential function in I(Q,t) Fit.
 - The Plotting Options have also been made more consistent across the interface.
 
 .. figure:: ../../images/Indirect_Data_Analysis_IqtFit.PNG
@@ -39,7 +39,7 @@ Simulations Interface
 ---------------------
 
 - Improved the format of Abins HDF5 files to include readable set of advanced parameters. Values
-  in the AbinsParameters module have been re-organised into a logical heirarchy; user scripts
+  in the AbinsParameters module have been re-organised into a logical hierarchy; user scripts
   may need to be modified to match this.
 
 BugFixes

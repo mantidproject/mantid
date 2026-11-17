@@ -25,7 +25,7 @@ The home page hasn't had that many changes but things to note are the next and p
 
 [400px](https://www.mantidproject.org/index.php?title=Special:Upload&wpDestFile=MuonAnalysisGrouping.png)
 
-One of the major changes to this page is the fact that it is now synced to the home tab of MuonAnalysis. Feedback from users was that it was difficult to tell whether the workspace plotted was associated to the grouping options tab or the home tab because one may say Logorithms where the other tab says Counts. Mac users had a few issues loading and saving grouping files. This has now been fixed.
+One of the major changes to this page is the fact that it is now synced to the home tab of MuonAnalysis. Feedback from users was that it was difficult to tell whether the workspace plotted was associated to the grouping options tab or the home tab because one may say Logarithms where the other tab says Counts. Mac users had a few issues loading and saving grouping files. This has now been fixed.
 
 ## Settings
 

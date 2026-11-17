@@ -109,7 +109,7 @@ Usage
 -----
 
 This is a worksflow algorithm used to process and the results of
-powder diffraction scattering experimens on SNS
+powder diffraction scattering experiments on SNS
 instruments. Processing data from instruments not at SNS is
 unsupported. Sample usage can be found in the `system tests <https://github.com/mantidproject/mantid/blob/master/Testing/SystemTests/tests/analysis/SNSPowderRedux.py>`_.
 

@@ -9,7 +9,7 @@ DeltaFunction
 Description
 -----------
 
-DeltaFunction represets the Dirac delta function and can only be used with the :ref:`Convolution <func-Convolution>`:
+DeltaFunction represents the Dirac delta function and can only be used with the :ref:`Convolution <func-Convolution>`:
 
 .. math:: \int\limits_{A}^{B}R(x-\xi) \times \mbox{Height}\times \delta(\xi-\mbox{Centre}) \mbox{d}\xi = \mbox{Height} \times R(x-\mbox{Centre})
 

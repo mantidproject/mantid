@@ -21,6 +21,6 @@ MantidPlot with an open IPython window
 
 ## Redhat & Mac OS X
 
-- IPython is still available for the remaining platforms by follwing the instructions here
+- IPython is still available for the remaining platforms by following the instructions here
 
 - A future release will see these platforms also ship with IPython as standard.

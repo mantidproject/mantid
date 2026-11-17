@@ -151,7 +151,7 @@ Exercise 4
    def formatLine(cola, colb, width):
        return cola.center(width) + '|' + colb.center(width)
 
-   # A simple two cloumn print out
+   # A simple two column print out
    def outputStore(store):
        print('Phonebook contains {} entries:'.format(len(store)))
 

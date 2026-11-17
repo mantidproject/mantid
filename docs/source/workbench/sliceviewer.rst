@@ -71,7 +71,7 @@ been integrated.
 Adding or removing peaks
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Peaks can be added or removed from an overlayed peaks workspace by
+Peaks can be added or removed from an overlaid peaks workspace by
 selecting the desired peaks workspace from the drop down box (1) and
 selecting either ``Add Peaks`` or ``Remove Peaks`` (2), then clicking
 on the plot (3).
@@ -83,7 +83,7 @@ on the plot (3).
 
 When adding peaks the position selected with the mouse click and the
 sliders are used, along with the MD Frame (Q_lab, Q_sample, HKL) to
-create and add a peak to the seleceted peaks workspace. If units are
+create and add a peak to the selected peaks workspace. If units are
 HKL then the peaks workspace requires an orientated lattice to be
 defined on it, one can be copied from the data workspace with
 :ref:`CopySample <algm-CopySample>` or can be set with :ref:`SetUB

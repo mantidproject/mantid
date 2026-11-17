@@ -14,7 +14,7 @@ Load Instrument Breaking Change
 Algorithms
 ----------
 
-The usage of algoirthms is now tracked so we can get a better idea of
+The usage of algorithms is now tracked so we can get a better idea of
 which algorithms are used, and which are not. No personal information is
 stored alongside this, just a count of algorithm usages against the
 version of Mantid.

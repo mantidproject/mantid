@@ -56,7 +56,7 @@ Usage
   inside_dets = []
   # Collect separately all masked detector IDs and IDs of detectors
   # that are inside the cylinder defined by shapeXML
-  R2 = 0.04**2 # cylinder radius sqared
+  R2 = 0.04**2 # cylinder radius squared
   spectrum_info = ws.spectrumInfo()
   for i in range(ws.getNumberHistograms()):
     detid = ws.getSpectrum(i).getDetectorIDs()[0]

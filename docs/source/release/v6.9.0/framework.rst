@@ -69,7 +69,7 @@ New features
 
 Bugfixes
 ############
-- Fixed a deadlock that occured when using debug level logging and PythonStdoutChannel or PythonLoggingChannel.
+- Fixed a deadlock that occurred when using debug level logging and PythonStdoutChannel or PythonLoggingChannel.
 
 
 Dependencies

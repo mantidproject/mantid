@@ -10,7 +10,7 @@ New features
 - :ref:`RemovePromptPulse <algm-RemovePromptPulse>` now has options to specify the time range of the data. This can speed up workflows which already know the data range such as :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>`.
 - :ref:`ConvertDiffCal <algm-ConvertDiffCal>` and :ref:`CalculateDIFC <algm-CalculateDIFC>` now have the option to specify Offset Mode, by selecting `Signed` you can calculate the offset for logarithmically binned data.
 - :ref:`Rebin <algm-Rebin>` now has an optional parameter to explicitly set binning mode (linear/log/reverse log/power) regardless of binwidth sign or other properties set.  This can enforce a particular binning type, reducing inadvertent errors from errant binning mode specifications.
-- New ouput property `OutputScalingWorkspace` in algorithm :ref:`Stitch1D <algm-Stitch1D>` generates a WorkspaceSingleValue containing the scale factor and its error. No workspace creation if left empty.
+- New output property `OutputScalingWorkspace` in algorithm :ref:`Stitch1D <algm-Stitch1D>` generates a WorkspaceSingleValue containing the scale factor and its error. No workspace creation if left empty.
 - New algorithm :ref:`GenerateGoniometerIndependentBackground <algm-GenerateGoniometerIndependentBackground>` extract the background from a dataset where sample is rotated through multiple positions.
 
 Bugfixes

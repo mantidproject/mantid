@@ -466,7 +466,7 @@ and description for entries in the input json file is summarized in the followin
     * - StandardScaling
       - Whether or not to scale the input spectra by removing the mean and scaling to unit variance before clustering.
     * - WorkspaceIndexRange
-      - Range of workspace indeces to include in automatic grouping process.
+      - Range of workspace indices to include in automatic grouping process.
     * - FittingFunctionParameters
       - If ``ED`` method is to be used for calculating similarity between spectra, this specifies the peak parameters to fit and to be used as the coordinate components in parameter space.
     * - FitPeaksArgs

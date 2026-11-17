@@ -285,7 +285,7 @@ Example Input:
 packing_fraction
 ^^^^^^^^^^^^^^^^
 This is an alternative to using :ref:`number_density_effective_sampleDetails_isis-powder-diffraction-ref` to specify a powder_density.
-This value is a fraction between 0.0 and 1.0 and if supplied then number_density_effective is calculated by multipling packing_fraction by number_density
+This value is a fraction between 0.0 and 1.0 and if supplied then number_density_effective is calculated by multiplying packing_fraction by number_density
 
 Example Input:
 

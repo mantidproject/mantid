@@ -454,7 +454,7 @@ be performed. The possible values are "Relative" and "Absolute".
 
 This parameter is optional. The default value when :ref:`mode_polaris_isis-powder-diffraction-ref` ="Rietveld" is "Relative". The default value when mode="PDF" is "Absolute".
 
-If "Absolute" is selected then the measured intensity is multipled by the following additional factor to give a differential cross section (which is based on equation 8 in [#Howe]_):
+If "Absolute" is selected then the measured intensity is multiplied by the following additional factor to give a differential cross section (which is based on equation 8 in [#Howe]_):
 
 .. math::
 

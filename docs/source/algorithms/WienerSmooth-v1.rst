@@ -11,7 +11,7 @@ Description
 -----------
 
 This algorithm smooths the data in a workspace using the Wiener filter method.
-The fiter is a function which if convolved with an input minimizes the noise in the output.
+The filter is a function which if convolved with an input minimizes the noise in the output.
 
 .. math:: s_o(t) = \int_{-\infty}^\infty s_i(\tau) w(t-\tau) d\tau
 
@@ -21,7 +21,7 @@ WienerSmooth uses the power spectrum of the input signal :math:`s_i` to build th
 :math:`W(\nu)=\int_{-\infty}^\infty w(t)e^{-2\pi it\nu} dt`
 
 First the noise level is estimated from the higher frequencies of the power spectrum.
-Then the fiter function is constructed out of three pieces. The first piece is at the
+Then the filter function is constructed out of three pieces. The first piece is at the
 lower frequencies where the power spectrum is well above the noise. At this region the
 the filter function is calculated with the formula:
 

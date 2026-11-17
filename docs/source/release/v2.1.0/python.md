@@ -43,7 +43,7 @@ More details can be found in the [changes](http://download.mantidproject.org/doc
 
 ## Python algorithms exposed to new API
 
-In the previous release the new Python API was introduced but it was not possible to create Python algorithms with it. This functionality has now been implemented and brings to new API one step closer to being able to replace the old API in all situations. This will mean at some point it can be remvoed.
+In the previous release the new Python API was introduced but it was not possible to create Python algorithms with it. This functionality has now been implemented and brings to new API one step closer to being able to replace the old API in all situations. This will mean at some point it can be removed.
 
 A tutorial for creating a Python algorithm with the new API can be found here: Python Algorithms Documentation
 

@@ -68,7 +68,7 @@ Under 'Fit Function', you can view the selected model and associated parameters 
 
 There are two modes which can be used to select functions. The default version allows easy selection of the most commonly used function models. The options
 in this mode differ for each of the four fitting tabs so more detailed information is given in the specific sections below. The other mode, which may be switched to
-bu ticking the `See full function` box, displays the generic function browser in which any function model can be specified.
+by ticking the `See full function` box, displays the generic function browser in which any function model can be specified.
 
 Parameters may be tied by right-clicking on a parameter and selecting either 'Tie > To Function' to tie the parameter
 to a parameter of the same name in a different function, or by selecting 'Tie > Custom Tie' to tie to parameters of
@@ -119,7 +119,7 @@ The preview plots will display the curves for the selected spectrum ('Plot Spect
 The 'Plot Spectrum' option can be used to select the active/displayed spectrum.
 
 A button labelled 'Fit Single Spectrum' is found under the preview plots and can be used to perform a fit of the
-selected specturm.
+selected spectrum.
 
 'Plot Current Preview' can be used to plot the sample, fit, and difference curves of the selected spectrum in
 a separate plotting window.
@@ -185,7 +185,7 @@ this may be of interest.
 
 A sequential fit is run by clicking the Run button at the bottom of the tab, a
 single fit can be performed using the Fit Single Spectrum button underneath the
-preview plot. A simultaneous fit may be performed in a very similar fashion by changeing the Fit Type to Simultaneous
+preview plot. A simultaneous fit may be performed in a very similar fashion by changing the Fit Type to Simultaneous
 and the clicking run.
 
 The :ref:`Peters model <func-MsdPeters>` [1]_ reduces to a :ref:`Gaussian <func-MsdGauss>` at large

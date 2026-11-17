@@ -263,7 +263,7 @@ Colorfill Plots
 - Changing the figure options on tiled colorfill plots now applies to all the plots if there is only one colorbar.
 - Colorfill plots now correctly use the workspace name as the plot title.
 - ``Select image`` in figure options now contains each image, rather than each spectrum, for colorfil plots of workspaces with a numeric vertical axis.
-- Monitor only spectra can be plotted as a colorfill successfuly.
+- Monitor only spectra can be plotted as a colorfill successfully.
 - The y axis labels will now appear in the correct order if imshow is called from a script with origin=upper.
 - Fixed a bug with colorfill plot script generation for distribution workspaces.
 - Changing the normalisation and scale on colorfill plots now safely handles negative limits.

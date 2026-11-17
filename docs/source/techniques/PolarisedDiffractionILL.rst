@@ -8,7 +8,7 @@ Data reduction for D7 instrument at the ILL
 There are three workflow algorithms supporting data reduction at ILL's D7 polarised diffraction and spectroscopy instrument. These algorithms are:
 
 :ref:`algm-D7YIGPOsitionCalibration`
-    Performs wavelength and position calibraiton for D7 instrument banks and individual detectors in banks.
+    Performs wavelength and position calibration for D7 instrument banks and individual detectors in banks.
 
 :ref:`algm-PolDiffILLReduction`
     Performs data reduction, including all desired corrections, and produces the input for the following cross-section separation and normalisation.
@@ -383,7 +383,7 @@ taken into account.
 Background subtraction
 ----------------------
 
-Background subtraction is straight-forward in case of a diffraction experiment, where it is perfomed
+Background subtraction is straight-forward in case of a diffraction experiment, where it is performed
 in the way described in the Quartz reduction. However, in the case of Time-of-flight experiment, this approach is not sufficient. There, background
 is split into time-independent (:math:`B_{\mathrm{indep}}`) and time-dependent (:math:`B_{\mathrm{dep}}`) contributions. Time-independent contribution
 is calculated as an average of counts of the background source (either empty container or vanadium measurement itself) in time channels outside
@@ -617,7 +617,7 @@ the same number of entries as input data if `Individual` was selected. In the ca
 vanadium counts are integrated around the elastic peak position for each detector before normalisation
 to the expected cross-section.
 
-In case it is desireable to separate cross-sections, for example for diagnostic purposes, it can be done
+In case it is desirable to separate cross-sections, for example for diagnostic purposes, it can be done
 using the reduced data described as above using :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>`
 algorithm. More details on working with this algorithm are given in the sample normalisation section.
 

@@ -27,7 +27,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 
 ### Python Additions
 
-- First cut at calculating in-plane angles. Peformed entirely via a python wrapper class.
+- First cut at calculating in-plane angles. Performed entirely via a python wrapper class.
 - PeaksWorkspaces can be overplotted via python
 
 ```

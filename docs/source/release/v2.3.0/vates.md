@@ -32,7 +32,7 @@ Slices from simulation of MERLIN instrument resolution convolved with a Strontri
 
 - SaveMD crashes Mantid when saving large MD files
 - ConvertToMD loses information about grouping
-- ConvertToMD slow peformance
+- ConvertToMD slow performance
 - SliceMD not working on file-based Workspaces
 - SliceViewer not launchable from Vates Simple Interface
 - SliceViewer colour range incorrectly calculated

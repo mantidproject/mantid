@@ -307,7 +307,7 @@ The method takes the keyword arguments for :ref:`algm-PredictPeaks`
 and :ref:`algm-PredictFractionalPeaks` for ``PEAK_TYPE.PREDICT`` and ``PEAK_TYPE.PREDICT_SAT`` respectively.
 
 The integration algorithm called by ``integrate_data`` will integrate the peak table based on the ``PEAK_TYPE`` supplied
-using an agorithm determined by the `enum` class ``INTEGRATION_TYPE``:
+using an algorithm determined by the `enum` class ``INTEGRATION_TYPE``:
 
 - ``MD``
 - ``MD_OPTIMAL_RADIUS``

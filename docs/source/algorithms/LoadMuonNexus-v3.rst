@@ -13,7 +13,7 @@ The algorithm LoadMuonNexus will read a Muon Nexus data file and place
 the data into the named workspace. The file name can be an absolute or
 relative path and should have the extension .nxs or .NXS.
 
-v3 of this algoirthm acts as an algorithm selector. Given the input filename,
+v3 of this algorithm acts as an algorithm selector. Given the input filename,
 the confidence of the following loaders will be assessed and the loader with the
 highest confidence selected:
 

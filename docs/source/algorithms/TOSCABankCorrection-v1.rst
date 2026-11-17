@@ -27,7 +27,7 @@ A scale factor is then calculated for each bank that will align at least the
 selected peak and in doing so will also align the majority of misaligned peaks
 across the two banks.
 
-The sacling factor is calculated as follows:
+The scaling factor is calculated as follows:
 
 .. math::
 

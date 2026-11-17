@@ -26,7 +26,7 @@ The main types are:
 - **Raw Data**, which shows the spectra per detector
 - **Model Data**, which shows plots of the sample logs and fit parameter values. It also show fits to the data
 
-The plotting can be controlled through serveral options:
+The plotting can be controlled through several options:
 
 **Plot type** Changes the plot type (e.g from asymmetry to counts).
 

@@ -44,5 +44,5 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 
 ## Bugs Fixed
 
-- The absolute correction routine now conjoins spectra together without an unecessary check for an overlap in spectrum numbers.
+- The absolute correction routine now conjoins spectra together without an unnecessary check for an overlap in spectrum numbers.
 - The Fury routine now does the FFT on point data rather than histogram data before it is normalized by the integrated value.

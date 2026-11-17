@@ -108,7 +108,7 @@ use the negative of the TZero output value in further calculations.
 
     ws = Load("CNCS_7860_event.nxs", LoadMonitors=True)
     # Need monitor workspace, as main workspace does not.
-    # Energy estimate not manditory for SNS instruments
+    # Energy estimate not mandatory for SNS instruments
     vals = GetEi(ws[1])
     print("Calculated Incident Energy = {:.1f} meV".format(vals[0]))
     print("Time Zero = {:.10f} microseconds".format(-vals[3]))

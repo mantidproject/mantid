@@ -168,7 +168,7 @@ Mantid.
 
 Constraint
 ^^^^^^^^^^
-In future, constaint will be considered.
+In future, constraint will be considered.
 
 
 How to use algorithm with other algorithms

@@ -188,7 +188,7 @@ From here, the transformation to each run's sample orientation is exactly the sa
 On ENGINX, there are two main goniometers used - the Eulerian Cradle and the Cybaman. Extracting the state transformations for these two goniometers
 setups is done with different approaches, but should provide coverage for a broad range of additional setups.
 
-The general procedure for transfering these pieces of information onto the relevant workspaces is as follows. First define a "Reference Workspace" upon which the initial
+The general procedure for transferring these pieces of information onto the relevant workspaces is as follows. First define a "Reference Workspace" upon which the initial
 sample shape and orientation can be saved (along with any information on material which might be used for absorption correction). Next, load in all the run workspaces
 corresponding to this experiment. Load an orientation file to set the goniometer transformation on the individual workspaces. Finally, copy the sample definition across from the
 reference workspace to each of the run workspaces.
@@ -296,7 +296,7 @@ the transformation matrices from SscansS2 reference frame into mantid. In princi
    import matplotlib.pyplot as plt
    import numpy as np
 
-   # script to covert a file with flattened matrices that have been generated in sscanss (and
+   # script to convert a file with flattened matrices that have been generated in sscanss (and
    # thus us in the sscanss reference frame where beam = X, detector = Y, roof = Z) into a
    # matrix that is in the mantid reference frame
 
@@ -611,7 +611,7 @@ Additionally to fitting the peak, the table will also contain a numerical integr
    # otherwise set root directory here:
    root_dir = fr"path\to\User\{exp_name}"
 
-   # Next the folder contraining the workspaces you want to fit
+   # Next the folder containing the workspaces you want to fit
    file_folder = "Focus"
    # These are likely within a sub-folder specified by the detector grouping
    GROUP = get_instr_config(instr).group

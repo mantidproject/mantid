@@ -27,7 +27,7 @@ The phase table calculator provides an interface to generate a table of detector
 Phase Quad Calculator
 ^^^^^^^^^^^^^^^^^^^^^
 
-The phase quad calcuator use the :ref:`PhaseQuad <algm-PhaseQuad>` algorithm combine the signals from multiple detectors
+The phase quad calculator use the :ref:`PhaseQuad <algm-PhaseQuad>` algorithm combine the signals from multiple detectors
 into a quadrature phase signal.
 It will calculate the phasequad for all of the loaded runs using the selected phase table. If you are using co-added runs,
 the deadtime table is only taken from the first run during calculation.

@@ -90,7 +90,7 @@ Starting values of the peak function
 ====================================
 
 * Peak height is estimated by the maximum value, with background removed, inside the peak range;
-* Peak position can be set up either to the X value of the maximum Y value in the peak range, or to the value specified by user accordin to user's selection.  For example, in the case of calibrating the offsets of detectors of powder diffractometers, the peak positions are unknown.  Then it is better to use the X value with the maximum Y value as the starting peak centre.  While in the case of striping vanadium peaks, all peaks' centres should be exactly same as the theortical values.
+* Peak position can be set up either to the X value of the maximum Y value in the peak range, or to the value specified by user according to user's selection.  For example, in the case of calibrating the offsets of detectors of powder diffractometers, the peak positions are unknown.  Then it is better to use the X value with the maximum Y value as the starting peak centre.  While in the case of striping vanadium peaks, all peaks' centres should be exactly same as the theortical values.
 
 
 Criteria To Validate Peaks Found

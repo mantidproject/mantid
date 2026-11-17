@@ -16,7 +16,7 @@ Also there are some new algorithms to support calibration,
 
 ## An example calibration
 
-The following images show the effect of tube calibration on the MERLIN instrument from excuting the example TubeCalibDemoMerlin_Simple.py in Tube Calibration Examples.
+The following images show the effect of tube calibration on the MERLIN instrument from executing the example TubeCalibDemoMerlin_Simple.py in Tube Calibration Examples.
 
 ![3D view of calibration run with no calibration shown](../../images/2_3_release/TubecalibMERLINpic1.webp)
 

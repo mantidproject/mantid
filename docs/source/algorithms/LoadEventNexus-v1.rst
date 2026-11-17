@@ -77,7 +77,7 @@ This mode does take longer than running ``LoadEventNexus`` without compression,
 but reduces the overall memory used during algorithm execution, and memory used by the resulting workspace.
 For files that do not have many events, this does not necessarily have an effect other than slowing down loading.
 
-.. note:: The workspace created by ``LoadEventNexus`` with compression are different from those created by ``LoadEventNexus`` without compression then ``CompressedEvents``. The histogram representation will be near identical if the tolerence is selected appropriately.
+.. note:: The workspace created by ``LoadEventNexus`` with compression are different from those created by ``LoadEventNexus`` without compression then ``CompressedEvents``. The histogram representation will be near identical if the tolerance is selected appropriately.
 
 
 Veto Pulses

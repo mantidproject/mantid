@@ -9,7 +9,7 @@
 Description
 -----------
 
-Calcuates the derivative of the specta in a workspace using :ref:`algm-FFT`.
+Calculates the derivative of the specta in a workspace using :ref:`algm-FFT`.
 
 Usage
 -----

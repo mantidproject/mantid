@@ -19,7 +19,7 @@ user intervention.
 
 ISIS inelastic instruments descriptions have been modified to contain
 chopper location and other additional information necessary to calculate
-time, when chopper lets neutrons trough from appropriate chopper logs.
+time, when chopper lets neutrons through from appropriate chopper logs.
 
 `Re#14071 <https://github.com/mantidproject/mantid/issues/14071>`_
 :ref:`RenameWorkspace <algm-RenameWorkspace>` algorithm renames separate monitor workspace, if a

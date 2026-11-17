@@ -249,7 +249,7 @@ Output:
 
   1350, 1360
 
-**Example: Merge Workspace Combining Sample Logs with a Warnining if Different**
+**Example: Merge Workspace Combining Sample Logs with a Warning if Different**
 
 .. testcode:: MergeSampleLogs
 

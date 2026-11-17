@@ -90,7 +90,7 @@ Output:
         Target='Theta'
     )
 
-    # Verical cuts.
+    # Vertical cuts.
 
     tofs = numpy.arange(3000, 7000, 500)
     cutWSs = list()

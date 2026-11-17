@@ -66,7 +66,7 @@ Input and output workspaces
 - *InBckgroundParam* : input background parameters.
 
 
-- InputProfileWorkspace : table workspace contraining starting values of profile parameters;
+- InputProfileWorkspace : table workspace containing starting values of profile parameters;
 
 - InputBraggPeaksWorkspace : table workspace containing the Bragg peaks' information for Le Bail fit;
 

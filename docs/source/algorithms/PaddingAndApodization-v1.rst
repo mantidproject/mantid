@@ -12,7 +12,7 @@ Description
 This algorithm can prepare data for
   :ref:`FFT <algm-FFT>` by applying padding and/or applying an apodization function.
 
-Padding is when the input data is extended by adding extra measurments of zero at regular intervals. For real data this is only done after the end of the input data. However, for complex data the padding should be shared between the start and end of the input data.
+Padding is when the input data is extended by adding extra measurements of zero at regular intervals. For real data this is only done after the end of the input data. However, for complex data the padding should be shared between the start and end of the input data.
 
 `Apodization functions <http://mathworld.wolfram.com/ApodizationFunction.html>`_ can be used to remove data with large errors. These are usually
 found at large time scales. These take a decay constant

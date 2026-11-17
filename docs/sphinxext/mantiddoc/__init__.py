@@ -8,7 +8,7 @@
 
 def get_logger(name, app):
     """
-    Compatability layer between Sphinx v1.2 & latest
+    Compatibility layer between Sphinx v1.2 & latest
     to wrap changes in logging
     :param name: The name of the logger (unused in Sphinx < v2)
     :param app: The application object (unused in Sphinx > v2)

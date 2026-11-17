@@ -17,7 +17,7 @@ Examples of editors that include schema validation tools:
 - `Eclipse <http://www.eclipse.org>`__
 - `jEdit <http://www.jedit.org>`__
 - `Altova <http://www.altova.com/xmlspy/xml-schema-editor.html>`__
-- `Liquid Tehnologies <http://www.liquid-technologies.com/xml-schema-editor.aspx>`__
+- `Liquid Technologies <http://www.liquid-technologies.com/xml-schema-editor.aspx>`__
 - `Stylusstudio <http://www.stylusstudio.com/open_xsd_validation.html>`__
 
 Where an XML includes a link to an XML schema then simply open the XML file in

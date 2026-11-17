@@ -70,7 +70,7 @@ Limiting Spectra Calibrated
 
 Supplying ``StartWorkspaceIndex`` and/or ``StopWorkspaceIndex`` will limit the spectra that are fitted.
 Only those that are fitted will exist in the output table, ``OutputCalibrationTable``.
-:ref:`CombineDiffCal <algm-CombineDiffCal>` can accept input of partial instrument calibration as the ``GroupedCalibration`` and will copy all other values fom the ``PixelCalibration``.
+:ref:`CombineDiffCal <algm-CombineDiffCal>` can accept input of partial instrument calibration as the ``GroupedCalibration`` and will copy all other values from the ``PixelCalibration``.
 In this mode, the ``CalibrationWorkspace`` supplied to :ref:`CombineDiffCal <algm-CombineDiffCal>`  should still be the ``InputWorkspace`` supplied to ``PDCalibration``.
 
 Usage

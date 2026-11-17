@@ -207,7 +207,7 @@ This enables one to fit the functions with ``scipy.optimize.curve_fit``.
 Errors
 ------
 
-The errors assoicated with a given parameter can be accessed using the ``getError`` method.
+The errors associated with a given parameter can be accessed using the ``getError`` method.
 ``getError`` takes either the parameter name or index as input. For example to get the error
 on ``A1`` in the above polynomial, the code is:
 

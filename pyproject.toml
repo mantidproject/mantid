@@ -98,11 +98,14 @@ distance-dirty = "{base_version}.dev{distance}+uncommitted"
 
 [tool.codespell]
 # Ref: https://github.com/codespell-project/codespell#using-a-config-file
-# Checks are initially limited to dev-docs/ (see .github/workflows/codespell.yml
-# and .pre-commit-config.yaml); run locally as: codespell dev-docs
-skip = '.git,.git-meta,.gitattributes,.*cache,.venv,.tox,.eggs,*.egg-info,__pycache__,.pixi,./build,*.pdf,*.svg,*.png,*.jpg,*.lock,*.css,*.min.*,*-min.*,.npm'
+# Runs as a pre-commit hook, initially limited to dev-docs/ and docs/ (see
+# .pre-commit-config.yaml); run locally as: pre-commit run codespell --all-files
+skip = '.git,.git-meta,.gitattributes,.*cache,.venv,.tox,.eggs,*.egg-info,__pycache__,.pixi,./build,*.pdf,*.svg,*.png,*.jpg,*.lock,*.css,*.min.*,*-min.*,.npm,*/diagrams/*.xml,*/images/Workbench/*.xml'
 check-hidden = true
-# Ignore URLs, and camelCase and PascalCase identifiers (common in code)
-ignore-regex = 'https?://\S+|\b[a-z]+[A-Z]\w*\b|\b[A-Z][a-z]+[A-Z]\w*\b'
+# Ignore URLs, escaped newlines (e.g. "\nin" in graphviz labels), a person's name, the tthe row of the LoadDetectorInfo table, and camelCase and PascalCase identifiers (common in code)
+ignore-regex = 'https?://\S+|\\n|\bMial Lewis\b|\|\s+theta\s+\|\s+tthe\s+\|\s+tthe\s+\||\b[a-z]+[A-Z]\w*\b|\b[A-Z][a-z]+[A-Z]\w*\b'
 # nd: ND (normal direction) and number of dimensions; others are valid spellings
-ignore-words-list = 'nd,re-use,re-used,co-ordinate,pre-empts'
+# discus: DISCUS multiple scattering program; mot: SNS log names (BL3:Mot:...);
+# ser: "J. Phys.: Conf. Ser."; edn: edition; namd: NAMD software; ines: INES instrument;
+# delt, ths: field/metadata names; ontop: workbench setting value
+ignore-words-list = 'nd,re-use,re-used,co-ordinate,co-ordinates,pre-empts,precessing,discus,mot,ser,edn,namd,ines,delt,ths,ontop'

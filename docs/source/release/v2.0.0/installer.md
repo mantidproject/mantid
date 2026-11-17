@@ -16,7 +16,7 @@ Note: If you see "error code 2349" during installation, it is because you are no
 
 ### VATES Installer
 
-Please note the seperate (optional) VATES installer does not yet uninstall previous versions, so you still need to uninstall the last version first using the control panel.
+Please note the separate (optional) VATES installer does not yet uninstall previous versions, so you still need to uninstall the last version first using the control panel.
 
 ## Multiple RHEL6 versions at SNS and HFIR
 

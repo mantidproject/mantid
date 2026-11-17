@@ -39,7 +39,7 @@ The name of the axis is just used for plotting. z direction (0,0,1) is along the
 is pointing vertically upward, and the x direction (1,0,0) is in the horizontal plane, perpendicular to z.
 The **Sense** is either 1 for counterclockwise rotations, or -1 for clockwise rotation.
 The minimum, maximum, and step values for each goniometer axis describe all sample positions for which the
-trajectories calculation are made. If more than 10 orientations are selected, the user will be promted
+trajectories calculation are made. If more than 10 orientations are selected, the user will be prompted
 to proceed, since this might take longer.
 
 Sample settings

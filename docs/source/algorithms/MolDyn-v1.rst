@@ -9,7 +9,7 @@
 Description
 -----------
 
-This algorithm is used to load and process simualtion data from the nMOLDYN
+This algorithm is used to load and process simulation data from the nMOLDYN
 package.
 
 Currently this supports loading the ``.cdl`` and ``.dat`` files created by

@@ -48,7 +48,7 @@ The signal is modeled by the convolution of a resolution function
 with the elastic component of a rotator. The resolution is modeled as
 a normal distribution. We insert a random noise in the rotator. Finally,
 we choose a linear background noise. The goal is to find out the radius
-of the rotator and the overal intensity of the signal with a fit to the
+of the rotator and the overall intensity of the signal with a fit to the
 following model:
 
 :math:`S(Q,E) = R(Q,E) \otimes ElasticIsoRotDiff(Q,E) + (a+bE)`

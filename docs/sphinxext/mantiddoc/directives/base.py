@@ -244,7 +244,7 @@ class AlgorithmBaseDirective(BaseDirective):
 
     def create_mantid_ifunction(self, function_name):
         """
-        Create and initiializes a Mantid IFunction.
+        Create and initializes a Mantid IFunction.
 
         Args:
           function_name (str): The name of the function to use.

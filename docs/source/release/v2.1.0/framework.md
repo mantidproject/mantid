@@ -28,7 +28,7 @@ Have been improved to correctly account for the normalisation required when acco
 
 ## Mask Workspaces
 
-Mask workspaces are a workspace that purely describes the masking pattern for a set of data. These were introduced in the previous release, but their use and funcationality has been significantly increased in this release.
+Mask workspaces are a workspace that purely describes the masking pattern for a set of data. These were introduced in the previous release, but their use and functionality has been significantly increased in this release.
 
 - Instrument View Masking now saves masks using SaveMask
 - ExtrackMask will extract a MaskWorkspace from any other workspace
@@ -49,7 +49,7 @@ In a continued attempt to keep the naming of our algorithms sensible we have ren
 
 ## Multiple file loading and summing
 
-All load algorithms now support mutliple file loading and summing. So now you can enter several file to be either loaded seperately, or summed into one with a single call to the algorithm. Some examples of the syntax used are:
+All load algorithms now support multiple file loading and summing. So now you can enter several file to be either loaded separately, or summed into one with a single call to the algorithm. Some examples of the syntax used are:
 
 ```
 MAR17198 + 17199 + 17240

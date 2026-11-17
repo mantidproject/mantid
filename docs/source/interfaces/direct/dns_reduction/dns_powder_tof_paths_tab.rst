@@ -38,4 +38,4 @@ the file named ``last_filelist.txt``. In order to clean up the cache, click on t
 
 Whenever the user operates regularly with the same set of input/output directories, it might be convenient to save the corresponding
 configuration of input/output folders to an ``.xml`` file. This can be done by clicking on the "File" → "Save As" buttons in the top
-left corner of the GUI. After the configuration has been saved, it can simply be loaded by chosing "File" → "Open" → ``config_filename.xml``.
+left corner of the GUI. After the configuration has been saved, it can simply be loaded by choosing "File" → "Open" → ``config_filename.xml``.

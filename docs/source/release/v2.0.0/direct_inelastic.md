@@ -15,7 +15,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 
 - In this release the diagnostics routines have been updated to match the output of the libisis software.
 
-- As a result of this there is now greater control over the parameters used in the diag process. The help describes these paramters:
+- As a result of this there is now greater control over the parameters used in the diag process. The help describes these parameters:
 
 ```
 diagnose(self, white, **kwargs) unbound DirectEnergyConversion.DirectEnergyConversion method

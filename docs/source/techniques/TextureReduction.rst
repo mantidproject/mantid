@@ -34,17 +34,17 @@ your own data, but will not explain in detail what each option entails, for this
 Step 0: Initial Set Up
 ======================
 
-To follow along with example data you will require the `Training Course Data <https://sourceforge.net/projects/mantid/files/Sample%20Data/TrainingCourseData.zip/download>`_ with the revelant files to be found within the texture folder.
+To follow along with example data you will require the `Training Course Data <https://sourceforge.net/projects/mantid/files/Sample%20Data/TrainingCourseData.zip/download>`_ with the relevant files to be found within the texture folder.
 
 If you would like to follow along with all the below steps using your own experimental data you will require the following data/experimental information:
 
-#. Raw Diffraction Data for each experimental run (this would ideally be nexus files or, if data search directories and priviledges are setup correctly, just the run numbers may suffice)
+#. Raw Diffraction Data for each experimental run (this would ideally be nexus files or, if data search directories and privileges are setup correctly, just the run numbers may suffice)
 #. Calibration Run Data files, for ENGINX this is a Ceria run for diffraction parameter calibration and a vanadium run for intensity normalisation (see :ref:`interface documentation<Engineering_Diffraction-ref>` for more information)
 #. Sample Shape information, either as an ``STL`` file that you have created/obtained already or as a Constructive Solid Geometry shape definition ``XML`` string (see :ref:`HowToDefineGeometricShape` for more info)
 #. Sample Material Information, this is solely for attenuation correction and so the accuracy of the information will be determined by the accuracy required by your experiment (see :py:obj:`Material <mantid.kernel.Material>` for more info)
 #. Correct definition of the Sample Shape in its initial state when the goniometer is homed/default (this would ideally be how the sample shape information is provided above, but the shape definition could be defined in a different orientation and transformed to the initial state if necessary)
 #. Orientation Information for each experimental run, either provided as transformation matrices or euler angles (if using euler angles you must know the axes of rotation for the goniometer and the sense of these rotations - *take care to get this correct*)
-#. Sample Directions relative to sample shape (texture can be defined relative to intrinsic directions of the sample, for example the Rolling, Normal and Tranverse Directions)
+#. Sample Directions relative to sample shape (texture can be defined relative to intrinsic directions of the sample, for example the Rolling, Normal and Transverse Directions)
 #. The Shape of the experimental Gauge Volume
 #. The Beam Diveregence Parameters
 #. Crystal Structure either as lattice definition (see :ref:`Crystal structure and reflections`) or a ``CIF`` file

@@ -28,11 +28,11 @@ The headers are:
 
 **Group Name** The name of the group (this cannot be edited).
 
-**Periods** A list of the periods to add together. Can be seperated by commas or a dash for an inclusive range.
+**Periods** A list of the periods to add together. Can be separated by commas or a dash for an inclusive range.
 
 **Analyse (plot/fit)** Whether the selected group is included in the transform (if available) plot and fitting.
 
-**Detector ID's** The detectors contained within the group. Can be seperated by commas or a dash for an inclusive range.
+**Detector ID's** The detectors contained within the group. Can be separated by commas or a dash for an inclusive range.
 
 **N Detectors** The total number of detectors in the group (this cannot be edited directly).
 
@@ -56,7 +56,7 @@ The headers are:
 
 **Pair Name** The name of the pair (This cannot be edited).
 
-**Analyse (plot/fit)** Whether the selected pair is included in the transform (when avialable), plot and fitting.
+**Analyse (plot/fit)** Whether the selected pair is included in the transform (when available), plot and fitting.
 
 **Group 1** The group to be used as forward in :ref:`MuonPairingAsymmetry <algm-MuonPairingAsymmetry>`.
 
@@ -80,7 +80,7 @@ The headers are:
 
 **Diff Name** The name of the difference (This cannot be edited).
 
-**Analyse (plot/fit)** Whether the selected difference is included in the transform (when avialable), plot and fitting.
+**Analyse (plot/fit)** Whether the selected difference is included in the transform (when available), plot and fitting.
 
 **Group 1** The group/pair to be used as the left hand side of the difference.
 

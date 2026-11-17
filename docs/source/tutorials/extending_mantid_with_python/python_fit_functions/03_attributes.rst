@@ -59,7 +59,7 @@ of a Function Attribute Validator. Such a validator must derive from the ``IVali
 abstract class; a number of these are currently provided in the Mantid Kernel such as:
 - List Validator (attribute value must be specified from a provided list of values).
 - Bounded Validator (numeric attribute value must be between two provided bounds).
-- String contrains validator (string attribute value must contain a provided sub-string/s)
+- String contains validator (string attribute value must contain a provided sub-string/s)
 
 In python, attributes can be declared with a validator using the following syntax:
 

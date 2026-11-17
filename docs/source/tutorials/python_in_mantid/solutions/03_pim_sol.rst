@@ -33,7 +33,7 @@ A - Direct Matplotlib with SNS Data
     # Plot the 9th spectrum with errorbars
     axes.errorbar(run, specNum=9, capsize=2.0, color='blue', label='Peak of Interest', linewidth=1.0)
 
-    # Set the X-axis limts and the Y-axis scale
+    # Set the X-axis limits and the Y-axis scale
     axes.set_xlim(-1.5, 1.8)
     plt.yscale('log')
 

@@ -21,7 +21,7 @@ Workspace History Window
    :class: screenshot
    :align: right
 
-- Algorithm proprties with long values are now shown in a shortened format both in this display and the log.  The full history is still retained, and generated python scripts will still work as before.
+- Algorithm properties with long values are now shown in a shortened format both in this display and the log.  The full history is still retained, and generated python scripts will still work as before.
 
 Custom Interfaces
 #################

@@ -146,7 +146,7 @@ The following Python script generate a synthetic data set (instrument and sample
         )
         return ws
 
-    # use Mutliple scattering correction
+    # use Multiple scattering correction
     def correction_multiple_scattering(sample_ws, unit="Wavelength"):
         ConvertUnits(InputWorkspace=sample_ws,
                     OutputWorkspace=sample_ws,

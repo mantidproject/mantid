@@ -89,7 +89,7 @@ Plotting these weights for the first spectrum results in the following graph:
    :alt: Multiple_Scattering_for_Spectrum_1.png
 
 From this figure, it appears that the weights for 3 scattering events are practically zero, and negligible in comparison with the other 2 terms.
-We could then assume only 2 scattering events in the computation of succesive multiple scattering corrections to reduce computation time.
+We could then assume only 2 scattering events in the computation of successive multiple scattering corrections to reduce computation time.
 Additionally, we can find in the output group workspace the ratio of all scattering events to a single scattering (as well as its inverse curve).
 
 .. figure:: ../images/Ratio_All_To_Single.png

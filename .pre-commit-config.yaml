@@ -118,5 +118,5 @@ repos:
     rev: v2.4.3
     hooks:
       - id: codespell
-        # Initially limited to dev-docs/; extend as other areas get fixed
-        files: ^dev-docs/
+        # Initially limited to documentation; extend as other areas get fixed
+        files: ^(dev-docs|docs)/

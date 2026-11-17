@@ -55,7 +55,7 @@ Usage
     peak3 = "name=BackToBackExponential,I=5000,A=0.05,B=0.025,X0=35000,S=100"
     bg = "name=FlatBackground,A0=20"
 
-    # Create workpsace with the above peaks and a single detector pixel
+    # Create workspace with the above peaks and a single detector pixel
     ws = CreateSampleWorkspace(Function="User Defined",
                               UserDefinedFunction=";".join([peak1, peak2, peak3, bg]),
                               NumBanks=1,

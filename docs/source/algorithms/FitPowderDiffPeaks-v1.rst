@@ -12,7 +12,7 @@ Description
 This algorithm fits a certain set of single diffraction peaks in a powder
 diffraction pattern.
 
-The assumption is that all the peaks in the diffraction patter can be described by a single peak type.
+The assumption is that all the peaks in the diffraction pattern can be described by a single peak type.
 A specific peak parameter will have its values plotted by an analytical function among all the peaks.
 
 It serves as the first step to fit/refine instrumental parameters that

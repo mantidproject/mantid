@@ -12,7 +12,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 
 ![IDA bug](../../images/2_3_release/IDA_bug.webp)
 
-- "Calibration" in Convert To Energy Transfer inteface wanted the background to be taken over the whole range instead of users being able to pick specific values.
+- "Calibration" in Convert To Energy Transfer interface wanted the background to be taken over the whole range instead of users being able to pick specific values.
 
 ## Other Changes
 

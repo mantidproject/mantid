@@ -9,7 +9,7 @@ StretchedKT
 Description
 -----------
 
-For observation of muon spin relaxation MuSR spectra with lineshapes lying between a Guassian and a Lorentzian,
+For observation of muon spin relaxation MuSR spectra with lineshapes lying between a Gaussian and a Lorentzian,
 
 .. math:: A(t)=A_0\left(\frac{1}{3}+\frac{2}{3}\left(1-(\sigma t)^\beta\right)e^{-\frac{(\sigma t)^\beta}{\beta}}\right)
 
@@ -19,7 +19,7 @@ where,
 
 :math:`A_0` is the amplitude,
 
-:math:`\beta` is the stretching exponential and it ranges from 1 (neglible nuclear field) and 2 (strong nuclear field).
+:math:`\beta` is the stretching exponential and it ranges from 1 (negligible nuclear field) and 2 (strong nuclear field).
 
 .. attributes::
 

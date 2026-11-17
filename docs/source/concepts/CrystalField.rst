@@ -123,7 +123,7 @@ from the :math:`\hat{J}_x`, :math:`\hat{J}_y`, :math:`\hat{J}_z` operators expre
 using the :math:`J_z` basis states.
 
 In Stevens' original work [#Stevens52]_, attention was paid to how the crystal field parameters determined for one magnetic
-ion might be transfered to another ion in the same crystalline environment.
+ion might be transferred to another ion in the same crystalline environment.
 In order to account for the different electronic configurations of the ions,
 the crystal field parameters are additionally weighted by the *Stevens factor*
 :math:`\theta_k = \langle \nu,L,S | |O^{(k)}|| \nu,L,S \rangle` which may be thought of as an additional reduced matrix
@@ -139,7 +139,7 @@ Thus Stevens' Hamiltonian is
 where :math:`O_q^{(k)}` are the Stevens operator described above.
 In principle, the parameter :math:`A_q^k` is intrinsic to a particular crystalline environment,
 whilst the :math:`\langle r^k \rangle \theta_k` parts depend on the magnetic ion within that environment and may be factored out.
-In practice, however, it was found that although in some cases the parameters may be transfered between ions, this often fails.
+In practice, however, it was found that although in some cases the parameters may be transferred between ions, this often fails.
 
 Instead, in the neutron spectroscopy literature, the full product
 

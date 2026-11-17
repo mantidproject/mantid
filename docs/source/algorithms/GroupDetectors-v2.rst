@@ -254,13 +254,13 @@ Output
   Number of grouped detectors is 3
   Detector IDs: set(100,102,104)
 
-**Example 3: specifying detctor IDs**
+**Example 3: specifying detector IDs**
 
 .. testcode:: ExDet
 
   # Create a workspace filled with a constant value = 0.3
   ws=CreateSampleWorkspace()
-  # Group detectots using a list of detctor IDs
+  # Group detectots using a list of detector IDs
   grouped = GroupDetectors(ws,DetectorList=[100,102,104])
 
   # Check the result

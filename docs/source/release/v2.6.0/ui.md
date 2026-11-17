@@ -19,7 +19,7 @@ The shape tools are now shared between the Pick, mask and group tabs.
 
 ### Instrument View Changes
 
-- The Shape selection tools (elipse, ring, rectangle etc.) are now shared between the pick mask and group tabs., You can move between the tabs to change the 'meaning' of any selections you have made.
+- The Shape selection tools (ellipse, ring, rectangle etc.) are now shared between the pick mask and group tabs., You can move between the tabs to change the 'meaning' of any selections you have made.
 - To remove a shape select it using the shape editing tool and press the delete key.
 - In Pick mode the miniplot will display the sum of all of the pixels in all of the shapes you have defined.
 
@@ -46,7 +46,7 @@ The Script Repository with autoupdate and delete functionality.
 
 ### Script Repository
 
-- You can now delete files from the script repository, as long as you were the original author. If you need to remove a script that where you were not the original author then contect the development team.
+- You can now delete files from the script repository, as long as you were the original author. If you need to remove a script that where you were not the original author then contact the development team.
 - Checking the AutoUpdate box will now allow you to mark a script to be kept current with any changes to the version in the Script Repository. Mantid will check for and download new versions on startup.
 - Python paths are now automatically setup for scripts you download so new libraries and scripts should work easily.
 - We have changed the icons used for uplodaing, downloading and current data files to they are easier to differentiate.

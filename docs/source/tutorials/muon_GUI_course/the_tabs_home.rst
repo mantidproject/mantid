@@ -16,7 +16,7 @@ When launched, the Muon Analysis GUI defaults to the Home tab. This tab allows:
 * Run information to be viewed.
 * `Time zero`, `first good data` and `last good data` to be set.
 * `Deadtime corrections` to be set
-* Data binning to be modifed.
+* Data binning to be modified.
 
 Loading a Workspace
 -------------------

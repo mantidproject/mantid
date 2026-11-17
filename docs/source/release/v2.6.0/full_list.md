@@ -121,7 +121,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 | [#6437](https://github.com/mantidproject/mantid/issues/6437) (Trac 5591) | [Indirect] - Cubic spline algorithms                                                                |
 | [#6579](https://github.com/mantidproject/mantid/issues/6579) (Trac 5733) | Custom view modes with MDEventWorkspaceInputs                                                       |
 | [#6721](https://github.com/mantidproject/mantid/issues/6721) (Trac 5875) | Write algorithm which would automatically calculate min-max values for ConvertToMD                  |
-| [#6781](https://github.com/mantidproject/mantid/issues/6781) (Trac 5935) | Ploting problems in Indirect interfaces                                                             |
+| [#6781](https://github.com/mantidproject/mantid/issues/6781) (Trac 5935) | Plotting problems in Indirect interfaces                                                            |
 | [#6925](https://github.com/mantidproject/mantid/issues/6925) (Trac 6079) | HFIR SANS: allow to load processed NXS for sensitivity                                              |
 | [#7278](https://github.com/mantidproject/mantid/issues/7278) (Trac 6432) | Convert unit test for IntegrateEllipsoids to a system test.                                         |
 | [#7291](https://github.com/mantidproject/mantid/issues/7291) (Trac 6445) | Error message from Load is a little complex                                                         |
@@ -292,7 +292,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 | [#8310](https://github.com/mantidproject/mantid/issues/8310) (Trac 7465) | Move MDWorkspaceTests to API v2                                                                     |
 | [#8314](https://github.com/mantidproject/mantid/issues/8314) (Trac 7469) | Move ISIS SANS to Python API v2                                                                     |
 | [#8316](https://github.com/mantidproject/mantid/issues/8316) (Trac 7471) | Fix L2QScript System Test                                                                           |
-| [#8317](https://github.com/mantidproject/mantid/issues/8317) (Trac 7472) | Get Quick Auxilary Functions Under Test                                                             |
+| [#8317](https://github.com/mantidproject/mantid/issues/8317) (Trac 7472) | Get Quick Auxiliary Functions Under Test                                                            |
 | [#8319](https://github.com/mantidproject/mantid/issues/8319) (Trac 7474) | Test Quick's toLam functionality                                                                    |
 | [#8322](https://github.com/mantidproject/mantid/issues/8322) (Trac 7477) | gd_prtn_charge units in data from LoadEventNexus                                                    |
 | [#8326](https://github.com/mantidproject/mantid/issues/8326) (Trac 7481) | Add option to change log level of system tests                                                      |
@@ -343,7 +343,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 | [#8356](https://github.com/mantidproject/mantid/issues/8356) (Trac 7511) | Update MERLIN Documentation (easy to test)                                                          |
 | [#7072](https://github.com/mantidproject/mantid/issues/7072) (Trac 6226) | SANS: Rename some ISIS SANS tabs                                                                    |
 | [#7891](https://github.com/mantidproject/mantid/issues/7891) (Trac 7045) | Set matrix values bug                                                                               |
-| [#7908](https://github.com/mantidproject/mantid/issues/7908) (Trac 7062) | Error in Displaying CRISP Instrument in Cyclindrical Y Coordinates                                  |
+| [#7908](https://github.com/mantidproject/mantid/issues/7908) (Trac 7062) | Error in Displaying CRISP Instrument in Cylindrical Y Coordinates                                   |
 | [#7965](https://github.com/mantidproject/mantid/issues/7965) (Trac 7119) | Correct optional message in LoadSassena initDocs                                                    |
 | [#7984](https://github.com/mantidproject/mantid/issues/7984) (Trac 7138) | Glob test failure                                                                                   |
 | [#8231](https://github.com/mantidproject/mantid/issues/8231) (Trac 7385) | Labels in PeaksList                                                                                 |

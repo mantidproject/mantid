@@ -109,7 +109,7 @@ class Category(LinkItem):
     subcategories = None
     # Relative path for the final html to be written. \ separators are converted to /
     html_path = None
-    # The section of the documentation that this category resides in aglorithms, concepts etc
+    # The section of the documentation that this category resides in algorithms, concepts etc
     section = None
     # The file path to a file that contains the category
     src_path = None
