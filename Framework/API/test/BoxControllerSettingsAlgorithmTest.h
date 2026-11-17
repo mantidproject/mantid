@@ -12,7 +12,7 @@
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/FakeObjects.h"
 #include "MantidFrameworkTestHelpers/ScopedFileHelper.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 
 #include <utility>
 
@@ -45,11 +45,12 @@ private:
     auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(1, 2, 1);
     auto baseInstrument = ComponentCreationHelper::createTestInstrumentRectangular(6, 1, 0.0);
-    auto parameters = std::make_shared<Mantid::Geometry::ParameterMap>();
-    parameters->add("double", baseInstrument.get(), "SplitThreshold", static_cast<double>(splitThreshold));
-    parameters->add("double", baseInstrument.get(), "SplitInto", static_cast<double>(splitInto));
-    parameters->add("double", baseInstrument.get(), "MaxRecursionDepth", static_cast<double>(maxRecursionDepth));
-    ws->setInstrument(std::make_shared<Mantid::Geometry::Instrument>(baseInstrument, parameters));
+    ws->setInstrument(baseInstrument);
+    auto &componentInfo = ws->mutableComponentInfo();
+    auto const root = componentInfo.root();
+    componentInfo.addDouble(root, "SplitThreshold", static_cast<double>(splitThreshold));
+    componentInfo.addDouble(root, "SplitInto", static_cast<double>(splitInto));
+    componentInfo.addDouble(root, "MaxRecursionDepth", static_cast<double>(maxRecursionDepth));
 
     return ws;
   }
