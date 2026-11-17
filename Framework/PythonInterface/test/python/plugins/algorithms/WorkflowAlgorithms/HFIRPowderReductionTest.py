@@ -18,10 +18,13 @@ from mantid.simpleapi import (
     AddSampleLog,
     GroupWorkspaces,
     SaveNexusESS,
+    SaveNexusProcessed,
+    MaskDetectors,
+    LoadEmptyInstrument,
     Load,
     mtd,
 )
-from mantid.api import AlgorithmManager, MatrixWorkspace, WorkspaceGroup
+from mantid.api import AlgorithmManager, ExperimentInfo, MatrixWorkspace, WorkspaceGroup
 from mantid.kernel import Logger, Property
 from plugins.algorithms.WorkflowAlgorithms.HFIRPowderReduction import HFIRPowderReduction as _HFIRPowderReduction
 import h5py
@@ -2332,6 +2335,93 @@ class IDFOverrideTests(unittest.TestCase):
         algo._loadMIDASData(midas_file, "test_midas_custom_idf")
         instrument_name = mtd["test_midas_custom_idf"].getInstrumentName()
         self.assertEqual(instrument_name, os.path.basename(self._idf))
+
+
+class MIDASMaskTests(unittest.TestCase):
+    """Tests for the standard MIDAS mask applied by _loadMIDASData when ApplyMask is True."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls._test_dir = tempfile.mkdtemp()
+        LoadEmptyInstrument(InstrumentName="MIDAS", OutputWorkspace="_midas_empty")
+        cls._midas_file = os.path.join(cls._test_dir, "midas_sample.nxs")
+        SaveNexusProcessed(mtd["_midas_empty"], Filename=cls._midas_file)
+        mtd.remove("_midas_empty")
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls._test_dir, ignore_errors=True)
+
+    def tearDown(self):
+        for name in list(mtd.getObjectNames()):
+            if mtd.doesExist(name):
+                mtd.remove(name)
+
+    @staticmethod
+    def _masked_detector_ids(ws):
+        detector_info = ws.detectorInfo()
+        ids = detector_info.detectorIDs()
+        return {int(ids[i]) for i in range(len(ids)) if detector_info.isMasked(i) and not detector_info.isMonitor(i)}
+
+    @staticmethod
+    def _expected_mask_ids():
+        # 7 banks x 16 tubes x 512 pixels; the first and last 40 pixels of each tube are masked
+        expected = set()
+        for tube in range(7 * 16):
+            start = tube * 512
+            expected.update(range(start, start + 40))
+            expected.update(range(start + 472, start + 512))
+        return expected
+
+    def test_apply_mask_masks_tube_ends(self):
+        algo = _create_algo(Instrument="MIDAS", Wavelength=2.5, ApplyMask=True)
+        algo._loadMIDASData(self._midas_file, "test_midas_masked")
+        self.assertEqual(self._masked_detector_ids(mtd["test_midas_masked"]), self._expected_mask_ids())
+
+    def test_apply_mask_with_custom_idf(self):
+        # A custom IDF renames the instrument; the mask is defined by detector ID so it still applies
+        custom_idf = os.path.join(self._test_dir, "My_MIDAS_IDF.xml")
+        shutil.copyfile(ExperimentInfo.getInstrumentFilename("MIDAS"), custom_idf)
+
+        algo = _create_algo(Instrument="MIDAS", Wavelength=2.5, ApplyMask=True, IDFFilename=custom_idf)
+        algo._loadMIDASData(self._midas_file, "test_midas_masked_custom_idf")
+        ws = mtd["test_midas_masked_custom_idf"]
+        self.assertEqual(ws.getInstrumentName(), os.path.basename(custom_idf))
+        self.assertEqual(self._masked_detector_ids(ws), self._expected_mask_ids())
+
+    def test_no_mask_when_apply_mask_false(self):
+        algo = _create_algo(Instrument="MIDAS", Wavelength=2.5, ApplyMask=False)
+        algo._loadMIDASData(self._midas_file, "test_midas_unmasked")
+        self.assertEqual(self._masked_detector_ids(mtd["test_midas_unmasked"]), set())
+
+    @staticmethod
+    def _mask_workspace_ids(mask_ws):
+        """Detector IDs flagged in a MaskWorkspace (one detector per spectrum)."""
+        return {
+            int(det_id)
+            for i in range(mask_ws.getNumberHistograms())
+            if mask_ws.y(i)[0] > 0.5
+            for det_id in mask_ws.getSpectrum(i).getDetectorIDs()
+        }
+
+    def test_user_mask_without_mask_angle_keeps_midas_mask(self):
+        # ExtractUnmaskedSpectra ignores the workspace's masked flags once a MaskWorkspace is given,
+        # so the MIDAS mask must be combined into the mask passed on, even without MaskAngle
+        user_masked_id = 100  # inside the unmasked central region of the first tube
+        LoadEmptyInstrument(InstrumentName="MIDAS", OutputWorkspace="_user_mask_src")
+        MaskDetectors(Workspace="_user_mask_src", DetectorList=[user_masked_id])
+        ExtractMask(InputWorkspace="_user_mask_src", OutputWorkspace="_user_mask")
+
+        algo = _create_algo(Instrument="MIDAS", Wavelength=2.5, ApplyMask=True, MaskWorkspace="_user_mask")
+        algo._loadMIDASData(self._midas_file, "test_midas_user_mask")
+
+        with patch.object(algo, "_to_spectrum_axis") as to_spectrum_axis:
+            mask_workspaces = algo._extract_masks(["test_midas_user_mask"], ["test_midas_user_mask_out"])
+
+        mask_used = to_spectrum_axis.call_args.args[2]
+        self.assertEqual(mask_workspaces, [mask_used])
+        mask_ws = mtd[mask_used] if isinstance(mask_used, str) else mask_used
+        self.assertEqual(self._mask_workspace_ids(mask_ws), self._expected_mask_ids() | {user_masked_id})
 
 
 if __name__ == "__main__":

@@ -18,6 +18,27 @@ and reduction steps are slightly modified.
 By default the instrument geometry is determined by the sample file. An instrument definition file (IDF) can
 optionally be supplied through the ``IDFFilename`` property to override the geometry used by the sample file.
 
+Masking
+-------
+
+When ``ApplyMask`` is enabled (the default), a standard mask is applied when the data are loaded.
+For WAND\ :sup:`2` this is the mask applied by :ref:`algm-LoadWAND`. For MIDAS, the first 40 and last
+40 pixels of every 512-pixel detector tube are masked. These pixels lie outside the active length of
+the detector tubes and do not count neutrons. The number of masked pixels is an approximate default.
+If it is not suitable for an experiment, supply a ``MaskWorkspace``. With ``ApplyMask`` enabled, the
+``MaskWorkspace`` is combined with the standard mask. To replace the standard mask entirely, set
+``ApplyMask`` to ``False``.
+
+The MIDAS mask is defined by detector ID, not by the instrument geometry, so it is also applied when a
+custom IDF is supplied through ``IDFFilename``. It assumes the standard MIDAS detector numbering:
+112 tubes (7 banks of 16 tubes) of 512 pixels each, with detector IDs starting at 0 and running
+consecutively along each tube, one tube after another. In each tube, the pixels with IDs
+``512*t`` to ``512*t + 39`` and ``512*t + 472`` to ``512*t + 511`` are masked, where ``t`` is the tube index.
+A custom IDF must keep this numbering for the standard mask to cover the tube ends. If it uses a
+different numbering, the standard mask may cover the wrong pixels. In that case, set ``ApplyMask`` to
+``False`` and supply an appropriate ``MaskWorkspace`` instead. Detector IDs in the mask that are not in
+the custom IDF are ignored.
+
 Binning
 -------
 
