@@ -989,8 +989,7 @@ void InstrumentWidgetMaskTab::saveMaskingToCalFile(bool invertMask) {
  * @param invertMask :: if true, the selected mask will be inverted; if false,
  * the mask will be used as is
  */
-void InstrumentWidgetMaskTab::saveMaskingToTableWorkspace(bool invertMask) {
-  UNUSED_ARG(invertMask);
+void InstrumentWidgetMaskTab::saveMaskingToTableWorkspace([[maybe_unused]] bool invertMask) {
 
   // Set override cursor
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));

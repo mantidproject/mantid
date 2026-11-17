@@ -110,9 +110,8 @@ public:
    *place generalization here;
    * It should be overridden if the dependence on Y coordinate do exist.
    */
-  virtual bool calcMatrixCoordinates(const MantidVec &X, size_t i, size_t j, std::vector<coord_t> &Coord, double &s,
-                                     double &err) const {
-    UNUSED_ARG(i);
+  virtual bool calcMatrixCoordinates(const MantidVec &X, [[maybe_unused]] size_t i, size_t j,
+                                     std::vector<coord_t> &Coord, double &s, double &err) const {
     double X_ev = double(0.5 * (X[j] + X[j + 1])); // ! POSSIBLE FACTORY HERE
                                                    // !!! if the histogram
                                                    // interpolation is different
@@ -205,9 +204,9 @@ public:
   /**
    * Updates the internal rotation matrix for classes which support this
    */
-  virtual void updateRotMat(const std::vector<double> &newMat) { UNUSED_ARG(newMat); }
+  virtual void updateRotMat([[maybe_unused]] const std::vector<double> &newMat) {}
   virtual std::pair<coord_t, coord_t> getDimBounds(size_t dim) const = 0;
-  virtual void setInvertRot(bool isInvert) { UNUSED_ARG(isInvert); }
+  virtual void setInvertRot([[maybe_unused]] bool isInvert) {}
 };
 
 using MDTransf_sptr = std::shared_ptr<MDTransfInterface>;

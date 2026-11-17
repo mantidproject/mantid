@@ -91,8 +91,7 @@ void FitMD::declareDatasetProperties(const std::string &suffix, bool addProp) {
  * @param i0 :: Ignored currently
  */
 void FitMD::createDomain(std::shared_ptr<API::FunctionDomain> &domain, std::shared_ptr<API::FunctionValues> &ivalues,
-                         size_t i0) {
-  UNUSED_ARG(i0);
+                         [[maybe_unused]] size_t i0) {
   setParameters();
   auto iterator = m_IMDWorkspace->createIterator();
   const size_t n = iterator->getDataSize();

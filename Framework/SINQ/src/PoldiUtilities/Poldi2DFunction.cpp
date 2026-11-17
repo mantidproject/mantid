@@ -53,10 +53,8 @@ void Poldi2DFunction::functionDeriv(const FunctionDomain &domain, Jacobian &jaco
  * @param domain :: Unused domain.
  * @param values :: Unused function values.
  */
-void Poldi2DFunction::function1DSpectrum(const FunctionDomain1DSpectrum &domain, FunctionValues &values) const {
-  UNUSED_ARG(domain);
-  UNUSED_ARG(values);
-}
+void Poldi2DFunction::function1DSpectrum([[maybe_unused]] const FunctionDomain1DSpectrum &domain,
+                                         [[maybe_unused]] FunctionValues &values) const {}
 
 /**
  * Calculates the 1D spectrum for this function
