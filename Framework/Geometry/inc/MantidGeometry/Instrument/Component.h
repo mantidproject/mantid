@@ -363,9 +363,10 @@ protected:
 
 private:
   friend class InstrumentVisitor;
+  friend class Instrument;
   /// Index of the unparametrized component in its instrument's ComponentInfo. Set by InstrumentVisitor when the
-  /// finished tree is walked to cache its beamline. A copy carries the original's index until its own tree is walked;
-  /// it is only read for a tree whose beamline has been cached.
+  /// finished tree is walked to cache its beamline, or by Instrument::fromBeamline. A copy carries the original's index
+  /// until its own tree is walked; it is only read for a tree whose beamline has been cached.
   mutable std::size_t m_index{std::numeric_limits<std::size_t>::max()};
 };
 

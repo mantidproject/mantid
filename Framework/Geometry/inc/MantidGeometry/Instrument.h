@@ -33,12 +33,13 @@ class ComponentInfo;
 class DetectorInfo;
 class XMLInstrumentParameter;
 class Parameter;
+struct BeamlineRef;
 class ParameterMap;
 class ReferenceFrame;
 class InstrumentVisitor;
 /// Convenience typedef
 using InstrumentParameterCache =
-    std::map<std::pair<std::string, const IComponent *>, std::shared_ptr<XMLInstrumentParameter>>;
+    std::map<std::pair<std::string, const IComponent *>, std::shared_ptr<const XMLInstrumentParameter>>;
 
 /**
 Base Instrument Class.
@@ -224,6 +225,7 @@ public:
   std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
   makeBeamline(ParameterMap &pmap, const ParameterMap *source = nullptr) const;
   std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>> makeBaseBeamline() const;
+  static std::unique_ptr<Instrument> fromBeamline(BeamlineRef const &beamline);
 
   /// Get the footprint in memory in bytes.
   size_t getMemorySize() const;
@@ -273,6 +275,8 @@ private:
   makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo, const DetectorInfo &detectorInfo) const;
   std::pair<std::shared_ptr<const ComponentInfo>, std::shared_ptr<const DetectorInfo>> cachedBeamline() const;
   void resetBeamlineCache();
+  static std::unique_ptr<Instrument> treeFromBeamline(ComponentInfo const &componentInfo,
+                                                      DetectorInfo const &detectorInfo);
 
   /// @brief Tuple which holds detector-IDs and pointers to detector components, and monitor flags.
   /// This is the type of the elements in the detector cache vector.
