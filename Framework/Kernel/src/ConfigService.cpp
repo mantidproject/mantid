@@ -1447,7 +1447,7 @@ bool ConfigServiceImpl::isNetworkDrive([[maybe_unused]] const std::string &path)
         mntpoint = mntpoint.substr(0, idx) + static_cast<char>(printch) + mntpoint.substr(idx + 4);
       }
       // Search for this at the start of the path
-      if (path.find(mntpoint) == 0)
+      if (path.starts_with(mntpoint))
         return true;
     }
   }

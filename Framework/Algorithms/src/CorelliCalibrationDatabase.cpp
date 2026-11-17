@@ -699,7 +699,7 @@ std::vector<std::string> CorelliCalibrationDatabase::retrieveInstrumentComponent
   for (size_t i = 0; i < num_components; ++i) {
     std::string compname = component_info.name(i);
     // a component starts with bank must be a bank
-    if (compname.compare(0, 4, "bank") == 0) {
+    if (compname.starts_with("bank")) {
       componentnames.push_back(compname + "/sixteenpack");
     }
   }

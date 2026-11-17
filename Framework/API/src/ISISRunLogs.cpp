@@ -132,7 +132,7 @@ std::vector<std::string> ISISRunLogs::getLogNamesExcludedFromFiltering(const API
   const auto &props = run.getProperties();
   for (const auto prop : props) {
     // add all properties starting with period
-    if (prop->name().rfind("period", 0) == 0) {
+    if (prop->name().starts_with("period")) {
       // add if not already in the list
       if (std::find(retVal.cbegin(), retVal.cend(), prop->name()) == retVal.cend()) {
         retVal.emplace_back(prop->name());

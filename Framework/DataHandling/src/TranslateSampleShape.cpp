@@ -50,7 +50,7 @@ bool isPointLike(const std::string &tag) {
   if (tag == "centre" || tag == "centre-of-bottom-base" || tag == "tip" || tag == "point-in-plane")
     return true;
   // Cuboids/hexahedra can be defined by corners which end with the six characters: "-point"
-  if (tag.size() >= 6 && tag.rfind("-point") == tag.size() - 6)
+  if (tag.size() >= 6 && tag.ends_with("-point"))
     return true;
   // all other tags should also be ignored
   return false;

@@ -89,7 +89,7 @@ std::string PointGroup::getLauePointGroupSymbol() const {
   case CrystalSystem::Triclinic:
     return "-1";
   case CrystalSystem::Monoclinic:
-    if (m_symbolHM.substr(0, 2) == "11") {
+    if (m_symbolHM.starts_with("11")) {
       return "112/m"; // unique axis c
     } else {
       return "2/m"; // unique axis b

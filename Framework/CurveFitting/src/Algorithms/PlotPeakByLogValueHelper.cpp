@@ -88,8 +88,8 @@ std::vector<InputSpectraToFit> makeNames(const std::string &inputList, int defau
     int wi = default_wi;
     int spec = default_spec;
     if (params.count() > 1) {
-      std::string index = params[1];                        // spectrum or workspace index with a prefix
-      if (index.size() > 2 && index.substr(0, 2) == "sp") { // spectrum number
+      std::string index = params[1];                     // spectrum or workspace index with a prefix
+      if (index.size() > 2 && index.starts_with("sp")) { // spectrum number
         spec = boost::lexical_cast<int>(index.substr(2));
         wi = SpecialIndex::NOT_SET;                     // undefined yet
       } else if (index.size() > 1 && index[0] == 'i') { // workspace index

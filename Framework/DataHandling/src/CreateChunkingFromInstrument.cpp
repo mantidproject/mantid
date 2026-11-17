@@ -186,7 +186,7 @@ bool startsWith(const string &str, const string &prefix) {
   if (str.length() < prefix.length())
     return false;
 
-  return (str.substr(0, prefix.length()) == prefix);
+  return (str.starts_with(prefix));
 }
 
 /**

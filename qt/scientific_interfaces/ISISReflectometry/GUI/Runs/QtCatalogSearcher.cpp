@@ -32,7 +32,7 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 namespace { // unnamed
 bool runHasCorrectInstrument(std::string const &run, std::string const &instrument) {
   // Return false if the run appears to be from another instruement
-  return (run.substr(0, instrument.size()) == instrument);
+  return (run.starts_with(instrument));
 }
 
 std::string trimRunName(std::string const &runFile, std::string const &instrument) {

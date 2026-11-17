@@ -771,8 +771,7 @@ void LoadNexusLogs::loadLogs(Nexus::File &file, const std::string &absolute_entr
                        [](const auto &block) { return std::make_unique<Poco::Glob>(block); });
       }
 
-      for (auto it = itPrefixBegin;
-           it != logsSet.end() && it->compare(0, absolute_entry_name.size(), absolute_entry_name) == 0; ++it) {
+      for (auto it = itPrefixBegin; it != logsSet.end() && it->starts_with(absolute_entry_name); ++it) {
         // must be third level entry
         if (std::count(it->begin(), it->end(), '/') == 3) {
           if (has_block_list) {

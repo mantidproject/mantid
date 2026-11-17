@@ -26,7 +26,7 @@ WorkspaceIcons::WorkspaceIcons() : m_idToPixmapName() { initInternalLookup(); }
 QPixmap WorkspaceIcons::getIcon(const std::string &workspaceID) const {
   // All mappings are simple bar the MDEventWorkspace as each of its templates
   // has different ID.
-  if (workspaceID.compare(0, 16, "MDEventWorkspace") == 0)
+  if (workspaceID.starts_with("MDEventWorkspace"))
     return getQPixmap(m_idToPixmapName.value("MDEventWorkspace"));
   else
     return getQPixmap(m_idToPixmapName.value(workspaceID));
@@ -38,7 +38,7 @@ QPixmap WorkspaceIcons::getIcon(const std::string &workspaceID) const {
  * @return a string with the QPixmap id for this workspace.
  */
 std::string WorkspaceIcons::getIconID(const std::string &workspaceID) const {
-  if (workspaceID.compare(0, 16, "MDEventWorkspace") == 0)
+  if (workspaceID.starts_with("MDEventWorkspace"))
     return m_idToPixmapName.value("MDEventWorkspace");
   else
     return m_idToPixmapName.value(workspaceID);

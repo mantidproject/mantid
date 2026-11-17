@@ -71,7 +71,7 @@ public:
       if (units == "minutes") {
         using std::placeholders::_1;
         std::transform(times(), times() + times.dim0(), times(), std::bind(std::multiplies<double>(), _1, 60));
-      } else if (!units.empty() && units.substr(0, 6) != "second") {
+      } else if (!units.empty() && !units.starts_with("second")) {
         return nullptr;
       }
       return parseTimeSeries(logName, times, start_time);
@@ -82,7 +82,7 @@ public:
       std::string units = times.attributes("units");
       if (units == "minutes") {
         std::for_each(times(), times() + times.dim0(), [](float &val) { val *= 60.0f; });
-      } else if (!units.empty() && units.substr(0, 6) != "second") {
+      } else if (!units.empty() && !units.starts_with("second")) {
         return nullptr;
       }
       return parseTimeSeries(logName, times, start_time);

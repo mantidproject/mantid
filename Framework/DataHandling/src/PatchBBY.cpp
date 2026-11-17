@@ -150,7 +150,7 @@ void PatchBBY::exec() {
     auto len = itr->length();
 
     if ((len > 4) && (itr->find_first_of("\\/", 0, 2) == std::string::npos)) {
-      if ((itr->compare(0, 3, "BBY") == 0) && (itr->rfind(".hdf") == len - 4))
+      if ((itr->starts_with("BBY")) && (itr->rfind(".hdf") == len - 4))
         hdfFiles++;
       else if (itr->rfind(".bin") == len - 4)
         binFiles++;
@@ -218,8 +218,8 @@ void PatchBBY::exec() {
   // load original values from hdf
   bool reset = getProperty("Reset");
   if (reset) {
-    const auto file_it = std::find_if(files.cbegin(), files.cend(),
-                                      [](const std::string &file) { return file.rfind(".hdf") == file.length() - 4; });
+    const auto file_it =
+        std::find_if(files.cbegin(), files.cend(), [](const std::string &file) { return file.ends_with(".hdf"); });
     if (file_it != files.end()) {
       tarFile.select(file_it->c_str());
       // extract hdf file into tmp file

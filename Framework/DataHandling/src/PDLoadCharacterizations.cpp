@@ -297,7 +297,7 @@ int PDLoadCharacterizations::readFocusInfo(std::ifstream &file, const std::strin
     // skip empty lines and "comments"
     if (line.empty())
       continue;
-    if (line.substr(0, 1) == "#")
+    if (line.starts_with("#"))
       continue;
 
     std::vector<std::string> splitted;
@@ -356,7 +356,7 @@ void PDLoadCharacterizations::readCharInfo(std::ifstream &file, ITableWorkspace_
     // skip empty lines and "comments"
     if (line.empty())
       continue;
-    if (line.substr(0, 1) == "#")
+    if (line.starts_with("#"))
       continue;
     g_log.debug(line);
     // parse the line
@@ -404,7 +404,7 @@ void PDLoadCharacterizations::readVersion0(const std::string &filename, API::ITa
   // read the first line and decide what to do
   int linenum = 0;
   std::string firstLine = Strings::getLine(file);
-  if (firstLine.substr(0, IPARM_KEY.size()) == IPARM_KEY) {
+  if (firstLine.starts_with(IPARM_KEY)) {
     firstLine = Strings::strip(firstLine.substr(IPARM_KEY.size()));
     this->setProperty("IParmFilename", firstLine);
     linenum = this->readFocusInfo(file, filename);
@@ -484,7 +484,7 @@ void PDLoadCharacterizations::readVersion1(const std::string &filename, API::ITa
     line = Strings::strip(line);
     if (line.empty())
       continue;
-    if (line.substr(0, 1) == "#")
+    if (line.starts_with("#"))
       continue;
     g_log.debug(line);
 
@@ -572,7 +572,7 @@ void PDLoadCharacterizations::readExpIni(const std::string &filename, API::ITabl
     // skip empty lines and "comments"
     if (line.empty())
       continue;
-    if (line.substr(0, 1) == "#")
+    if (line.starts_with("#"))
       continue;
 
     // split the line and see if it has something meaningful

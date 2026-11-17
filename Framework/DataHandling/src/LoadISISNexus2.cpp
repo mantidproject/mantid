@@ -841,7 +841,7 @@ void LoadISISNexus2::runLoadInstrument(DataObjects::Workspace2D_sptr &localWorks
       std::shared_ptr<Geometry::Parameter> updateDets =
           pmap.get(localWorkspace->getInstrument()->getComponentID(), "det-pos-source");
       std::string value = updateDets->value<std::string>();
-      if (value.substr(0, 8) == "datafile") {
+      if (value.starts_with("datafile")) {
         auto updateInst = createChildAlgorithm("UpdateInstrumentFromFile");
         updateInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
         updateInst->setPropertyValue("Filename", m_filename);

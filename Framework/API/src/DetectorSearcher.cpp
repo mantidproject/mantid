@@ -51,7 +51,7 @@ bool containsOnlyRectDetectors(const Geometry::ComponentInfo &compInfo, const Ge
       continue;
     // skip choppers, slits and supermirrors - HACK!
     auto const &name = compInfo.name(index);
-    if (name == "chopper-position" || name.substr(0, 4) == "slit" || name == "supermirror")
+    if (name == "chopper-position" || name.starts_with("slit") || name == "supermirror")
       continue;
 
     auto const type = compInfo.componentType(index);

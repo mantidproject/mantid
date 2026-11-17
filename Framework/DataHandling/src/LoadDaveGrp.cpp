@@ -43,7 +43,7 @@ int LoadDaveGrp::confidence(Kernel::FileDescriptor &descriptor) const {
 
   // First line is a comment: #
   std::getline(descriptor.data(), curline);
-  if (curline.substr(0, 1) == "#") {
+  if (curline.starts_with("#")) {
     daveGrp = true;
   } else
     return 0;
@@ -57,7 +57,7 @@ int LoadDaveGrp::confidence(Kernel::FileDescriptor &descriptor) const {
 
   // Third line is a comment: #
   std::getline(descriptor.data(), curline);
-  if (curline.substr(0, 1) != "#")
+  if (!curline.starts_with("#"))
     return 0;
 
   // Fourth line is an integer

@@ -1168,7 +1168,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::DeviceDescriptorPkt &pkt) {
           if (pvType == "double") {
             prop = new TimeSeriesProperty<double>(pvName);
           } else if ((pvType == "integer") || (pvType == "unsigned") || (pvType == "unsigned integer") ||
-                     (pvType.compare(0, 5, "enum_") == 0))
+                     (pvType.starts_with("enum_")))
           // Note: Mantid doesn't currently support unsigned int properties
           // Note: We're treating enums as ints (at least for now)
           // Note: ADARA doesn't currently define an integer variable value

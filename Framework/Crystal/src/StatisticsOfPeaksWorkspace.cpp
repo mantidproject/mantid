@@ -100,9 +100,9 @@ void StatisticsOfPeaksWorkspace::exec() {
 
   // We must sort the peaks
   std::vector<std::pair<std::string, bool>> criteria;
-  if (sortType.compare(0, 2, "Re") == 0)
+  if (sortType.starts_with("Re"))
     criteria.emplace_back("DSpacing", false);
-  else if (sortType.compare(0, 2, "Ru") == 0)
+  else if (sortType.starts_with("Ru"))
     criteria.emplace_back("RunNumber", true);
   criteria.emplace_back("BankName", true);
   criteria.emplace_back("h", true);
@@ -113,11 +113,11 @@ void StatisticsOfPeaksWorkspace::exec() {
   // =========================================
   std::vector<Peak> peaks = ws->getPeaks();
   doSortHKL(ws, "Overall");
-  if (sortType.compare(0, 2, "Ov") == 0)
+  if (sortType.starts_with("Ov"))
     return;
   // run number
   std::string oldSequence;
-  if (sortType.compare(0, 2, "Re") == 0) {
+  if (sortType.starts_with("Re")) {
     double dspacing = peaks[0].getDSpacing();
     if (dspacing > 3.0)
       oldSequence = "Inf - 3.0";
@@ -133,7 +133,7 @@ void StatisticsOfPeaksWorkspace::exec() {
       oldSequence = "1.0 - 0.5";
     else
       oldSequence = "0.5 - 0.0";
-  } else if (sortType.compare(0, 2, "Ru") == 0)
+  } else if (sortType.starts_with("Ru"))
     oldSequence = std::to_string(peaks[0].getRunNumber());
   else
     oldSequence = peaks[0].getBankName();
@@ -142,7 +142,7 @@ void StatisticsOfPeaksWorkspace::exec() {
 
     Peak &p = peaks[wi];
     std::string sequence;
-    if (sortType.compare(0, 2, "Re") == 0) {
+    if (sortType.starts_with("Re")) {
       double dspacing = p.getDSpacing();
       if (dspacing > 3.0)
         sequence = "Inf - 3.0";
@@ -158,7 +158,7 @@ void StatisticsOfPeaksWorkspace::exec() {
         sequence = "1.0 - 0.5";
       else
         sequence = "0.5 - 0.0";
-    } else if (sortType.compare(0, 2, "Ru") == 0)
+    } else if (sortType.starts_with("Ru"))
       sequence = std::to_string(p.getRunNumber());
     else
       sequence = p.getBankName();

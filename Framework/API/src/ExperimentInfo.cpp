@@ -396,12 +396,12 @@ void ExperimentInfo::populateInstrumentParameters() {
       if (paramN.compare(1, 9, "-position") == 0) {
         auto &rtpValues = rtpParams[compIndex]; // If not found, constructs default
         double value = ParameterValue(*paramInfo, runData);
-        if (paramN.compare(0, 1, "r") == 0) {
+        if (paramN.starts_with("r")) {
           rtpValues.radius = value;
           rtpValues.haveRadius = true;
-        } else if (paramN.compare(0, 1, "t") == 0)
+        } else if (paramN.starts_with("t"))
           rtpValues.theta = value;
-        else if (paramN.compare(0, 1, "p") == 0)
+        else if (paramN.starts_with("p"))
           rtpValues.phi = value;
         if (rtpValues.haveRadius) {
           V3D pos;

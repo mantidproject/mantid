@@ -103,9 +103,9 @@ void SaveLauenorm::exec() {
 
   // We must sort the peaks
   std::vector<std::pair<std::string, bool>> criteria;
-  if (type.compare(0, 2, "Ba") == 0)
+  if (type.starts_with("Ba"))
     criteria.emplace_back("BankName", true);
-  else if (type.compare(0, 2, "Ru") == 0)
+  else if (type.starts_with("Ru"))
     criteria.emplace_back("RunNumber", true);
   else {
     criteria.emplace_back("RunNumber", true);
@@ -176,7 +176,7 @@ void SaveLauenorm::exec() {
       continue;
     // Take out the "bank" part of the bank name and convert to an int
     bankName.erase(remove_if(bankName.begin(), bankName.end(), std::not_fn(::isdigit)), bankName.end());
-    if (type.compare(0, 2, "Ba") == 0) {
+    if (type.starts_with("Ba")) {
       Strings::convert(bankName, sequence);
     }
     // Do not use peaks from these banks
@@ -246,7 +246,7 @@ void SaveLauenorm::exec() {
       continue;
     // Take out the "bank" part of the bank name and convert to an int
     bankName.erase(remove_if(bankName.begin(), bankName.end(), std::not_fn(::isdigit)), bankName.end());
-    if (type.compare(0, 2, "Ba") == 0) {
+    if (type.starts_with("Ba")) {
       Strings::convert(bankName, sequence);
     }
     // Do not use peaks from these banks

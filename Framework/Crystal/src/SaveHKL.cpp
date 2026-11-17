@@ -174,7 +174,7 @@ void SaveHKL::exec() {
     Strings::convert(bankName, bank);
 
     // Save in the map
-    if (type.compare(0, 2, "Ru") == 0)
+    if (type.starts_with("Ru"))
       runMap[run][bank].emplace_back(i);
     else
       runMap[bank][run].emplace_back(i);
@@ -421,7 +421,7 @@ void SaveHKL::exec() {
 
           out << std::setw(8) << std::fixed << std::setprecision(2) << p.getSigmaIntensity();
         }
-        if (type.compare(0, 2, "Ba") == 0)
+        if (type.starts_with("Ba"))
           out << std::setw(4) << bankSequence + 1;
         else
           out << std::setw(4) << runSequence + 1;

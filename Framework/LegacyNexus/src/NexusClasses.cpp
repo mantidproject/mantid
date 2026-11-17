@@ -140,7 +140,7 @@ void NXClass::readAllInfo() {
       NXclosedata(m_fileID);
       data_info.nxname = info.nxname;
       m_datasets->emplace_back(data_info);
-    } else if (info.nxclass.substr(0, 2) == "NX" || info.nxclass.substr(0, 2) == "IX") {
+    } else if (info.nxclass.starts_with("NX") || info.nxclass.starts_with("IX")) {
       m_groups->emplace_back(info);
     }
   }

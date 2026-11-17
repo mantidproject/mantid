@@ -24,7 +24,7 @@ bool LoadOff::getOFFline(std::string &line) {
     return false;
   }
   boost::trim(line);
-  while (line.empty() || line.substr(0, 1) == "#") {
+  while (line.empty() || line.starts_with("#")) {
     if (!getline(m_file, line)) {
       return false;
     }

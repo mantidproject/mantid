@@ -205,7 +205,7 @@ MatrixWorkspace_sptr ConvertUnits::executeUnitConversion(const API::MatrixWorksp
   // Don't do for EventWorkspaces, where you can easily rebin to recover the situation without losing information
   /* This is an ugly test - could be made more general by testing for DBL_MAX
   values at the ends of all spectra, but that would be less efficient */
-  if (m_outputUnit->unitID().find("Delta") == 0 && !m_inputEvents)
+  if (m_outputUnit->unitID().starts_with("Delta") && !m_inputEvents)
     outputWS = this->removeUnphysicalBins(outputWS);
 
   // Rebin the data to common bins if requested, and if necessary
