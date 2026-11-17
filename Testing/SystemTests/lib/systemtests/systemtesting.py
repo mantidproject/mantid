@@ -1365,10 +1365,14 @@ def isValidTestClass(class_obj):
     """Returns true if the test is a valid test class. It is valid
     if: the class subclasses MantidSystemTest and is not an abstract base class.
     """
-    if not issubclass(class_obj, MantidSystemTest) or class_obj is MantidSystemTest:
+    if not issubclass(class_obj, MantidSystemTest):
         return False
+    # Skip abstract base classes that follow *Base naming convention but might
+    # not have subclasses defined in the same module.
     if class_obj.__name__.endswith("Base"):
         return False
+    # Skip abstract base classes that are subclassed in the same module
+    # but might not follow naming convention.
     if inspect.isabstract(class_obj) and bool(class_obj.__subclasses__()):
         return False
     return True
