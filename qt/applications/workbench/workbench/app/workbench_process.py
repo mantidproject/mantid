@@ -77,6 +77,8 @@ def qapplication():
         app.setOrganizationDomain(ORG_DOMAIN)
         app.setApplicationName(APPNAME)
         app.setApplicationVersion(mantid_version_str())
+        # Default icon for every window, e.g. interfaces, that does not set its own
+        app.setWindowIcon(QIcon(":/images/MantidIcon.ico"))
         # Spin up the usage service and set the name for the usage reporting
         # The report is sent when the FrameworkManager kicks up
         UsageService.setApplicationName(APPNAME)

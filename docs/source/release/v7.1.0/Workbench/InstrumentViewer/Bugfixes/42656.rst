@@ -1,0 +1,1 @@
+- Workbench interfaces, such as Powder Reduction and TexturePlanner, now show the Mantid icon. Previously they showed the system default icon, or the PyVista logo after the new Instrument View had been opened.

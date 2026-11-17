@@ -280,7 +280,7 @@ class FullInstrumentViewView(QWidget):
         self._right_column_graphics = QWidget()
         self._parent_hsplitter = QSplitter(Qt.Horizontal)
         # TODO: get connections out of setup
-        self.main_plotter = BackgroundPlotter(show=False, menu_bar=False, toolbar=False, off_screen=self._off_screen)
+        self.main_plotter = BackgroundPlotter(show=False, menu_bar=False, toolbar=False, off_screen=self._off_screen, update_app_icon=False)
 
         self._detector_spectrum_fig = Figure()
         self._detector_spectrum_axes = self._detector_spectrum_fig.add_subplot(111, projection="mantid")

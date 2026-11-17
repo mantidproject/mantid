@@ -47,7 +47,7 @@ class TestReflectometryInstrumentViewView(unittest.TestCase):
     @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewView.BackgroundPlotter")
     def test_initialise_creates_background_plotter(self, mock_bg_plotter_cls):
         self._view.initialise()
-        mock_bg_plotter_cls.assert_called_once_with(show=False, menu_bar=False, toolbar=False, off_screen=False)
+        mock_bg_plotter_cls.assert_called_once_with(show=False, menu_bar=False, toolbar=False, off_screen=False, update_app_icon=False)
 
     @mock.patch("instrumentview.isisreflectometry.ReflectometryInstrumentViewView.BackgroundPlotter")
     def test_initialise_sets_main_plotter(self, mock_bg_plotter_cls):
