@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Objects/IObject.h"
@@ -100,7 +101,7 @@ protected:
 
   API::MatrixWorkspace_sptr m_inputWS;         ///< A pointer to the input workspace
   const Geometry::IObject *m_sampleObject;     ///< Local cache of sample object.
-  Geometry::IObject_sptr m_labFrameShape;      ///< Owns the lab-frame shape m_sampleObject points at, if any
+  API::Sample m_labFrameSample;                ///< Owns the lab-frame shape m_sampleObject points at, if any
   Kernel::V3D m_beamDirection;                 ///< The direction of the beam.
   std::vector<double> m_L1s,                   ///< Cached L1 distances
       m_elementVolumes;                        ///< Cached element volumes

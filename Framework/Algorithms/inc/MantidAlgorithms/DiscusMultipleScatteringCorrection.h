@@ -10,6 +10,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidAlgorithms/InterpolationOption.h"
 #include "MantidAlgorithms/SampleCorrections/IBeamProfile.h"
@@ -191,6 +192,7 @@ private:
   std::shared_ptr<const DiscusData1D> m_sigmaSS; // scattering cross section as a function of k
   // vectors of S(Q,w) and derived quantities. One entry for sample and each environment component
   ComponentWorkspaceMappings m_SQWSs;
+  API::Sample m_labFrameSample; ///< Owns m_sampleShape and m_env
   Geometry::IObject_const_sptr m_sampleShape;
   bool m_importanceSampling{};
   Kernel::DeltaEMode::Type m_EMode{Kernel::DeltaEMode::Undefined};

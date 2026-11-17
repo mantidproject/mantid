@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidAlgorithms/MultipleScatteringCorrectionDistGraber.h"
 #include "MantidKernel/Material.h"
@@ -50,6 +51,7 @@ protected:
   int64_t m_num_lambda;                ///< The number of points in wavelength, the rest is interpolated linearly
   double m_sampleElementSize;          ///< The size of the integration element for sample in meters
   double m_containerElementSize;       ///< the size of the integration element for container in meters
+  API::Sample m_labFrameSample;        ///< The sample, and container, where the goniometer puts them
 
 private:
   void init() override;
