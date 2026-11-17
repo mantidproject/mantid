@@ -1,0 +1,36 @@
+name: 'Install pixi environment'
+description: |
+  Run `pixi install --frozen` with a time limit on each attempt and a bounded number of retries.
+  A stalled package download on a self-hosted runner otherwise spins until the job timeout, so each
+  attempt is killed after attempt-timeout seconds and retried, and the step fails after the last one.
+inputs:
+  attempts:
+    description: 'Number of attempts before failing'
+    required: false
+    default: '3'
+  attempt-timeout:
+    description: 'Seconds allowed for each attempt before it is killed'
+    required: false
+    default: '600'
+runs:
+  using: "composite"
+  steps:
+    - name: Install pixi environment
+      shell: bash
+      working-directory: ${{ github.workspace }}
+      env:
+        ATTEMPTS: ${{ inputs.attempts }}
+        ATTEMPT_TIMEOUT: ${{ inputs.attempt-timeout }}
+      run: |
+        for (( attempt = 1; attempt <= ATTEMPTS; attempt++ )); do
+          # -k escalates to SIGKILL if pixi ignores the initial SIGTERM
+          if timeout -k 30 "${ATTEMPT_TIMEOUT}" pixi install --frozen -v; then
+            exit 0
+          fi
+          echo "::warning::pixi install attempt ${attempt} of ${ATTEMPTS} failed or exceeded ${ATTEMPT_TIMEOUT}s"
+          if (( attempt < ATTEMPTS )); then
+            sleep 30
+          fi
+        done
+        echo "::error::pixi install failed after ${ATTEMPTS} attempts"
+        exit 1
