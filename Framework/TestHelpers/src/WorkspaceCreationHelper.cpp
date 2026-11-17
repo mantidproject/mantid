@@ -1136,9 +1136,8 @@ Mantid::API::MatrixWorkspace_sptr createProcessedInelasticWS(const std::vector<d
  * without any events
  */
 Mantid::DataObjects::EventWorkspace_sptr
-createEventWorkspace3(const Mantid::DataObjects::EventWorkspace_const_sptr &sourceWS, const std::string &wsname,
-                      API::Algorithm *alg) {
-  UNUSED_ARG(wsname);
+createEventWorkspace3(const Mantid::DataObjects::EventWorkspace_const_sptr &sourceWS,
+                      [[maybe_unused]] const std::string &wsname, API::Algorithm *alg) {
   // 1. Initialize:use dummy numbers for arguments, for event workspace it
   // doesn't matter
   Mantid::DataObjects::EventWorkspace_sptr outputWS =

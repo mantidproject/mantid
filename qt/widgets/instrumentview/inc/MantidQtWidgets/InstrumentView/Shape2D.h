@@ -337,7 +337,7 @@ public:
 
   /// Because setting the new bounding box makes no sense, this is just
   /// overridden and does nothing at all
-  virtual void setBoundingRect(const RectF &rect) override { UNUSED_ARG(rect); }
+  virtual void setBoundingRect([[maybe_unused]] const RectF &rect) override {}
 
   /// Load state for the shape from a project file
   static Shape2D *loadFromProject(const std::string &lines);

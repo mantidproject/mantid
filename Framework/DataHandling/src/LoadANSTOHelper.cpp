@@ -157,8 +157,7 @@ EventCounter::EventCounter(const std::vector<bool> &roi, const size_t stride, co
 size_t EventCounter::numFrames() const { return m_framesValid; }
 double EventCounter::tofMin() const { return m_tofMin <= m_tofMax ? m_tofMin : 0.0; }
 double EventCounter::tofMax() const { return m_tofMin <= m_tofMax ? m_tofMax : 0.0; }
-void EventCounter::addEventImpl(size_t id, int64_t pulse, double tof) {
-  UNUSED_ARG(pulse);
+void EventCounter::addEventImpl(size_t id, [[maybe_unused]] int64_t pulse, double tof) {
   if (m_tofMin > tof)
     m_tofMin = tof;
   if (m_tofMax < tof)

@@ -130,8 +130,7 @@ void RangeSelector::handleMouseMove(const QPoint &point) {
   }
 }
 
-void RangeSelector::handleMouseUp(const QPoint &point) {
-  UNUSED_ARG(point);
+void RangeSelector::handleMouseUp([[maybe_unused]] const QPoint &point) {
   if (m_markerMoving) {
     m_rangeMarker->mouseMoveStop();
     m_plot->setSelectorActive(false);

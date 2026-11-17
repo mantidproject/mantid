@@ -70,10 +70,7 @@ void PeakPicker::handleMouseMove(const QPoint &point) {
   }
 }
 
-void PeakPicker::handleMouseUp(const QPoint &point) {
-  UNUSED_ARG(point);
-  m_peakMarker->mouseMoveStop();
-}
+void PeakPicker::handleMouseUp([[maybe_unused]] const QPoint &point) { m_peakMarker->mouseMoveStop(); }
 
 void PeakPicker::handleMouseHovering(const QPoint &point) {
   const auto dataCoords = m_plot->toDataCoords(point);
