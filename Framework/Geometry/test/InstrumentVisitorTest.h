@@ -30,6 +30,12 @@ using namespace ComponentCreationHelper;
 using Mantid::detid_t;
 
 namespace {
+/// A map attached to the instrument, as a workspace's is
+std::shared_ptr<ParameterMap> attachedMap(std::shared_ptr<const Instrument> const &instrument) {
+  auto pmap = std::make_shared<ParameterMap>();
+  pmap->setInstrument(instrument.get());
+  return pmap;
+}
 
 std::shared_ptr<const Instrument> makeParameterized(std::shared_ptr<const Instrument> baseInstrument) {
   return std::make_shared<const Instrument>(baseInstrument, std::make_shared<ParameterMap>());
@@ -68,10 +74,12 @@ public:
     // Create a very basic instrument to visit
     auto visitee = createMinimalInstrument(V3D(0, 0, 0) /*source pos*/, V3D(10, 0, 0) /*sample pos*/,
                                            V3D(11, 0, 0) /*detector position*/);
-    auto pmap = std::make_shared<ParameterMap>();
-    auto detector = visitee->getDetector(visitee->getDetectorIDs()[0]);
-    pmap->addV3D(detector->getComponentID(), "pos", Mantid::Kernel::V3D{12, 0, 0});
-    pmap->addV3D(visitee->getComponentID(), "pos", Mantid::Kernel::V3D{13, 0, 0});
+    auto const attached = attachedMap(visitee);
+    auto &componentInfo = attached->mutableComponentInfo();
+    componentInfo.addV3D(0, "pos", Mantid::Kernel::V3D{12, 0, 0});
+    componentInfo.addV3D(componentInfo.root(), "pos", Mantid::Kernel::V3D{13, 0, 0});
+    // As for a Peak's instrument, the visitor walks a copy of the map, which has no ComponentInfo of its own
+    auto const pmap = std::make_shared<ParameterMap>(*attached);
 
     TS_ASSERT_EQUALS(pmap->size(), 2);
 
@@ -98,28 +106,27 @@ public:
     const V3D detectorPos(11, 0, 0);
     // Create a very basic instrument to visit
     auto baseInstrument = ComponentCreationHelper::createMinimalInstrument(sourcePos, samplePos, detectorPos);
-    auto paramMap = std::make_shared<Mantid::Geometry::ParameterMap>();
+    auto const attached = attachedMap(baseInstrument);
 
-    TSM_ASSERT_EQUALS("Expect 0 items in the parameter map to start with", paramMap->size(), 0);
-    auto source = baseInstrument->getComponentByName("source");
+    TSM_ASSERT_EQUALS("Expect 0 items in the parameter map to start with", attached->size(), 0);
+    auto &attachedComponentInfo = attached->mutableComponentInfo();
     const V3D newInstrumentPos(-10, 0, 0);
-    paramMap->addV3D(baseInstrument.get(), "pos", newInstrumentPos);
+    attachedComponentInfo.addV3D(attachedComponentInfo.root(), "pos", newInstrumentPos);
     const V3D newSourcePos(-1, 0, 0);
-    paramMap->addV3D(source.get(), "pos", newSourcePos - newInstrumentPos);
+    attachedComponentInfo.addV3D(attachedComponentInfo.source(), "pos", newSourcePos - newInstrumentPos);
+    // As for a Peak's instrument, the visitor walks a copy of the map, which has no ComponentInfo of its own
+    auto const paramMap = std::make_shared<ParameterMap>(*attached);
 
-    // Test the moved things are where we expect them to be an that the
-    // parameter map is populated.
+    // Test the parameter map is populated.
     TSM_ASSERT_EQUALS("Expect 2 items in the parameter map", paramMap->size(), 2);
 
-    paramMap->setInstrument(baseInstrument.get());
+    InstrumentVisitor visitor(std::make_shared<const Instrument>(baseInstrument, paramMap));
+    visitor.walkInstrument();
+    auto const wrappers = visitor.makeWrappers();
 
     TSM_ASSERT_EQUALS("Expect 0 items in the purged parameter map", paramMap->size(), 0);
 
-    auto parInstrument = std::make_shared<Mantid::Geometry::Instrument>(baseInstrument, paramMap);
-    TS_ASSERT_EQUALS(newSourcePos, parInstrument->getComponentByName("source")->getPos());
-    TS_ASSERT_EQUALS(newInstrumentPos, parInstrument->getPos());
-
-    auto &compInfo = paramMap->componentInfo();
+    auto const &compInfo = *std::get<0>(wrappers);
     TSM_ASSERT("Check source position",
                Mantid::Kernel::toVector3d(compInfo.position(1)).isApprox(Mantid::Kernel::toVector3d(newSourcePos)));
     TSM_ASSERT("Check instrument position",
@@ -286,9 +293,10 @@ public:
     // components, parametrized with the workspace's map, whose parameters are on the first.
     auto neutronic = createMinimalInstrument(V3D(0, 0, -10), V3D(0, 0, 0), V3D(0, 0, 1));
     auto const physical = std::make_shared<const Instrument>(*neutronic);
-    auto pmap = std::make_shared<ParameterMap>();
+    auto const pmap = attachedMap(neutronic);
     auto const sample = neutronic->getSample();
-    pmap->addDouble(sample.get(), "a-double", 1.5);
+    auto &componentInfo = pmap->mutableComponentInfo();
+    componentInfo.addDouble(componentInfo.sample(), "a-double", 1.5);
     Instrument const parametrizedPhysical(physical, pmap);
 
     InstrumentVisitor::makeWrappers(parametrizedPhysical);
@@ -299,9 +307,10 @@ public:
 
   void test_makeWrappers_of_a_parametrized_instrument_keeps_its_legacy_position_parameters() {
     auto instrument = createMinimalInstrument(V3D(0, 0, -10), V3D(0, 0, 0), V3D(0, 0, 1));
-    auto pmap = std::make_shared<ParameterMap>();
+    auto const pmap = attachedMap(instrument);
     auto const sample = instrument->getSample();
-    pmap->addV3D(sample.get(), ParameterMap::pos(), V3D(0, 0, 0.5));
+    auto &componentInfo = pmap->mutableComponentInfo();
+    componentInfo.addV3D(componentInfo.sample(), ParameterMap::pos(), V3D(0, 0, 0.5));
     Instrument const parametrized(instrument, pmap);
 
     auto const wrappers = InstrumentVisitor::makeWrappers(parametrized);
@@ -438,15 +447,17 @@ public:
     // Create a very basic instrument to visit
     auto visitee = createMinimalInstrument(V3D(0, 0, 0) /*source pos*/, V3D(10, 0, 0) /*sample pos*/,
                                            V3D(11, 0, 0) /*detector position*/);
-    auto pmap = std::make_shared<ParameterMap>();
-    auto detector = visitee->getDetector(visitee->getDetectorIDs()[0]);
+    auto const attached = attachedMap(visitee);
+    auto &componentInfo = attached->mutableComponentInfo();
     // Add a scale factor for the detector
 
     Mantid::Kernel::V3D detScaling{2, 2, 2};
-    pmap->addV3D(detector->getComponentID(), ParameterMap::scale(), detScaling);
+    componentInfo.addV3D(0, ParameterMap::scale(), detScaling);
     // Add as scale factor for the instrument
     Mantid::Kernel::V3D instrScaling{3, 3, 3};
-    pmap->addV3D(visitee->getComponentID(), ParameterMap::scale(), instrScaling);
+    componentInfo.addV3D(componentInfo.root(), ParameterMap::scale(), instrScaling);
+    // As for a Peak's instrument, the visitor walks a copy of the map, which has no ComponentInfo of its own
+    auto const pmap = std::make_shared<ParameterMap>(*attached);
     // Sanity check inputs
     TS_ASSERT_EQUALS(pmap->size(), 2);
 

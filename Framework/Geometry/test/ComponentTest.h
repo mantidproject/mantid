@@ -6,7 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
@@ -166,14 +170,22 @@ public:
     TS_ASSERT(ancs[0]->isParametrized());
   }
   void testDescription() {
-    Component parent("Parent", V3D(1, 1, 1));
+    // An instrument holding Parent -> Child, so that the map can be attached
+    auto const instrument = std::make_shared<Instrument>("Instrument");
+    auto *const parentAssembly = new CompAssembly("Parent", instrument.get());
+    parentAssembly->setPos(V3D(1, 1, 1));
+    auto &parent = *parentAssembly;
     // name and parent
-    Component q("Child", V3D(5, 6, 7), Quat(1, 1, 1, 1), &parent);
+    auto *const child = new Component("Child", V3D(5, 6, 7), Quat(1, 1, 1, 1), parentAssembly);
+    parentAssembly->add(child);
+    auto &q = *child;
 
     TS_ASSERT_THROWS(parent.setDescription("descr"), const Mantid::Kernel::Exception::NotImplementedError &);
 
     ParameterMap_sptr pmap(new ParameterMap());
-    pmap->addString(&q, "ChildMessage", "Message from a child");
+    pmap->setInstrument(instrument.get());
+    auto &componentInfo = pmap->mutableComponentInfo();
+    componentInfo.addString(componentInfo.indexOf(&q), "ChildMessage", "Message from a child");
     Component pq(&q, pmap.get());
 
     TS_ASSERT_EQUALS(pq.getName(), "Child");
@@ -359,13 +371,21 @@ public:
   void testGetParameterVisibile() {
     V3D origin(0, 0, 0);
 
-    Component comp("origin", origin);
+    auto const instrument = std::make_shared<Instrument>("Instrument");
+    auto *const comp = new Component("origin", origin);
+    instrument->add(comp);
     ParameterMap_sptr pmap(new ParameterMap());
-    pmap->addString(&comp, "Hidden string parameter", "hidden values", nullptr, "false");
-    pmap->addDouble(&comp, "Hidden double parameter", 0.0, nullptr, "false");
-    auto names = comp.getParameterNames();
-    for (auto name : names) {
-      TS_ASSERT_EQUALS(comp.getParameterVisible(name, false), false);
+    pmap->setInstrument(instrument.get());
+    auto &componentInfo = pmap->mutableComponentInfo();
+    auto const index = componentInfo.indexOf(comp);
+    componentInfo.addString(index, "Hidden string parameter", "hidden values", nullptr, "false");
+    componentInfo.addDouble(index, "Hidden double parameter", 0.0, nullptr, "false");
+
+    Component const parametrized(comp, pmap.get());
+    auto const names = parametrized.getParameterNames(false);
+    TS_ASSERT_EQUALS(names.size(), 2);
+    for (auto const &name : names) {
+      TS_ASSERT_EQUALS(parametrized.getParameterVisible(name, false), false);
     }
   }
 

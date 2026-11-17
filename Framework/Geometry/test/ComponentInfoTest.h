@@ -828,14 +828,13 @@ public:
     auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 4);
     auto bank = instrument->getComponentByName("bank1");
     ParameterMap pmap;
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument, &pmap);
+    const auto &componentInfo = std::get<0>(wrappers);
+    const size_t bankIndex = componentInfo->root() - 3;
     pmap.addDouble(bank.get(), "my_double", 42.0);
     pmap.addString(bank.get(), "my_string", "hello");
     pmap.addBool(bank.get(), "my_bool", true);
     pmap.addInt(bank.get(), "my_int", 7);
-
-    auto wrappers = InstrumentVisitor::makeWrappers(*instrument, &pmap);
-    const auto &componentInfo = std::get<0>(wrappers);
-    const size_t bankIndex = componentInfo->root() - 3;
 
     TS_ASSERT(componentInfo->hasParameter(bankIndex, "my_double"));
     TS_ASSERT(!componentInfo->hasParameter(bankIndex, "no_such_parameter"));
@@ -869,13 +868,11 @@ public:
 
   void test_named_parameter_recursive_lookup_and_no_recursion() {
     auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 4);
-    auto bank = instrument->getComponentByName("bank1");
     ParameterMap pmap;
-    pmap.addDouble(bank.get(), "bank_level_param", 1.5);
-
     auto wrappers = InstrumentVisitor::makeWrappers(*instrument, &pmap);
     const auto &componentInfo = std::get<0>(wrappers);
     const size_t bankIndex = componentInfo->root() - 3;
+    componentInfo->addDouble(bankIndex, "bank_level_param", 1.5);
     // A detector one level below the bank inherits the parameter recursively...
     const size_t detectorIndex = componentInfo->children(componentInfo->children(bankIndex)[0])[0];
 
@@ -908,18 +905,14 @@ public:
     auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 4);
     auto bank = instrument->getComponentByName("bank1");
     ParameterMap pmap;
-    pmap.addDouble(bank.get(), "from_the_map", 1.0);
-
     auto wrappers = InstrumentVisitor::makeWrappers(*instrument, &pmap);
     const auto &componentInfo = std::get<0>(wrappers);
     const size_t bankIndex = componentInfo->indexOf(bank->getComponentID());
 
-    // The rekey carried the existing parameter across...
-    TS_ASSERT_EQUALS(componentInfo->getNumberParameter(bankIndex, "from_the_map").at(0), 1.0);
-    // ...and the map still sees it afterwards, i.e. the rekey moved the store rather than
-    // leaving the map pointing at an orphaned copy.
-    TS_ASSERT(pmap.contains(bank.get(), "from_the_map"));
-    TS_ASSERT_EQUALS(pmap.get(bank.get(), "from_the_map")->value<double>(), 1.0);
+    componentInfo->addDouble(bankIndex, "from_component_info", 1.0);
+    // The map and the ComponentInfo share one store, so the map sees the parameter
+    TS_ASSERT(pmap.contains(bank.get(), "from_component_info"));
+    TS_ASSERT_EQUALS(pmap.get(bank.get(), "from_component_info")->value<double>(), 1.0);
   }
 
   void test_parameters_written_through_ComponentInfo_read_back_typed() {
@@ -1020,12 +1013,12 @@ public:
     auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 2);
     auto bank = instrument->getComponentByName("bank1");
     ParameterMap pmap;
-    pmap.addDouble(bank.get(), "a_double", 2.5);
-    pmap.addInt(bank.get(), "an_int", 7);
-    pmap.addString(bank.get(), "a_string", "hello");
     auto wrappers = InstrumentVisitor::makeWrappers(*instrument, &pmap);
-    auto const &componentInfo = *std::get<0>(wrappers);
+    auto &componentInfo = *std::get<0>(wrappers);
     auto const bankIndex = componentInfo.indexOf(bank->getComponentID());
+    componentInfo.addDouble(bankIndex, "a_double", 2.5);
+    componentInfo.addInt(bankIndex, "an_int", 7);
+    componentInfo.addString(bankIndex, "a_string", "hello");
     auto const detectorIndex = componentInfo.children(componentInfo.children(bankIndex)[0])[0];
     auto const parametrizedBank = ParComponentFactory::create(bank, &pmap);
 

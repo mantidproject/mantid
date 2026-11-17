@@ -87,12 +87,10 @@ public:
   }
   /// method swaps two parameter maps contents  each other
   void swap(ParameterMap &other) {
-    // The index domain and staging tables must travel with the store: an index is meaningless without them.
+    // The index domain must travel with the store: an index is meaningless without it.
     m_parameterInfo.swap(other.m_parameterInfo);
     m_domainIds.swap(other.m_domainIds);
     m_domainIndices.swap(other.m_domainIndices);
-    m_stagedIndices.swap(other.m_stagedIndices);
-    m_stagedIds.swap(other.m_stagedIds);
   }
   /// Clear any parameters with the given name
   void clearParametersByName(const std::string &name);
@@ -144,7 +142,8 @@ public:
    * The same operations addressed by component index instead of by a legacy component pointer,
    * for callers that already hold an index. These are the primary implementations; the
    * pointer-based overloads above translate and delegate to them. A componentIndex of
-   * ComponentInfo::invalidIndex is ignored, so a caller whose lookup failed need not branch. */
+   * ComponentInfo::invalidIndex is ignored, so a caller whose lookup failed need not branch. A detached map, which
+   * has no component indices, throws std::logic_error. */
   //@{
   void add(const std::string &type, const size_t componentIndex, const std::string &name, const std::string &value,
            const std::string *const pDescription = nullptr, const std::string &pVisible = "true");
@@ -345,7 +344,8 @@ public:
 
   /** Attach this map to an instrument's component index domain, rekeying its parameters onto the
    * instrument's component indices, and return the resulting store. Parameters of components outside
-   * the domain are dropped. A map already attached to this domain is left as it is. */
+   * the domain are dropped. A map already attached to this domain is left as it is, and a detached map,
+   * which holds no parameters by component, simply adopts the domain. */
   std::shared_ptr<ParameterInfo> rekey(std::shared_ptr<const ComponentIDs> componentIds,
                                        std::shared_ptr<const ComponentIndices> componentIndices);
 
@@ -364,10 +364,10 @@ private:
 
   /// The number of components in the index domain
   size_t domainSize() const { return m_domainIds ? m_domainIds->size() : 0; }
-  /// Index for a component, or ComponentInfo::invalidIndex if this map holds nothing for it.
+  /// Index for a component, or ComponentInfo::invalidIndex if it is not in this map's index domain, which a
+  /// detached map does not have.
   size_t indexOf(const IComponent *comp) const;
-  /// As indexOf(), but allocating a staging index for a component of a detached map seen for the
-  /// first time. Throws for a component outside the index domain of an attached map.
+  /// As indexOf(), but throws for a detached map, or a component outside the index domain.
   size_t indexForWrite(const IComponent *comp);
   /// The name of the component with this store index
   std::string componentName(const size_t index) const;
@@ -382,14 +382,9 @@ private:
 
   /** The index domain: the components of the instrument this map is attached to, shared with that
    * instrument's ComponentInfo. Within it, a component's store index is its component index. Both
-   * null for a detached map. */
+   * null for a detached map, which cannot be written to by component. */
   std::shared_ptr<const ComponentIDs> m_domainIds;
   std::shared_ptr<const ComponentIndices> m_domainIndices;
-
-  /** Staging indices, for the components of a detached map, which has no component indices yet.
-   * Staging index i is m_stagedIds[i]. rekey() converts them to component indices and clears them. */
-  std::unordered_map<Geometry::IComponent const *, size_t> m_stagedIndices;
-  std::vector<ComponentID> m_stagedIds;
 
   /** The 2.0 instrument layers, co-owned with the ExperimentInfo that built them.
    *

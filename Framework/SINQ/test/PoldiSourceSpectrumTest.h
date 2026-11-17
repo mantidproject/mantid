@@ -60,8 +60,9 @@ public:
   void testGetSpectrumParameter() {
     TestablePoldiSourceSpectrum spectrum;
 
-    std::shared_ptr<const IComponent> source = std::make_shared<PoldiFakeSourceComponent>();
-    ParameterMap_sptr goodParameterMap(new PoldiValidFakeParameterMap(source.get()));
+    auto const instrument = makeFakePoldiSourceInstrument();
+    auto const source = instrument->getComponentByName("FakePoldiSource");
+    ParameterMap_sptr goodParameterMap(new PoldiValidFakeParameterMap(instrument.get(), source.get()));
 
     TS_ASSERT_THROWS_NOTHING(spectrum.getSpectrumParameter(source, goodParameterMap));
 
@@ -72,8 +73,9 @@ public:
   void testSetSpectrum() {
     TestablePoldiSourceSpectrum spectrum;
 
-    std::shared_ptr<const IComponent> source = std::make_shared<PoldiFakeSourceComponent>();
-    ParameterMap_sptr goodParameterMap(new PoldiValidFakeParameterMap(source.get()));
+    auto const instrument = makeFakePoldiSourceInstrument();
+    auto const source = instrument->getComponentByName("FakePoldiSource");
+    ParameterMap_sptr goodParameterMap(new PoldiValidFakeParameterMap(instrument.get(), source.get()));
     Parameter_sptr goodParameter = spectrum.getSpectrumParameter(source, goodParameterMap);
     TS_ASSERT_THROWS_NOTHING(spectrum.setSpectrum(goodParameter));
 

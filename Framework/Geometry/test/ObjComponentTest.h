@@ -7,6 +7,9 @@
 #pragma once
 
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/CompAssembly.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Objects/CSGObject.h"
@@ -312,42 +315,55 @@ public:
     TS_ASSERT_DELTA(point.Z(), -31.5, 1e-6);
   }
 
-  ObjComponent *MakeWithScaleFactor(const ObjComponent *parent, ParameterMap *map, double X, double Y, double Z) {
-    ObjComponent *ret = new ObjComponent(parent, map);
-    map->addV3D(ret, "sca", V3D(X, Y, Z));
-    return ret;
+  struct ScaledComponent {
+    std::shared_ptr<Instrument> instrument;
+    ParameterMap_sptr map;
+    std::unique_ptr<ObjComponent> component;
+  };
+
+  /// A parametrized capped cylinder, scaled through ComponentInfo. Its base sits at pos with rotation rot, under a
+  /// parent at parentPos in an instrument, which owns it and has the map attached.
+  ScaledComponent makeWithScaleFactor(const V3D &scale, const V3D &pos = V3D(), const Quat &rot = Quat(),
+                                      const V3D &parentPos = V3D()) {
+    auto instrument = std::make_shared<Instrument>("Instrument");
+    auto *const parent = new CompAssembly("parent", instrument.get());
+    parent->setPos(parentPos);
+    auto *const base = new ObjComponent("ocyl", createCappedCylinder(), parent);
+    parent->add(base);
+    base->setPos(pos);
+    base->setRot(rot);
+    auto map = std::make_shared<ParameterMap>();
+    map->setInstrument(instrument.get());
+    auto &componentInfo = map->mutableComponentInfo();
+    componentInfo.setScaleFactor(componentInfo.indexOf(base), scale);
+    return {instrument, map, std::make_unique<ObjComponent>(base, map.get())};
   }
 
   void testIsValidWithScaleFactor() {
-    ParameterMap map;
-    ObjComponent ocyl_base("ocyl", createCappedCylinder());
-    ObjComponent *ocyl = MakeWithScaleFactor(&ocyl_base, &map, 2.0, 1.0, 1.0);
+    auto const scaled = makeWithScaleFactor(V3D(2.0, 1.0, 1.0));
+    auto const *ocyl = scaled.component.get();
     TS_ASSERT(ocyl->isValid(V3D(2.4, 0.0, 0.0)));
     TS_ASSERT(ocyl->isValid(V3D(-6.4, 0.0, 0.0)));
     TS_ASSERT(!ocyl->isValid(V3D(2.5, 0.0, 0.0)));
     TS_ASSERT(!ocyl->isValid(V3D(-6.5, 0.0, 0.0)));
     TS_ASSERT(ocyl->isValid(V3D(2.3, 0.0, 0.0)));
     TS_ASSERT(ocyl->isValid(V3D(-6.3, 0.0, 0.0)));
-    delete ocyl;
   }
 
   void testIsOnSideWithScaleFactor() {
-    ParameterMap map;
-    ObjComponent ocyl_base("ocyl", createCappedCylinder());
-    ObjComponent *ocyl = MakeWithScaleFactor(&ocyl_base, &map, 2.0, 1.0, 1.0);
+    auto const scaled = makeWithScaleFactor(V3D(2.0, 1.0, 1.0));
+    auto const *ocyl = scaled.component.get();
     TS_ASSERT(ocyl->isOnSide(V3D(2.4, 0.0, 0.0)));
     TS_ASSERT(ocyl->isOnSide(V3D(-6.4, 0.0, 0.0)));
     TS_ASSERT(!ocyl->isOnSide(V3D(2.5, 0.0, 0.0)));
     TS_ASSERT(!ocyl->isOnSide(V3D(-6.5, 0.0, 0.0)));
     TS_ASSERT(!ocyl->isOnSide(V3D(2.3, 0.0, 0.0)));
     TS_ASSERT(!ocyl->isOnSide(V3D(-6.3, 0.0, 0.0)));
-    delete ocyl;
   }
 
   void testInterceptSurfaceWithScaleFactor() {
-    ParameterMap map;
-    ObjComponent ocyl_base("ocyl", createCappedCylinder());
-    ObjComponent *ocyl = MakeWithScaleFactor(&ocyl_base, &map, 2.0, 1.0, 3.0);
+    auto const scaled = makeWithScaleFactor(V3D(2.0, 1.0, 3.0));
+    auto const *ocyl = scaled.component.get();
 
     Track trackScale(V3D(-6.5, 0, 0), V3D(1.0, 0, 0));
     TS_ASSERT_EQUALS(ocyl->interceptSurface(trackScale), 1);
@@ -369,65 +385,50 @@ public:
     TS_ASSERT_DELTA(itscaleW->distFromStart, 6.5, 1e-6);
     TS_ASSERT_EQUALS(itscaleW->entryPoint, V3D(0, 0, -1.5));
     TS_ASSERT_EQUALS(itscaleW->exitPoint, V3D(0, 0, +1.5));
-    delete ocyl;
   }
 
   void testBoundingBoxWithScaleFactor() {
-    ParameterMap map;
-    ObjComponent A_base("ocyl", createCappedCylinder());
-    ObjComponent *A = MakeWithScaleFactor(&A_base, &map, 2.0, 1.0, 1.0);
+    auto const scaled = makeWithScaleFactor(V3D(2.0, 1.0, 1.0));
+    auto const *A = scaled.component.get();
     BoundingBox bbox;
     A->getBoundingBox(bbox);
     TS_ASSERT_DELTA(bbox.xMax(), 2.4, 0.00001);
     TS_ASSERT_DELTA(bbox.xMin(), -6.4, 0.00001);
-    delete A;
   }
 
   void testPointInObjectWithScaleFactor() {
-    ParameterMap map;
-    ObjComponent A_base("ocyl", createCappedCylinder());
-    ObjComponent *A = MakeWithScaleFactor(&A_base, &map, 2.0, 1.0, 1.0);
+    auto const scaled = makeWithScaleFactor(V3D(2.0, 1.0, 1.0));
+    auto const *A = scaled.component.get();
     V3D scalept;
     TS_ASSERT_EQUALS(A->getPointInObject(scalept), 1);
     TS_ASSERT_DELTA(scalept.X(), 0.0, 1e-6);
     TS_ASSERT_DELTA(scalept.Y(), 0.0, 1e-6);
     TS_ASSERT_DELTA(scalept.Z(), 0.0, 1e-6);
-    delete A;
   }
 
   void testPointInObjectWithScaleFactor2() {
-    ParameterMap map;
-    ObjComponent A_base("ocyl", createCappedCylinder());
-    A_base.setRot(Quat(90.0, V3D(0, 0, 1)));
-    ObjComponent *A = MakeWithScaleFactor(&A_base, &map, 2.0, 1.0, 1.0);
+    auto const scaled = makeWithScaleFactor(V3D(2.0, 1.0, 1.0), V3D(), Quat(90.0, V3D(0, 0, 1)));
+    auto const *A = scaled.component.get();
     V3D scalept(0, 0, 0);
     TS_ASSERT_EQUALS(A->getPointInObject(scalept), 1);
     TS_ASSERT_DELTA(scalept.X(), 0.0, 1e-6);
     TS_ASSERT_DELTA(scalept.Y(), 0.0, 1e-6);
     TS_ASSERT_DELTA(scalept.Z(), 0.0, 1e-6);
-    delete A;
   }
 
   void testPointInObjectWithScaleFactorAndWithOffset() {
-    ParameterMap map;
-    ObjComponent A_base("ocyl", createCappedCylinder());
-    A_base.setPos(10, 0, 0);
-    ObjComponent *A = MakeWithScaleFactor(&A_base, &map, 2.0, 1.0, 1.0);
+    auto const scaled = makeWithScaleFactor(V3D(2.0, 1.0, 1.0), V3D(10, 0, 0));
+    auto const *A = scaled.component.get();
     V3D scalept(0, 0, 0);
     TS_ASSERT_EQUALS(A->getPointInObject(scalept), 1);
     TS_ASSERT_DELTA(scalept.X(), 10.0, 1e-6);
     TS_ASSERT_DELTA(scalept.Y(), 0.0, 1e-6);
     TS_ASSERT_DELTA(scalept.Z(), 0.0, 1e-6);
-    delete A;
   }
 
   void testSolidAngleCappedCylinderWithScaleFactor() {
-    ParameterMap map;
-    ObjComponent A_base("ocyl", createCappedCylinder());
-    ObjComponent *A = MakeWithScaleFactor(&A_base, &map, 2.0, 1.0, 1.0);
-
-    A_base.setPos(10, 0, 0);
-    A_base.setRot(Quat(90.0, V3D(0, 0, 1)));
+    auto const scaled = makeWithScaleFactor(V3D(2.0, 1.0, 1.0), V3D(10, 0, 0), Quat(90.0, V3D(0, 0, 1)));
+    auto const *A = scaled.component.get();
     double satol = 3e-3; // tolerance for solid angle
 
     // this point should be 0.5 above the cylinder on its axis of sym
@@ -437,22 +438,22 @@ public:
     // Internal point
     TS_ASSERT_DELTA(A->solidAngle(V3D(10, 0, 0)), 4 * M_PI, satol);
 
-    // Add a parent with a rotation of its own;
-    Component parent("parent", V3D(0, 10, 0), Quat(0.0, V3D(0, 1, 0)));
-    A_base.setParent(&parent);
+    // The same component under a parent at (0, 10, 0), with no rotation of its own
+    auto const scaledWithParent =
+        makeWithScaleFactor(V3D(2.0, 1.0, 1.0), V3D(10, 0, 0), Quat(90.0, V3D(0, 0, 1)), V3D(0, 10, 0));
+    auto const *AWithParent = scaledWithParent.component.get();
 
     // See testSolidAngleCappedCylinder in ObjectTest - these tests are a subset
     // of them
     // assume this is the same position as above
-    TS_ASSERT_DELTA(A->solidAngle(V3D(10, 12.9, 0)), 1.840302, satol);
+    TS_ASSERT_DELTA(AWithParent->solidAngle(V3D(10, 12.9, 0)), 1.840302, satol);
     // internal point (should be 4pi)
-    TS_ASSERT_DELTA(A->solidAngle(V3D(10, 10, 0)), 4 * M_PI, satol);
+    TS_ASSERT_DELTA(AWithParent->solidAngle(V3D(10, 10, 0)), 4 * M_PI, satol);
 
     // Calling on an ObjComponent without an associated geometric object will
     // throw
     ObjComponent B("noShape");
     TS_ASSERT_THROWS(B.solidAngle(V3D(1, 2, 3)), const Exception::NullPointerException &)
-    delete A;
   }
 
 private:

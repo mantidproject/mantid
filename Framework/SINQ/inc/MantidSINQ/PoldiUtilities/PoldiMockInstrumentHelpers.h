@@ -145,12 +145,21 @@ public:
   }
 };
 
+/// A map attached to the given instrument, with a WavelengthDistribution on one of its components
 class PoldiValidFakeParameterMap : public ParameterMap {
 public:
-  PoldiValidFakeParameterMap(const IComponent *component) : ParameterMap() {
+  PoldiValidFakeParameterMap(const Instrument *instrument, const IComponent *component) : ParameterMap() {
+    setInstrument(instrument);
     add("fitting", component, "WavelengthDistribution", FitParameter());
   }
 };
+
+/// An instrument holding only a PoldiFakeSourceComponent
+inline std::shared_ptr<Instrument> makeFakePoldiSourceInstrument() {
+  auto instrument = std::make_shared<Instrument>("FakePoldi");
+  instrument->add(new PoldiFakeSourceComponent);
+  return instrument;
+}
 
 class PoldiInvalidFakeParameterMap : public ParameterMap {
 public:
