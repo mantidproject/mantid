@@ -82,9 +82,8 @@ bool MDTransfNoQ::calcMatrixCoord(const double &X, std::vector<coord_t> &Coord, 
   return true;
 }
 
-std::vector<double> MDTransfNoQ::getExtremumPoints(const double xMin, const double xMax, size_t det_num) const {
-  UNUSED_ARG(det_num);
-
+std::vector<double> MDTransfNoQ::getExtremumPoints(const double xMin, const double xMax,
+                                                   [[maybe_unused]] size_t det_num) const {
   std::vector<double> rez(2);
   rez[0] = xMin;
   rez[1] = xMax;
@@ -96,10 +95,8 @@ std::vector<double> MDTransfNoQ::getExtremumPoints(const double xMin, const doub
 workspace.
 Depending on ws axis units, the numebr here is either 1 or 2* and is independent
 on emode*/
-unsigned int MDTransfNoQ::getNMatrixDimensions(Kernel::DeltaEMode::Type mode,
+unsigned int MDTransfNoQ::getNMatrixDimensions([[maybe_unused]] Kernel::DeltaEMode::Type mode,
                                                API::MatrixWorkspace_const_sptr inWS) const {
-  UNUSED_ARG(mode);
-
   API::NumericAxis *pXAx, *pYAx;
   this->getAxes(inWS, pXAx, pYAx);
 
@@ -129,10 +126,8 @@ here it is usually input ws units, which are independent on emode
 * @param  inWS -- input matrix workspace shared pointer
 *
 */
-std::vector<std::string> MDTransfNoQ::outputUnitID(Kernel::DeltaEMode::Type mode,
+std::vector<std::string> MDTransfNoQ::outputUnitID([[maybe_unused]] Kernel::DeltaEMode::Type mode,
                                                    API::MatrixWorkspace_const_sptr inWS) const {
-  UNUSED_ARG(mode);
-
   std::vector<std::string> rez;
   API::NumericAxis *pXAxis, *pYAx;
   this->getAxes(inWS, pXAxis, pYAx);
@@ -154,8 +149,8 @@ std::vector<std::string> MDTransfNoQ::getDefaultDimID(Kernel::DeltaEMode::Type m
 }
 /**  returns the units, the input ws is actually in as they coinside with input
  * units for this class */
-const std::string MDTransfNoQ::inputUnitID(Kernel::DeltaEMode::Type mode, API::MatrixWorkspace_const_sptr inWS) const {
-  UNUSED_ARG(mode);
+const std::string MDTransfNoQ::inputUnitID([[maybe_unused]] Kernel::DeltaEMode::Type mode,
+                                           API::MatrixWorkspace_const_sptr inWS) const {
   API::NumericAxis *pXAxis;
   // get the X axis of input workspace, it has to be there; if not axis throws
   // invalid index

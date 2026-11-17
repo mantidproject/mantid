@@ -25,7 +25,7 @@ void PoldiDetectorDecorator::setDecoratedDetector(std::shared_ptr<PoldiAbstractD
 
 std::shared_ptr<PoldiAbstractDetector> PoldiDetectorDecorator::decoratedDetector() { return m_decoratedDetector; }
 
-void PoldiDetectorDecorator::loadConfiguration(Instrument_const_sptr poldiInstrument) { UNUSED_ARG(poldiInstrument); }
+void PoldiDetectorDecorator::loadConfiguration([[maybe_unused]] Instrument_const_sptr poldiInstrument) {}
 
 double PoldiDetectorDecorator::efficiency() {
   if (m_decoratedDetector) {

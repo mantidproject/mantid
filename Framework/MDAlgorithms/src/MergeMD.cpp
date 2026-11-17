@@ -162,11 +162,9 @@ void MergeMD::createOutputWorkspace(std::vector<std::string> &inputs) {
  * @param expInfoIndexOffset :: offset to be added to the expInfoIndex
  */
 template <size_t nd, size_t ond>
-inline void copyEvent(const MDLeanEvent<nd> &srcEvent, MDLeanEvent<ond> &newEvent, const uint16_t expInfoIndexOffset) {
+inline void copyEvent([[maybe_unused]] const MDLeanEvent<nd> &srcEvent, [[maybe_unused]] MDLeanEvent<ond> &newEvent,
+                      [[maybe_unused]] const uint16_t expInfoIndexOffset) {
   // Nothing extra copy - this is no-op
-  UNUSED_ARG(srcEvent);
-  UNUSED_ARG(newEvent);
-  UNUSED_ARG(expInfoIndexOffset);
 }
 
 //----------------------------------------------------------------------------------------------

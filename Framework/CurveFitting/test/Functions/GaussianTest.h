@@ -34,10 +34,8 @@ public:
   std::string name() const override { return "SimplexGaussian"; }
 
 protected:
-  void functionDerivMW(Jacobian *out, const double *xValues, const size_t nData) {
-    UNUSED_ARG(out);
-    UNUSED_ARG(xValues);
-    UNUSED_ARG(nData);
+  void functionDerivMW([[maybe_unused]] Jacobian *out, [[maybe_unused]] const double *xValues,
+                       [[maybe_unused]] const size_t nData) {
     throw Exception::NotImplementedError("No derivative function provided");
   }
 };

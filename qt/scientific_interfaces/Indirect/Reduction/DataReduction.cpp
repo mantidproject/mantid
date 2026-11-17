@@ -308,8 +308,7 @@ void DataReduction::loadInstrumentDetails() {
       m_instDetails[QString::fromStdString(key)] = std::move(value);
     }
     // In the case that the parameter does not exist
-    catch (Mantid::Kernel::Exception::NotFoundError &nfe) {
-      UNUSED_ARG(nfe);
+    catch (const Mantid::Kernel::Exception::NotFoundError &) {
       g_log.warning() << "Could not find parameter " << ipfElement << " in instrument " << instrumentName << '\n';
     }
   }

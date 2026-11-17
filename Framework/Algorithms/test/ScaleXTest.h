@@ -15,6 +15,7 @@
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 
 using Mantid::HistogramData::Histogram;
 
@@ -93,13 +94,12 @@ public:
     const std::string parname("factor");
 
     const auto &spectrumInfo = inputWS->spectrumInfo();
-    const auto &det1 = spectrumInfo.detector(0);
+    auto const &componentInfo = inputWS->componentInfo();
     const double det1Factor(5);
-    pmap.addDouble(det1.getComponentID(), parname, det1Factor);
+    pmap.addDouble(componentInfo.componentID(spectrumInfo.firstDetectorIndex(0)), parname, det1Factor);
 
-    const auto &det2 = spectrumInfo.detector(1);
     const double det2Factor(-10);
-    pmap.addDouble(det2.getComponentID(), parname, det2Factor);
+    pmap.addDouble(componentInfo.componentID(spectrumInfo.firstDetectorIndex(1)), parname, det2Factor);
 
     const double instFactor(100);
     auto inst = inputWS->getInstrument();
@@ -136,13 +136,12 @@ public:
     const std::string parname("factor");
 
     const auto &spectrumInfo = inputWS->spectrumInfo();
-    const auto &det1 = spectrumInfo.detector(0);
+    auto const &componentInfo = inputWS->componentInfo();
     const double det1Factor(5);
-    pmap.addDouble(det1.getComponentID(), parname, det1Factor);
+    pmap.addDouble(componentInfo.componentID(spectrumInfo.firstDetectorIndex(0)), parname, det1Factor);
 
-    const auto &det2 = spectrumInfo.detector(1);
     const double det2Factor(-10);
-    pmap.addDouble(det2.getComponentID(), parname, det2Factor);
+    pmap.addDouble(componentInfo.componentID(spectrumInfo.firstDetectorIndex(1)), parname, det2Factor);
 
     const double instFactor(100);
     auto inst = inputWS->getInstrument();

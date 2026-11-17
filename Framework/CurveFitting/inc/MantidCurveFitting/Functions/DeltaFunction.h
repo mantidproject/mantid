@@ -34,7 +34,7 @@ public:
   double fwhm() const override { return 0; }
   void setCentre(const double c) override { setParameter("Centre", c); }
   void setHeight(const double h) override { setParameter("Height", h); }
-  void setFwhm(const double w) override { UNUSED_ARG(w); }
+  void setFwhm([[maybe_unused]] const double w) override {}
   virtual double HeightPrefactor() const { return 1.0; } // modulates the Height of the Delta function
   /// overwrite IFunction base class methods
   std::string name() const override { return "DeltaFunction"; }
@@ -43,16 +43,10 @@ public:
 protected:
   void function1D(double *out, const double *xValues, const size_t nData) const override;
   void functionDeriv1D(API::Jacobian *out, const double *xValues, const size_t nData) override;
-  void functionLocal(double *out, const double *xValues, const size_t nData) const override {
-    UNUSED_ARG(out);
-    UNUSED_ARG(xValues);
-    UNUSED_ARG(nData);
-  }
-  void functionDerivLocal(API::Jacobian *out, const double *xValues, const size_t nData) override {
-    UNUSED_ARG(out);
-    UNUSED_ARG(xValues);
-    UNUSED_ARG(nData);
-  }
+  void functionLocal([[maybe_unused]] double *out, [[maybe_unused]] const double *xValues,
+                     [[maybe_unused]] const size_t nData) const override {}
+  void functionDerivLocal([[maybe_unused]] API::Jacobian *out, [[maybe_unused]] const double *xValues,
+                          [[maybe_unused]] const size_t nData) override {}
 };
 
 } // namespace Functions

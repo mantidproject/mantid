@@ -17,6 +17,7 @@
 #include "MantidDataHandling/MoveInstrumentComponent.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/Unit.h"
 
 using namespace Mantid::API;
@@ -436,9 +437,10 @@ public:
 
     auto &pmap = testWS->instrumentParameters();
     const auto &spectrumInfo = testWS->spectrumInfo();
-    pmap.addDouble(&spectrumInfo.detector(0), "Efixed", 0.4);
-    pmap.addDouble(&spectrumInfo.detector(1), "Efixed", 0.1);
-    pmap.addDouble(&spectrumInfo.detector(2), "Efixed", 0.025);
+    auto const &componentInfo = testWS->componentInfo();
+    pmap.addDouble(componentInfo.componentID(spectrumInfo.firstDetectorIndex(0)), "Efixed", 0.4);
+    pmap.addDouble(componentInfo.componentID(spectrumInfo.firstDetectorIndex(1)), "Efixed", 0.1);
+    pmap.addDouble(componentInfo.componentID(spectrumInfo.firstDetectorIndex(2)), "Efixed", 0.025);
 
     Mantid::Algorithms::ConvertSpectrumAxis2 conv;
     conv.initialize();

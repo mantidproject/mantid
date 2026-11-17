@@ -88,7 +88,7 @@ SXPeak::SXPeak(double t, double phi, double intensity, const std::vector<int> &s
   if (m_LTotal < 0) {
     throw std::invalid_argument("SXPeak: Cannot have detector distance < 0");
   }
-  m_detId = spectrumInfo.detector(m_wsIndex).getID();
+  m_detId = spectrumInfo.firstDetectorID(m_wsIndex);
   m_nPixels = 1;
 
   Mantid::Kernel::Units::TOF tof;

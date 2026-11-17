@@ -35,6 +35,7 @@
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V2D.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include <Poco/Path.h>
 #include <algorithm>
@@ -247,6 +248,10 @@ std::shared_ptr<CSGObject> createHollowShell(double innerRadius, double outerRad
   return shapeMaker.createShape(wholeXML);
 }
 
+// allow DetectorGroup in the below
+GNU_DIAG_OFF("deprecated-declarations")
+MSVC_DIAG_OFF(4996)
+
 //----------------------------------------------------------------------------------------------
 /**
  * Create a detector group containing 5 detectors
@@ -336,6 +341,10 @@ std::shared_ptr<DetectorGroup> createRingOfCylindricalDetectors(const double R_m
                  [](auto &det) { return std::move(det); });
   return std::make_shared<DetectorGroup>(std::move(groupMembers));
 }
+
+MSVC_DIAG_ON(4996)
+GNU_DIAG_ON("deprecated-declarations")
+// end allow DetectorGroup
 
 Instrument_sptr createTestInstrumentCylindrical(int num_banks, const Mantid::Kernel::V3D &sourcePos,
                                                 const Mantid::Kernel::V3D &samplePos, const double cylRadius,

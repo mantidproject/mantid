@@ -8,6 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/FakeObjects.h"
 #include "MantidFrameworkTestHelpers/InstrumentCreationHelper.h"
@@ -140,7 +141,7 @@ public:
   // removed at some point.
   void test_twoThetaLegacy() {
     const auto &detectorInfo = m_workspace.detectorInfo();
-    auto det = m_workspace.getDetector(2);
+    ALLOW_DEPRECATED(auto det = m_workspace.getDetector(2));
     TS_ASSERT_EQUALS(detectorInfo.twoTheta(2), m_workspace.detectorTwoTheta(*det));
   }
 
@@ -196,21 +197,6 @@ public:
     TS_ASSERT_DELTA(ws->detectorInfo().phiOffset(0, M_PI), M_PI - M_PI / 4, 1e-12);
     auto ws2 = makeWorkspace(1, false, V3D(0.0, -1.0, 5.0));
     TS_ASSERT_DELTA(ws2->detectorInfo().phiOffset(0, M_PI), -(M_PI - M_PI / 2), 1e-12);
-  }
-
-  void test_angles_with_observer_match_legacy_including_monitors() {
-    const auto &detectorInfo = m_workspace.detectorInfo();
-    const V3D observer(0.1, -0.2, 0.3);
-    const V3D axis(0.0, 0.1, 1.0);
-    const V3D up(0.3, 1.0, 0.0);
-    for (size_t i = 0; i < detectorInfo.size(); ++i) {
-      ALLOW_DEPRECATED(const auto &det = detectorInfo.detector(i));
-      TS_ASSERT_DELTA(detectorInfo.twoTheta(i, observer, axis), det.getTwoTheta(observer, axis), 1e-12);
-      TS_ASSERT_DELTA(detectorInfo.signedTwoTheta(i, observer, axis, up), det.getSignedTwoTheta(observer, axis, up),
-                      1e-12);
-      TS_ASSERT_DELTA(detectorInfo.phi(i), det.getPhi(), 1e-12);
-      TS_ASSERT_DELTA(detectorInfo.phiOffset(i, M_PI), det.getPhiOffset(M_PI), 1e-12);
-    }
   }
 
   void test_geographicalAngles_casualAngles() {
@@ -520,11 +506,11 @@ public:
     const std::string instrumentName("SimpleFakeInstrument");
     InstrumentCreationHelper::addFullInstrumentToWorkspace(workspace, includeMonitors, startYNegative, instrumentName);
     // Check that *workspace* does not have sorted IDs.
-    TS_ASSERT_EQUALS(workspace.getDetector(0)->getID(), 5);
-    TS_ASSERT_EQUALS(workspace.getDetector(1)->getID(), 4);
-    TS_ASSERT_EQUALS(workspace.getDetector(2)->getID(), 3);
-    TS_ASSERT_EQUALS(workspace.getDetector(3)->getID(), 2);
-    TS_ASSERT_EQUALS(workspace.getDetector(4)->getID(), 1);
+    TS_ASSERT_EQUALS(workspace.spectrumInfo().firstDetectorID(0), 5);
+    TS_ASSERT_EQUALS(workspace.spectrumInfo().firstDetectorID(1), 4);
+    TS_ASSERT_EQUALS(workspace.spectrumInfo().firstDetectorID(2), 3);
+    TS_ASSERT_EQUALS(workspace.spectrumInfo().firstDetectorID(3), 2);
+    TS_ASSERT_EQUALS(workspace.spectrumInfo().firstDetectorID(4), 1);
     const auto &info = workspace.detectorInfo();
     const auto &ids = info.detectorIDs();
     auto sorted_ids(ids);

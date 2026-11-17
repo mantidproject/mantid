@@ -7,6 +7,9 @@
 #pragma once
 
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
@@ -209,15 +212,18 @@ public:
   void testResizingParameter() {
     auto cuboidShape = ComponentCreationHelper::createCuboid(0.5);
 
+    auto const instrument = std::make_shared<Instrument>("Instrument");
     RectangularDetector *det = new RectangularDetector("MyRectangle");
     det->setPos(1000., 2000., 3000.);
     det->initialize(cuboidShape, 100, -50.0, 1.0, 200, -100.0, 1.0, 1000000, true, 1000);
+    auto const pmap = attachedMap(*instrument, det);
 
     // --- Now make a parametrized version ----
-    ParameterMap_sptr pmap(new ParameterMap());
     RectangularDetector *parDet = new RectangularDetector(det, pmap.get());
-    pmap->addDouble(det, "scalex", 12);
-    pmap->addDouble(det, "scaley", 23);
+    auto &componentInfo = pmap->mutableComponentInfo();
+    auto const detIndex = componentInfo.indexOf(det);
+    componentInfo.addDouble(detIndex, "scalex", 12);
+    componentInfo.addDouble(detIndex, "scaley", 23);
 
     // Sizes and steps are scaled by these factors
     TS_ASSERT_DELTA(parDet->xstep(), 12, 1e-5);
@@ -235,7 +241,24 @@ public:
     TS_ASSERT_EQUALS(parDet->getPosAtXY(1, 0), V3D(1000 + (-50. + 1) * 12., 2000 - (100 * 23.), 3000.));
     TS_ASSERT_EQUALS(parDet->getPosAtXY(1, 1), V3D(1000 + (-50. + 1) * 12., 2000 + (-100. + 1) * 23., 3000.));
 
-    delete det;
     delete parDet;
+  }
+
+private:
+  /// Adds the bank to the instrument, which takes ownership of it, registers its pixels as detectors and attaches a
+  /// map to the instrument
+  static ParameterMap_sptr attachedMap(Instrument &instrument, ICompAssembly *bank) {
+    instrument.add(bank);
+    std::vector<IComponent_const_sptr> children;
+    bank->getChildren(children, true);
+    for (auto const &child : children) {
+      if (auto const *pixel = dynamic_cast<const IDetector *>(child.get())) {
+        instrument.markAsDetectorIncomplete(pixel);
+      }
+    }
+    instrument.markAsDetectorFinalize();
+    auto pmap = std::make_shared<ParameterMap>();
+    pmap->setInstrument(&instrument);
+    return pmap;
   }
 };

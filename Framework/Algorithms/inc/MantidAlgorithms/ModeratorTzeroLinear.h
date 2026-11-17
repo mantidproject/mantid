@@ -90,7 +90,8 @@ private:
   // Execution code for event workspace
   void execEvent();
   // Calculate time from sample to detector and initial flight path
-  void calculateTfLi(const API::SpectrumInfo &spectrumInfo, size_t i, double &t_f, double &L_i);
+  void calculateTfLi(const API::SpectrumInfo &spectrumInfo, Geometry::ComponentInfo const &componentInfo, size_t i,
+                     double &t_f, double &L_i);
 };
 
 } // namespace Algorithms

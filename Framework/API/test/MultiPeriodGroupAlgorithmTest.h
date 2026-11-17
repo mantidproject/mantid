@@ -73,14 +73,10 @@ public:
                                                                           // algorithms.
   }
   void exec() override {
-    MatrixWorkspace_sptr a = getProperty("PropertyA");
-    MatrixWorkspace_sptr b = getProperty("PropertyB");
-    MatrixWorkspace_sptr c = getProperty("PropertyC");
-    int x = getProperty("PropertyX");
-    UNUSED_ARG(a);
-    UNUSED_ARG(b);
-    UNUSED_ARG(c);
-    UNUSED_ARG(x);
+    [[maybe_unused]] MatrixWorkspace_sptr a = getProperty("PropertyA");
+    [[maybe_unused]] MatrixWorkspace_sptr b = getProperty("PropertyB");
+    [[maybe_unused]] MatrixWorkspace_sptr c = getProperty("PropertyC");
+    [[maybe_unused]] int x = getProperty("PropertyX");
 
     setProperty("OutputWorkspace", Workspace_sptr(new WorkspaceTester));
   }

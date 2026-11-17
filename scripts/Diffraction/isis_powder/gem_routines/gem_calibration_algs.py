@@ -119,15 +119,8 @@ def _calibration_processing(
     if calibration_ws.getAxis(0).getUnit().unitID() != WORKSPACE_UNITS.d_spacing:
         calibration_ws = mantid.Rebin(InputWorkspace=input_ws, Params=rebin_1_params)
         calibration_ws = mantid.ConvertUnits(InputWorkspace=calibration_ws, Target="dSpacing")
-    spectrum_list = []
-    for i in range(0, calibration_ws.getNumberHistograms()):
-        try:
-            calibration_ws.getDetector(i)
-
-        except RuntimeError:
-            pass
-        else:
-            spectrum_list.append(i)
+    spectrum_info = calibration_ws.spectrumInfo()
+    spectrum_list = [i for i in range(0, calibration_ws.getNumberHistograms()) if spectrum_info.hasDetectors(i)]
     calibration_ws = mantid.ExtractSpectra(InputWorkspace=calibration_ws, WorkspaceIndexList=spectrum_list)
     rebinned = mantid.Rebin(InputWorkspace=calibration_ws, Params=rebin_2_params)
     cross_correlated = mantid.CrossCorrelate(InputWorkspace=rebinned, **cross_correlate_params)

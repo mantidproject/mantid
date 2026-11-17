@@ -9,7 +9,6 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/IDetector.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -30,13 +29,11 @@ private:
   void exec() override;
   void loadInstrument();
 
-  void calculateDetector(const Mantid::Geometry::IDetector &detector,
-                         const std::function<double()> &flatRandomVariateGen, std::vector<double> &l1Values,
-                         std::vector<double> &thetaValues);
+  void calculateDetector(std::size_t const wsIndex, const std::function<double()> &flatRandomVariateGen,
+                         std::vector<double> &l1Values, std::vector<double> &thetaValues);
   Mantid::API::MatrixWorkspace_sptr processDistribution(Mantid::API::MatrixWorkspace_sptr ws, const double binWidth);
 
   Mantid::API::MatrixWorkspace_sptr m_instWorkspace;
-  Mantid::Geometry::IComponent_const_sptr m_sample;
   Mantid::API::MatrixWorkspace_sptr m_outputWorkspace;
   Mantid::API::MatrixWorkspace_sptr m_l1DistributionWs;
   Mantid::API::MatrixWorkspace_sptr m_thetaDistributionWs;

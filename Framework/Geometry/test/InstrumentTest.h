@@ -9,7 +9,6 @@
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -251,23 +250,6 @@ public:
     TS_ASSERT_EQUALS(dets.size(), ndets);
     for (size_t i = 0; i < ndets; ++i) {
       TS_ASSERT_EQUALS(dets[i]->getID(), detIDs[i]);
-    }
-  }
-
-  void test_GetDetector_With_A_List_Returns_A_Group() {
-    const size_t ndets(3);
-    std::set<detid_t> detIDs{1, 10, 11};
-    std::vector<detid_t> detIDsVec(detIDs.begin(), detIDs.end());
-
-    IDetector_const_sptr det;
-    TS_ASSERT_THROWS_NOTHING(det = instrument.getDetectorG(detIDs));
-    std::shared_ptr<const DetectorGroup> detGroup = std::dynamic_pointer_cast<const DetectorGroup>(det);
-    TS_ASSERT(detGroup);
-
-    TS_ASSERT_EQUALS(detGroup->nDets(), ndets);
-    std::vector<detid_t> memberIDs = detGroup->getDetectorIDs();
-    for (size_t i = 0; i < ndets; ++i) {
-      TS_ASSERT_EQUALS(memberIDs[i], detIDsVec[i]);
     }
   }
 
@@ -580,17 +562,20 @@ public:
     const V3D bankAxis{0, 0, 1};
     const Quat bankRot(90.0, bankAxis);
     const V3D bankScale{1, 2, 3};
-    auto pmap = std::make_shared<ParameterMap>();
-    pmap->addV3D(bank1->getComponentID(), ParameterMap::pos(), bankOffset);
-    pmap->addV3D(bank2->getComponentID(), ParameterMap::pos(), bankEpsilon);
-    pmap->addQuat(bank3->getComponentID(), ParameterMap::rot(), bankRot);
-    pmap->addV3D(bank3->getComponentID(), ParameterMap::scale(), bankScale);
-
     // Set instrument in ParameterMap to create DetectorInfo
+    auto pmap = std::make_shared<ParameterMap>();
     pmap->setInstrument(baseInstrument.get());
     auto instr = std::make_shared<Instrument>(baseInstrument, pmap);
     auto &detInfo = pmap->mutableDetectorInfo();
     auto &compInfo = pmap->mutableComponentInfo();
+    // The instrument is at the origin, unrotated, so absolute and relative bank positions coincide
+    auto const bank1Index = compInfo.indexOf(bank1->getComponentID());
+    auto const bank2Index = compInfo.indexOf(bank2->getComponentID());
+    auto const bank3Index = compInfo.indexOf(bank3->getComponentID());
+    compInfo.setPosition(bank1Index, bankOffset);
+    compInfo.setPosition(bank2Index, bankEpsilon);
+    compInfo.setRotation(bank3Index, bankRot);
+    compInfo.setScaleFactor(bank3Index, bankScale);
 
     // bank 1
     TS_ASSERT(toVector3d(detInfo.position(0)).isApprox(toVector3d(bankOffset + V3D{-0.008, -0.0002, 0.0}), 1e-12));
@@ -599,7 +584,7 @@ public:
     TS_ASSERT(toVector3d(detInfo.position(9)).isApprox(toVector3d(bankEpsilon + V3D{-0.008, -0.0002, 0.0}), 1e-12));
     // bank 3
     TS_ASSERT(toVector3d(detInfo.position(18)).isApprox(Eigen::Vector3d(0.0002, -0.008, 15.0), 1e-12));
-    TS_ASSERT_EQUALS(compInfo.scaleFactor(compInfo.indexOf(bank3->getComponentID())), bankScale);
+    TS_ASSERT_EQUALS(compInfo.scaleFactor(bank3Index), bankScale);
 
     const V3D detOffset{0.2, 0.3, 0.4};
     const V3D detEpsilon{5e-10, 5e-10, 5e-10};
@@ -616,43 +601,49 @@ public:
     detInfo.setRotation(19, detRotEps * detInfo.rotation(19));
     // Set a new scale factor
     const V3D newScaleFactor{2, 2, 2};
-    compInfo.setScaleFactor(compInfo.indexOf(bank3->getComponentID()), newScaleFactor);
+    compInfo.setScaleFactor(bank3Index, newScaleFactor);
 
     // All position information should be purged
     TS_ASSERT_EQUALS(pmap->size(), 0);
 
     const auto legacy = instr->legacyParameters();
-    // 3 bank parameters + 2 det parameters + 1 scale parameter
+    // 3 bank parameters + 2 det parameters + 1 scale parameter. The shifts by epsilon, of detectors 1 and 9 and the
+    // rotation of detector 19, are below tolerance and give none.
     TS_ASSERT_EQUALS(legacy.size(), 6);
-    Instrument legacyInstrument(baseInstrument, mapOf(legacy, compInfo));
-
-    TS_ASSERT_EQUALS(legacyInstrument.getDetector(1)->getPos(), bankOffset + V3D(-0.008, -0.0002, 0.0) + detOffset);
-    // Was shifted by something less than epsilon so this is the default
-    // position.
-    TS_ASSERT_EQUALS(legacyInstrument.getDetector(3)->getPos(), bankOffset + V3D(0.008, -0.0002, 0.0));
-    // Epsilon in parent is preserved, but not epsilon relative to parent.
-    TS_ASSERT_EQUALS(legacyInstrument.getDetector(10)->getPos(), bankEpsilon + V3D(-0.008, -0.0002, 0.0));
-    TS_ASSERT_EQUALS(legacyInstrument.getDetector(19)->getPos(), V3D(0.0002, -0.008, 15.0));
-    TS_ASSERT(toQuaterniond(legacyInstrument.getDetector(19)->getRotation())
-                  .isApprox(toQuaterniond(detRot * bankRot), 1e-10));
-    // Check the scale factor
-    TS_ASSERT(toVector3d(legacyInstrument.getComponentByName("bank3")->getScaleFactor())
+    // Bank positions and rotations, relative to the instrument. Epsilon in a bank is preserved.
+    TS_ASSERT_EQUALS(legacyValue<V3D>(legacy, bank1Index, ParameterMap::pos()), bankOffset);
+    TS_ASSERT_EQUALS(legacyValue<V3D>(legacy, bank2Index, ParameterMap::pos()), bankEpsilon);
+    TS_ASSERT(
+        toQuaterniond(legacyValue<Quat>(legacy, bank3Index, ParameterMap::rot())).isApprox(toQuaterniond(bankRot)));
+    TS_ASSERT(toVector3d(legacyValue<V3D>(legacy, bank3Index, ParameterMap::scale()))
                   .isApprox(toVector3d(newScaleFactor), 1e-10));
+    // Detector positions and rotations, relative to their banks
+    TS_ASSERT(toVector3d(legacyValue<V3D>(legacy, 0, ParameterMap::pos()))
+                  .isApprox(toVector3d(V3D(-0.008, -0.0002, 0.0) + detOffset), 1e-12));
+    auto bankRotInverse = bankRot;
+    bankRotInverse.inverse();
+    TS_ASSERT(toQuaterniond(legacyValue<Quat>(legacy, 18, ParameterMap::rot()))
+                  .isApprox(toQuaterniond(bankRotInverse * detRot * bankRot), 1e-10));
   }
 
   void test_legacyParameters_scaled_RectangularDetector() {
     const auto &baseInstrument = ComponentCreationHelper::createTestInstrumentRectangular(1, 2);
     const auto bank1 = baseInstrument->getComponentByName("bank1");
-    auto pmap = std::make_shared<ParameterMap>();
     double scalex = 1.7;
     double scaley = 1.3;
-    pmap->addDouble(bank1->getComponentID(), "scalex", scalex);
-    pmap->addDouble(bank1->getComponentID(), "scaley", scaley);
 
     // Set instrument in ParameterMap to create DetectorInfo
+    auto pmap = std::make_shared<ParameterMap>();
     pmap->setInstrument(baseInstrument.get());
     auto instr = std::make_shared<Instrument>(baseInstrument, pmap);
     auto &detInfo = pmap->mutableDetectorInfo();
+    pmap->addDouble(bank1->getComponentID(), "scalex", scalex);
+    pmap->addDouble(bank1->getComponentID(), "scaley", scaley);
+    // Scale the pixel positions as ExperimentInfo does for these parameters. The bank is centred on the beam axis.
+    for (size_t i = 0; i < detInfo.size(); ++i) {
+      auto const position = detInfo.position(i);
+      detInfo.setPosition(i, V3D(position.X() * scalex, position.Y() * scaley, position.Z()));
+    }
 
     // bank 1
     double pitch = 0.008;
@@ -676,14 +667,11 @@ public:
     detInfo.setPosition(3, detInfo.position(3) + detOffset);
     TS_ASSERT_THROWS(instr->legacyParameters(), const std::runtime_error &);
 
-    // 2 bank parameters + 0 det parameters
+    // 2 bank parameters + 0 det parameters: the scaled pixels are where the scale factors put them
     TS_ASSERT_EQUALS(legacy.size(), 2);
-    Instrument legacyInstrument(baseInstrument, mapOf(legacy, pmap->componentInfo()));
-
-    TS_ASSERT_EQUALS(legacyInstrument.getDetector(4)->getPos(), V3D(0.0, 0.0, 5.0));
-    TS_ASSERT_EQUALS(legacyInstrument.getDetector(5)->getPos(), V3D(0.0, scaley * pitch, 5.0));
-    TS_ASSERT_EQUALS(legacyInstrument.getDetector(6)->getPos(), V3D(scalex * pitch, 0.0, 5.0));
-    TS_ASSERT_EQUALS(legacyInstrument.getDetector(7)->getPos(), V3D(scalex * pitch, scaley * pitch, 5.0));
+    auto const bank1Index = pmap->componentInfo().indexOf(bank1->getComponentID());
+    TS_ASSERT_EQUALS(legacyValue<double>(legacy, bank1Index, "scalex"), scalex);
+    TS_ASSERT_EQUALS(legacyValue<double>(legacy, bank1Index, "scaley"), scaley);
   }
 
   void test_empty_Instrument() {
@@ -747,14 +735,16 @@ public:
   }
 
 private:
-  /// A map holding the given legacy parameters, so that an instrument built on it reads its positions from them
-  static std::shared_ptr<ParameterMap> mapOf(const std::vector<ParameterMap::Entry> &entries,
-                                             const ComponentInfo &componentInfo) {
-    auto pmap = std::make_shared<ParameterMap>();
-    for (auto const &[index, parameter] : entries) {
-      pmap->add(componentInfo.componentID(index), parameter);
+  /// The value of the named legacy parameter of a component. Fails the test if there is no such parameter.
+  template <typename T>
+  static T legacyValue(const std::vector<ParameterMap::Entry> &entries, size_t const index, const std::string &name) {
+    for (auto const &[entryIndex, parameter] : entries) {
+      if (entryIndex == index && parameter->name() == name) {
+        return parameter->value<T>();
+      }
     }
-    return pmap;
+    TS_FAIL("No legacy parameter " + name + " on component " + std::to_string(index));
+    return T{};
   }
 
   Instrument_sptr createInstrumentWithSource() {

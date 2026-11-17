@@ -10,14 +10,11 @@
 #include "MantidBeamline/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Tolerance.h"
-#include "MantidKernel/WarningSuppressions.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <algorithm>
@@ -33,8 +30,7 @@ Kernel::Logger g_log("ExperimentInfo");
 
 SpectrumInfo::SpectrumInfo(const Beamline::SpectrumInfo &spectrumInfo, const ExperimentInfo &experimentInfo,
                            Geometry::DetectorInfo &detectorInfo)
-    : m_experimentInfo(experimentInfo), m_detectorInfo(detectorInfo), m_spectrumInfo(spectrumInfo),
-      m_lastDetector(PARALLEL_GET_MAX_THREADS), m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {}
+    : m_experimentInfo(experimentInfo), m_detectorInfo(detectorInfo), m_spectrumInfo(spectrumInfo) {}
 
 // Defined as default in source for forward declaration with std::unique_ptr.
 SpectrumInfo::~SpectrumInfo() = default;
@@ -81,6 +77,22 @@ double SpectrumInfo::l2(const size_t index) const {
       spectrumDef.cbegin(), spectrumDef.cend(), 0.0,
       [this](double x, const std::pair<size_t, size_t> &detIndex) { return x + m_detectorInfo.l2(detIndex); });
   return l2 / static_cast<double>(spectrumDef.size());
+}
+
+/** Returns the mean distance from the given point to the detector(s) of the spectrum.
+ *
+ * For a spectrum with more than one detector this is the mean of the distances
+ * of the individual detectors, not the distance to their mean position.
+ * @param index :: the workspace index of the spectrum
+ * @param point :: the point to measure the distances from
+ */
+double SpectrumInfo::meanDistance(std::size_t const index, Kernel::V3D const &point) const {
+  auto const &spectrumDef = checkAndGetSpectrumDefinition(index);
+  auto const sum = std::accumulate(spectrumDef.cbegin(), spectrumDef.cend(), 0.0,
+                                   [this, &point](double const x, std::pair<std::size_t, std::size_t> const &detIndex) {
+                                     return x + m_detectorInfo.position(detIndex).distance(point);
+                                   });
+  return sum / static_cast<double>(spectrumDef.size());
 }
 
 /** Returns the scattering angle 2 theta in radians (angle w.r.t. to beam
@@ -316,10 +328,9 @@ void SpectrumInfo::getDetectorValues(const Kernel::Unit &inputUnit, const Kernel
       g_log.warning(e.what());
     }
     if (emode != Kernel::DeltaEMode::Elastic && pmap.find(UnitParams::efixed) == pmap.end()) {
-      std::shared_ptr<const Geometry::IDetector> det(&detector(wsIndex), Mantid::NoDeleting());
       try {
-        pmap[UnitParams::efixed] = m_experimentInfo.getEFixedGivenEMode(det, emode);
-        g_log.debug() << "Detector: " << det->getID() << " EFixed: " << pmap[UnitParams::efixed] << "\n";
+        pmap[UnitParams::efixed] = m_experimentInfo.getEFixedForDetectorIndex(firstDetectorIndex(wsIndex), emode);
+        g_log.debug() << "Detector: " << firstDetectorID(wsIndex) << " EFixed: " << pmap[UnitParams::efixed] << "\n";
       } catch (std::runtime_error &) {
         // let the unit classes work out if this is a problem
       }
@@ -391,12 +402,6 @@ void SpectrumInfo::setMasked(const size_t index, bool masked) {
     m_detectorInfo.setMasked(detIndex, masked);
 }
 
-/// Return a const reference to the detector or detector group of the spectrum
-/// with given index.
-const Geometry::IDetector &SpectrumInfo::detector(const size_t index) const {
-  ALLOW_DEPRECATED(return getDetector(index));
-}
-
 /// Returns the source position.
 Kernel::V3D SpectrumInfo::sourcePosition() const { return m_detectorInfo.sourcePosition(); }
 
@@ -405,38 +410,6 @@ Kernel::V3D SpectrumInfo::samplePosition() const { return m_detectorInfo.sampleP
 
 /// Returns L1 (distance from source to sample).
 double SpectrumInfo::l1() const { return m_detectorInfo.l1(); }
-
-const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
-  auto thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
-  if (m_lastIndex[thread] == index)
-    return *m_lastDetector[thread];
-
-  // Note: This function body has big overlap with the method
-  // MatrixWorkspace::getDetector(). The plan is to eventually remove the
-  // latter, once SpectrumInfo is in widespread use.
-  const auto &specDef = spectrumDefinition(index);
-  const size_t ndets = specDef.size();
-  if (ndets == 1) {
-    // If only 1 detector for the spectrum number, just return it
-    const auto detIndex = specDef[0].first;
-    ALLOW_DEPRECATED(m_lastDetector[thread] = m_detectorInfo.getDetectorPtr(detIndex));
-  } else if (ndets == 0) {
-    throw Kernel::Exception::NotFoundError("MatrixWorkspace::getDetector(): No "
-                                           "detectors for this workspace "
-                                           "index.",
-                                           std::to_string(index));
-  } else {
-    // Else need to construct a DetectorGroup and use that
-    std::vector<std::shared_ptr<const Geometry::IDetector>> det_ptrs;
-    for (const auto &specDefIndex : specDef) {
-      const auto detIndex = specDefIndex.first;
-      ALLOW_DEPRECATED(det_ptrs.emplace_back(m_detectorInfo.getDetectorPtr(detIndex)));
-    }
-    m_lastDetector[thread] = std::make_shared<Geometry::DetectorGroup>(det_ptrs);
-  }
-  m_lastIndex[thread] = index;
-  return *m_lastDetector[thread];
-}
 
 /** Returns the detector ID of the first detector of the spectrum with given index.
  *

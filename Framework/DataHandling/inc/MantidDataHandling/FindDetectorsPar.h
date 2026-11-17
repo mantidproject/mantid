@@ -11,9 +11,15 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataHandling/DllConfig.h"
-#include "MantidGeometry/IDetector.h"
+#include "MantidKernel/V3D.h"
 
 namespace Mantid {
+namespace API {
+class SpectrumInfo;
+}
+namespace Geometry {
+class ComponentInfo;
+}
 namespace DataHandling {
 /**  file types currently supported by ASCII loader are:
  *1) an ASCII Tobyfit par file
@@ -165,7 +171,8 @@ private:
   std::vector<size_t> detID;
 
   // calculate generic detectors parameters:
-  void calcDetPar(const Geometry::IDetector &detector, const Kernel::V3D &observer, DetParameters &detParameters);
+  void calcDetPar(API::SpectrumInfo const &spectrumInfo, Geometry::ComponentInfo const &componentInfo,
+                  std::size_t const wsIndex, const Kernel::V3D &observer, DetParameters &detParameters);
 
   /// if ASCII file is selected as the datasource, this structure describes the
   /// type of this file.
@@ -235,7 +242,8 @@ public:
   AvrgDetector()
       : m_AzimutSum(0), m_PolarSum(0), m_FlightPathSum(0), m_AzimBase(0), m_PolarBase(0), m_useSphericalSizes(false),
         m_AzimMin(FLT_MAX), m_PolarMin(FLT_MAX), m_AzimMax(-FLT_MAX), m_PolarMax(-FLT_MAX), m_nComponents(0) {}
-  void addDetInfo(const Geometry::IDetector &det, const Kernel::V3D &Observer);
+  void addDetInfo(Geometry::ComponentInfo const &componentInfo, std::size_t const detIndex,
+                  const Kernel::V3D &Observer);
   void returnAvrgDetPar(DetParameters &avrgDet);
 
   void setUseSpherical(bool shouldWe = true) { m_useSphericalSizes = shouldWe; }

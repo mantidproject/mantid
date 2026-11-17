@@ -57,10 +57,7 @@ void TOFSANSResolutionByPixel::init() {
 /*
  * Double Boltzmann fit to the TOF resolution as a function of wavelength
  */
-double TOFSANSResolutionByPixel::getTOFResolution(double wl) {
-  UNUSED_ARG(wl);
-  return m_wl_resolution;
-}
+double TOFSANSResolutionByPixel::getTOFResolution([[maybe_unused]] double wl) { return m_wl_resolution; }
 
 void TOFSANSResolutionByPixel::exec() {
   MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");

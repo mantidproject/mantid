@@ -11,6 +11,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/ModeratorTzeroLinear.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -34,8 +35,9 @@ void addToInstrument(const MatrixWorkspace_sptr &testWS, const bool &add_deltaE_
     testWS->instrumentParameters().addString(testWS->getInstrument()->getComponentID(), "deltaE-mode", "indirect");
     auto &pmap = testWS->instrumentParameters();
     const auto &spectrumInfo = testWS->spectrumInfo();
+    auto const &componentInfo = testWS->componentInfo();
     for (size_t ihist = 0; ihist < testWS->getNumberHistograms(); ++ihist) {
-      pmap.addDouble(&spectrumInfo.detector(ihist), "Efixed", evalue);
+      pmap.addDouble(componentInfo.componentID(spectrumInfo.firstDetectorIndex(ihist)), "Efixed", evalue);
     }
   }
   if (add_t0_formula) {

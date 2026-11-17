@@ -26,8 +26,6 @@ class SpectrumInfo;
 namespace Geometry {
 class BoundingBox;
 class DetectorInfo;
-class IDetector;
-class Instrument;
 class ParameterMap;
 } // namespace Geometry
 namespace API {
@@ -66,6 +64,7 @@ public:
   bool isMonitor(const size_t index) const;
   bool isMasked(const size_t index) const;
   double l2(const size_t index) const;
+  double meanDistance(std::size_t const index, Kernel::V3D const &point) const;
   double twoTheta(const size_t index) const;
   double signedTwoTheta(const size_t index) const;
   double azimuthal(const size_t index) const;
@@ -88,11 +87,6 @@ public:
 
   void setMasked(const size_t index, bool masked);
 
-  // This is likely to be deprecated/removed with the introduction of
-  // Instrument-2.0: The concept of detector groups will probably be dropped so
-  // returning a single detector for a spectrum will not be possible anymore.
-  const Geometry::IDetector &detector(const size_t index) const;
-
   // This does not really belong into SpectrumInfo, but it seems to be useful
   // while Instrument-2.0 does not exist.
   Kernel::V3D sourcePosition() const;
@@ -112,17 +106,11 @@ public:
   friend class ExperimentInfo;
 
 private:
-  [[deprecated("SpectrumInfo::getDetector has been deprecated in Mantid 7.1."
-               "See the 'Instrument Access via SpectrumInfo, DetectorInfo, ComponentInfo' concept page, "
-               "located at: https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html")]]
-  const Geometry::IDetector &getDetector(const size_t index) const;
   const SpectrumDefinition &checkAndGetSpectrumDefinition(const size_t index) const;
 
   const ExperimentInfo &m_experimentInfo;
   Geometry::DetectorInfo &m_detectorInfo;
   const Beamline::SpectrumInfo &m_spectrumInfo;
-  mutable std::vector<std::shared_ptr<const Geometry::IDetector>> m_lastDetector;
-  mutable std::vector<size_t> m_lastIndex;
 };
 
 using SpectrumInfoIt = SpectrumInfoIterator<SpectrumInfo>;

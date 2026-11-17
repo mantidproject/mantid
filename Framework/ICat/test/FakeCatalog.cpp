@@ -20,26 +20,21 @@ FakeCatalog::FakeCatalog() = default;
 
 FakeCatalog::~FakeCatalog() = default;
 
-API::CatalogSession_sptr FakeCatalog::login(std::string const &username, std::string const &password,
-                                            std::string const &endPoint, std::string const &facility) {
-  UNUSED_ARG(username);
-  UNUSED_ARG(password);
+API::CatalogSession_sptr FakeCatalog::login([[maybe_unused]] std::string const &username,
+                                            [[maybe_unused]] std::string const &password, std::string const &endPoint,
+                                            std::string const &facility) {
   return std::make_shared<API::CatalogSession>("FakeID", facility, endPoint);
 }
 
 void FakeCatalog::logout() { m_counter++; }
 
-void FakeCatalog::search(ICat::CatalogSearchParam const &inputs, ITableWorkspace_sptr &outputWorkspace,
-                         int const &offset, int const &limit) {
-  UNUSED_ARG(inputs);
-  UNUSED_ARG(offset);
-  UNUSED_ARG(limit);
+void FakeCatalog::search([[maybe_unused]] ICat::CatalogSearchParam const &inputs, ITableWorkspace_sptr &outputWorkspace,
+                         [[maybe_unused]] int const &offset, [[maybe_unused]] int const &limit) {
   outputWorkspace->appendRow();
   m_counter++;
 }
 
-int64_t FakeCatalog::getNumberOfSearchResults(ICat::CatalogSearchParam const &inputs) {
-  UNUSED_ARG(inputs);
+int64_t FakeCatalog::getNumberOfSearchResults([[maybe_unused]] ICat::CatalogSearchParam const &inputs) {
   m_counter++;
   return 5;
 }
@@ -49,14 +44,14 @@ void FakeCatalog::myData(ITableWorkspace_sptr &outputWorkspace) {
   m_counter++;
 }
 
-void FakeCatalog::getDataSets(std::string const &investigationID, ITableWorkspace_sptr &outputWorkspace) {
-  UNUSED_ARG(investigationID);
+void FakeCatalog::getDataSets([[maybe_unused]] std::string const &investigationID,
+                              ITableWorkspace_sptr &outputWorkspace) {
   outputWorkspace->appendRow();
   m_counter++;
 }
 
-void FakeCatalog::getDataFiles(std::string const &investigationID, ITableWorkspace_sptr &outputWorkspace) {
-  UNUSED_ARG(investigationID);
+void FakeCatalog::getDataFiles([[maybe_unused]] std::string const &investigationID,
+                               ITableWorkspace_sptr &outputWorkspace) {
   outputWorkspace->appendRow();
   m_counter++;
 }
@@ -73,21 +68,13 @@ void FakeCatalog::listInvestigationTypes(std::vector<std::string> &investigation
 
 void FakeCatalog::keepAlive() { m_counter++; }
 
-std::string const FakeCatalog::getFileLocation(long long const &fileID) {
-  UNUSED_ARG(fileID);
-  return "";
-}
+std::string const FakeCatalog::getFileLocation([[maybe_unused]] long long const &fileID) { return ""; }
 
-std::string const FakeCatalog::getDownloadURL(long long const &fileID) {
-  UNUSED_ARG(fileID);
-  return "";
-}
+std::string const FakeCatalog::getDownloadURL([[maybe_unused]] long long const &fileID) { return ""; }
 
-std::string const FakeCatalog::getUploadURL(std::string const &investigationID, std::string const &createFileName,
-                                            std::string const &dataFileDescription) {
-  UNUSED_ARG(investigationID);
-  UNUSED_ARG(createFileName);
-  UNUSED_ARG(dataFileDescription);
+std::string const FakeCatalog::getUploadURL([[maybe_unused]] std::string const &investigationID,
+                                            [[maybe_unused]] std::string const &createFileName,
+                                            [[maybe_unused]] std::string const &dataFileDescription) {
   return "";
 }
 

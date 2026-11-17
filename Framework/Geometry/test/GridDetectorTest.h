@@ -7,7 +7,10 @@
 #pragma once
 
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/GridDetector.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Quat.h"
@@ -108,16 +111,19 @@ public:
   void testResizingParameter() {
     auto cuboidShape = ComponentCreationHelper::createCuboid(0.5);
 
-    auto det = std::make_unique<GridDetector>("MyGrid");
+    auto const instrument = std::make_shared<Instrument>("Instrument");
+    auto *const det = new GridDetector("MyGrid");
     det->setPos(1, 2, 1);
     det->initialize(cuboidShape, 5, -2.5, 1.0, 7, -3.5, 1.0, 3, -1.5, 1.0, 1000000, "zyx", 3, 1);
+    auto const pmap = attachedMap(*instrument, det);
 
     // --- Now make a parametrized version ----
-    ParameterMap_sptr pmap(new ParameterMap());
-    auto parDet = std::make_unique<GridDetector>(det.get(), pmap.get());
-    pmap->addDouble(det.get(), "scalex", 3.0);
-    pmap->addDouble(det.get(), "scaley", 5.0);
-    pmap->addDouble(det.get(), "scalez", 2.0);
+    auto parDet = std::make_unique<GridDetector>(det, pmap.get());
+    auto &componentInfo = pmap->mutableComponentInfo();
+    auto const detIndex = componentInfo.indexOf(det);
+    componentInfo.addDouble(detIndex, "scalex", 3.0);
+    componentInfo.addDouble(detIndex, "scaley", 5.0);
+    componentInfo.addDouble(detIndex, "scalez", 2.0);
 
     // Sizes and steps are scaled by these factors
     TS_ASSERT_DELTA(parDet->xstep(), 3.0, 1e-5);
@@ -156,6 +162,23 @@ public:
   }
 
 private:
+  /// Adds the bank to the instrument, which takes ownership of it, registers its pixels as detectors and attaches a
+  /// map to the instrument
+  static ParameterMap_sptr attachedMap(Instrument &instrument, ICompAssembly *bank) {
+    instrument.add(bank);
+    std::vector<IComponent_const_sptr> children;
+    bank->getChildren(children, true);
+    for (auto const &child : children) {
+      if (auto const *pixel = dynamic_cast<const IDetector *>(child.get())) {
+        instrument.markAsDetectorIncomplete(pixel);
+      }
+    }
+    instrument.markAsDetectorFinalize();
+    auto pmap = std::make_shared<ParameterMap>();
+    pmap->setInstrument(&instrument);
+    return pmap;
+  }
+
   /** Test on a grid detector that will be
    * repeated on an un-moved parametrized version.
    */

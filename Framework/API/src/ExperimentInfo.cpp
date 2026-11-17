@@ -723,6 +723,35 @@ double ExperimentInfo::getEFixedGivenEMode(const std::shared_ptr<const Geometry:
   }
 }
 
+/**
+ * Easy access to the efixed value for this run & detector
+ * @param detectorIndex :: The index of the detector to ask for the efixed value. Only
+ * used in Indirect mode
+ * @param emode :: enum value indicating whether elastic, direct or indirect
+ * @return The current efixed value
+ */
+double ExperimentInfo::getEFixedForDetectorIndex(std::size_t const detectorIndex,
+                                                 Kernel::DeltaEMode::Type const emode) const {
+  if (emode != Kernel::DeltaEMode::Indirect)
+    return getEFixedGivenEMode(nullptr, emode);
+
+  auto const &compInfo = componentInfo();
+  double efixed = 0.;
+  for (auto const &parameterName : {"Efixed", "EFixed-val"}) {
+    auto const values = compInfo.getNumberParameter(detectorIndex, parameterName);
+    if (!values.empty())
+      efixed = values.front();
+  }
+  if (efixed == 0.) {
+    std::ostringstream os;
+    os << "ExperimentInfo::getEFixed - Indirect mode efixed requested but "
+          "detector has no Efixed parameter attached. ID="
+       << detectorInfo().detid(detectorIndex);
+    throw std::runtime_error(os.str());
+  }
+  return efixed;
+}
+
 void ExperimentInfo::setEFixed(const detid_t detID, const double value) {
   populateIfNotLoaded();
   size_t detIndex;

@@ -62,17 +62,15 @@ std::string toString(const std::vector<std::vector<T>> &value, const std::string
 
 // --------------------- convert values to pretty strings
 /// Convert values to pretty strings.
-template <typename T> std::string toPrettyString(const T &value, size_t maxLength = 0, bool collapseLists = true) {
-  UNUSED_ARG(collapseLists);
+template <typename T>
+std::string toPrettyString(const T &value, size_t maxLength = 0, [[maybe_unused]] bool collapseLists = true) {
   return Strings::shorten(boost::lexical_cast<std::string>(value), maxLength);
 }
 
 /// Throw an exception if a shared pointer is converted to a pretty string.
 template <typename T>
-std::string toPrettyString(const std::shared_ptr<T> &value, size_t maxLength = 0, bool collapseLists = true) {
-  UNUSED_ARG(value);
-  UNUSED_ARG(maxLength);
-  UNUSED_ARG(collapseLists);
+std::string toPrettyString([[maybe_unused]] const std::shared_ptr<T> &value, [[maybe_unused]] size_t maxLength = 0,
+                           [[maybe_unused]] bool collapseLists = true) {
   throw boost::bad_lexical_cast();
 }
 
@@ -82,11 +80,9 @@ std::string toPrettyString(const std::shared_ptr<T> &value, size_t maxLength = 0
  */
 template <typename T>
 std::string toPrettyString(
-    const std::vector<T> &value, size_t maxLength = 0, bool collapseLists = true, const std::string &delimiter = ",",
-    const std::string &unusedDelimiter = "+",
+    const std::vector<T> &value, size_t maxLength = 0, [[maybe_unused]] bool collapseLists = true,
+    const std::string &delimiter = ",", [[maybe_unused]] const std::string &unusedDelimiter = "+",
     typename std::enable_if<!(std::is_integral<T>::value && std::is_arithmetic<T>::value)>::type * = nullptr) {
-  UNUSED_ARG(unusedDelimiter);
-  UNUSED_ARG(collapseLists);
   return Strings::shorten(Strings::join(value.begin(), value.end(), delimiter), maxLength);
 }
 
@@ -118,19 +114,17 @@ toPrettyString(const std::vector<T> &value, size_t maxLength = 0, bool collapseL
 
 template <>
 [[maybe_unused]]
-inline std::string toPrettyString(const std::vector<bool> &value, size_t maxLength, bool collapseLists,
-                                  const std::string &delimiter, const std::string &unusedDelimiter,
+inline std::string toPrettyString(const std::vector<bool> &value, size_t maxLength, [[maybe_unused]] bool collapseLists,
+                                  const std::string &delimiter, [[maybe_unused]] const std::string &unusedDelimiter,
                                   typename std::enable_if<std::is_same<bool, bool>::value>::type *) {
-  UNUSED_ARG(unusedDelimiter);
-  UNUSED_ARG(collapseLists);
   return Strings::shorten(Strings::join(value.begin(), value.end(), delimiter), maxLength);
 }
 
 /// Specialization for a property of type std::vector<std::vector>.
 template <typename T>
-std::string toPrettyString(const std::vector<std::vector<T>> &value, size_t maxLength = 0, bool collapseLists = true,
-                           const std::string &outerDelimiter = ",", const std::string &innerDelimiter = "+") {
-  UNUSED_ARG(collapseLists);
+std::string toPrettyString(const std::vector<std::vector<T>> &value, size_t maxLength = 0,
+                           [[maybe_unused]] bool collapseLists = true, const std::string &outerDelimiter = ",",
+                           const std::string &innerDelimiter = "+") {
   return Strings::shorten(toString<T>(value, outerDelimiter, innerDelimiter), maxLength);
 }
 

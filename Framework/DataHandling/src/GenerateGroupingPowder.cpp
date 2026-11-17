@@ -11,7 +11,6 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidGeometry/Crystal/AngleUnits.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -324,15 +323,14 @@ void GenerateGroupingPowder::createGroups() {
       continue;
     }
 
-    const auto &det = spectrumInfo.detector(i);
     const double groupId = (double)(*label)(spectrumInfo, i);
 
     if (spectrumInfo.hasUniqueDetector(i)) {
       this->m_groupWS->setValue(spectrumInfo.firstDetectorID(i), groupId);
     } else {
-      const auto &group = dynamic_cast<const DetectorGroup &>(det);
-      const auto idv = group.getDetectorIDs();
-      const auto ids = std::set<detid_t>(idv.begin(), idv.end());
+      std::set<detid_t> ids;
+      for (auto const &specDefItem : spectrumInfo.spectrumDefinition(i))
+        ids.insert(detectorInfo.detid(specDefItem.first));
       this->m_groupWS->setValue(ids, groupId);
     }
   }
@@ -450,7 +448,6 @@ void GenerateGroupingPowder::saveAsPAR() {
     if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMasked(i) || spectrumInfo.isMonitor(i)) {
       continue;
     }
-    const auto &det = spectrumInfo.detector(i);
     // integer count angle slice
     const double tt = spectrumInfo.twoTheta(i) * Geometry::rad2deg;
     const auto where = static_cast<size_t>(tt / step);
@@ -460,9 +457,12 @@ void GenerateGroupingPowder::saveAsPAR() {
     if (spectrumInfo.hasUniqueDetector(i)) {
       groups[where].emplace_back(spectrumInfo.firstDetectorID(i));
     } else {
-      const auto &group = dynamic_cast<const DetectorGroup &>(det);
-      const auto idv = group.getDetectorIDs();
-      groups[where].insert(groups[where].end(), idv.begin(), idv.end());
+      // sorted, matching the order DetectorGroup used to give
+      auto const &detectorInfo = input_ws->detectorInfo();
+      std::set<detid_t> ids;
+      for (auto const &specDefItem : spectrumInfo.spectrumDefinition(i))
+        ids.insert(detectorInfo.detid(specDefItem.first));
+      groups[where].insert(groups[where].end(), ids.begin(), ids.end());
     }
   }
 

@@ -13,6 +13,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
@@ -142,6 +143,7 @@ void ModeratorTzeroLinear::exec() {
 
   // do the shift in X
   const auto &spectrumInfo = inputWS->spectrumInfo();
+  auto const &componentInfo = inputWS->componentInfo();
   const size_t numHists = inputWS->getNumberHistograms();
   Progress prog(this, 0.0, 1.0, numHists); // report progress of algorithm
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
@@ -149,7 +151,7 @@ void ModeratorTzeroLinear::exec() {
     PARALLEL_START_INTERRUPT_REGION
     double t_f, L_i;
     auto wsIndex = static_cast<size_t>(i);
-    calculateTfLi(spectrumInfo, wsIndex, t_f, L_i);
+    calculateTfLi(spectrumInfo, componentInfo, wsIndex, t_f, L_i);
 
     outputWS->setHistogram(i, inputWS->histogram(i));
     // shift the time of flights
@@ -197,6 +199,7 @@ void ModeratorTzeroLinear::execEvent() {
 
   // Loop over the spectra
   const auto &spectrumInfo = matrixOutputWS->spectrumInfo();
+  auto const &componentInfo = matrixOutputWS->componentInfo();
   const size_t numHists = outputWS->getNumberHistograms();
   Progress prog(this, 0.0, 1.0, numHists); // report progress of algorithm
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
@@ -208,7 +211,7 @@ void ModeratorTzeroLinear::execEvent() {
     {
       // Calculate the time from sample to detector 'i'
       double t_f, L_i;
-      calculateTfLi(spectrumInfo, wsIndex, t_f, L_i);
+      calculateTfLi(spectrumInfo, componentInfo, wsIndex, t_f, L_i);
       if (t_f >= 0) {
         const double scaling = L_i / (L_i + m_gradient);
         // Calculate new time of flight, TOF'=scaling*(TOF-t_f-intercept)+t_f =
@@ -224,7 +227,8 @@ void ModeratorTzeroLinear::execEvent() {
 } // end of void ModeratorTzeroLinear::execEvent()
 
 // calculate time from sample to detector
-void ModeratorTzeroLinear::calculateTfLi(const SpectrumInfo &spectrumInfo, size_t i, double &t_f, double &L_i) {
+void ModeratorTzeroLinear::calculateTfLi(const SpectrumInfo &spectrumInfo, Geometry::ComponentInfo const &componentInfo,
+                                         size_t i, double &t_f, double &L_i) {
   static const double convFact = 1.0e-6 * sqrt(2 * PhysicalConstants::meV / PhysicalConstants::NeutronMass);
   static const double TfError = -1.0; // signal error when calculating final
                                       // time
@@ -240,7 +244,10 @@ void ModeratorTzeroLinear::calculateTfLi(const SpectrumInfo &spectrumInfo, size_
   } else {
     L_i = spectrumInfo.l1();
     // Get final energy E_f, final velocity v_f
-    auto wsProp = spectrumInfo.detector(i).getNumberParameter("Efixed");
+    // A spectrum of several detectors has no parameters of its own
+    auto const wsProp = spectrumInfo.hasUniqueDetector(i)
+                            ? componentInfo.getNumberParameter(spectrumInfo.firstDetectorIndex(i), "Efixed")
+                            : std::vector<double>{};
     if (!wsProp.empty()) {
       double E_f = wsProp.at(0);         //[E_f]=meV
       double v_f = convFact * sqrt(E_f); //[v_f]=meter/microsec

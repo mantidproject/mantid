@@ -444,10 +444,9 @@ template <typename BOXTYPE> bool SortBoxesByID(const BOXTYPE &a, const BOXTYPE &
 
 //-----------------------------------------------------------------------------------------------
 /** Create a table of data about the boxes contained */
-TMDE(Mantid::API::ITableWorkspace_sptr MDEventWorkspace)::makeBoxTable(size_t start, size_t num) {
+TMDE(Mantid::API::ITableWorkspace_sptr MDEventWorkspace)::makeBoxTable([[maybe_unused]] size_t start,
+                                                                       [[maybe_unused]] size_t num) {
   Kernel::CPUTimer tim;
-  UNUSED_ARG(start);
-  UNUSED_ARG(num);
 
   // Boxes to show
   std::vector<API::IMDNode *> boxes;
@@ -580,8 +579,7 @@ TMDE(void MDEventWorkspace)::splitAllIfNeeded(Kernel::ThreadScheduler *ts) { dat
  * @param ts :: optional ThreadScheduler * that will be used to parallelize
  *        recursive splitting.
  */
-TMDE(void MDEventWorkspace)::splitTrackedBoxes(Kernel::ThreadScheduler *ts) {
-  UNUSED_ARG(ts);
+TMDE(void MDEventWorkspace)::splitTrackedBoxes([[maybe_unused]] Kernel::ThreadScheduler *ts) {
   throw std::runtime_error("Not implemented yet");
   //    // Get a COPY of the vector (to avoid thread-safety issues)
   //    std::vector<void *> boxes = this->getBoxController()->getBoxesToSplit();

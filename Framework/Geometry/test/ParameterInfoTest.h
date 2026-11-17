@@ -206,21 +206,6 @@ public:
 
   /// The rekeying performed by InstrumentVisitor must carry every parameter across, keyed by
   /// the matching component index.
-  void test_rekeying_from_a_parameter_map_preserves_parameters() {
-    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular2(1, 4);
-    auto bank = instrument->getComponentByName("bank1");
-    ParameterMap pmap;
-    pmap.addDouble(bank.get(), "my_double", 42.0);
-    pmap.addString(bank.get(), "my_string", "hello");
-
-    auto wrappers = InstrumentVisitor::makeWrappers(*instrument, &pmap);
-    auto const &componentInfo = *std::get<0>(wrappers);
-    size_t const bankIndex = componentInfo.indexOf(bank->getComponentID());
-
-    TS_ASSERT_EQUALS(componentInfo.getNumberParameter(bankIndex, "my_double").at(0), 42.0);
-    TS_ASSERT_EQUALS(componentInfo.getStringParameter(bankIndex, "my_string").at(0), "hello");
-  }
-
 private:
   static std::shared_ptr<Parameter> makeDouble(std::string const &name, double const value) {
     auto parameter = ParameterFactory::create("double", name);

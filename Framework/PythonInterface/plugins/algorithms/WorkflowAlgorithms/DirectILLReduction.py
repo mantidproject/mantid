@@ -214,8 +214,7 @@ def _medianDeltaTheta(ws):
     spectrumInfo = ws.spectrumInfo()
     for i in range(ws.getNumberHistograms()):
         if not spectrumInfo.isMasked(i) and spectrumInfo.hasDetectors(i) and not spectrumInfo.isMonitor(i):
-            det = ws.getDetector(i)
-            twoTheta = ws.detectorTwoTheta(det)
+            twoTheta = spectrumInfo.twoTheta(i)
             thetas.append(twoTheta)
     if not thetas:
         raise RuntimeError("No usable detectors for median DTheta calculation.")

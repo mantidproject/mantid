@@ -12,6 +12,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/DeltaEMode.h"
 #include "MantidKernel/Unit.h"
@@ -329,8 +330,9 @@ bool CreateDetectorTable::retrieveSignedThetaParameter() {
   if (firstSpectraWithDetectors == workspaceIndices.end()) {
     return false;
   }
-  const std::vector<std::string> &parameters = spectrumInfo->detector(static_cast<size_t>(*firstSpectraWithDetectors))
-                                                   .getStringParameter("show-signed-theta", true); // recursive
+  std::size_t const firstSpectraIndex = spectrumInfo->firstDetectorIndex(*firstSpectraWithDetectors);
+  const std::vector<std::string> &parameters =
+      ws->componentInfo().getStringParameter(firstSpectraIndex, "show-signed-theta", /*recursive*/ true);
   return (!parameters.empty() && find(parameters.begin(), parameters.end(), "Always") != parameters.end());
 }
 

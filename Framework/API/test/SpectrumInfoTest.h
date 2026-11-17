@@ -146,6 +146,37 @@ public:
     // Other lengths are not sensible since the detectors include monitors
   }
 
+  void test_meanDistance() {
+    auto const &spectrumInfo = m_workspace.spectrumInfo();
+    auto const &detectorInfo = m_workspace.detectorInfo();
+    auto const sourcePos = spectrumInfo.sourcePosition();
+    auto const point = V3D(1.0, -2.0, 3.0);
+    for (std::size_t i = 0; i < spectrumInfo.size(); ++i) {
+      TS_ASSERT_EQUALS(spectrumInfo.meanDistance(i, sourcePos), detectorInfo.position(i).distance(sourcePos));
+      TS_ASSERT_EQUALS(spectrumInfo.meanDistance(i, point), detectorInfo.position(i).distance(point));
+    }
+    // Monitors
+    TS_ASSERT_EQUALS(spectrumInfo.meanDistance(3, sourcePos), 11.0);
+    TS_ASSERT_EQUALS(spectrumInfo.meanDistance(4, sourcePos), 18.0);
+  }
+
+  void test_grouped_meanDistance_is_mean_of_detector_distances() {
+    auto const &spectrumInfo = m_grouped.spectrumInfo();
+    auto const &detectorInfo = m_grouped.detectorInfo();
+    auto const sourcePos = spectrumInfo.sourcePosition();
+    auto const expected =
+        (detectorInfo.position(1).distance(sourcePos) + detectorInfo.position(2).distance(sourcePos)) / 2.0;
+    TS_ASSERT_DELTA(spectrumInfo.meanDistance(GroupOfDets2And3, sourcePos), expected, 1e-15);
+    // This is not the same as the distance to the mean position of the group
+    TS_ASSERT_LESS_THAN(spectrumInfo.position(GroupOfDets2And3).distance(sourcePos) + 1e-9,
+                        spectrumInfo.meanDistance(GroupOfDets2And3, sourcePos));
+  }
+
+  void test_meanDistance_no_detectors() {
+    TS_ASSERT_THROWS(m_workspaceNoInstrument.spectrumInfo().meanDistance(0, V3D(0.0, 0.0, 0.0)),
+                     const Kernel::Exception::NotFoundError &);
+  }
+
   void test_twoTheta() {
     const auto &spectrumInfo = m_workspace.spectrumInfo();
     TS_ASSERT_DELTA(spectrumInfo.twoTheta(0), 0.0199973, 1e-6);
@@ -181,7 +212,7 @@ public:
   // removed at some point.
   void test_twoThetaLegacy() {
     const auto &spectrumInfo = m_workspace.spectrumInfo();
-    auto det = m_workspace.getDetector(2);
+    ALLOW_DEPRECATED(auto det = m_workspace.getDetector(2));
     TS_ASSERT_EQUALS(spectrumInfo.twoTheta(2), m_workspace.detectorTwoTheta(*det));
   }
 
@@ -189,7 +220,7 @@ public:
   // removed at some point.
   void test_grouped_twoThetaLegacy() {
     const auto &spectrumInfo = m_grouped.spectrumInfo();
-    auto det = m_grouped.getDetector(GroupOfDets1And2);
+    ALLOW_DEPRECATED(auto det = m_grouped.getDetector(GroupOfDets1And2));
     TS_ASSERT_EQUALS(spectrumInfo.twoTheta(GroupOfDets1And2), m_grouped.detectorTwoTheta(*det));
   }
 
@@ -214,7 +245,7 @@ public:
   // be removed at some point.
   void test_signedTwoThetaLegacy() {
     const auto &spectrumInfo = m_workspace.spectrumInfo();
-    auto det = m_workspace.getDetector(2);
+    ALLOW_DEPRECATED(auto det = m_workspace.getDetector(2));
     TS_ASSERT_EQUALS(spectrumInfo.signedTwoTheta(2), m_workspace.detectorSignedTwoTheta(*det));
   }
 
@@ -222,7 +253,7 @@ public:
   // be removed at some point.
   void test_grouped_signedTwoThetaLegacy() {
     const auto &spectrumInfo = m_grouped.spectrumInfo();
-    auto det = m_grouped.getDetector(GroupOfDets1And2);
+    ALLOW_DEPRECATED(auto det = m_grouped.getDetector(GroupOfDets1And2));
     TS_ASSERT_EQUALS(spectrumInfo.signedTwoTheta(GroupOfDets1And2), m_grouped.detectorSignedTwoTheta(*det));
   }
 
@@ -263,7 +294,7 @@ public:
     const auto &spectrumInfo = ws.spectrumInfo();
     TS_ASSERT_DELTA(spectrumInfo.phi(0), M_PI, 1e-12);
     TS_ASSERT_DELTA(spectrumInfo.phiOffset(0, M_PI), 0.0, 1e-12);
-    TS_ASSERT_DELTA(spectrumInfo.phi(0), ws.getDetector(0)->getPhi(), 1e-12);
+    ALLOW_DEPRECATED(TS_ASSERT_DELTA(spectrumInfo.phi(0), ws.getDetector(0)->getPhi(), 1e-12));
   }
 
   void test_angles_with_observer_no_detectors() {
@@ -447,26 +478,25 @@ public:
     spectrumInfo.setMasked(GroupOfDets1And4, true);
   }
 
-  void test_detector() {
+  void test_firstDetectorID() {
     const auto &spectrumInfo = m_workspace.spectrumInfo();
-    TS_ASSERT_THROWS_NOTHING(spectrumInfo.detector(0));
-    TS_ASSERT_EQUALS(spectrumInfo.detector(0).getID(), 1);
-    TS_ASSERT_EQUALS(spectrumInfo.detector(1).getID(), 2);
-    TS_ASSERT_EQUALS(spectrumInfo.detector(2).getID(), 3);
-    TS_ASSERT_EQUALS(spectrumInfo.detector(3).getID(), 4);
-    TS_ASSERT_EQUALS(spectrumInfo.detector(4).getID(), 5);
+    TS_ASSERT_EQUALS(spectrumInfo.firstDetectorID(0), 1);
+    TS_ASSERT_EQUALS(spectrumInfo.firstDetectorID(1), 2);
+    TS_ASSERT_EQUALS(spectrumInfo.firstDetectorID(2), 3);
+    TS_ASSERT_EQUALS(spectrumInfo.firstDetectorID(3), 4);
+    TS_ASSERT_EQUALS(spectrumInfo.firstDetectorID(4), 5);
   }
 
   void test_no_detector() {
     const auto &spectrumInfo = m_workspaceNoInstrument.spectrumInfo();
-    TS_ASSERT_THROWS(spectrumInfo.detector(0), const Kernel::Exception::NotFoundError &);
+    TS_ASSERT_THROWS(spectrumInfo.firstDetectorIndex(0), const Kernel::Exception::NotFoundError &);
   }
 
   void test_no_detector_twice() {
     // Regression test: Make sure that *repeated* access also fails.
     const auto &spectrumInfo = m_workspaceNoInstrument.spectrumInfo();
-    TS_ASSERT_THROWS(spectrumInfo.detector(0), const Kernel::Exception::NotFoundError &);
-    TS_ASSERT_THROWS(spectrumInfo.detector(0), const Kernel::Exception::NotFoundError &);
+    TS_ASSERT_THROWS(spectrumInfo.firstDetectorIndex(0), const Kernel::Exception::NotFoundError &);
+    TS_ASSERT_THROWS(spectrumInfo.firstDetectorIndex(0), const Kernel::Exception::NotFoundError &);
   }
 
   void test_ExperimentInfo_basics() {
@@ -609,7 +639,7 @@ private:
     const V3D axis(0.0, 0.1, 1.0);
     const V3D up(0.3, 1.0, 0.0);
     for (const auto i : indices) {
-      const auto det = ws.getDetector(i);
+      ALLOW_DEPRECATED(const auto det = ws.getDetector(i));
       TS_ASSERT_DELTA(spectrumInfo.twoTheta(i, observer, axis), det->getTwoTheta(observer, axis), 1e-12);
       TS_ASSERT_DELTA(spectrumInfo.signedTwoTheta(i, observer, axis, up), det->getSignedTwoTheta(observer, axis, up),
                       1e-12);

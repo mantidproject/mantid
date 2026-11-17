@@ -30,8 +30,10 @@ class WorkspaceNearestNeighbourInfoTest(unittest.TestCase):
 
         for ind in range(ws.getNumberHistograms()):
             spec = ws.getSpectrum(ind)
-            d = ws.getDetector(ind)
-            neighbours_by_detector = ni.getNeighbours(d)
+            with self.assertWarns(DeprecationWarning):
+                d = ws.getDetector(ind)
+            with self.assertWarns(DeprecationWarning):
+                neighbours_by_detector = ni.getNeighbours(d)
             neighbours_by_exact = ni.getNeighboursExact(spec.getSpectrumNo())
             self.assertEqual(neighbours_by_exact, neighbours_by_detector)
             self.assertEqual(len(neighbours_by_exact), 8)
@@ -51,9 +53,12 @@ class WorkspaceNearestNeighbourInfoTest(unittest.TestCase):
 
         self.assertTrue(set(neigh_closer.values()).issubset(set(neigh_distance.values())))
 
-        d = ws.getDetector(0)
-        neighbours_by_det_radius_closer = ni.getNeighbours(d, 0.01)
-        neighbours_by_det_radius_distant = ni.getNeighbours(d, 0.02)
+        with self.assertWarns(DeprecationWarning):
+            d = ws.getDetector(0)
+        with self.assertWarns(DeprecationWarning):
+            neighbours_by_det_radius_closer = ni.getNeighbours(d, 0.01)
+        with self.assertWarns(DeprecationWarning):
+            neighbours_by_det_radius_distant = ni.getNeighbours(d, 0.02)
         self.assertTrue(set(neighbours_by_det_radius_closer.values()).issubset(set(neighbours_by_det_radius_distant.values())))
 
 

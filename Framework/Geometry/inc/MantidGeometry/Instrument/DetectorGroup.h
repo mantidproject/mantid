@@ -8,6 +8,7 @@
 
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include <map>
 #include <vector>
 
@@ -24,7 +25,11 @@ a simple average of its constituents.
 @author Russell Taylor, Tessella Support Services plc
 @date 08/04/2008
 */
-class MANTID_GEOMETRY_DLL DetectorGroup : public virtual IDetector {
+class [[deprecated(
+    "DetectorGroup has been deprecated in Mantid 7.1. "
+    "See the 'Instrument Access via SpectrumInfo, DetectorInfo, ComponentInfo' concept page, "
+    "located at: https://docs.mantidproject.org/nightly/concepts/InstrumentAccessLayers.html")]] MANTID_GEOMETRY_DLL
+    DetectorGroup : public virtual IDetector {
 public:
   DetectorGroup();
   DetectorGroup(const std::vector<IDetector_const_sptr> &dets);
@@ -229,9 +234,9 @@ private:
 };
 
 /// Typedef for shared pointer
-using DetectorGroup_sptr = std::shared_ptr<DetectorGroup>;
+ALLOW_DEPRECATED(using DetectorGroup_sptr = std::shared_ptr<DetectorGroup>)
 /// Typedef for shared pointer to a const object
-using DetectorGroup_const_sptr = std::shared_ptr<const DetectorGroup>;
+ALLOW_DEPRECATED(using DetectorGroup_const_sptr = std::shared_ptr<const DetectorGroup>)
 
 } // namespace Geometry
 } // namespace Mantid

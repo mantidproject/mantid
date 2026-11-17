@@ -24,8 +24,7 @@ transformation
 @param inWS   -- input matrix workspace, the subject of transformation.
 */
 const std::string MDTransfModQ::inputUnitID(Kernel::DeltaEMode::Type dEmode,
-                                            API::MatrixWorkspace_const_sptr inWS) const {
-  UNUSED_ARG(inWS);
+                                            [[maybe_unused]] API::MatrixWorkspace_const_sptr inWS) const {
   switch (dEmode) {
   case (Kernel::DeltaEMode::Elastic):
     return "Momentum";
@@ -47,8 +46,7 @@ transformation
 @param inWS   -- input matrix workspace, the subject of transformation.
 */
 unsigned int MDTransfModQ::getNMatrixDimensions(Kernel::DeltaEMode::Type mode,
-                                                API::MatrixWorkspace_const_sptr inWS) const {
-  UNUSED_ARG(inWS);
+                                                [[maybe_unused]] API::MatrixWorkspace_const_sptr inWS) const {
   switch (mode) {
   case (Kernel::DeltaEMode::Direct):
     return 2;
@@ -76,10 +74,8 @@ No signal or error transformation is performed by this particular method.
 @return Coord -- the calculated coordinate of the point in the reciprocal space.
 
 */
-bool MDTransfModQ::calcMatrixCoord(const double &deltaEOrK0, std::vector<coord_t> &Coord, double &signal,
-                                   double &ErrSq) const {
-  UNUSED_ARG(signal);
-  UNUSED_ARG(ErrSq);
+bool MDTransfModQ::calcMatrixCoord(const double &deltaEOrK0, std::vector<coord_t> &Coord,
+                                   [[maybe_unused]] double &signal, [[maybe_unused]] double &ErrSq) const {
   if (m_Emode == Kernel::DeltaEMode::Elastic) {
     return calcMatrixCoordElastic(deltaEOrK0, Coord);
   } else {
@@ -128,8 +124,7 @@ bool MDTransfModQ::calcGenericVariables(std::vector<coord_t> &Coord, size_t nd) 
  * process.
  * @return FALSE if spectra should be excluded (if masked)
  */
-bool MDTransfModQ::calcYDepCoordinates(std::vector<coord_t> &Coord, size_t i) {
-  UNUSED_ARG(Coord);
+bool MDTransfModQ::calcYDepCoordinates([[maybe_unused]] std::vector<coord_t> &Coord, size_t i) {
   m_ex = (m_DetDirecton + i)->X();
   m_ey = (m_DetDirecton + i)->Y();
   m_ez = (m_DetDirecton + i)->Z();
@@ -321,8 +316,7 @@ The position of each dimID in the vector corresponds to the position of each MD
 coordinate in the Coord vector
 */
 std::vector<std::string> MDTransfModQ::getDefaultDimID(Kernel::DeltaEMode::Type dEmode,
-                                                       API::MatrixWorkspace_const_sptr inWS) const {
-  UNUSED_ARG(inWS);
+                                                       [[maybe_unused]] API::MatrixWorkspace_const_sptr inWS) const {
   std::vector<std::string> default_dim_ID;
   switch (dEmode) {
   case (Kernel::DeltaEMode::Elastic): {
@@ -349,8 +343,7 @@ std::vector<std::string> MDTransfModQ::getDefaultDimID(Kernel::DeltaEMode::Type 
  *
  * It is Momentum and DelteE in inelastic modes   */
 std::vector<std::string> MDTransfModQ::outputUnitID(Kernel::DeltaEMode::Type dEmode,
-                                                    API::MatrixWorkspace_const_sptr inWS) const {
-  UNUSED_ARG(inWS);
+                                                    [[maybe_unused]] API::MatrixWorkspace_const_sptr inWS) const {
   std::vector<std::string> UnitID = this->getDefaultDimID(dEmode, inWS);
   // TODO: is it really momentum transfer, as MomentumTransfer units are seems
   // bound to elastic mode only (at least accorting to Units description on

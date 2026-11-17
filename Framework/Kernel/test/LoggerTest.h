@@ -54,15 +54,13 @@ public:
   //---------------------------------------------------------------------------
   /** Build same named logger from many threads. */
   void test_Logger_get_inParallel() {
-    int level(0);
+    [[maybe_unused]] int level(0);
 
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < 1000; i++) {
       Logger otherLogger("MyOtherTestLogger");
       level = otherLogger.getLevel(); // here so the optimiser doesn't kill the loop
     }
-
-    UNUSED_ARG(level);
   }
 
   //---------------------------------------------------------------------------

@@ -215,11 +215,8 @@ derivative free simplex minimization
 * @param xValues :: X values for data points
 * @param nData :: Number of data points
  */
-void Fit1D::functionDeriv(const double *in, Jacobian *out, const double *xValues, const size_t nData) {
-  UNUSED_ARG(in);
-  UNUSED_ARG(out);
-  UNUSED_ARG(xValues);
-  UNUSED_ARG(nData);
+void Fit1D::functionDeriv([[maybe_unused]] const double *in, [[maybe_unused]] Jacobian *out,
+                          [[maybe_unused]] const double *xValues, [[maybe_unused]] const size_t nData) {
   throw Exception::NotImplementedError("No derivative function provided");
 }
 
@@ -306,6 +303,12 @@ void Fit1D::exec() {
   // Custom initialization
   prepare();
 
+  if (nParams() == 0) {
+    throw std::runtime_error("The fitting function has no parameters to fit. "
+                             "Add at least one fitting parameter to the function, or use the "
+                             "EvaluateFunction algorithm to calculate the function values.");
+  }
+
   // check if derivative defined in derived class
   bool isDerivDefined = true;
   gsl_matrix *M = nullptr;
@@ -376,7 +379,6 @@ void Fit1D::exec() {
   // coincides with) it
   if (endX >= XValues.back() || endX < startX) {
     g_log.warning("EndX out of range! Set to end of frame");
-    endX = XValues.back();
     m_maxX = static_cast<int>(YValues.size());
   } else {
     for (m_maxX = m_minX; XValues[m_maxX] < endX; ++m_maxX) {
@@ -391,6 +393,13 @@ void Fit1D::exec() {
   // fitting parameter values.
 
   FitData l_data(this, getProperty("Fix"));
+
+  // The GSL solvers cannot be created for zero free parameters
+  if (l_data.p == 0) {
+    throw std::runtime_error("All parameters of the fitting function are fixed, there is nothing to fit. "
+                             "Unfix at least one parameter, or use the EvaluateFunction algorithm to "
+                             "calculate the function values.");
+  }
 
   l_data.n = m_maxX - m_minX; // m_minX and m_maxX are array index markers. I.e. e.g. 0 & 19.
   if (l_data.n == 0) {

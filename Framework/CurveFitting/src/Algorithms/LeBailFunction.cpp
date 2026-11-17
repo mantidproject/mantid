@@ -572,12 +572,9 @@ bool LeBailFunction::calculateGroupPeakIntensities(vector<pair<double, IPowderDi
  * @param peakheight: height of the peak
  * @param setpeakheight:  boolean as the option to set peak height or not.
  */
-void LeBailFunction::setPeakParameters(const IPowderDiffPeakFunction_sptr &peak, const map<string, double> &parammap,
-                                       double peakheight, bool setpeakheight) {
-  UNUSED_ARG(peak);
-  UNUSED_ARG(parammap);
-  UNUSED_ARG(peakheight);
-  UNUSED_ARG(setpeakheight);
+void LeBailFunction::setPeakParameters([[maybe_unused]] const IPowderDiffPeakFunction_sptr &peak,
+                                       [[maybe_unused]] const map<string, double> &parammap,
+                                       [[maybe_unused]] double peakheight, [[maybe_unused]] bool setpeakheight) {
   throw runtime_error("Requiring update flag: peak value changed and etc.");
   /*
   // FIXME - The best solution for speeding is to have a set of peak
@@ -918,8 +915,7 @@ void LeBailFunction::setFixPeakHeights() {
 /** Reset all peaks' height
  * @param inheights :: list of peak heights corresponding to each peak
  */
-void LeBailFunction::setPeakHeights(const std::vector<double> &inheights) {
-  UNUSED_ARG(inheights);
+void LeBailFunction::setPeakHeights([[maybe_unused]] const std::vector<double> &inheights) {
   throw runtime_error("It is not implemented properly.");
   /*
   if (inheights.size() != heights.size())

@@ -421,11 +421,8 @@ double SmoothNeighbours::translateToMeters(const std::string &radiusUnits, const
     // Nothing more to do.
     translatedRadius = enteredRadius;
   } else if (radiusUnits == "NumberOfPixels") {
-    // Get the first idetector from the workspace index 0.
-    const auto &firstDet = m_inWS->spectrumInfo().detector(0);
-    // Find the bounding box of that detector
-    BoundingBox bbox;
-    firstDet.getBoundingBox(bbox);
+    // Find the bounding box of the detector(s) at workspace index 0.
+    BoundingBox const bbox = m_inWS->spectrumInfo().boundingBox(0);
     // Multiply (meters/pixels) by number of pixels, note that enteredRadius
     // takes on meaning of the number of pixels.
     translatedRadius = bbox.width().norm() * enteredRadius;

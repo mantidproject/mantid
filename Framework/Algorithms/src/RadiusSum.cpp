@@ -506,8 +506,7 @@ double RadiusSum::getMinBinSizeForInstrument(const API::MatrixWorkspace_sptr &in
   for (size_t i = 0; i < inWS->getNumberHistograms(); ++i) {
     if (spectrumInfo.isMonitor(i))
       continue;
-    Geometry::BoundingBox bbox;
-    spectrumInfo.detector(i).getBoundingBox(bbox);
+    Geometry::BoundingBox bbox = spectrumInfo.boundingBox(i);
     return bbox.width().norm();
   }
   // this should never happen because it was done in getBoundariesOfInstrument,

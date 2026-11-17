@@ -14,6 +14,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
@@ -109,10 +110,11 @@ void ModeratorTzero::exec() {
     t0_direct = parser.Eval();
   }
 
-  const auto &spectrumInfo = inputWS->spectrumInfo();
-  const double Lss = spectrumInfo.l1();
+  auto const &spectrumInfo = inputWS->spectrumInfo();
+  auto const &componentInfo = inputWS->componentInfo();
+  double const Lss = spectrumInfo.l1();
 
-  const auto numHists = static_cast<size_t>(inputWS->getNumberHistograms());
+  auto const numHists = static_cast<size_t>(inputWS->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, numHists); // report progress of algorithm
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   // iterate over the spectra
@@ -152,7 +154,11 @@ void ModeratorTzero::exec() {
           t2 = 0.0;
         } else {
           static const double convFact = 1.0e-6 * sqrt(2 * PhysicalConstants::meV / PhysicalConstants::NeutronMass);
-          std::vector<double> wsProp = spectrumInfo.detector(i).getNumberParameter("Efixed");
+          // A spectrum of several detectors has no parameters of its own
+          std::vector<double> const wsProp =
+              spectrumInfo.hasUniqueDetector(i)
+                  ? componentInfo.getNumberParameter(spectrumInfo.firstDetectorIndex(i), "Efixed")
+                  : std::vector<double>{};
           if (!wsProp.empty()) {
             double E2 = wsProp.at(0);        //[E2]=meV
             double v2 = convFact * sqrt(E2); //[v2]=meter/microsec
@@ -231,8 +237,9 @@ void ModeratorTzero::execEvent(const std::string &emode) {
     t0_direct = parser.Eval();
   }
 
-  const auto &spectrumInfo = outputWS->spectrumInfo();
-  const double Lss = spectrumInfo.l1();
+  auto const &spectrumInfo = outputWS->spectrumInfo();
+  auto const &componentInfo = outputWS->componentInfo();
+  double const Lss = spectrumInfo.l1();
 
   // Loop over the spectra
   const auto numHists = static_cast<size_t>(outputWS->getNumberHistograms());
@@ -277,7 +284,11 @@ void ModeratorTzero::execEvent(const std::string &emode) {
             t2 = 0.0;
           } else {
             static const double convFact = 1.0e-6 * sqrt(2 * PhysicalConstants::meV / PhysicalConstants::NeutronMass);
-            std::vector<double> wsProp = spectrumInfo.detector(i).getNumberParameter("Efixed");
+            // A spectrum of several detectors has no parameters of its own
+            std::vector<double> const wsProp =
+                spectrumInfo.hasUniqueDetector(i)
+                    ? componentInfo.getNumberParameter(spectrumInfo.firstDetectorIndex(i), "Efixed")
+                    : std::vector<double>{};
             if (!wsProp.empty()) {
               double E2 = wsProp.at(0);        //[E2]=meV
               double v2 = convFact * sqrt(E2); //[v2]=meter/microsec

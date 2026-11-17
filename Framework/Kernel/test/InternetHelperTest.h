@@ -30,14 +30,13 @@ namespace {
  */
 class MockedInternetHelper : public InternetHelper {
 protected:
-  InternetHelper::HTTPStatus sendHTTPSRequest(const std::string &url, std::ostream &responseStream) override {
-    UNUSED_ARG(url);
-
+  InternetHelper::HTTPStatus sendHTTPSRequest([[maybe_unused]] const std::string &url,
+                                              std::ostream &responseStream) override {
     responseStream << "HTTPS request succeeded";
     return InternetHelper::HTTPStatus::OK;
   }
-  InternetHelper::HTTPStatus sendHTTPRequest(const std::string &url, std::ostream &responseStream) override {
-    UNUSED_ARG(url);
+  InternetHelper::HTTPStatus sendHTTPRequest([[maybe_unused]] const std::string &url,
+                                             std::ostream &responseStream) override {
     responseStream << "HTTP request succeeded";
     return InternetHelper::HTTPStatus::OK;
   }

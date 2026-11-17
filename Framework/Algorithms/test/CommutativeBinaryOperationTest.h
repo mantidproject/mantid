@@ -41,21 +41,13 @@ private:
   // Unhide base class method to avoid Intel compiler warning
   using BinaryOperation::checkSizeCompatibility;
   // Overridden BinaryOperation methods
-  void performBinaryOperation(const HistogramData::Histogram &lhs, const HistogramData::Histogram &rhs,
-                              HistogramData::HistogramY &YOut, HistogramData::HistogramE &EOut) override {
-    UNUSED_ARG(lhs);
-    UNUSED_ARG(rhs);
-    UNUSED_ARG(YOut);
-    UNUSED_ARG(EOut);
-  }
-  void performBinaryOperation(const HistogramData::Histogram &lhs, const double rhsY, const double rhsE,
-                              HistogramData::HistogramY &YOut, HistogramData::HistogramE &EOut) override {
-    UNUSED_ARG(lhs);
-    UNUSED_ARG(rhsY);
-    UNUSED_ARG(rhsE);
-    UNUSED_ARG(YOut);
-    UNUSED_ARG(EOut);
-  }
+  void performBinaryOperation([[maybe_unused]] const HistogramData::Histogram &lhs,
+                              [[maybe_unused]] const HistogramData::Histogram &rhs,
+                              [[maybe_unused]] HistogramData::HistogramY &YOut,
+                              [[maybe_unused]] HistogramData::HistogramE &EOut) override {}
+  void performBinaryOperation([[maybe_unused]] const HistogramData::Histogram &lhs, [[maybe_unused]] const double rhsY,
+                              [[maybe_unused]] const double rhsE, [[maybe_unused]] HistogramData::HistogramY &YOut,
+                              [[maybe_unused]] HistogramData::HistogramE &EOut) override {}
 };
 
 class CommutativeBinaryOperationTest : public CxxTest::TestSuite {

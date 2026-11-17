@@ -88,8 +88,7 @@ void ITableWorkspace::modified() {
  *equal, etc.
  * @throw std::runtime_error unless overridden
  */
-void ITableWorkspace::sort(std::vector<std::pair<std::string, bool>> &criteria) {
-  UNUSED_ARG(criteria);
+void ITableWorkspace::sort([[maybe_unused]] std::vector<std::pair<std::string, bool>> &criteria) {
   throw std::runtime_error("This type of ITableWorkspace (" + this->id() +
                            ") has not implemented sort() yet customSort() "
                            "returns true. Please contact the developers.");

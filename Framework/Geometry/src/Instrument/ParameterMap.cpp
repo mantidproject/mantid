@@ -53,6 +53,13 @@ const std::string SCALE_PARAM_NAME = "sca";
 // static logger reference
 Kernel::Logger g_log("ParameterMap");
 
+/// A detached map has no index domain for a component index to refer to
+void checkIsAttached(bool const attached) {
+  if (!attached)
+    throw std::logic_error("ParameterMap: cannot add a parameter by component index before the map is attached to "
+                           "an instrument");
+}
+
 void checkIsNotMaskingParameter(const std::string &name) {
   if (name == std::string("masked"))
     throw std::runtime_error("Masking data (\"masked\") cannot be stored in "
@@ -69,8 +76,7 @@ ParameterMap::ParameterMap(const ParameterMap &other)
     // sharing would make a write through either one visible to the other.
     : m_parameterFileNames(other.m_parameterFileNames),
       m_parameterInfo(std::make_shared<ParameterInfo>(*other.m_parameterInfo)), m_domainIds(other.m_domainIds),
-      m_domainIndices(other.m_domainIndices), m_stagedIndices(other.m_stagedIndices), m_stagedIds(other.m_stagedIds),
-      m_instrument(other.m_instrument) {
+      m_domainIndices(other.m_domainIndices), m_instrument(other.m_instrument) {
   // Deliberately does NOT rebuild the beamline. That is now ExperimentInfo's job, via rebuildBeamlineFrom()
 }
 
@@ -101,11 +107,9 @@ ParameterMap::~ParameterMap() = default;
 
 size_t ParameterMap::indexOf(const IComponent *comp) const {
   size_t result = ComponentInfo::invalidIndex;
-  if (comp) {
-    // An attached map is keyed by component index, a detached one by staging index
-    const auto &indices = m_domainIndices ? *m_domainIndices : m_stagedIndices;
-    auto const found = indices.find(comp->getComponentID());
-    if (found != indices.end()) {
+  if (comp && m_domainIndices) {
+    auto const found = m_domainIndices->find(comp->getComponentID());
+    if (found != m_domainIndices->end()) {
       result = found->second;
     }
   }
@@ -115,15 +119,12 @@ size_t ParameterMap::indexOf(const IComponent *comp) const {
 size_t ParameterMap::indexForWrite(const IComponent *comp) {
   size_t result = indexOf(comp);
   if (comp && result == ComponentInfo::invalidIndex) {
-    if (m_domainIndices) {
-      throw std::invalid_argument("ParameterMap: cannot add a parameter to component '" + comp->getFullName() +
-                                  "', which is not part of the instrument this map belongs to");
+    if (!m_domainIndices) {
+      throw std::logic_error("ParameterMap: cannot add a parameter to component '" + comp->getFullName() +
+                             "' before the map is attached to an instrument");
     }
-    // First time this component has been written to
-    const ComponentID id = comp->getComponentID();
-    result = m_stagedIds.size();
-    m_stagedIds.emplace_back(id);
-    m_stagedIndices.emplace(id, result);
+    throw std::invalid_argument("ParameterMap: cannot add a parameter to component '" + comp->getFullName() +
+                                "', which is not part of the instrument this map belongs to");
   }
   return result;
 }
@@ -155,8 +156,14 @@ std::shared_ptr<ParameterInfo> ParameterMap::rekey(std::shared_ptr<const Compone
   if (componentIds == m_domainIds) {
     return m_parameterInfo;
   }
+  if (!m_domainIds) {
+    // A detached map holds no parameters by component, so there is nothing to translate
+    m_domainIds = std::move(componentIds);
+    m_domainIndices = std::move(componentIndices);
+    return m_parameterInfo;
+  }
   // The components the current indices refer to
-  const auto &oldIds = m_domainIds ? *m_domainIds : m_stagedIds;
+  const auto &oldIds = *m_domainIds;
   auto rekeyed = std::make_shared<ParameterInfo>();
   for (auto const &[oldIndex, parameters] : *m_parameterInfo) {
     auto const found = componentIndices->find(oldIds[oldIndex]);
@@ -182,8 +189,6 @@ std::shared_ptr<ParameterInfo> ParameterMap::rekey(std::shared_ptr<const Compone
   m_parameterInfo = rekeyed;
   m_domainIds = std::move(componentIds);
   m_domainIndices = std::move(componentIndices);
-  m_stagedIndices.clear();
-  m_stagedIds.clear();
   return m_parameterInfo;
 }
 
@@ -461,6 +466,7 @@ void ParameterMap::add(const IComponent *comp, const std::shared_ptr<Parameter> 
 
 void ParameterMap::add(const size_t componentIndex, const std::shared_ptr<Parameter> &par,
                        const std::string *const pDescription) {
+  checkIsAttached(static_cast<bool>(m_domainIndices));
   if (!par || componentIndex == ComponentInfo::invalidIndex)
     return;
   checkIsNotMaskingParameter(par->name());
@@ -503,6 +509,7 @@ void ParameterMap::addFittingParameter(const IComponent *comp, const std::string
 void ParameterMap::addFittingParameter(const size_t componentIndex, const std::string &name,
                                        const std::string &fittingFunction, const std::string &value,
                                        const std::string *const pDescription, const std::string &pVisible) {
+  checkIsAttached(static_cast<bool>(m_domainIndices));
   checkIsNotMaskingParameter(name);
   if (componentIndex == ComponentInfo::invalidIndex)
     return;
@@ -1220,11 +1227,6 @@ size_t ParameterMap::getMemorySize() const {
   // store may be shared with the owning ComponentInfo, which reports it too, so summing this
   // with ComponentInfo::getMemorySize() double-counts it.
   const size_t mapMem = m_parameterInfo->getMemorySize();
-  // The staging tables, which exist only here. The index domain is shared with ComponentInfo,
-  // which reports it.
-  const size_t translationMem =
-      m_stagedIndices.size() * (sizeof(std::pair<const ComponentID, size_t>) + sizeof(void *)) +
-      m_stagedIds.capacity() * sizeof(ComponentID);
   // m_parameterFileNames: vector of strings; sizeof(*this) covers the vector object, count the heap buffer
   const size_t fileNamesMem = m_parameterFileNames.size() * sizeof(std::string) +
                               std::accumulate(m_parameterFileNames.cbegin(), m_parameterFileNames.cend(), size_t{0},
@@ -1234,7 +1236,7 @@ size_t ParameterMap::getMemorySize() const {
   const size_t componentInfoMem = m_componentInfo ? m_componentInfo->getMemorySize() : 0;
   // m_instrument is a non-owning raw pointer to the base Instrument; its memory is counted in
   // Instrument::getMemorySize() and excluded here to avoid double-counting.
-  return sizeof(*this) + mapMem + translationMem + fileNamesMem + detectorInfoMem + componentInfoMem;
+  return sizeof(*this) + mapMem + fileNamesMem + detectorInfoMem + componentInfoMem;
 }
 
 } // namespace Mantid::Geometry

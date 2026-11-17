@@ -68,16 +68,10 @@ public:
   virtual void print(size_t index, std::ostream &s) const = 0;
 
   /// Read in a string and set the value at the given index
-  virtual void read(size_t index, const std::string &text) {
-    UNUSED_ARG(text);
-    UNUSED_ARG(index);
-  }
+  virtual void read([[maybe_unused]] size_t index, [[maybe_unused]] const std::string &text) {}
 
   /// Read in from stream and set the value at the given index
-  virtual void read(const size_t index, std::istringstream &in) {
-    UNUSED_ARG(index);
-    UNUSED_ARG(in);
-  }
+  virtual void read([[maybe_unused]] const size_t index, [[maybe_unused]] std::istringstream &in) {}
 
   /// Specialized type check
   virtual bool isBool() const = 0;

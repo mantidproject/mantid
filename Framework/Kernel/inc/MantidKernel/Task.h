@@ -60,10 +60,7 @@ public:
    *
    * @param object :: any pointer.
    */
-  void setMutexObject(void *object) {
-    UNUSED_ARG(object);
-    throw Kernel::Exception::NotImplementedError("Not impl.");
-  }
+  void setMutexObject([[maybe_unused]] void *object) { throw Kernel::Exception::NotImplementedError("Not impl."); }
 
   //---------------------------------------------------------------------------------------------
   /** Get the mutex object for this Task

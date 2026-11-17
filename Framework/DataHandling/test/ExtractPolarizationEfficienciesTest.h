@@ -15,7 +15,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidHistogramData/Counts.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidHistogramData/Points.h"
@@ -516,39 +516,37 @@ private:
   MatrixWorkspace_sptr createInputWorkspace(std::string const &method, std::string const &lambda = "1 2 3 4",
                                             bool skipP1 = false, bool loadErrors = false) {
     auto workspace = createPointWS(1, 0, 10);
-    auto pmap = std::make_shared<ParameterMap>();
-    auto instrument = std::make_shared<Instrument>();
+    workspace->setInstrument(std::make_shared<Instrument>());
+    auto &componentInfo = workspace->mutableComponentInfo();
+    auto const root = componentInfo.root();
 
-    pmap->addString(instrument.get(), "polarization_correction_method", method);
+    componentInfo.addString(root, "polarization_correction_method", method);
     if (!lambda.empty()) {
-      pmap->addString(instrument.get(), "efficiency_lambda", lambda);
+      componentInfo.addString(root, "efficiency_lambda", lambda);
     }
     if (method == "Fredrikze") {
-      pmap->addString(instrument.get(), "polarization_correction_option", "PA");
-      pmap->addString(instrument.get(), "Pp", "0.991 0.992 0.993 0.994");
-      pmap->addString(instrument.get(), "Ap", "0.981 0.982 0.983 0.984");
-      pmap->addString(instrument.get(), "Rho", "0.971 0.972 0.973 0.974");
-      pmap->addString(instrument.get(), "Alpha", "0.961 0.962 0.963 0.964");
+      componentInfo.addString(root, "polarization_correction_option", "PA");
+      componentInfo.addString(root, "Pp", "0.991 0.992 0.993 0.994");
+      componentInfo.addString(root, "Ap", "0.981 0.982 0.983 0.984");
+      componentInfo.addString(root, "Rho", "0.971 0.972 0.973 0.974");
+      componentInfo.addString(root, "Alpha", "0.961 0.962 0.963 0.964");
     } else {
-      pmap->addString(instrument.get(), "polarization_correction_option", "00,01,10,11");
+      componentInfo.addString(root, "polarization_correction_option", "00,01,10,11");
       if (!skipP1) {
-        pmap->addString(instrument.get(), "P1", "0.991 0.992 0.993 0.994");
+        componentInfo.addString(root, "P1", "0.991 0.992 0.993 0.994");
         if (loadErrors) {
-          pmap->addString(instrument.get(), "P1_Errors", "0.1 0.2 0.3 0.4");
+          componentInfo.addString(root, "P1_Errors", "0.1 0.2 0.3 0.4");
         }
       }
-      pmap->addString(instrument.get(), "P2", "0.981 0.982 0.983 0.984");
-      pmap->addString(instrument.get(), "F1", "0.971 0.972 0.973 0.974");
-      pmap->addString(instrument.get(), "F2", "0.961 0.962 0.963 0.964");
+      componentInfo.addString(root, "P2", "0.981 0.982 0.983 0.984");
+      componentInfo.addString(root, "F1", "0.971 0.972 0.973 0.974");
+      componentInfo.addString(root, "F2", "0.961 0.962 0.963 0.964");
       if (loadErrors) {
-        pmap->addString(instrument.get(), "P2_Errors", "0.11 0.21 0.31 0.41");
-        pmap->addString(instrument.get(), "F1_Errors", "0.12 0.22 0.32 0.42");
-        pmap->addString(instrument.get(), "F2_Errors", "0.13 0.23 0.33 0.43");
+        componentInfo.addString(root, "P2_Errors", "0.11 0.21 0.31 0.41");
+        componentInfo.addString(root, "F1_Errors", "0.12 0.22 0.32 0.42");
+        componentInfo.addString(root, "F2_Errors", "0.13 0.23 0.33 0.43");
       }
     }
-
-    instrument = std::make_shared<Instrument>(instrument, pmap);
-    workspace->setInstrument(instrument);
 
     return workspace;
   }

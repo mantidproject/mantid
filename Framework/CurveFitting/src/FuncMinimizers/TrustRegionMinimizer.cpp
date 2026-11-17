@@ -119,10 +119,8 @@ void TrustRegionMinimizer::evalJ(const DoubleFortranVector &x, DoubleFortranMatr
  *  @param f :: The fortran vector with the weighted residuals.
  *  @param h :: The fortran matrix with the Hessian.
  */
-void TrustRegionMinimizer::evalHF(const DoubleFortranVector &x, const DoubleFortranVector &f,
-                                  DoubleFortranMatrix &h) const {
-  UNUSED_ARG(x);
-  UNUSED_ARG(f);
+void TrustRegionMinimizer::evalHF([[maybe_unused]] const DoubleFortranVector &x,
+                                  [[maybe_unused]] const DoubleFortranVector &f, DoubleFortranMatrix &h) const {
   auto n = static_cast<int>(m_leastSquares->nParams());
   if (h.len1() != n || h.len2() != n) {
     h.allocate(n, n);

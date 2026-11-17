@@ -13,6 +13,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidJson/Json.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Strings.h"
@@ -419,12 +420,13 @@ void StepScan::fillNormalizationCombobox() {
   const auto inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_inputWSName);
 
   try {
-    const auto monWS = inputWS->monitorWorkspace();
-    const auto &monitorSpectrumInfo = monWS->spectrumInfo();
+    auto const monWS = inputWS->monitorWorkspace();
+    auto const &monitorSpectrumInfo = monWS->spectrumInfo();
+    auto const &monitorCompInfo = monWS->componentInfo();
 
     if (monWS) {
       for (std::size_t i = 0; i < monWS->getNumberHistograms(); ++i) {
-        const std::string monitorName = monitorSpectrumInfo.detector(i).getName();
+        const std::string monitorName = monitorCompInfo.name(monitorSpectrumInfo.firstDetectorIndex(i));
         m_uiForm.normalization->addItem(QString::fromStdString(monitorName));
       }
     }

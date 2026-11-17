@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidKernel/DllConfig.h"
+#include <cstdint>
 #include <string>
 #include <vector>
 
