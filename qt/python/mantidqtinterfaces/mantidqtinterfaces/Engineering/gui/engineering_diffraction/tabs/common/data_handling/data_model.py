@@ -143,7 +143,7 @@ class FittingDataModel(object):
         self._data_workspaces.clear()
         self.set_log_workspaces_none()
 
-    def delete_workspaces(self) -> List[MatrixWorkspace]:
+    def delete_workspaces(self) -> List[str]:
         current_log_workspaces = self._sample_logs_workspace_group.get_log_workspaces()
         if current_log_workspaces:
             ws_name = current_log_workspaces.name()
@@ -154,13 +154,13 @@ class FittingDataModel(object):
             removed_ws_list.extend(self.delete_workspace(ws_name))
         return removed_ws_list
 
-    def delete_workspace(self, loaded_ws_name: str) -> List[MatrixWorkspace]:
+    def delete_workspace(self, loaded_ws_name: str) -> List[str]:
         removed = self._data_workspaces.pop(loaded_ws_name)
-        removed_ws_list = [removed.loaded_ws]
+        removed_ws_list = [loaded_ws_name]
         DeleteWorkspace(removed.loaded_ws)
         if removed.bgsub_ws:
             DeleteWorkspace(removed.bgsub_ws)
-            removed_ws_list.append(removed.bgsub_ws)
+            removed_ws_list.append(removed.bgsub_ws_name)
             self.update_sample_log_workspace_group()
         return removed_ws_list
 

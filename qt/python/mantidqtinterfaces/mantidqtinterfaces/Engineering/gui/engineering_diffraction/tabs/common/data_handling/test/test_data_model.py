@@ -151,6 +151,17 @@ class TestFittingDataModel(unittest.TestCase):
         mock_load.assert_any_call("/dir/file2.nxs", OutputWorkspace="file2_Fitting")
         self.assertEqual(2, mock_logger.error.call_count)
 
+    @patch(data_model_path + ".FittingDataModel.update_sample_log_workspace_group")
+    @patch(data_model_path + ".DeleteWorkspace")
+    def test_delete_workspace_returns_names_not_deleted_workspaces(self, mock_delete_ws, _):
+        loaded_ws, bgsub_ws = mock.MagicMock(), mock.MagicMock()
+        self.model._data_workspaces.add("name1", loaded_ws=loaded_ws, bgsub_ws=bgsub_ws, bgsub_ws_name="name1_bgsub")
+
+        removed = self.model.delete_workspace("name1")
+
+        self.assertEqual(["name1", "name1_bgsub"], removed)
+        mock_delete_ws.assert_has_calls([call(loaded_ws), call(bgsub_ws)])
+
     @patch(data_model_path + ".DeleteWorkspace")
     @patch(data_model_path + ".EnggEstimateFocussedBackground")
     @patch(data_model_path + ".Minus")
