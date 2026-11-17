@@ -212,6 +212,15 @@ class ExperimentInfoTest(unittest.TestCase):
         self._assert_laid_down(lab_sample.getShape())
         self._assert_laid_down(lab_sample.getEnvironment().getContainer().getShape())
 
+    def test_by_default_only_the_container_is_on_the_goniometer(self):
+        self.assertTrue(self._ws_with_a_sample_in_a_can().sample().getEnvironment().isOnGoniometer(0))
+
+    def test_a_lab_frame_sample_set_back_on_the_workspace_is_turned_only_once(self):
+        ws = self._ws_with_a_sample_in_a_can()
+        ws.setSample(ws.getLabFrameSample())
+
+        self._assert_laid_down(ws.getLabFrameSample().getEnvironment().getContainer().getShape())
+
     def _get_holding_parent(self, parent, accessor):
         """Checks the reference rather than reading through it: freed memory often still holds the old values."""
         before = sys.getrefcount(parent)
