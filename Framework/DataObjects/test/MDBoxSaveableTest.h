@@ -24,6 +24,7 @@
 #include <filesystem>
 #include <map>
 #include <memory>
+#include <tuple>
 #include <utility>
 
 using namespace Mantid;
@@ -324,10 +325,9 @@ public:
 
     {
       // Now getEvents in a const way then call addEvent()
-      const std::vector<MDLeanEvent<3>> &events2 = c.getConstEvents();
+      std::ignore = c.getConstEvents();
       TSM_ASSERT("Data is not flagged as modified because it was accessed as const",
                  !c.getISaveable()->isDataChanged());
-      (void)events2;
       c.addEvent(ev);
 
       TSM_ASSERT("Data is still not flagged as modified because it was "
@@ -352,8 +352,7 @@ public:
 
     {
       // Now getEvents in a non-const way then call addEvent()
-      std::vector<MDLeanEvent<3>> &events3 = c.getEvents();
-      (void)events3;
+      std::ignore = c.getEvents();
       c.addEvent(ev);
       TSM_ASSERT_EQUALS("Still 1002 events on file", c.getISaveable()->getFileSize(), 1002);
       TSM_ASSERT_EQUALS("And 1003 events in memory", c.getTotalDataSize(), 1003);
@@ -665,7 +664,7 @@ public:
   //-----------------------------------------------------------------------------------------
   /** Set up the file back end and test accessing data
    * by integrating a sphere */
-  void do_test_fileBackEnd_integrationOperations(bool parallel_condition) {
+  void do_test_fileBackEnd_integrationOperations([[maybe_unused]] bool parallel_condition) {
     // Create a box with a controller for the back-end
     BoxController_sptr bc(new BoxController(3));
 
@@ -696,8 +695,6 @@ public:
 
     bc->getFileIO()->closeFile();
     do_deleteNexusFile("MDBoxBinningxest.nxs");
-    // suppress unused variable when built without openmp
-    UNUSED_ARG(parallel_condition);
   }
 
   void test_fileBackEnd_integrationOperations() { do_test_fileBackEnd_integrationOperations(false); }

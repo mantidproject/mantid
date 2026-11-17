@@ -91,7 +91,8 @@ void SCDCalibratePanels2ObjFunc::setPeakWorkspace(IPeaksWorkspace_sptr &pws, con
  * @param xValues :: feature vector [shiftx3, rotx3, T0]
  * @param order   :: dimensionality of feature vector
  */
-void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues, const size_t order) const {
+void SCDCalibratePanels2ObjFunc::function1D(double *out, [[maybe_unused]] const double *xValues,
+                                            [[maybe_unused]] const size_t order) const {
   // Get the feature vector component (numeric type)
   //-- delta in translation
   const double dx = getParameter("DeltaX");
@@ -111,12 +112,6 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues, 
   //-- scale of the detector size
   const double scalex = getParameter("ScaleX");
   const double scaley = getParameter("ScaleY");
-
-  //-- NOTE: given that these components are never used as
-  //         one vector, there is no need to construct a
-  //         xValues
-  UNUSED_ARG(xValues);
-  UNUSED_ARG(order);
 
   // -- always working on a copy only
   IPeaksWorkspace_sptr pws = m_pws->clone();

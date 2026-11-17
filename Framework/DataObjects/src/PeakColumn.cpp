@@ -234,8 +234,7 @@ template <class T> long int PeakColumn<T>::sizeOfData() const {
  * @param count :: Count of new column size (unused)
  * @throw Exception::NotImplementedError
  */
-template <class T> void PeakColumn<T>::resize(size_t count) {
-  UNUSED_ARG(count);
+template <class T> void PeakColumn<T>::resize([[maybe_unused]] size_t count) {
   throw Exception::NotImplementedError("PeakColumn::resize - Peaks must be "
                                        "added through the PeaksWorkspace "
                                        "interface.");
@@ -247,8 +246,7 @@ template <class T> void PeakColumn<T>::resize(size_t count) {
  * @param index :: The new index position (unused)
  * @throw Exception::NotImplementedError
  */
-template <class T> void PeakColumn<T>::insert(size_t index) {
-  UNUSED_ARG(index);
+template <class T> void PeakColumn<T>::insert([[maybe_unused]] size_t index) {
   throw Exception::NotImplementedError("PeakColumn::insert - Peaks must be "
                                        "inserted through the PeaksWorkspace "
                                        "interface.");
@@ -260,8 +258,7 @@ template <class T> void PeakColumn<T>::insert(size_t index) {
  * @param index :: The index position removed(unused)
  * @throw Exception::NotImplementedError
  */
-template <class T> void PeakColumn<T>::remove(size_t index) {
-  UNUSED_ARG(index);
+template <class T> void PeakColumn<T>::remove([[maybe_unused]] size_t index) {
   throw Exception::NotImplementedError("PeakColumn::remove - Peaks must be "
                                        "remove through the PeaksWorkspace "
                                        "interface.");
