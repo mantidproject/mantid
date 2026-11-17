@@ -186,6 +186,11 @@ Kernel::V3D ComponentInfo::samplePosition() const { return Kernel::toV3D(m_compo
 
 bool ComponentInfo::hasSource() const { return m_componentInfo->hasSource(); }
 
+/// True if both were cloned from the same base instrument's cached beamline
+bool ComponentInfo::hasSameBase(ComponentInfo const &other) const {
+  return m_componentInfo->hasSameBase(*other.m_componentInfo);
+}
+
 /*
  * @brief Check the sources of two componentInfo objects coincide
  *
@@ -194,11 +199,6 @@ bool ComponentInfo::hasSource() const { return m_componentInfo->hasSource(); }
  *
  * @returns true if sources are equivalent
  */
-/// True if both were cloned from the same base instrument's cached beamline
-bool ComponentInfo::hasSameBase(ComponentInfo const &other) const {
-  return m_componentInfo->hasSameBase(*other.m_componentInfo);
-}
-
 bool ComponentInfo::hasEquivalentSource(const ComponentInfo &other) const {
   return m_componentInfo->hasEquivalentSource(*(other.m_componentInfo));
 }
