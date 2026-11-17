@@ -45,6 +45,7 @@ jobs:
   doxygen:
     needs: [check-filters]
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -57,6 +58,7 @@ jobs:
 
   conda-packaging-linux:
     needs: [cppcheck, doxygen, check-filters]
+    timeout-minutes: 150
     runs-on:
       - ${{ (inputs.RUNNER_LABEL == '' && 'self-hosted') || inputs.RUNNER_LABEL }}
       - self-hosted
@@ -120,6 +122,7 @@ jobs:
 
   cppcheck:
     needs: [check-filters]
+    timeout-minutes: 60
     runs-on:
       - ${{ (inputs.RUNNER_LABEL == '' && 'self-hosted') || inputs.RUNNER_LABEL }}
       - self-hosted
@@ -164,6 +167,8 @@ jobs:
 
   build-and-test:
     needs: [cppcheck, doxygen, check-filters]
+    # Without a limit a hung step holds the runner for GitHub's six hour default
+    timeout-minutes: 180
     permissions:
       contents: read
 
@@ -172,7 +177,8 @@ jobs:
       fail-fast: false
       matrix:
         # Skip Windows when the PR targets ornl-next (ORNL-specific branch, Linux only)
-        include: ${{ fromJson(github.base_ref == 'ornl-next' && '[{"os":"Linux","cmake_preset":"linux-64-ci"}]' || '[{"os":"Linux","cmake_preset":"linux-64-ci"},{"os":"Windows","cmake_preset":"win-64-ci"}]') }}
+        # Windows builds with Ninja rather than Visual Studio so that ccache can be used
+        include: ${{ fromJson(github.base_ref == 'ornl-next' && '[{"os":"Linux","cmake_preset":"linux-64-ci"}]' || '[{"os":"Linux","cmake_preset":"linux-64-ci"},{"os":"Windows","cmake_preset":"win-64-ci-ninja"}]') }}
 
     runs-on:
       - ${{ (inputs.RUNNER_LABEL == '' && 'self-hosted') || inputs.RUNNER_LABEL }}
@@ -198,6 +204,9 @@ jobs:
       ENABLE_DOCS: false
       ENABLE_DOC_TESTS: false
       ENABLE_DEV_DOCS: false
+      # Records this job's cache hits and misses, which the shared cache statistics cannot
+      # separate from those of other runners on the same host
+      CCACHE_STATSLOG: ${{ github.workspace }}/build/test_logs/ccache_stats.log
 
     steps:
       - name: Print shell environment vars (debug)
@@ -209,6 +218,26 @@ jobs:
       # If this workflow was triggered manually,
       # print a sorted list of all shell environment variables
       #
+
+      # A cancelled or timed out job can leave processes behind (pixi, python, test executables)
+      # that keep files in the workspace open. Windows will not delete an open file, so the
+      # checkout's git clean, clean-builder or pixi then fail or wait. Only processes whose
+      # executable lives under this runner's workspace or temp directory are stopped, so other
+      # runners on the same host are not touched. This must run before checkout.
+      - name: Stop stray processes from earlier jobs
+        if: ${{ runner.os == 'Windows' }}
+        shell: powershell
+        run: |
+          $roots = @($env:GITHUB_WORKSPACE, $env:RUNNER_TEMP) | Where-Object { $_ } |
+            ForEach-Object { [System.IO.Path]::GetFullPath($_).TrimEnd('\') + '\' }
+          $stray = Get-Process | Where-Object {
+            $path = $_.Path
+            $path -and ($roots | Where-Object { $path.StartsWith($_, [System.StringComparison]::OrdinalIgnoreCase) })
+          }
+          foreach ($proc in $stray) {
+            Write-Host "Stopping $($proc.Id) $($proc.Path)"
+            Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
+          }
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -242,13 +271,27 @@ jobs:
         if: ${{ matrix.os == 'Windows' }}
         run: echo "::add-matcher::.github/matchers/msvc.json"
 
-      - name: Install pixi environment
-        if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
+      # The cache lives in the runner user's profile and is shared by every runner on the host.
+      # BASEDIR makes paths relative to the workspace so that runners with different workspace
+      # directories hit each other's entries. The default size of 5G holds less than one build.
+      - name: Configure ccache
+        if: ${{ matrix.os == 'Windows' }}
         run: |
-          pixi install --frozen -v
+          {
+            echo "CCACHE_BASEDIR=${GITHUB_WORKSPACE}"
+            echo "CCACHE_MAXSIZE=30G"
+            echo "CCACHE_COMPILERCHECK=content"
+          } >> "$GITHUB_ENV"
+
+      - name: Install pixi environment
+        uses: ./.github/actions/install-pixi-env
+        if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
+        # three ten minute attempts plus the pauses between them
+        timeout-minutes: 35
 
       - name: Build code
         if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
+        timeout-minutes: 100
         run: |
           set -o pipefail
           echo "For Jenkins scripts JOB_NAME=${JOB_NAME}"
@@ -258,6 +301,17 @@ jobs:
           mkdir -p ${GITHUB_WORKSPACE}/build/test_logs/
           pixi run --frozen bash -ex ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/build ${GITHUB_WORKSPACE} $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS $ENABLE_DOC_TESTS $EXTRA_CMAKE_FLAGS 2>&1 \
               | tee ${GITHUB_WORKSPACE}/build/test_logs/build_${{ matrix.os }}.log
+
+      - name: Show ccache statistics
+        if: ${{ !cancelled() && needs.check-filters.outputs.code_changes == 'true' && hashFiles('build/test_logs/ccache_stats.log') != '' }}
+        run: |
+          {
+            echo "### ccache statistics for this build (${{ matrix.os }})"
+            echo
+            echo '```'
+            pixi run --frozen ccache --show-log-stats -v
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Remove GCC Problem Matchers
         if: ${{ matrix.os == 'Linux' }}
@@ -282,6 +336,7 @@ jobs:
       - name: Run unit tests
         if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
         id: testunit
+        timeout-minutes: 90
         run: |
           cd ${GITHUB_WORKSPACE}
           # Not physical but logical cores, includes hyper threaded - different for darwin
@@ -289,6 +344,22 @@ jobs:
           # bool flags for this are
           # SYSTEM_TESTS UNIT_TESTS DOCS DOC_TESTS
           pixi run --frozen bash -ex ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/run-tests ${GITHUB_WORKSPACE} false true $ENABLE_DOCS $ENABLE_DOC_TESTS ${BUILD_THREADS}
+
+      # Lists where the unit test time goes, to guide work on the test stage. clean-builder removes
+      # build/Testing before each run, so the cost data covers this run only.
+      - name: Summarise slowest unit tests
+        if: ${{ !cancelled() && steps.testunit.conclusion != 'skipped' && hashFiles('build/Testing/Temporary/CTestCostData.txt') != '' }}
+        run: |
+          {
+            echo "### Slowest unit tests (${{ matrix.os }})"
+            echo
+            echo "| Seconds | Test |"
+            echo "|--:|:--|"
+            # each line is "<name> <runs> <average seconds>"; the failed test list follows "---"
+            awk '/^---/ { exit } NF >= 3 { printf "%.1f %s\n", $3, $1 }' \
+                ${GITHUB_WORKSPACE}/build/Testing/Temporary/CTestCostData.txt \
+              | sort -rn | head -n 30 | awk '{ printf "| %s | %s |\n", $1, $2 }'
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Archive unit test output (Linux)
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -309,6 +380,7 @@ jobs:
       - name: Run system tests
         if: ${{ matrix.os == 'Linux' && needs.check-filters.outputs.code_changes == 'true' }}
         id: testsystem
+        timeout-minutes: 90
         run: |
           cd ${GITHUB_WORKSPACE}
           # Not physical but logical cores, includes hyper threaded - different for darwin
@@ -351,6 +423,7 @@ jobs:
 
   user-docs-build-and-test:
     needs: [cppcheck, doxygen, check-filters]
+    timeout-minutes: 120
     permissions:
       contents: read
 
@@ -396,12 +469,14 @@ jobs:
           ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/clean-builder ${GITHUB_WORKSPACE} ${CLEAN_ARGS}
 
       - name: Install pixi environment
+        uses: ./.github/actions/install-pixi-env
         if: ${{ needs.check-filters.outputs.user_docs == 'true' }}
-        run: |
-          pixi install --frozen -v
+        # three ten minute attempts plus the pauses between them
+        timeout-minutes: 35
 
       - name: Build code and user docs
         if: ${{ needs.check-filters.outputs.user_docs == 'true' }}
+        timeout-minutes: 100
         run: |
           cd ${GITHUB_WORKSPACE}
           echo "::add-matcher::.github/matchers/gcc.json"
@@ -411,6 +486,7 @@ jobs:
       - name: Run doctests
         if: ${{ needs.check-filters.outputs.user_docs == 'true' }}
         id: testdocs
+        timeout-minutes: 60
         run: |
           cd ${GITHUB_WORKSPACE}
           # Not physical but logical cores, includes hyper threaded - different for darwin

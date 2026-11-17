@@ -83,7 +83,12 @@
       "inherits": [
         "ci-default",
         "conda"
-      ]
+      ],
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "cl",
+        "CMAKE_CXX_COMPILER": "cl",
+        "CMAKE_DISABLE_PRECOMPILE_HEADERS": "ON"
+      }
     },
     {
       "name": "cppcheck-ci",

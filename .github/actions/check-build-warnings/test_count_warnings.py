@@ -223,6 +223,20 @@ class TestScanMSVC(CountWarningsTestCase):
 
         self.assertEqual(counted, [("Framework/Kernel/src/Foo.cpp", 90, 7, f"C4101: {MSVC_WARNING}")])
 
+    def test_counts_warning_from_a_ninja_build(self):
+        # Ninja prints its progress line, then cl's output verbatim: the source file name and the
+        # warning, with neither MSBuild's node prefix nor its project suffix
+        log_path = self._write_log(
+            "[12/345] Building CXX object Framework/Kernel/CMakeFiles/Kernel.dir/src/Foo.cpp.obj",
+            "Foo.cpp",
+            self._msvc_line(f"{self.workspace}/Framework/Kernel/src/Foo.cpp", project=None),
+        )
+
+        counted, uncounted, _ = self._scan(log_path)
+
+        self.assertEqual(counted, [("Framework/Kernel/src/Foo.cpp", 90, 7, f"C4101: {MSVC_WARNING}")])
+        self.assertEqual(uncounted, [])
+
     def test_normalises_windows_path_separators(self):
         log_path = self._write_log(self._msvc_line(r"..\Framework\Kernel\src\Foo.cpp"))
 
