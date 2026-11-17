@@ -88,8 +88,9 @@ ScriptEditor::ScriptEditor(const QString &lexerName, const QFont &font, QWidget 
  */
 ScriptEditor::ScriptEditor(QWidget *parent, QsciLexer *codelexer, QString settingsGroup)
     : QsciScintilla(parent), m_filename(""), m_progressArrowKey(markerDefine(QsciScintilla::RightArrow)),
-      m_currentExecLine(0), m_completer(nullptr), m_previousKey(0), m_findDialog(new FindReplaceDialog(this)),
-      m_settingsGroup(std::move(settingsGroup)), m_progress_marker_timer(new QTimer(this)) {
+      m_currentExecLine(0), m_last_currentExecLine(0), m_completer(nullptr), m_previousKey(0),
+      m_findDialog(new FindReplaceDialog(this)), m_settingsGroup(std::move(settingsGroup)),
+      m_progress_marker_timer(new QTimer(this)), m_progress_marker_error(0), m_last_progress_marker_error(0) {
 // Older versions of QScintilla still use just CR as the line ending, which is
 // pre-OSX.
 // New versions just use unix-style for everything but Windows.
@@ -407,7 +408,13 @@ void ScriptEditor::updateProgressMarker(int lineno, bool error) {
  * Show the updated progress marker. Call from the QTimer while the script is running.
  */
 void ScriptEditor::showUpdatedProgressMarker() {
-  if (m_progress_marker_error) {
+  if (m_currentExecLine == m_last_currentExecLine && m_progress_marker_error == m_last_progress_marker_error) {
+    return;
+  }
+  m_last_currentExecLine = m_currentExecLine;
+  m_last_progress_marker_error = m_progress_marker_error;
+
+  if (m_last_progress_marker_error) {
     setMarkerBackgroundColor(g_error_colour, m_progressArrowKey);
   } else {
     setMarkerBackgroundColor(g_success_colour, m_progressArrowKey);
@@ -417,9 +424,9 @@ void ScriptEditor::showUpdatedProgressMarker() {
   if (m_currentExecLine <= 0 || m_currentExecLine > this->lines())
     return;
 
-  ensureLineVisible(m_currentExecLine);
+  ensureLineVisible(m_last_currentExecLine);
   markerAdd(m_currentExecLine - 1, m_progressArrowKey);
-  progressMade(m_currentExecLine);
+  progressMade(m_last_currentExecLine);
 }
 
 /// Mark the progress arrow as an error

@@ -182,6 +182,7 @@ private:
   int m_progressArrowKey;
   /// Hold the line number of the currently executing line
   int m_currentExecLine;
+  int m_last_currentExecLine;
   /// A pointer to a QsciAPI object that handles the code completion
   QsciAPIs *m_completer;
   /// The colour of the marker for a success state
@@ -197,4 +198,5 @@ private:
 
   std::unique_ptr<QTimer> m_progress_marker_timer;
   bool m_progress_marker_error;
+  bool m_last_progress_marker_error;
 };
