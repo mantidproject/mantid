@@ -279,8 +279,15 @@ public:
         [this](const auto &r, bool baked) { return singleScatterOverTiltedPlate(r, baked); });
   }
 
+  void test_a_container_turns_with_the_sample() {
+    SampleFrameEquivalence::assertFramesAgree(
+        SampleFrameEquivalence::rotationY(30.0),
+        [this](const auto &r, bool baked) { return singleScatterOverTiltedPlate(r, baked, true); });
+  }
+
   /// Single-scatter result for the flat plate held in the given frame.
-  double singleScatterOverTiltedPlate(const Mantid::Kernel::Matrix<double> &rotation, const bool baked) {
+  double singleScatterOverTiltedPlate(const Mantid::Kernel::Matrix<double> &rotation, const bool baked,
+                                      const bool inCan = false) {
     const double THICKNESS = 0.001; // metres
     auto inputWorkspace = SetupFlatPlateWorkspace(46, 1, 1.0, 1, 0.5, 1.0, 10 * THICKNESS, 10 * THICKNESS, THICKNESS);
     inputWorkspace->mutableRun().mutableGoniometer().setR(rotation);
@@ -288,6 +295,9 @@ public:
     if (baked) {
       SampleFrameEquivalence::bakeWithCopySample(
           SetupFlatPlateWorkspace(46, 1, 1.0, 1, 0.5, 1.0, 10 * THICKNESS, 10 * THICKNESS, THICKNESS), inputWorkspace);
+    }
+    if (inCan) {
+      SampleFrameEquivalence::addCan(*inputWorkspace);
     }
 
     auto alg = createAlgorithm();

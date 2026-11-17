@@ -143,10 +143,10 @@ void export_ExperimentInfo() {
            ":ref:`algm-CopySample` bakes the goniometer in, while :ref:`algm-SetGoniometer` alone "
            "leaves the shape untouched - so rotating by the goniometer unconditionally would turn an "
            "already-rotated shape a second time. This applies only what is outstanding; the "
-           "workspace's own sample is unchanged. A sample in an environment is returned as defined.")
+           "workspace's own sample is unchanged.")
       .def("getLabFrameSample", &getLabFrameSample, args("self"),
            "Return a copy of the :class:`~mantid.api.Sample` carrying the shape getLabFrameSampleShape "
-           "gives. The environment is not currently rotated by the goniometer, so it is copied as defined.")
+           "gives, with the parts of its environment mounted on the goniometer turned with it.")
       .def("run", &ExperimentInfo::run, return_value_policy<reference_existing_object>(), args("self"),
            "Return the :class:`~mantid.api.Run` object. This cannot be "
            "modified, use mutableRun to modify.")

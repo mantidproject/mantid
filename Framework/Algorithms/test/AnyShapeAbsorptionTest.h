@@ -378,21 +378,32 @@ public:
         [this](const auto &r, bool baked) { return runPlateCorrection("anyshape_frames", r, baked); });
   }
 
+  void test_a_container_turns_with_the_sample() {
+    SampleFrameEquivalence::assertFramesAgree(
+        SampleFrameEquivalence::rotationY(30.0),
+        [this](const auto &r, bool baked) { return runPlateCorrection("anyshape_can_frames", r, baked, "Container"); });
+  }
+
 private:
   /// Absorption-correct a plate sample held in the given frame and return the first attenuation
   /// factor. No cross sections are set, so the material comes from the shape the fixture attached.
-  double runPlateCorrection(const std::string &name, const Mantid::Kernel::Matrix<double> &rotation, const bool baked) {
+  double runPlateCorrection(const std::string &name, const Mantid::Kernel::Matrix<double> &rotation, const bool baked,
+                            const std::string &scatterFrom = "Sample") {
     MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 10);
     ws->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
     SampleFrameEquivalence::setSample(*ws, rotation, baked);
+    if (scatterFrom == "Container")
+      SampleFrameEquivalence::addCan(*ws);
 
     Mantid::Algorithms::AnyShapeAbsorption alg;
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", ws);
     alg.setPropertyValue("OutputWorkspace", name);
-    // mm. Comfortably smaller than the 4 mm plate thickness, or the unrotated case dices to nothing.
-    alg.setProperty("ElementSize", 2.0);
+    alg.setPropertyValue("ScatterFrom", scatterFrom);
+    // mm. Comfortably smaller than the 4 mm plate thickness, and the can's 1.5 mm walls, or the
+    // unrotated case dices to nothing.
+    alg.setProperty("ElementSize", scatterFrom == "Container" ? 1.0 : 2.0);
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
