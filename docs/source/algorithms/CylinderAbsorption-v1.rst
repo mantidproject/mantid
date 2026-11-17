@@ -44,7 +44,7 @@ defined because detector, source & sample position are needed.
 Sample Orientation
 ##################
 
-When neither ``CylinderSampleHeight`` nor ``CylinderSampleRadius`` is given, the sample shape is used where the run's goniometer, for example from :ref:`algm-SetGoniometer`, puts it, unless it already carries that rotation, for example from :ref:`algm-CopySample`. A sample in a container or sample environment is used as defined, with a warning, because the environment is not currently rotated by the goniometer. When either property is given, the cylinder is built along ``CylinderAxis`` and the goniometer is not applied.
+When neither ``CylinderSampleHeight`` nor ``CylinderSampleRadius`` is given, the sample shape is used where the run's goniometer, for example from :ref:`algm-SetGoniometer`, puts it, unless it already carries that rotation, for example from :ref:`algm-CopySample`. A sample in a container or sample environment is turned too. When either property is given, the cylinder is built along ``CylinderAxis`` and the goniometer is not applied.
 
 References
 ----------

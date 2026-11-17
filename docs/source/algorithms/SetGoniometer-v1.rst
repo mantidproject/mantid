@@ -46,6 +46,14 @@ upward.
 SetGoniometer(w,"Universal") is the same as
 SetGoniometer(w,Axis0="omega,0,1,0,1",Axis1="chi,0,0,1,1",Axis2="phi,0,1,0,1")
 
+Sample shape
+############
+
+The sample shape and any sample environment keep the orientation they were defined in. Algorithms
+that need them in the lab frame, such as :ref:`algm-MonteCarloAbsorption`, turn them by this rotation,
+together with the parts of the environment mounted on the goniometer; see
+:ref:`SampleEnvironment_goniometer`.
+
 
 
 Usage

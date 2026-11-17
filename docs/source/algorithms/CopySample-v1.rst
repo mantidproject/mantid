@@ -33,7 +33,7 @@ to the individual data workspaces.
 Sample Orientation
 ##################
 
-When the shape is copied, it is turned by the destination workspace's goniometer rotation, which replaces any goniometer rotation it already carried, so it is never turned twice. A rotation within the shape's own frame, for example from :ref:`algm-RotateSampleShape` or a ``rotate-all`` tag, is kept. The environment is copied unrotated.
+When the shape is copied, it is turned by the destination workspace's goniometer rotation, which replaces any goniometer rotation it already carried, so it is never turned twice. A rotation within the shape's own frame, for example from :ref:`algm-RotateSampleShape` or a ``rotate-all`` tag, is kept. The environment is copied as defined, and its parts mounted on the goniometer are turned with the sample when it is used.
 
 Usage
 -----
