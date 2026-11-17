@@ -1,0 +1,1 @@
+- :ref:`HFIRPowderReduction <algm-HFIRPowderReduction>` now applies a standard mask to MIDAS data when ``ApplyMask`` is enabled, masking the first 40 and last 40 pixels of each detector tube.
