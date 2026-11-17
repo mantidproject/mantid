@@ -14,7 +14,9 @@
 #include "MantidKernel/EigenConversionHelpers.h"
 
 #include <algorithm>
+#include <iterator>
 #include <map>
+#include <ranges>
 #include <stdexcept>
 #include <unordered_map>
 
@@ -33,11 +35,8 @@ public:
     auto const &nodes = builder.m_nodes;
     // Detectors take the leading indices, in detector ID order
     std::vector<Node> detectors;
-    for (Node node = 0; node < nodes.size(); ++node) {
-      if (nodes[node].isDetector) {
-        detectors.emplace_back(node);
-      }
-    }
+    std::ranges::copy_if(std::views::iota(Node{0}, nodes.size()), std::back_inserter(detectors),
+                         [&nodes](Node const node) { return nodes[node].isDetector; });
     std::sort(detectors.begin(), detectors.end(),
               [&nodes](Node const a, Node const b) { return nodes[a].id < nodes[b].id; });
     auto const duplicate =

@@ -117,7 +117,8 @@ public:
   void test_the_reference_frame_and_default_view() {
     InstrumentBuilder builder(this->iTestName);
     auto const instrument = builder.createInstrument();
-    auto const frame = instrument->getReferenceFrame();
+    auto const [componentInfo, detectorInfo] = instrument->makeBaseBeamline();
+    auto const &frame = componentInfo->referenceFrame();
     TS_ASSERT_EQUALS(frame->pointingUp(), Geometry::Y);
     TS_ASSERT_EQUALS(frame->pointingAlongBeam(), Geometry::Z);
     TS_ASSERT_EQUALS(frame->pointingHorizontal(), Geometry::X);
@@ -140,8 +141,7 @@ private:
   /// An instrument with a monitor, and a bank rotated 90 degrees about y holding a pixel and a tube of two pixels
   std::shared_ptr<const Geometry::Instrument> makeInstrument() const {
     InstrumentBuilder builder(this->iTestName);
-    std::shared_ptr<const Geometry::IObject> monitorShape = this->shape;
-    builder.addMonitor("monitor", 1, Eigen::Vector3d(0, 0, -1), monitorShape);
+    builder.addMonitor("monitor", 1, Eigen::Vector3d(0, 0, -1), this->shape);
     builder.addBank("bank", Eigen::Vector3d(0, 0, 1),
                     Eigen::Quaterniond(Eigen::AngleAxisd(M_PI / 2, Eigen::Vector3d::UnitY())));
     builder.addDetectorToLastBank("pixel", 3, Eigen::Vector3d(0.1, 0, 0), this->shape);

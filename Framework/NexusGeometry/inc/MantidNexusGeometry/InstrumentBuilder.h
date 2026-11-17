@@ -41,13 +41,13 @@ public:
                 const std::shared_ptr<const Mantid::Geometry::IObject> &pixelShape);
   /// Adds detector to the root (instrument)
   void addDetectorToInstrument(const std::string &detName, detid_t detId, const Eigen::Vector3d &position,
-                               std::shared_ptr<const Mantid::Geometry::IObject> &shape);
+                               std::shared_ptr<const Mantid::Geometry::IObject> const &shape);
   /// Adds detector to the last registered bank
   void addDetectorToLastBank(const std::string &detName, detid_t detId, const Eigen::Vector3d &relativeOffset,
                              std::shared_ptr<const Mantid::Geometry::IObject> shape);
   /// Adds detector to instrument
   void addMonitor(const std::string &detName, detid_t detId, const Eigen::Vector3d &position,
-                  std::shared_ptr<const Mantid::Geometry::IObject> &shape);
+                  std::shared_ptr<const Mantid::Geometry::IObject> const &shape);
   /// Add sample
   void addSample(const std::string &sampleName, const Eigen::Vector3d &position);
   /// Add source

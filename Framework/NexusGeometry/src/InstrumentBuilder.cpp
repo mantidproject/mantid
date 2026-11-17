@@ -76,12 +76,12 @@ void InstrumentBuilder::addDetectorToLastBank(const std::string &detName, detid_
 /// Adds detector to instrument
 void InstrumentBuilder::addDetectorToInstrument(const std::string &detName, detid_t detId,
                                                 const Eigen::Vector3d &position,
-                                                std::shared_ptr<const Geometry::IObject> &shape) {
+                                                std::shared_ptr<const Geometry::IObject> const &shape) {
   m_builder.addDetector(m_root, detName, detId, toV3D(position), Quat(), shape);
 }
 
 void InstrumentBuilder::addMonitor(const std::string &detName, detid_t detId, const Eigen::Vector3d &position,
-                                   std::shared_ptr<const Geometry::IObject> &shape) {
+                                   std::shared_ptr<const Geometry::IObject> const &shape) {
   m_builder.addDetector(m_root, detName, detId, toV3D(position), Quat(), shape, /*isMonitor*/ true);
 }
 
