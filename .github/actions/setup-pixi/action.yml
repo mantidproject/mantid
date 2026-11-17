@@ -40,3 +40,6 @@ runs:
         run-install: ${{ inputs.run-install }}
         frozen: ${{ inputs.run-install }}
         activate-environment: ${{ inputs.activate-environment }}
+        # don't cache the environment on windows
+        cache: ${{ runner.os != 'Windows' }}
+        post-cleanup: ${{ runner.os != 'Windows' }}
