@@ -70,10 +70,9 @@ void SliceMD::init() {
  * @param srcEvent :: the source event, being copied
  * @param newEvent :: the destination event
  */
-template <size_t nd, size_t ond> inline void copyEvent(const MDLeanEvent<nd> &srcEvent, MDLeanEvent<ond> &newEvent) {
+template <size_t nd, size_t ond>
+inline void copyEvent([[maybe_unused]] const MDLeanEvent<nd> &srcEvent, [[maybe_unused]] MDLeanEvent<ond> &newEvent) {
   // Nothing extra copy - this is no-op
-  UNUSED_ARG(srcEvent);
-  UNUSED_ARG(newEvent);
 }
 
 //----------------------------------------------------------------------------------------------

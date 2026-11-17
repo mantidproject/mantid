@@ -17,6 +17,7 @@
 #include "MantidKernel/CPUTimer.h"
 #include "PropertyManagerHelper.h"
 #include <cxxtest/TestSuite.h>
+#include <tuple>
 
 using namespace std;
 using namespace Mantid;
@@ -353,8 +354,7 @@ public:
     for (size_t i = 0; i < ws1->getNumberHistograms(); i++) {
       const auto &spec = ws1->getSpectrum(i);
       const auto &detIDs = spec.getDetectorIDs();
-      detid_t oneDetId = *detIDs.begin();
-      UNUSED_ARG(oneDetId);
+      std::ignore = *detIDs.begin();
     }
     std::cout << tim << " to get detector ID's for " << nhist << " spectra using the ISpectrum method.\n";
   }

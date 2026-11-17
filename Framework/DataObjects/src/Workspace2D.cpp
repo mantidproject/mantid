@@ -324,8 +324,7 @@ size_t Workspace2D::getHistogramNumberHelper() const { return data.size(); }
  *        CURRENTLY IGNORED, the Error is always calculated.
  */
 void Workspace2D::generateHistogram(const std::size_t index, std::span<double const> X, MantidVec &Y, MantidVec &E,
-                                    bool skipError) const {
-  UNUSED_ARG(skipError);
+                                    [[maybe_unused]] bool skipError) const {
   if (index >= data.size())
     throw std::range_error("Workspace2D::generateHistogram, histogram number out of range");
   // output data arrays are implicitly filled by function

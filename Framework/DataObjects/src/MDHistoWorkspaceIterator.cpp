@@ -358,12 +358,10 @@ std::unique_ptr<coord_t[]> MDHistoWorkspaceIterator::getVertexesArray(size_t &nu
   return m_ws->getVertexesArray(m_pos, numVertices);
 }
 
-std::unique_ptr<coord_t[]> MDHistoWorkspaceIterator::getVertexesArray(size_t &numVertices, const size_t outDimensions,
-                                                                      const bool *maskDim) const {
+std::unique_ptr<coord_t[]> MDHistoWorkspaceIterator::getVertexesArray([[maybe_unused]] size_t &numVertices,
+                                                                      [[maybe_unused]] const size_t outDimensions,
+                                                                      [[maybe_unused]] const bool *maskDim) const {
   // Do the same thing as is done in the MDBoxBase
-  UNUSED_ARG(numVertices);
-  UNUSED_ARG(outDimensions);
-  UNUSED_ARG(maskDim);
   throw std::runtime_error("Not Implemented At present time");
 }
 

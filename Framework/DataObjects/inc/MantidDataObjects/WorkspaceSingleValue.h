@@ -46,10 +46,7 @@ public:
   /// Returns the size of each block of data returned by the dataX accessors
   std::size_t blocksize() const override { return 1; }
   /// Returns the number of bins for a given histogram index.
-  std::size_t getNumberBins(const std::size_t &index) const override {
-    UNUSED_ARG(index);
-    return 1;
-  }
+  std::size_t getNumberBins([[maybe_unused]] const std::size_t &index) const override { return 1; }
   /// Returns the maximum number of bins in a workspace.
   std::size_t getMaxNumberBins() const override { return 1; }
 

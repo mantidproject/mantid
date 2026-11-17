@@ -456,10 +456,7 @@ Histogram LoadMuonNexus2::loadData(const BinEdges &edges, const Mantid::LegacyNe
  *   @param period :: The period of this workspace
  */
 void LoadMuonNexus2::loadLogs(const API::MatrixWorkspace_sptr &ws, const Mantid::LegacyNexus::NXEntry &entry,
-                              int period) {
-  // Avoid compiler warning
-  UNUSED_ARG(period);
-
+                              [[maybe_unused]] int period) {
   std::string start_time = entry.getString("start_time");
 
   std::string sampleName = entry.getString("sample/name");
