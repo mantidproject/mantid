@@ -12,7 +12,6 @@ from qtpy.QtWidgets import QApplication, QFileDialog, QMessageBox
 
 from mantid.api import AnalysisDataService, AnalysisDataServiceObserver, WorkspaceGroup
 from mantid.kernel import ConfigService
-from mantid.plots import MantidAxes
 from mantidqt.io import open_a_file_dialog
 from mantidqt.project.projectloader import ProjectLoader
 from mantidqt.project.projectsaver import ProjectSaver
@@ -203,15 +202,18 @@ class Project(AnalysisDataServiceObserver):
         :param workspaces: a list of workspace names.
         :return: a dictionary of figure managers containing plots that only use the workspaces in workspaces.
         """
-        plots_copy = plots.copy()
-        for i, plot in plots_copy.items():
-            # check that every axes only uses workspaces that are being saved, otherwise delete the plot
-            if not all(
-                all(ws in workspaces for ws in ax.tracked_workspaces if isinstance(ax, MantidAxes)) for ax in plot.canvas.figure.axes
-            ):
-                del plots[i]
 
-        return plots
+        def workspaces_used(ax):
+            # 3D axes only record workspaces in their creation_args, other axes such as colorbars use none
+            tracked = getattr(ax, "tracked_workspaces", None)
+            if tracked is not None:
+                return tracked
+            return [cargs["workspaces"] for cargs in getattr(ax, "creation_args", []) if "workspaces" in cargs]
+
+        # Build a new dictionary: plots is the global figure manager's own dictionary and must not be modified.
+        return {
+            i: plot for i, plot in plots.items() if all(ws in workspaces for ax in plot.canvas.figure.axes for ws in workspaces_used(ax))
+        }
 
     @staticmethod
     def inform_user_not_possible():

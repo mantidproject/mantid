@@ -21,3 +21,9 @@
 # window = SliceViewer(ws)
 # window.view.show()
 # app.exec()
+from mantidqt.project.decoderfactory import DecoderFactory
+from mantidqt.project.encoderfactory import EncoderFactory
+from mantidqt.widgets.sliceviewer.io import SliceViewerDecoder, SliceViewerEncoder
+
+DecoderFactory.register_decoder(SliceViewerDecoder)
+EncoderFactory.register_encoder(SliceViewerEncoder)

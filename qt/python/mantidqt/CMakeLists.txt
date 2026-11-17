@@ -138,6 +138,7 @@ set(PYTHON_WIDGET_WORKBENCH_ONLY_TESTS
     mantidqt/widgets/sliceviewer/test/test_dimensions.py
     mantidqt/widgets/sliceviewer/test/test_sliceviewer_cursortracker.py
     mantidqt/widgets/sliceviewer/test/test_sliceviewer_imageinfowidget.py
+    mantidqt/widgets/sliceviewer/test/test_sliceviewer_io.py
     mantidqt/widgets/sliceviewer/test/test_sliceviewer_lineplots.py
     mantidqt/widgets/sliceviewer/test/test_sliceviewer_maskingpresenter.py
     mantidqt/widgets/sliceviewer/test/test_sliceviewer_maskingmodel.py

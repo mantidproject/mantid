@@ -18,6 +18,7 @@ from mantid.api import AnalysisDataService as ADS
 from mantid.kernel import ConfigService
 from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces, RenameWorkspace, UnGroupWorkspace
 from unittest import mock
+from matplotlib.axes import Axes
 from mantid.plots.mantidaxes import MantidAxes
 from mantidqt.project.project import Project
 from mantidqt.utils.qt.testing import start_qapplication
@@ -287,13 +288,16 @@ class ProjectTest(unittest.TestCase):
             fig_manager = mock.Mock()
             mock_ax = mock.Mock(spec=MantidAxes)
             mock_ax.tracked_workspaces = [ws]
-            fig_manager.canvas.figure.axes = [mock_ax]
+            # an axes that does not track workspaces, e.g. a colorbar
+            fig_manager.canvas.figure.axes = [mock_ax, mock.Mock(spec=Axes)]
 
             figure_managers[i] = fig_manager
 
         filtered_figure_managers = self.project._filter_plots_with_unaltered_workspaces(plots=figure_managers, workspaces=[workspaces[0]])
 
-        self.assertEqual(len(filtered_figure_managers), 1)
+        self.assertEqual(list(filtered_figure_managers.keys()), [0])
+        # the dictionary passed in belongs to the global figure manager so must be left alone
+        self.assertEqual(len(figure_managers), 2)
 
     def test_saving_project_with_save_altered_workspaces_only_calls_filter_functions(self):
         self.project.save_altered_workspaces_only = True

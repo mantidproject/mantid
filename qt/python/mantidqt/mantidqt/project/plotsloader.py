@@ -17,12 +17,15 @@ from mantid import logger
 from mantid.api import AnalysisDataService as ADS
 from mantid.plots.legend import LegendProperties
 from mantid.plots.plotfunctions import create_subplots
+from mantid.plots.utility import MantidAxType
 
 # Constants set in workbench.plotting.functions but would cause backwards reliability
-from mantidqt.plotting.functions import pcolormesh
+from mantidqt.plotting.functions import pcolormesh, plot_surface, plot_wireframe
 
 SUBPLOT_WSPACE = 0.5
 SUBPLOT_HSPACE = 0.5
+
+PLOT_FUNCTIONS_3D = {"plot_surface": plot_surface, "plot_wireframe": plot_wireframe}
 
 TICK_FORMATTERS = {
     "NullFormatter": NullFormatter(),
@@ -98,6 +101,18 @@ class PlotsLoader(object):
             for cargs_dict in sublist:
                 if "norm" in cargs_dict and isinstance(cargs_dict["norm"], dict):
                     cargs_dict["norm"] = self.restore_normalise_obj_from_dict(cargs_dict["norm"])
+                if "axis" in cargs_dict:
+                    cargs_dict["axis"] = MantidAxType(cargs_dict["axis"])
+
+        function_3d = PLOT_FUNCTIONS_3D.get(creation_args[0][0].get("function")) if creation_args[0] else None
+        if function_3d is not None:
+            # These create and show the whole figure, including any colorbar or legend
+            fig = function_3d([cargs["workspaces"] for cargs in creation_args[0]])
+            fig._label = plot_dict["label"]
+            if fig.canvas.manager is not None:
+                fig.canvas.manager.set_window_title(plot_dict["label"])
+            return None if create_plot else fig
+
         fig, axes_matrix, _, _ = create_subplots(len(creation_args))
         axes_list = axes_matrix.flatten().tolist()
         for ax, cargs_list in zip(axes_list, creation_args):
@@ -118,6 +133,8 @@ class PlotsLoader(object):
         if fig.canvas.manager is not None:
             fig.canvas.manager.set_window_title(plot_dict["label"])
         self.restore_figure_data(fig=fig, dic=plot_dict)
+        if plot_dict.get("superplot") and fig.canvas.manager is not None:
+            fig.canvas.manager.superplot_toggle()
 
         # If the function should create plot then create else return
         if create_plot:

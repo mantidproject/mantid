@@ -1369,6 +1369,8 @@ class MantidAxes3D(Axes3D):
     def __init__(self, *args, **kwargs):
         kwargs["auto_add_to_figure"] = False
         super().__init__(*args, **kwargs)
+        # The workspace plots made on these axes, used to recreate them when a project is loaded
+        self.creation_args = []
         # By default, when right click is held the plot will zoom in and out.
         # For Mantid plots right click will open a context menu instead
         # Unassigning the zoom button avoids zoom becoming toggled after leaving the context menu
@@ -1507,6 +1509,7 @@ class MantidAxes3D(Axes3D):
         if datafunctions.validate_args(*args):
             logger.debug("using plotfunctions3D")
             line_c = axesfunctions3D.plot_wireframe(self, *args, **kwargs)
+            self.creation_args.append({"workspaces": args[0].name(), "function": "plot_wireframe"})
         else:
             line_c = Axes3D.plot_wireframe(self, *args, **kwargs)
 
@@ -1537,6 +1540,7 @@ class MantidAxes3D(Axes3D):
         if datafunctions.validate_args(*args):
             logger.debug("using plotfunctions3D")
             poly_c = axesfunctions3D.plot_surface(self, *args, **kwargs)
+            self.creation_args.append({"workspaces": args[0].name(), "function": "plot_surface"})
         else:
             poly_c = Axes3D.plot_surface(self, *args, **kwargs)
 
