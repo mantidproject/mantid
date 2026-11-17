@@ -41,9 +41,10 @@ Geometry::Container_const_sptr SampleEnvironmentSpec::findContainer(const std::s
  * @return A new instance of a SampleEnvironment
  */
 Geometry::SampleEnvironment_uptr SampleEnvironmentSpec::buildEnvironment(const std::string &canID) const {
-  auto env = std::make_unique<Geometry::SampleEnvironment>(m_name, findContainer(canID));
-  for (const auto &component : m_components) {
-    env->add(component);
+  const auto can = findContainer(canID);
+  auto env = std::make_unique<Geometry::SampleEnvironment>(m_name, can, m_canOnGoniometer.at(can->id()));
+  for (size_t i = 0; i < m_components.size(); ++i) {
+    env->add(m_components[i], m_componentOnGoniometer[i]);
   }
   return env;
 }
@@ -51,22 +52,26 @@ Geometry::SampleEnvironment_uptr SampleEnvironmentSpec::buildEnvironment(const s
 /**
  * Adds a can definition to the known list
  * @param can A pointer to a Container object
+ * @param onGoniometer Whether it turns with the sample when a goniometer is set
  * @throws std::invalid::argument if the id is empty
  */
-void SampleEnvironmentSpec::addContainer(const Geometry::Container_const_sptr &can) {
+void SampleEnvironmentSpec::addContainer(const Geometry::Container_const_sptr &can, const bool onGoniometer) {
   if (can->id().empty()) {
     throw std::invalid_argument("SampleEnvironmentSpec::addContainer() - Container must "
                                 "have an id field. Empty string found.");
   }
   m_cans.emplace(can->id(), can);
+  m_canOnGoniometer.emplace(can->id(), onGoniometer);
 }
 
 /**
  * Add a non-can component to the specification
  * @param component A pointer to a Object
+ * @param onGoniometer Whether it turns with the sample when a goniometer is set
  */
-void SampleEnvironmentSpec::addComponent(const Geometry::IObject_const_sptr &component) {
+void SampleEnvironmentSpec::addComponent(const Geometry::IObject_const_sptr &component, const bool onGoniometer) {
   m_components.emplace_back(component);
+  m_componentOnGoniometer.emplace_back(onGoniometer);
 }
 
 } // namespace Mantid::DataHandling

@@ -64,6 +64,20 @@ public:
     TS_ASSERT_EQUALS(environment.name(), "testName");
   }
 
+  void testByDefaultOnlyTheContainerIsOnTheGoniometer() {
+    const auto ws = loadCanThenPart("Unset", "Unset");
+    const auto &environment = ws->sample().getEnvironment();
+    TS_ASSERT(environment.isOnGoniometer(0));
+    TS_ASSERT(!environment.isOnGoniometer(1));
+  }
+
+  void testOnGoniometerSaysWhetherTheLoadedPartTurns() {
+    const auto ws = loadCanThenPart("False", "True");
+    const auto &environment = ws->sample().getEnvironment();
+    TS_ASSERT(!environment.isOnGoniometer(0));
+    TS_ASSERT(environment.isOnGoniometer(1));
+  }
+
   void testSetMaterial() {
     LoadSampleEnvironment alg;
     alg.initialize();
@@ -169,6 +183,24 @@ public:
   }
 
 private:
+  /// A workspace whose environment is a cube loaded as the can, then a cube added to it.
+  MatrixWorkspace_sptr loadCanThenPart(const std::string &canOnGoniometer, const std::string &partOnGoniometer) {
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
+    for (const auto &[add, onGoniometer] : {std::pair{false, canOnGoniometer}, std::pair{true, partOnGoniometer}}) {
+      LoadSampleEnvironment alg;
+      alg.initialize();
+      alg.setChild(true);
+      alg.setProperty("Filename", FileFinder::Instance().getFullPath("cubeBin.stl").string());
+      alg.setProperty("Add", add);
+      alg.setPropertyValue("OnGoniometer", onGoniometer);
+      alg.setProperty("InputWorkspace", ws);
+      alg.setPropertyValue("OutputWorkspace", "unused_for_child");
+      alg.execute();
+      ws = alg.getProperty("OutputWorkspace");
+    }
+    return ws;
+  }
+
 #ifdef ENABLE_LIB3MF
   static Kernel::Matrix<double> ninetyAboutZ() {
     return Kernel::Matrix<double>(std::vector<double>{0, -1, 0, 1, 0, 0, 0, 0, 1});
