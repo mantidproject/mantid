@@ -4,8 +4,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.api import AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, WorkspaceGroup
+from mantid.api import AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, IAlgorithm, MatrixWorkspace, WorkspaceGroup
 
+from collections.abc import Iterable, Iterator, Sequence
 from contextlib import contextmanager
 from uuid import uuid4
 
@@ -23,6 +24,16 @@ from mantid.kernel import (
     StringArrayMandatoryValidator,
     StringArrayProperty,
 )
+
+
+# Logical input name and its working workspace; absent transmissions have no workspace.
+NamedWorkspace = tuple[str, MatrixWorkspace | WorkspaceGroup | None]
+# Sample, first transmission and second transmission, in that order.
+ReductionInputs = tuple[NamedWorkspace, NamedWorkspace, NamedWorkspace]
+# Algorithm property name, logical input name and working workspace to register.
+ADSWorkspaceInput = tuple[str, str, MatrixWorkspace | WorkspaceGroup | None]
+# Algorithm input properties and a mapping from temporary ADS names to logical input names.
+TemporaryADSWorkspaces = tuple[dict[str, MatrixWorkspace | WorkspaceGroup | str | None], dict[str, str]]
 
 
 class Prop:
@@ -136,13 +147,13 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         self._groupTOFWorkspaces(input_workspace_names)
         self._groupProcessedTOFWorkspaces([processed_workspace_name, *(workspace.name() for workspace in to_reduce)], input_workspace_names)
 
-    def _publish_processed_input(self, cloned_workspace, finished_algs):
+    def _publish_processed_input(self, cloned_workspace: MatrixWorkspace | WorkspaceGroup, finished_algs: Sequence[IAlgorithm]) -> str:
         """Retain the full-detector working input for diagnostics without another copy."""
         workspace_name = finished_algs[0].getPropertyValue(Prop.OUTPUT_WS_BINNED) + "_processed_tof"
         if self.getProperty(Prop.HIDE_INPUT).value and not workspace_name.startswith("__"):
             workspace_name = "__" + workspace_name
 
-        def publish(workspace, name):
+        def publish(workspace: MatrixWorkspace | WorkspaceGroup, name: str) -> None:
             if isinstance(workspace, WorkspaceGroup):
                 for index, member in enumerate(workspace):
                     publish(member, f"{name}_{index + 1}")
@@ -159,7 +170,8 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
                         member.mutableRun().addProperty(self._PROCESSED_TOF_ID_LOG, workspace_name, True)
         return workspace_name
 
-    def _load(self):
+    def _load(self) -> tuple[ReductionInputs, list[str]]:
+        """Return working reduction inputs and the original sample workspace names."""
         hide_inputs = self.getProperty(Prop.HIDE_INPUT).value
         self._tofPrefix = "__TOF_" if hide_inputs else "TOF_"
         self._transPrefix = "__TRANS_" if hide_inputs else "TRANS_"
@@ -186,7 +198,12 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         )
         return reduction_inputs, input_workspace_names
 
-    def _calibrate(self, cloned_workspace, cloned_first_transmission_workspace, cloned_second_transmission_workspace):
+    def _calibrate(
+        self,
+        cloned_workspace: MatrixWorkspace | WorkspaceGroup,
+        cloned_first_transmission_workspace: MatrixWorkspace | WorkspaceGroup | None,
+        cloned_second_transmission_workspace: MatrixWorkspace | WorkspaceGroup | None,
+    ) -> float | None:
         nominal_specular_pixel = self.getProperty(Prop.NOMINAL_SPECULAR_PIXEL).value
         if self.getProperty(Prop.NOMINAL_SPECULAR_PIXEL).isDefault:
             nominal_specular_pixel = self.getProperty(Prop.ACTUAL_SPECULAR_PIXEL).value
@@ -223,7 +240,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         for workspace_name in cached_group_names:
             AnalysisDataService.remove(workspace_name)
 
-    def _groupProcessedTOFWorkspaces(self, workspace_names, input_workspace_names):
+    def _groupProcessedTOFWorkspaces(self, workspace_names: Iterable[str], input_workspace_names: Iterable[str]) -> None:
         """Group processed inputs, collapsed slices and bank sums in TOF_processed or __TOF_processed."""
         if not self.getProperty(Prop.GROUP_TOF).value:
             return
@@ -445,7 +462,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             workspaces.append(ws)
         return workspaces
 
-    def _clone_workspace(self, input_workspace):
+    def _clone_workspace(self, input_workspace: MatrixWorkspace | WorkspaceGroup) -> MatrixWorkspace | WorkspaceGroup:
         if isinstance(input_workspace, WorkspaceGroup):
             return self._create_workspace_group_from_members(
                 [self._clone_workspace(input_member_workspace) for input_member_workspace in input_workspace]
@@ -455,11 +472,15 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         return alg.getProperty("OutputWorkspace").value
 
     @contextmanager
-    def _temporary_ads_workspaces(self, workspace_inputs, require_names=False):
+    def _temporary_ads_workspaces(
+        self,
+        workspace_inputs: Iterable[ADSWorkspaceInput],
+        require_names: bool = False,
+    ) -> Iterator[TemporaryADSWorkspaces]:
         """Register inputs together, removing only registrations created in this scope."""
         workspace_names = {}
 
-        def register(cloned_workspace, input_workspace_name):
+        def register(cloned_workspace: MatrixWorkspace | WorkspaceGroup, input_workspace_name: str) -> str:
             if cloned_workspace.name() and AnalysisDataService.doesExist(cloned_workspace.name()):
                 return cloned_workspace.name()
             if isinstance(cloned_workspace, WorkspaceGroup):
@@ -471,7 +492,9 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             workspace_names[cloned_workspace_name] = input_workspace_name
             return cloned_workspace_name
 
-        def map_cloned_group_member_to_input_name(cloned_workspace, input_workspace_name):
+        def map_cloned_group_member_to_input_name(
+            cloned_workspace: WorkspaceGroup, input_workspace_name: str
+        ) -> list[tuple[MatrixWorkspace | WorkspaceGroup, str]]:
             cached_input_group = self._get_cached_workspace(input_workspace_name)
             member_to_name_list = []
             for index, cloned_member_workspace in enumerate(cloned_workspace):
@@ -497,7 +520,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
                 AnalysisDataService.remove(cloned_workspace_name)
 
     @staticmethod
-    def _rename_summed_workspaces(workspace_names):
+    def _rename_summed_workspaces(workspace_names: dict[str, str]) -> None:
         for cloned_workspace_name, input_workspace_name in workspace_names.items():
             for hidden_prefix in ("", "__"):
                 summed_workspace_name = _summedSegmentWorkspace(hidden_prefix + cloned_workspace_name)
@@ -687,7 +710,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
     def _representative_workspace(workspace):
         return workspace[0] if isinstance(workspace, WorkspaceGroup) else workspace
 
-    def _get_cached_workspace(self, workspace_name):
+    def _get_cached_workspace(self, workspace_name: str) -> MatrixWorkspace | WorkspaceGroup | None:
         """Resolve an ADS input or its ordered members in a flattened TOF cache."""
         if AnalysisDataService.doesExist(workspace_name):
             return AnalysisDataService.retrieve(workspace_name)
