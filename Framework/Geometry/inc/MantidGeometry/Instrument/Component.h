@@ -12,6 +12,7 @@
 #include "MantidKernel/V2D.h"
 #include "MantidKernel/V3D.h"
 
+#include <limits>
 #include <string>
 #include <typeinfo>
 #include <vector>
@@ -302,7 +303,7 @@ public:
 
   virtual size_t registerContents(class ComponentVisitor &componentVisitor) const override;
   bool hasComponentInfo() const;
-  size_t index() const;
+  size_t index() const override;
 
 protected:
   /// Parent component in the tree
@@ -359,6 +360,13 @@ protected:
   /// Swap the current references to the un-parameterized component and
   /// parameter map for new ones
   void swap(const Component *base, const ParameterMap *pmap);
+
+private:
+  friend class InstrumentVisitor;
+  /// Index of the unparametrized component in its instrument's ComponentInfo. Set by InstrumentVisitor when the
+  /// finished tree is walked to cache its beamline. A copy carries the original's index until its own tree is walked;
+  /// it is only read for a tree whose beamline has been cached.
+  mutable std::size_t m_index{std::numeric_limits<std::size_t>::max()};
 };
 
 } // namespace Geometry

@@ -339,7 +339,7 @@ void LoadHelper::moveComponent(const API::MatrixWorkspace_sptr &ws, const std::s
     throw std::invalid_argument("Instrument component " + componentName + " not found");
   }
   auto &componentInfo = ws->mutableComponentInfo();
-  const auto componentIndex = componentInfo.indexOf(component->getComponentID());
+  const auto componentIndex = component->index();
   componentInfo.setPosition(componentIndex, newPos);
 }
 
@@ -357,7 +357,7 @@ void LoadHelper::rotateComponent(const API::MatrixWorkspace_sptr &ws, const std:
     throw std::invalid_argument("Instrument component " + componentName + " not found");
   }
   auto &componentInfo = ws->mutableComponentInfo();
-  const auto componentIndex = componentInfo.indexOf(component->getComponentID());
+  const auto componentIndex = component->index();
   componentInfo.setRotation(componentIndex, rot);
 }
 

@@ -495,7 +495,7 @@ public:
     ParameterMap pmap;
     const auto comp = m_testInstrument->getChild(0);
     auto [componentInfo, detectorInfo] = InstrumentVisitor::makeWrappers(*m_testInstrument, &pmap);
-    const auto index = componentInfo->indexOf(comp->getComponentID());
+    const auto index = comp->index();
     componentInfo->addInt(index, "P1", 1);
     pmap.clear();
     TS_ASSERT(pmap.empty());
@@ -514,8 +514,7 @@ public:
     const auto comp = m_testInstrument->getChild(0);
     pmap.addInt(comp.get(), "P", 3);
 
-    TS_ASSERT_EQUALS(componentInfo->getIntParameter(componentInfo->indexOf(comp->getComponentID()), "P", false),
-                     std::vector<int>{3});
+    TS_ASSERT_EQUALS(componentInfo->getIntParameter(comp->index(), "P", false), std::vector<int>{3});
   }
 
   void test_attached_map_rejects_components_of_another_instrument() {
@@ -539,7 +538,7 @@ public:
     pmap.setInstrument(instrument.get());
     auto &componentInfo = pmap.mutableComponentInfo();
     componentInfo.addDouble(componentInfo.root(), "P", 1.5);
-    componentInfo.addInt(componentInfo.indexOf(instrument->getChild(0)->getComponentID()), "Q", 2);
+    componentInfo.addInt(instrument->getChild(0)->index(), "Q", 2);
 
     const auto &metadata = pmap.instrumentMetadata();
     TS_ASSERT(metadata.hasPhysicalInstrument());
@@ -558,7 +557,7 @@ public:
 
     const auto entries = pmap.entries();
     TS_ASSERT_EQUALS(entries.size(), 1);
-    TS_ASSERT_EQUALS(entries[0].first, componentInfo->indexOf(comp->getComponentID()));
+    TS_ASSERT_EQUALS(entries[0].first, comp->index());
     TS_ASSERT_EQUALS(entries[0].second->value<int>(), 3);
   }
 
@@ -572,9 +571,9 @@ public:
     TS_ASSERT(pmap.empty());
   }
 
-  void test_entries_of_a_detached_map_throw() {
+  void test_entries_of_a_detached_map_are_empty() {
     ParameterMap const pmap;
-    TS_ASSERT_THROWS(pmap.entries(), const std::logic_error &);
+    TS_ASSERT(pmap.entries().empty());
   }
 
   void test_map_attached_from_cached_beamline_shares_its_index_domain() {
@@ -586,8 +585,7 @@ public:
     const auto comp = instrument->getChild(0);
     pmap.addInt(comp.get(), "P", 4);
 
-    TS_ASSERT_EQUALS(componentInfo->getIntParameter(componentInfo->indexOf(comp->getComponentID()), "P", false),
-                     std::vector<int>{4});
+    TS_ASSERT_EQUALS(componentInfo->getIntParameter(comp->index(), "P", false), std::vector<int>{4});
   }
 
   void test_asString_names_components_of_an_attached_map() {
@@ -978,10 +976,12 @@ public:
     m_testInst->add(subbank1);
     m_testInst->add(topbank);
 
-    // Add a double parameter at the top level
-    m_pmap.addDouble(m_testInst->getComponentID(), "instlevel", 10.0);
+    // Attach the map to the finished instrument, then add a double parameter at the top level
+    m_pmap.setInstrument(m_testInst.get());
+    auto &componentInfo = m_pmap.mutableComponentInfo();
+    componentInfo.addDouble(componentInfo.root(), "instlevel", 10.0);
     // and at leaf level
-    m_pmap.addDouble(m_leaf->getComponentID(), "leaflevel", 11.0);
+    componentInfo.addDouble(m_pmap.detectorInfo().indexOf(m_leaf->getID()), "leaflevel", 11.0);
   }
 
   void test_Inst_Par_Lookup_Via_GetRecursive_And_Leaf_Component() {

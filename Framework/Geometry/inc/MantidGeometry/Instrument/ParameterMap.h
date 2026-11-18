@@ -89,8 +89,7 @@ public:
   void swap(ParameterMap &other) {
     // The index domain must travel with the store: an index is meaningless without it.
     m_parameterInfo.swap(other.m_parameterInfo);
-    m_domainIds.swap(other.m_domainIds);
-    m_domainIndices.swap(other.m_domainIndices);
+    std::swap(m_domain, other.m_domain);
   }
   /// Clear any parameters with the given name
   void clearParametersByName(const std::string &name);
@@ -300,7 +299,7 @@ public:
   void addParameterFilename(const std::string &filename);
 
   /** Every stored parameter with its component's index in the instrument this map belongs to, in
-   * component-index order. Throws for a detached map, which has no component indices yet.*/
+   * component-index order. A detached map has none. */
   std::vector<Entry> entries() const;
 
   bool hasDetectorInfo(const Instrument *instrument) const;
@@ -310,9 +309,6 @@ public:
   const Geometry::ComponentInfo &componentInfo() const;
   Geometry::ComponentInfo &mutableComponentInfo();
   Geometry::InstrumentMetadata const &instrumentMetadata() const;
-  size_t detectorIndex(const detid_t detID) const;
-  size_t componentIndex(const Geometry::ComponentID componentId) const;
-  const std::vector<Geometry::ComponentID> &componentIds() const;
   void setInstrument(const Instrument *instrument);
 
   /** Rebuild the 2.0 layers for a map that was copy-constructed from `source`.
@@ -337,17 +333,11 @@ public:
   const std::shared_ptr<Geometry::InstrumentMetadata> &sharedInstrumentMetadata() const { return m_instrumentMetadata; }
   //@}
 
-  /// The components of one instrument, by index, as held by its ComponentInfo
-  using ComponentIDs = std::vector<Geometry::IComponent *>;
-  /// The reverse of ComponentIDs
-  using ComponentIndices = std::unordered_map<Geometry::IComponent const *, size_t>;
-
-  /** Attach this map to an instrument's component index domain, rekeying its parameters onto the
-   * instrument's component indices, and return the resulting store. Parameters of components outside
-   * the domain are dropped. A map already attached to this domain is left as it is, and a detached map,
-   * which holds no parameters by component, simply adopts the domain. */
-  std::shared_ptr<ParameterInfo> rekey(std::shared_ptr<const ComponentIDs> componentIds,
-                                       std::shared_ptr<const ComponentIndices> componentIndices);
+  /** Attach this map to the component indices of an unparametrized instrument and return its store. A map
+   * already attached to this instrument is left as it is. Any other map starts with an empty store: a detached
+   * map holds no parameters, and one attached to another instrument has none for this one, whose components are
+   * all its own. */
+  std::shared_ptr<ParameterInfo> rekey(const Instrument &domain);
 
 private:
   std::shared_ptr<Parameter> create(const std::string &className, const std::string &name,
@@ -362,10 +352,8 @@ private:
   /// calculate relative error for use in diff
   bool relErr(double x1, double x2, double errorVal) const;
 
-  /// The number of components in the index domain
-  size_t domainSize() const { return m_domainIds ? m_domainIds->size() : 0; }
-  /// Index for a component, or ComponentInfo::invalidIndex if it is not in this map's index domain, which a
-  /// detached map does not have.
+  /// Index for a component, or ComponentInfo::invalidIndex if it is not in this map's instrument, which a detached
+  /// map does not have.
   size_t indexOf(const IComponent *comp) const;
   /// As indexOf(), but throws for a detached map, or a component outside the index domain.
   size_t indexForWrite(const IComponent *comp);
@@ -380,11 +368,9 @@ private:
   /** The parameter store, owner of the parameter info*/
   std::shared_ptr<ParameterInfo> m_parameterInfo;
 
-  /** The index domain: the components of the instrument this map is attached to, shared with that
-   * instrument's ComponentInfo. Within it, a component's store index is its component index. Both
-   * null for a detached map, which cannot be written to by component. */
-  std::shared_ptr<const ComponentIDs> m_domainIds;
-  std::shared_ptr<const ComponentIndices> m_domainIndices;
+  /** The index domain: the unparametrized instrument this map is attached to. Within it, a component's
+   * store index is its component index. Null for a detached map, which cannot be written to. */
+  const Instrument *m_domain{nullptr};
 
   /** The 2.0 instrument layers, co-owned with the ExperimentInfo that built them.
    *

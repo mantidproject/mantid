@@ -185,7 +185,7 @@ public:
     ParameterMap_sptr pmap(new ParameterMap());
     pmap->setInstrument(instrument.get());
     auto &componentInfo = pmap->mutableComponentInfo();
-    componentInfo.addString(componentInfo.indexOf(&q), "ChildMessage", "Message from a child");
+    componentInfo.addString(q.index(), "ChildMessage", "Message from a child");
     Component pq(&q, pmap.get());
 
     TS_ASSERT_EQUALS(pq.getName(), "Child");
@@ -377,7 +377,7 @@ public:
     ParameterMap_sptr pmap(new ParameterMap());
     pmap->setInstrument(instrument.get());
     auto &componentInfo = pmap->mutableComponentInfo();
-    auto const index = componentInfo.indexOf(comp);
+    auto const index = comp->index();
     componentInfo.addString(index, "Hidden string parameter", "hidden values", nullptr, "false");
     componentInfo.addDouble(index, "Hidden double parameter", 0.0, nullptr, "false");
 

@@ -61,8 +61,7 @@ public:
       TS_ASSERT_EQUALS(inWS->e(0)[i], outWS->e(0)[i]);
     }
 
-    TS_ASSERT_EQUALS(WorkspaceCreationHelper::baseInstrumentID(*inWS),
-                     WorkspaceCreationHelper::baseInstrumentID(*outWS));
+    TS_ASSERT(WorkspaceCreationHelper::haveSameBaseInstrument(*inWS, *outWS));
   }
 
   void testEvents() {
@@ -84,7 +83,6 @@ public:
       TS_ASSERT_EQUALS(inWS->e(0)[i], outWS->e(0)[i]);
     }
 
-    TS_ASSERT_EQUALS(WorkspaceCreationHelper::baseInstrumentID(*inWS),
-                     WorkspaceCreationHelper::baseInstrumentID(*outWS));
+    TS_ASSERT(WorkspaceCreationHelper::haveSameBaseInstrument(*inWS, *outWS));
   }
 };

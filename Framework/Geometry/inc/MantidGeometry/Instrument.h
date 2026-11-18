@@ -16,6 +16,7 @@
 #include "MantidTypes/Core/DateAndTime.h"
 
 #include <map>
+#include <mutex>
 #include <queue>
 #include <stdexcept>
 #include <string>
@@ -222,7 +223,7 @@ public:
   void parseTreeAndCacheBeamline();
   std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
   makeBeamline(ParameterMap &pmap, const ParameterMap *source = nullptr) const;
-  std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>> makeBeamlineNew(ParameterMap &pmap) const;
+  std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>> makeBaseBeamline() const;
 
   /// Get the footprint in memory in bytes.
   size_t getMemorySize() const;
@@ -270,6 +271,8 @@ private:
 
   std::pair<std::unique_ptr<ComponentInfo>, std::unique_ptr<DetectorInfo>>
   makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo, const DetectorInfo &detectorInfo) const;
+  std::pair<std::shared_ptr<const ComponentInfo>, std::shared_ptr<const DetectorInfo>> cachedBeamline() const;
+  void resetBeamlineCache();
 
   /// @brief Tuple which holds detector-IDs and pointers to detector components, and monitor flags.
   /// This is the type of the elements in the detector cache vector.
@@ -378,11 +381,12 @@ private:
   /// Pointer to the reference frame object.
   std::shared_ptr<ReferenceFrame> m_referenceFrame;
 
-  /// Pointer to the DetectorInfo object. May be NULL.
-  std::shared_ptr<const DetectorInfo> m_detectorInfo{nullptr};
-
-  /// Pointer to the ComponentInfo object. May be NULL.
-  std::shared_ptr<const ComponentInfo> m_componentInfo{nullptr};
+  /// The cached base beamline that every ComponentInfo and DetectorInfo of this instrument is cloned from, so that they
+  /// share its structure. Built on first use if parseTreeAndCacheBeamline() was not called. NULL for a parametrized
+  /// instrument.
+  mutable std::shared_ptr<const DetectorInfo> m_detectorInfo{nullptr};
+  mutable std::shared_ptr<const ComponentInfo> m_componentInfo{nullptr};
+  mutable std::mutex m_beamlineMutex;
 
   /// Flag - is this the physical rather than neutronic instrument
   bool m_isPhysicalInstrument{false};

@@ -9,8 +9,11 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ComponentInfoBankHelpers.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/GridDetectorPixel.h"
 #include "MantidKernel/Exception.h"
+
+#include <deque>
 
 namespace Mantid::DataHandling {
 
@@ -20,6 +23,42 @@ DECLARE_ALGORITHM(MoveInstrumentComponent)
 using namespace Kernel;
 using namespace Geometry;
 using namespace API;
+
+namespace {
+/// The component given by a name or a '/'-delimited path of names, or ComponentInfo::invalidIndex if there is none.
+/// As in CompAssembly::getComponentByName, each name is searched for breadth-first from the previous match
+/// (inclusive), so a path may skip steps.
+size_t indexOfPath(ComponentInfo const &componentInfo, std::string const &path) {
+  if (componentInfo.size() == 0) {
+    return ComponentInfo::invalidIndex;
+  }
+  size_t current = componentInfo.root();
+  size_t segmentStart = 0;
+  while (segmentStart <= path.size()) {
+    auto const separator = path.find('/', segmentStart);
+    auto const segment =
+        path.substr(segmentStart, separator == std::string::npos ? separator : separator - segmentStart);
+    std::deque<size_t> queue{current};
+    size_t found = ComponentInfo::invalidIndex;
+    while (!queue.empty() && found == ComponentInfo::invalidIndex) {
+      auto const index = queue.front();
+      queue.pop_front();
+      if (componentInfo.name(index) == segment) {
+        found = index;
+      } else {
+        auto const &children = componentInfo.children(index);
+        queue.insert(queue.end(), children.cbegin(), children.cend());
+      }
+    }
+    if (found == ComponentInfo::invalidIndex || separator == std::string::npos) {
+      return found;
+    }
+    current = found;
+    segmentStart = separator + 1;
+  }
+  return ComponentInfo::invalidIndex;
+}
+} // namespace
 
 /// Empty default constructor
 MoveInstrumentComponent::MoveInstrumentComponent() = default;
@@ -64,24 +103,9 @@ void MoveInstrumentComponent::exec() {
   MatrixWorkspace_sptr inputW = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
   DataObjects::PeaksWorkspace_sptr inputP = std::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ws);
 
-  // Get some stuff from the input workspace
-  Instrument_const_sptr inst;
-  if (inputW) {
-    inst = inputW->getInstrument();
-    if (!inst)
-      throw std::runtime_error("Could not get a valid instrument from the "
-                               "MatrixWorkspace provided as input");
-  } else if (inputP) {
-    inst = inputP->getInstrument();
-    if (!inst)
-      throw std::runtime_error("Could not get a valid instrument from the "
-                               "PeaksWorkspace provided as input");
-  } else {
-    if (!inst)
-      throw std::runtime_error("Could not get a valid instrument from the "
-                               "workspace and it does not seem to be valid as "
-                               "input (must be either MatrixWorkspace or "
-                               "PeaksWorkspace");
+  if (!inputW && !inputP) {
+    throw std::runtime_error("The workspace does not seem to be valid as input (must be either MatrixWorkspace or "
+                             "PeaksWorkspace");
   }
   const std::string ComponentName = getProperty("ComponentName");
   const int DetID = getProperty("DetectorID");
@@ -91,19 +115,22 @@ void MoveInstrumentComponent::exec() {
   const bool relativePosition = getProperty("RelativePosition");
   const bool moveFixedDetectors = getProperty("MoveFixedDetectors");
 
-  IComponent_const_sptr comp;
+  auto &componentInfo = inputW ? inputW->mutableComponentInfo() : inputP->mutableComponentInfo();
+  size_t compIndex = ComponentInfo::invalidIndex;
   // Find the component to move
   if (DetID != -1) {
-    comp = inst->getDetector(DetID);
-    if (comp == nullptr) {
+    auto const &detectorInfo = inputW ? inputW->detectorInfo() : inputP->detectorInfo();
+    try {
+      compIndex = detectorInfo.indexOf(DetID);
+    } catch (std::out_of_range const &) {
       std::ostringstream mess;
       mess << "Detector with ID " << DetID << " was not found.";
       g_log.error(mess.str());
       throw std::runtime_error(mess.str());
     }
   } else if (!ComponentName.empty()) {
-    comp = inst->getComponentByName(ComponentName);
-    if (comp == nullptr) {
+    compIndex = indexOfPath(componentInfo, ComponentName);
+    if (compIndex == ComponentInfo::invalidIndex) {
       std::ostringstream mess;
       mess << "Component with name " << ComponentName << " was not found.";
       g_log.error(mess.str());
@@ -114,8 +141,6 @@ void MoveInstrumentComponent::exec() {
     throw std::invalid_argument("DetectorID or ComponentName must be given.");
   }
 
-  auto &componentInfo = inputW ? inputW->mutableComponentInfo() : inputP->mutableComponentInfo();
-  auto compIndex = componentInfo.indexOf(comp->getComponentID());
   if (!moveFixedDetectors && ComponentInfoBankHelpers::isDetectorFixedInBank(componentInfo, compIndex)) {
     // DetectorInfo makes changing positions possible but we keep the old
     // behavior of ignoring position changes for Structured banks.
@@ -127,10 +152,9 @@ void MoveInstrumentComponent::exec() {
   // Do the move
   V3D position(X, Y, Z);
   if (relativePosition)
-    position += comp->getPos();
+    position += componentInfo.position(compIndex);
 
-  const auto componentId = comp->getComponentID();
-  componentInfo.setPosition(componentInfo.indexOf(componentId), position);
+  componentInfo.setPosition(compIndex, position);
 }
 
 } // namespace Mantid::DataHandling

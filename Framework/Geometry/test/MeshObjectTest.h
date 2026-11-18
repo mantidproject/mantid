@@ -432,7 +432,7 @@ public:
       if (index < expectedResults.size()) {
         TS_ASSERT_DELTA(it->distFromStart, expectedResults[index].distFromStart, 1e-6);
         TS_ASSERT_DELTA(it->distInsideObject, expectedResults[index].distInsideObject, 1e-6);
-        TS_ASSERT_EQUALS(it->componentID, expectedResults[index].componentID);
+        TS_ASSERT_EQUALS(it->componentIndex, expectedResults[index].componentIndex);
         TS_ASSERT_EQUALS(it->entryPoint, expectedResults[index].entryPoint);
         TS_ASSERT_EQUALS(it->exitPoint, expectedResults[index].exitPoint);
       }

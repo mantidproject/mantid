@@ -352,7 +352,7 @@ void LoadILLPolarizedDiffraction::moveTwoTheta(const NXEntry &entry, const API::
       Quat rotation(-twoThetaBank[0], V3D(0, 1, 0));
       IComponent_const_sptr currentBank =
           instrument->getComponentByName(std::string("bank" + std::to_string(bank_no + 2)));
-      const auto componentIndex = componentInfo.indexOf(currentBank->getComponentID());
+      const auto componentIndex = currentBank->index();
       componentInfo.setRotation(componentIndex, rotation);
     } else {
       std::vector<double> twoThetaPixels = loadTwoThetaDetectors(workspace, entry, bank_no + 2);

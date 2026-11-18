@@ -83,7 +83,7 @@ std::map<std::string, std::string> ScaleInstrumentComponent::validateInputs() {
   }
 
   // Check if the component is a detector
-  const auto componentIndex = m_componentInfo->indexOf(m_comp->getComponentID());
+  const auto componentIndex = m_comp->index();
   if (m_componentInfo->isDetector(componentIndex)) {
     result["ComponentName"] = "Cannot scale a detector. Please provide a non-detector component name.";
   }
@@ -99,12 +99,12 @@ void ScaleInstrumentComponent::exec() {
   Kernel::V3D scalings(scalingsXYZ[0], scalingsXYZ[1], scalingsXYZ[2]);
   const bool scalePixels = getProperty("ScalePixelSizes");
 
-  const auto componentId = m_comp->getComponentID();
-  m_componentInfo->scaleComponent(m_componentInfo->indexOf(componentId), scalings);
+  const auto componentIndex = m_comp->index();
+  m_componentInfo->scaleComponent(componentIndex, scalings);
 
   if (scalePixels) {
     std::vector<size_t> detectors;
-    detectors = m_componentInfo->detectorsInSubtree(m_componentInfo->indexOf(componentId));
+    detectors = m_componentInfo->detectorsInSubtree(componentIndex);
     for (const auto &detector : detectors) {
       auto oldScale = m_componentInfo->scaleFactor(detector);
       m_componentInfo->setScaleFactor(

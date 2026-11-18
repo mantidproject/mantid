@@ -435,12 +435,11 @@ public:
     auto testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 1, false);
     AnalysisDataService::Instance().addOrReplace(inputWS, testWS);
 
-    auto &pmap = testWS->instrumentParameters();
+    auto &componentInfo = testWS->mutableComponentInfo();
     const auto &spectrumInfo = testWS->spectrumInfo();
-    auto const &componentInfo = testWS->componentInfo();
-    pmap.addDouble(componentInfo.componentID(spectrumInfo.firstDetectorIndex(0)), "Efixed", 0.4);
-    pmap.addDouble(componentInfo.componentID(spectrumInfo.firstDetectorIndex(1)), "Efixed", 0.1);
-    pmap.addDouble(componentInfo.componentID(spectrumInfo.firstDetectorIndex(2)), "Efixed", 0.025);
+    componentInfo.addDouble(spectrumInfo.firstDetectorIndex(0), "Efixed", 0.4);
+    componentInfo.addDouble(spectrumInfo.firstDetectorIndex(1), "Efixed", 0.1);
+    componentInfo.addDouble(spectrumInfo.firstDetectorIndex(2), "Efixed", 0.025);
 
     Mantid::Algorithms::ConvertSpectrumAxis2 conv;
     conv.initialize();

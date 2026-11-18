@@ -271,7 +271,7 @@ public:
     const auto &componentInfo = ws->componentInfo();
     const auto &paramInfo = *componentInfo.sharedParameterInfo();
     const auto monitors = ws->getInstrument()->getComponentByName("monitors");
-    const auto monitor = componentInfo.indexOf(monitors->getComponentID());
+    const auto monitor = monitors->index();
     TS_ASSERT_DELTA(componentInfo.position(monitor).X(), 10.0, 0.0001);
     TS_ASSERT_DELTA(componentInfo.position(monitor).Y(), 0.0, 0.0001);
     TS_ASSERT_DELTA(componentInfo.position(monitor).Z(), 0.0, 0.0001);
@@ -1195,8 +1195,8 @@ public:
 
     // Sanity check that we are not comparing the same instrument (i.e. via some
     // smart caching)
-    TSM_ASSERT("Premise of comparision test broken!", WorkspaceCreationHelper::baseInstrumentID(*wish_xml) !=
-                                                          WorkspaceCreationHelper::baseInstrumentID(*wish_nexus));
+    TSM_ASSERT("Premise of comparision test broken!",
+               !WorkspaceCreationHelper::haveSameBaseInstrument(*wish_xml, *wish_nexus));
 
     const auto &wish_nexus_detinfo = wish_nexus->detectorInfo();
     const auto &wish_xml_detinfo = wish_xml->detectorInfo();

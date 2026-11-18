@@ -104,6 +104,24 @@ public:
     checkExpectedDetectorPosition(expectedPos);
   }
 
+  void testMoveByUnknownNameThrows() {
+    MoveInstrumentComponent mover;
+    mover.initialize();
+    mover.setRethrows(true);
+    mover.setPropertyValue("Workspace", wsName);
+    mover.setPropertyValue("ComponentName", bank_name + "/nonexistent");
+    TS_ASSERT_THROWS(mover.execute(), std::runtime_error const &);
+  }
+
+  void testMoveByUnknownDetectorIDThrows() {
+    MoveInstrumentComponent mover;
+    mover.initialize();
+    mover.setRethrows(true);
+    mover.setPropertyValue("Workspace", wsName);
+    mover.setPropertyValue("DetectorID", "999999");
+    TS_ASSERT_THROWS(mover.execute(), std::runtime_error const &);
+  }
+
   void testMoveDetectorInStructuredBankIgnoredByDefault() {
     setupInstrumentWithRectangularDetector();
 

@@ -516,6 +516,10 @@ void ComponentInfo::setDetectorInfo(DetectorInfo *detectorInfo) {
 
 bool ComponentInfo::hasSource() const { return m_sourceIndex >= 0; }
 
+/// True if both were cloned from the same base, i.e. they describe the same instrument. Clones share the
+/// structure arrays, which are never written after construction.
+bool ComponentInfo::hasSameBase(ComponentInfo const &other) const { return m_parentIndices == other.m_parentIndices; }
+
 /*
  * @brief Check the sources of two componentInfo objects coincide
  *

@@ -39,9 +39,9 @@ void AddToIndirectInstrument(MatrixWorkspace_sptr &testWS, const bool &add_t0_fo
   if (add_Efixed) {
     const double evalue(2.082); // energy corresponding to the first order
                                 // Bragg peak in the analyzers
+    auto &componentInfo = testWS->mutableComponentInfo();
     for (size_t ihist = 0; ihist < testWS->getNumberHistograms(); ++ihist) {
-      auto const detIndex = testWS->spectrumInfo().firstDetectorIndex(ihist);
-      testWS->instrumentParameters().addDouble(testWS->componentInfo().componentID(detIndex), "Efixed", evalue);
+      componentInfo.addDouble(testWS->spectrumInfo().firstDetectorIndex(ihist), "Efixed", evalue);
     }
   }
 } // end of void AddToInstrument
