@@ -134,8 +134,7 @@ void SingleSelector::handleMouseMove(const QPoint &point) {
   }
 }
 
-void SingleSelector::handleMouseUp(const QPoint &point) {
-  UNUSED_ARG(point);
+void SingleSelector::handleMouseUp([[maybe_unused]] const QPoint &point) {
   if (m_markerMoving) {
     m_singleMarker->mouseMoveStop();
     m_plot->setSelectorActive(false);

@@ -47,8 +47,8 @@ int LoadSassena::confidence(Nexus::NexusDescriptorLazy &descriptor) const {
  * @param description
  */
 void LoadSassena::registerWorkspace(const API::WorkspaceGroup_sptr &gws, const std::string &wsName,
-                                    const DataObjects::Workspace2D_sptr &ws, const std::string &description) {
-  UNUSED_ARG(description);
+                                    const DataObjects::Workspace2D_sptr &ws,
+                                    [[maybe_unused]] const std::string &description) {
   API::AnalysisDataService::Instance().add(wsName, ws);
   gws->addWorkspace(ws);
 }

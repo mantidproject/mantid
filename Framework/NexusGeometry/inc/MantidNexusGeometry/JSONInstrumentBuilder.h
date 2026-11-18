@@ -22,7 +22,7 @@ struct Chopper;
 class MANTID_NEXUSGEOMETRY_DLL JSONInstrumentBuilder {
 public:
   explicit JSONInstrumentBuilder(const std::string &jsonGeometry);
-  ~JSONInstrumentBuilder() = default;
+  ~JSONInstrumentBuilder();
 
   /// Choppers are not first-class citizens in mantid currently so forward this
   /// on from the parser

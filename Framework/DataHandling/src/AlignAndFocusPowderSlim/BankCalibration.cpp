@@ -7,6 +7,7 @@
 
 #include "MantidDataHandling/AlignAndFocusPowderSlim/BankCalibration.h"
 #include <algorithm>
+#include <iterator>
 #include <stdexcept>
 
 namespace Mantid::DataHandling::AlignAndFocusPowderSlim {

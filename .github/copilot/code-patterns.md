@@ -7,7 +7,7 @@
 ```cpp
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright © 2024 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright © 2026 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX-License-Identifier: GPL-3.0+
@@ -69,7 +69,7 @@ private:
 ```cpp
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright © 2024 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright © 2026 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX-License-Identifier: GPL-3.0+
@@ -228,7 +228,7 @@ public:
 ```python
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright © 2024 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright © 2026 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX-License-Identifier: GPL-3.0+
@@ -307,7 +307,7 @@ AlgorithmFactory.subscribe(MyPyAlgorithm)
 ```python
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright © 2024 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright © 2026 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX-License-Identifier: GPL-3.0+

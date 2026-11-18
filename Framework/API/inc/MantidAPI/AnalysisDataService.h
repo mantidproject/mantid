@@ -96,9 +96,9 @@ public:
   void addOrReplace(const std::string &name, const std::shared_ptr<API::Workspace> &workspace) override;
   /// Overridden rename member to attach the new name to the workspace when a
   /// workspace object is renamed
-  virtual void rename(const std::string &oldName, const std::string &newName);
+  void rename(const std::string &oldName, const std::string &newName);
   /// Overridden remove member to delete its name held by the workspace itself
-  virtual Workspace_sptr remove(const std::string &name);
+  Workspace_sptr remove(const std::string &name);
   /// Random generated unique workspace name
   const std::string uniqueName(const int n = 5, const std::string &prefix = "", const std::string &suffix = "");
   /// Random generated unique hidden workspace name

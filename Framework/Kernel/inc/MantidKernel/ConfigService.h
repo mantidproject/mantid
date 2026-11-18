@@ -240,7 +240,7 @@ private:
   /// Private copy constructor. Prevents singleton being copied.
   ConfigServiceImpl(const ConfigServiceImpl &);
 
-  virtual ~ConfigServiceImpl();
+  ~ConfigServiceImpl();
 
   /// Loads a config file
   void loadConfig(const std::string &filename, const bool append = false);

@@ -127,10 +127,8 @@ private:
       }
     }
 
-    void functionDeriv1DSpectrum(const FunctionDomain1DSpectrum &domain, Jacobian &jacobian) override {
-      UNUSED_ARG(domain);
-      UNUSED_ARG(jacobian);
-    }
+    void functionDeriv1DSpectrum([[maybe_unused]] const FunctionDomain1DSpectrum &domain,
+                                 [[maybe_unused]] Jacobian &jacobian) override {}
   };
 
   class TestPoldiFunction1D : public SummingFunction, public IPoldiFunction1D {

@@ -22,8 +22,7 @@ InvalidParameter *InvalidParameterParser::parseInvalidParameter(std::string valu
   return new InvalidParameter(std::move(value));
 }
 
-void InvalidParameterParser::setSuccessorParser(ImplicitFunctionParameterParser *parser) {
-  UNUSED_ARG(parser);
+void InvalidParameterParser::setSuccessorParser([[maybe_unused]] ImplicitFunctionParameterParser *parser) {
   // Do nothing. No successor allowed.
 }
 } // namespace Mantid::MDAlgorithms

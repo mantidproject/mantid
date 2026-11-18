@@ -27,7 +27,7 @@ class KafkaHistoStreamDecoder;
 class MANTID_LIVEDATA_DLL KafkaHistoListener : public API::LiveListener {
 public:
   KafkaHistoListener();
-  ~KafkaHistoListener() override = default;
+  ~KafkaHistoListener() override;
 
   //----------------------------------------------------------------------
   // Static properties
@@ -57,7 +57,7 @@ public:
   int runNumber() const override;
 
 private:
-  std::unique_ptr<KafkaHistoStreamDecoder> m_decoder = nullptr;
+  std::unique_ptr<KafkaHistoStreamDecoder> m_decoder;
   std::string m_instrumentName;
 };
 
