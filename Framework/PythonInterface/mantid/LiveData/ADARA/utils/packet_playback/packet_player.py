@@ -387,9 +387,9 @@ class Packet:
                     continue  # Just retry, DO NOT break or lose track
                 else:
                     raise
-            except socket.timeout:
+            except TimeoutError:
                 # Re-raise timeout with context about partial transfer
-                raise socket.timeout(f"Socket timeout after receiving {len(data)} of {num_bytes} bytes")
+                raise TimeoutError(f"Socket timeout after receiving {len(data)} of {num_bytes} bytes")
         return data
 
     @staticmethod
@@ -407,9 +407,9 @@ class Packet:
                     continue  # Retry the send, DO NOT break or lose track
                 else:
                     raise
-            except socket.timeout:
+            except TimeoutError:
                 # Re-raise timeout with context about partial transfer
-                raise socket.timeout(f"Socket timeout after sending {total_sent} of {len(data)} bytes")
+                raise TimeoutError(f"Socket timeout after sending {total_sent} of {len(data)} bytes")
         return total_sent
 
     ## ====== end: HELPER methods.                              ======
@@ -962,7 +962,7 @@ class Player:
                         try:
                             Packet.to_socket(dest, pkt)
                             _logger.debug(f"SEND: {pkt}")
-                        except (socket.error, socket.timeout) as e:
+                        except (TimeoutError, socket.error) as e:
                             _logger.error(f"Failed to send packet: {e}")
                             return
                     else:
@@ -1167,7 +1167,7 @@ class Player:
                             data = packet.header + packet.payload
                             to_server_queue.append(data)
                             _logger.debug(f"client SENDs server <- {packet}")
-                    except (socket.timeout, socket.error) as e:
+                    except (TimeoutError, socket.error) as e:
                         _logger.error(f"Socket error during RECV: {e}")
                         loop_broken = True
                         break
@@ -1187,7 +1187,7 @@ class Player:
                                 else:
                                     queue.pop(0)
 
-                            except (socket.timeout, socket.error) as e:
+                            except (TimeoutError, socket.error) as e:
                                 _logger.error(f"Socket error during SEND: {e}")
                                 loop_broken = True
                                 break
