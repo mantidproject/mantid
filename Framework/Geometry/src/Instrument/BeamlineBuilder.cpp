@@ -84,8 +84,10 @@ public:
         m_structuredGridComponents);
   }
 
-  std::unique_ptr<Beamline::DetectorInfo> detectorInfo() const {
-    return std::make_unique<Beamline::DetectorInfo>(m_detectorPositions, m_detectorRotations, m_monitorIndices);
+  /// Takes the detector positions and rotations, so call it once.
+  std::unique_ptr<Beamline::DetectorInfo> detectorInfo() {
+    return std::make_unique<Beamline::DetectorInfo>(std::move(m_detectorPositions), std::move(m_detectorRotations),
+                                                    m_monitorIndices);
   }
 
   std::shared_ptr<std::vector<std::shared_ptr<const IObject>>> shapes() const { return m_shapes; }
@@ -418,7 +420,9 @@ void BeamlineBuilder::checkBanks() const {
                   return m_nodes[layer].isAssembly && isPixelGrid(layer, grid.nX, grid.nY);
                 });
       } else {
-        valid = isPixelGrid(node, grid.nX, grid.nY);
+        // A rectangular bank is flat
+        valid = (record.type != Beamline::ComponentType::Rectangular || grid.nZ == 0) &&
+                isPixelGrid(node, grid.nX, grid.nY);
       }
     }
     if (!valid) {
@@ -433,7 +437,7 @@ BeamlineRef BeamlineBuilder::build() const {
     throw std::logic_error("BeamlineBuilder: there is no root node to build");
   }
   checkBanks();
-  Layout const layout(*this);
+  Layout layout(*this);
 
   auto parameterInfo = std::make_shared<ParameterInfo>();
   for (auto const &[node, parameter] : m_parameters) {

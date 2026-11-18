@@ -21,6 +21,7 @@
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/Parameter.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/StructuredDetector.h"
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
@@ -328,6 +329,15 @@ public:
     {
       BeamlineBuilder builder;
       auto const root = builder.addAssembly(BeamlineBuilder::noParent, "root");
+      auto layeredGrid = pixelGrid;
+      layeredGrid.nY = 1;
+      layeredGrid.nZ = 1;
+      addPixelColumn(builder, builder.addRectangularBank(root, "layered", V3D(), Quat(), layeredGrid), 1);
+      TS_ASSERT_THROWS(builder.build(), std::invalid_argument const &);
+    }
+    {
+      BeamlineBuilder builder;
+      auto const root = builder.addAssembly(BeamlineBuilder::noParent, "root");
       pixelGrid.nZ = 2;
       auto const grid = builder.addGridBank(root, "one layer", V3D(), Quat(), pixelGrid);
       auto const column = builder.addAssembly(builder.addAssembly(grid, "layer"), "column");
@@ -422,6 +432,46 @@ public:
     TS_ASSERT_EQUALS(result.componentInfo->name(result.componentInfo->sample()), "sample");
   }
 
+  void test_a_grid_without_layers_has_a_bounding_box() {
+    BeamlineBuilder builder;
+    auto const root = builder.addAssembly(BeamlineBuilder::noParent, "root");
+    Mantid::Beamline::PixelGridComponent pixelGrid;
+    pixelGrid.nX = 1;
+    pixelGrid.nY = 1;
+    auto const grid = builder.addGridBank(root, "grid", V3D(1, 2, 3), Quat(), pixelGrid);
+    auto const column = builder.addAssembly(grid, "column");
+    builder.addDetector(column, "pixel", 1, V3D(), Quat(), ComponentCreationHelper::createSphere(0.01));
+    auto const result = builder.build();
+    auto const &componentInfo = *result.componentInfo;
+    auto const box = componentInfo.boundingBox(componentInfo.indexOfAny("grid"));
+    TS_ASSERT_DELTA(box.centrePoint().distance(V3D(1, 2, 3)), 0, 1e-12);
+  }
+
+  void test_one_component_can_be_source_and_sample() {
+    BeamlineBuilder builder;
+    auto const root = builder.addAssembly(BeamlineBuilder::noParent, "root");
+    auto const both = builder.addComponent(root, "both");
+    builder.setSource(both);
+    builder.setSample(both);
+    auto const beamline = builder.build();
+    auto const walked = walk(Instrument::fromBeamline(beamline));
+    TS_ASSERT_EQUALS(walked.componentInfo->source(), beamline.componentInfo->source());
+    TS_ASSERT_EQUALS(walked.componentInfo->sample(), beamline.componentInfo->sample());
+  }
+
+  void test_bank_pixels_keep_their_side_by_side_view_positions() {
+    auto const legacy = ComponentCreationHelper::createTestInstrumentRectangular2(1, 2);
+    std::shared_ptr<ICompAssembly> bank;
+    for (int i = 0; i < legacy->nelements() && !bank; ++i) {
+      bank = std::dynamic_pointer_cast<RectangularDetector>((*legacy)[i]);
+    }
+    TS_ASSERT(bank);
+    auto const column = std::dynamic_pointer_cast<ICompAssembly>((*bank)[0]);
+    (*column)[1]->setSideBySideViewPos(V2D(0.5, 0.25));
+    auto const beamline = walk(legacy);
+    assertSameBeamline(walk(Instrument::fromBeamline(beamline)), beamline);
+  }
+
   void test_null_parameters_throw() {
     BeamlineBuilder builder;
     auto const root = builder.addAssembly(BeamlineBuilder::noParent, "root");
@@ -434,6 +484,16 @@ public:
     // The DetectorInfo pointer is gone, but the ComponentInfo still reads detector positions through it
     TS_ASSERT_EQUALS(componentInfo->name(0), "monitor");
     TS_ASSERT_EQUALS(componentInfo->position(0), makeBuilder(Placement()).build().detectorInfo->position(0));
+
+    auto detectorInfo = makeBuilder(Placement()).build().detectorInfo;
+    std::weak_ptr<const ComponentInfo> const weakComponentInfo = [&detectorInfo] {
+      auto beamline = makeBuilder(Placement()).build();
+      detectorInfo = beamline.detectorInfo;
+      return std::weak_ptr<const ComponentInfo>(beamline.componentInfo);
+    }();
+    TS_ASSERT(!weakComponentInfo.expired());
+    detectorInfo.reset();
+    TS_ASSERT(weakComponentInfo.expired());
   }
   void test_a_tree_made_from_a_built_beamline_walks_back_to_it() {
     auto const beamline = makeBuilder(Placement()).build();

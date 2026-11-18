@@ -126,6 +126,23 @@ void initializeGridBank(GridDetector &bank, ComponentInfo const &componentInfo, 
   }
 }
 
+/// Gives the components a bank made for itself their side-by-side view positions. Any mismatch between the bank's
+/// children and the beamline's is left for the pairing pass to report.
+void setBankSideBySideViewPositions(ICompAssembly const &assembly, ComponentInfo const &componentInfo,
+                                    size_t const index) {
+  auto const &children = componentInfo.children(index);
+  if (static_cast<size_t>(assembly.nelements()) != children.size()) {
+    return;
+  }
+  for (size_t i = 0; i < children.size(); ++i) {
+    auto const child = assembly[static_cast<int>(i)];
+    setSideBySideViewPosition(*child, componentInfo, children[i]);
+    if (auto const childAssembly = std::dynamic_pointer_cast<ICompAssembly>(child)) {
+      setBankSideBySideViewPositions(*childAssembly, componentInfo, children[i]);
+    }
+  }
+}
+
 /// True if a component a bank made for itself is where the beamline puts it.
 bool samePlacement(IComponent const &component, ComponentInfo const &componentInfo, size_t const index) {
   auto const expectedPosition = componentInfo.position(index);
@@ -196,12 +213,14 @@ void addTreeChildren(ICompAssembly &parent, ComponentInfo const &componentInfo, 
       addTreeChildren(*assembly, componentInfo, detectorInfo, shapes, child);
     } else if (gridBank) {
       initializeGridBank(*gridBank, componentInfo, shapes, child);
+      setBankSideBySideViewPositions(*gridBank, componentInfo, child);
     } else if (structuredBank) {
       auto const &grid = componentInfo.structuredGridComponent(child);
       auto const isZBeam = componentInfo.referenceFrame()->isVectorPointingAlongBeam(V3D(0, 0, 1));
       structuredBank->initialize(grid.nX, grid.nY, std::vector<double>(grid.xVertices),
                                  std::vector<double>(grid.yVertices), isZBeam, grid.idStart, grid.idFillByFirstY,
                                  grid.idStepByRow, grid.idStep);
+      setBankSideBySideViewPositions(*structuredBank, componentInfo, child);
     }
   }
 }
