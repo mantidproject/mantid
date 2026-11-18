@@ -68,7 +68,7 @@ def _return_numors_from_ws(ws_name):
     Args:
         ws_name: (str) workspace name to extract numor_list from
     """
-    numors = str()
+    numors = ""
     if ws_name in mtd:
         try:
             numors = mtd[ws_name].getRun().getLogData("numor_list").value

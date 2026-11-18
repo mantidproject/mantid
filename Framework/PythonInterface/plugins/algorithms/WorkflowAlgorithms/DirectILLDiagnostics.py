@@ -224,7 +224,7 @@ def _maskedListToStr(masked):
             string += str(blockBegin) + "-" + str(blockEnd) + ", "
         return string
 
-    string = str()
+    string = ""
     blockBegin = None
     blockEnd = None
     maxMasked = max(masked)

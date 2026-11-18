@@ -39,7 +39,6 @@ lint.ignore = [
   "UP007", # non-pep604-annotation-union https://docs.astral.sh/ruff/rules/non-pep604-annotation-union
   "UP008", # super-call-with-parameters https://docs.astral.sh/ruff/rules/super-call-with-parameters
   "UP015", # redundant-open-modes https://docs.astral.sh/ruff/rules/redundant-open-modes
-  "UP018", # native-literals https://docs.astral.sh/ruff/rules/native-literals
   "UP024", # os-error-alias https://docs.astral.sh/ruff/rules/os-error-alias
   "UP028", # yield-in-for-loop https://docs.astral.sh/ruff/rules/yield-in-for-loop
   "UP030", # format-literals https://docs.astral.sh/ruff/rules/format-literals
