@@ -10,6 +10,8 @@
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
+#include <string>
+
 namespace MantidQt::CustomInterfaces {
 
 class MANTIDQT_DIRECT_DLL IALFAlgorithmManagerSubscriber {

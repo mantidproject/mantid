@@ -10,6 +10,8 @@
 #include "MantidAPI/Workspace_fwd.h"
 #include <map>
 #include <memory>
+#include <string>
+#include <vector>
 namespace MantidQt {
 namespace MantidWidgets {
 

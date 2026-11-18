@@ -9,6 +9,9 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 
+#include <memory>
+#include <string>
+
 namespace Mantid {
 namespace API {
 /**
