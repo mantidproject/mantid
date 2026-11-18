@@ -228,28 +228,14 @@ class TextureCorrectionModel:
         SetSampleMaterial(ws, material)
 
     @staticmethod
-    def copy_sample_info(ref_ws_name: str, wss: Sequence[Workspace2D], is_ref: bool = False) -> None:
-        # currently copy shape bakes the orientation matrix into the sample shape
+    def copy_sample_info(ref_ws_name: str, wss: Sequence[Workspace2D]) -> None:
+        # CopySample bakes each destination's goniometer into the copied shape in place of the
+        # reference's, so the reference's own orientation never carries over
         if not ADS.doesExist(ref_ws_name):
             logger.error(f"Workspace: {ref_ws_name} could not be found to copy the sample - has it been deleted?")
             return None  # saves wrapping the rest of the function in an else block
-        if not is_ref:
-            # need to create a ws with an unorientated sample to copy over
-            ref_ws = ADS.retrieve(ref_ws_name)
-            trans_mat = ref_ws.getRun().getGoniometer().getR()
-
-            _tmp_ws = CloneWorkspace(ref_ws, OutputWorkspace="_tmp_ws")
-            _tmp_ws.getRun().getGoniometer().setR(np.linalg.inv(trans_mat))
-
-            CopySample(InputWorkspace=ref_ws, OutputWorkspace=_tmp_ws, CopyName=False, CopyEnvironment=False, CopyLattice=False)
-
-            for ws in wss:
-                CopySample(InputWorkspace=_tmp_ws, OutputWorkspace=ws, CopyName=False, CopyEnvironment=False, CopyLattice=False)
-            ADS.remove("_tmp_ws")
-        else:
-            # if is_ref flag then we want to take this baked orientation forward
-            for ws in wss:
-                CopySample(InputWorkspace=ref_ws_name, OutputWorkspace=ws, CopyName=False, CopyEnvironment=False, CopyLattice=False)
+        for ws in wss:
+            CopySample(InputWorkspace=ref_ws_name, OutputWorkspace=ws, CopyName=False, CopyEnvironment=False, CopyLattice=False)
 
     def get_ws_info(self, ws_name: str, select: bool = True) -> dict:
         return {

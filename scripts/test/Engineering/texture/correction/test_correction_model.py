@@ -280,17 +280,11 @@ class TextureCorrectionModelTest(unittest.TestCase):
         mock_set_sample.assert_called_once()
         mock_set_mat.assert_called_once()
 
-    @patch(correction_model_path + ".CloneWorkspace")
     @patch(correction_model_path + ".CopySample")
     @patch(correction_model_path + ".ADS")
-    def test_copy_sample_info_creates_temp_workspace_and_copies(self, mock_ads, mock_copy_sample, mock_clone):
-        mock_ws = MagicMock()
-        mock_ws.getRun().getGoniometer().getR.return_value = np.eye(3)
-        mock_ads.retrieve.return_value = mock_ws
-        mock_clone.return_value = mock_ws
-
+    def test_copy_sample_info_copies_to_each_workspace(self, mock_ads, mock_copy_sample):
         self.model.copy_sample_info("ws1", ["ws2", "ws3"])
-        self.assertEqual(mock_copy_sample.call_count, 3)
+        self.assertEqual(mock_copy_sample.call_count, 2)
 
     @patch(correction_model_path + ".ADS")
     def test_has_no_orientation_set_returns_true_on_identity(self, mock_ads):

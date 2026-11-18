@@ -7,6 +7,7 @@
 #pragma once
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -15,12 +16,14 @@
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/InstrumentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/DeltaEMode.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
+#include "SampleFrameEquivalence.h"
 
 #include <cmath>
 #include <cxxtest/TestSuite.h>
@@ -268,6 +271,39 @@ public:
       TS_ASSERT_DELTA(doubleScatterResult->y(SPECTRUMINDEXTOTEST)[0], 0.0019967315, delta);
       Mantid::API::AnalysisDataService::Instance().deepRemoveGroup("MuscatResults");
     }
+  }
+
+  void test_both_ways_of_orienting_the_sample_agree() {
+    SampleFrameEquivalence::assertFramesAgree(
+        SampleFrameEquivalence::rotationY(30.0),
+        [this](const auto &r, bool baked) { return singleScatterOverTiltedPlate(r, baked); });
+  }
+
+  /// Single-scatter result for the flat plate held in the given frame.
+  double singleScatterOverTiltedPlate(const Mantid::Kernel::Matrix<double> &rotation, const bool baked) {
+    const double THICKNESS = 0.001; // metres
+    auto inputWorkspace = SetupFlatPlateWorkspace(46, 1, 1.0, 1, 0.5, 1.0, 10 * THICKNESS, 10 * THICKNESS, THICKNESS);
+    inputWorkspace->mutableRun().mutableGoniometer().setR(rotation);
+
+    if (baked) {
+      SampleFrameEquivalence::bakeWithCopySample(
+          SetupFlatPlateWorkspace(46, 1, 1.0, 1, 0.5, 1.0, 10 * THICKNESS, 10 * THICKNESS, THICKNESS), inputWorkspace);
+    }
+
+    auto alg = createAlgorithm();
+    alg->setProperty("InputWorkspace", inputWorkspace);
+    alg->setProperty("NumberScatterings", 1);
+    alg->setProperty("NeutronPathsSingle", 2000);
+    alg->setProperty("SeedValue", 123456789);
+    alg->execute();
+    TS_ASSERT(alg->isExecuted());
+
+    auto output = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
+    auto singleScatter =
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(output->getItem("MuscatResults_Scatter_1"));
+    const double result = singleScatter->y(1)[0];
+    Mantid::API::AnalysisDataService::Instance().deepRemoveGroup("MuscatResults");
+    return result;
   }
 
   void test_flat_plate_sample_multiple_scatter_without_importance_sampling() {

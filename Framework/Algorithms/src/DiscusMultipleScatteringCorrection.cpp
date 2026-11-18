@@ -9,6 +9,7 @@
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/LabFrameSample.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -2181,7 +2182,10 @@ DiscusMultipleScatteringCorrection::findMatchingComponent(const ComponentWorkspa
 }
 
 void DiscusMultipleScatteringCorrection::prepareSampleBeamGeometry(const API::MatrixWorkspace_sptr &inputWS) {
-  m_sampleShape = inputWS->sample().getShapePtr();
+  // The beam profile below is built from this lab-frame sample too: an unspecified beam is sized
+  // from the sample's bounding box, so the unrotated one would illuminate the wrong region.
+  auto labFrameSample = API::labFrameSample(*inputWS);
+  m_sampleShape = labFrameSample.getShapePtr();
   try {
     m_env = &inputWS->sample().getEnvironment();
   } catch (std::runtime_error &) {
@@ -2195,7 +2199,7 @@ void DiscusMultipleScatteringCorrection::prepareSampleBeamGeometry(const API::Ma
   }
   m_instrument = inputWS->getInstrument();
   auto const &compInfo = inputWS->componentInfo();
-  m_beamProfile = BeamProfileFactory::createBeamProfile(compInfo, inputWS->sample());
+  m_beamProfile = BeamProfileFactory::createBeamProfile(compInfo, labFrameSample);
   m_refframe = compInfo.referenceFrame();
   m_sourcePos = compInfo.sourcePosition();
 }

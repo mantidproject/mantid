@@ -17,10 +17,14 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
+#include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidGeometry/Objects/ShapeRotation.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/MersenneTwister.h"
+
+#include <map>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -39,6 +43,12 @@ namespace {
 constexpr int DEFAULT_NEVENTS = 1000;
 constexpr int DEFAULT_SEED = 123456789;
 constexpr int NLAMBDA = 1;
+
+/// A Monte Carlo strategy for one sample orientation, with the beam profile it holds by reference.
+struct OrientedStrategy {
+  std::unique_ptr<IBeamProfile> beamProfile;
+  std::unique_ptr<MCAbsorptionStrategy> strategy;
+};
 
 } // namespace
 
@@ -114,15 +124,48 @@ void AddAbsorptionWeightedPathLengths::exec() {
     inputWS->setInstrument(inst);
   }
 
-  auto beamProfile = BeamProfileFactory::createBeamProfile(inputWS->componentInfo(), inputWS->sample());
-  // Configure strategy
-  std::shared_ptr<IMCInteractionVolume> interactionVol =
-      MCInteractionVolume::create(inputWS->sample(), maxScatterPtAttempts);
-  MCAbsorptionStrategy strategy(interactionVol, *beamProfile, DeltaEMode::Elastic, nevents, maxScatterPtAttempts, true);
-
   bool useSinglePath = getProperty("UseSinglePath");
   bool applyCorrection = getProperty("ApplyCorrection");
   const auto npeaks = inputWS->getNumberPeaks();
+
+  // Each peak's outstanding rotation is R * bakedRotation^T, as Geometry::outstandingGoniometerRotation
+  // gives, but worked out here so that it logs nothing per peak.
+  const auto &shape = inputWS->sample().getShape();
+  const auto bakedRotation = shape.getAppliedRotation();
+
+  // The interaction volume, and the beam profile when it is sized from the shape's bounding box, depend
+  // on the sample's orientation, which follows each peak's goniometer. Peaks usually come from a few
+  // runs, so build one strategy per distinct rotation rather than one per peak.
+  std::map<std::vector<double>, OrientedStrategy> strategies;
+  if (!useSinglePath) {
+    // Assembled from surfaces, as SaveHKL's sphere is, so there is no definition to rotate.
+    const auto *csgShape = dynamic_cast<const CSGObject *>(&shape);
+    const bool rotatable = !(csgShape && csgShape->getShapeXML().empty());
+    bool heldBack = false;
+    for (int i = 0; i < npeaks; ++i) {
+      const auto R = inputWS->getPeak(i).getGoniometerMatrix();
+      if (strategies.contains(R.getVector())) {
+        continue;
+      }
+      Sample sample(inputWS->sample());
+      if (R != bakedRotation) {
+        if (rotatable) {
+          sample.setShape(getLabFrameShape(shape, R));
+        } else {
+          heldBack = true;
+        }
+      }
+      auto beamProfile = BeamProfileFactory::createBeamProfile(inputWS->componentInfo(), sample);
+      auto strategy = std::make_unique<MCAbsorptionStrategy>(MCInteractionVolume::create(sample, maxScatterPtAttempts),
+                                                             *beamProfile, DeltaEMode::Elastic, nevents,
+                                                             maxScatterPtAttempts, true);
+      strategies.emplace(R.getVector(), OrientedStrategy{std::move(beamProfile), std::move(strategy)});
+    }
+    if (heldBack) {
+      g_log.warning("The sample shape has no XML definition, so the peaks' goniometer rotations are not applied to "
+                    "it. The Monte Carlo path uses the shape as stored for every peak.");
+    }
+  }
 
   // Configure progress
   Progress prog(this, 0.0, 1.0, npeaks);
@@ -143,13 +186,18 @@ void AddAbsorptionWeightedPathLengths::exec() {
     const auto samplePos = peak.getSamplePos();
 
     if (useSinglePath) {
-      const auto reverseBeamDir = normalize(samplePos - sourcePos);
+      // Rotate the ray into the shape's frame rather than build a rotated shape per peak: R varies
+      // peak to peak and this loop is parallel. Path lengths are unchanged by rotation.
+      const auto labToShape = bakedRotation * R.Tprime();
       const IObject *sampleShape = &(inputWS->sample().getShape());
 
-      Track beforeScatter(samplePos, reverseBeamDir);
+      const auto scatterPos = labToShape * samplePos;
+      const auto reverseBeamDir = normalize(labToShape * (samplePos - sourcePos));
+
+      Track beforeScatter(scatterPos, reverseBeamDir);
       sampleShape->interceptSurface(beforeScatter);
-      const auto detDir = normalize(detectorPos - samplePos);
-      Track afterScatter(samplePos, detDir);
+      const auto detDir = normalize(labToShape * (detectorPos - samplePos));
+      Track afterScatter(scatterPos, detDir);
       sampleShape->interceptSurface(afterScatter);
 
       absFactors[0] = beforeScatter.calculateAttenuation(lambdas[0]) * afterScatter.calculateAttenuation(lambdas[0]);
@@ -164,7 +212,8 @@ void AddAbsorptionWeightedPathLengths::exec() {
       }
       MCInteractionStatistics detStatistics(detID, inputWS->sample());
       std::vector<double> absFactorErrors(NLAMBDA);
-      strategy.calculate(rng, detectorPos, lambdas, peakWavelength, absFactors, absFactorErrors, detStatistics);
+      strategies.at(R.getVector())
+          .strategy->calculate(rng, detectorPos, lambdas, peakWavelength, absFactors, absFactorErrors, detStatistics);
 
       if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
         g_log.debug(detStatistics.generateScatterPointStats());

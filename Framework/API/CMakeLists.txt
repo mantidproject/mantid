@@ -99,6 +99,7 @@ set(SRC_FILES
     src/InstrumentFileFinder.cpp
     src/InstrumentValidator.cpp
     src/JointDomain.cpp
+    src/LabFrameSample.cpp
     src/LatticeDomain.cpp
     src/LinearScale.cpp
     src/LiveListener.cpp
@@ -299,6 +300,7 @@ set(INC_FILES
     inc/MantidAPI/InstrumentValidator.h
     inc/MantidAPI/Jacobian.h
     inc/MantidAPI/JointDomain.h
+    inc/MantidAPI/LabFrameSample.h
     inc/MantidAPI/LatticeDomain.h
     inc/MantidAPI/LinearScale.h
     inc/MantidAPI/LiveListener.h
@@ -447,6 +449,7 @@ set(TEST_FILES
     InstrumentDataServiceTest.h
     InstrumentFileFinderTest.h
     InstrumentValidatorTest.h
+    LabFrameSampleTest.h
     LatticeDomainTest.h
     LiveListenerFactoryTest.h
     LiveListenerTest.h

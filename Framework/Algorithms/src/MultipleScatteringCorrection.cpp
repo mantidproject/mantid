@@ -8,6 +8,7 @@
 #include "MantidAlgorithms/MultipleScatteringCorrection.h"
 #include "MantidAPI/HistoWorkspace.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/LabFrameSample.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SampleValidator.h"
@@ -155,8 +156,7 @@ void MultipleScatteringCorrection::exec() {
     ws_sampleOnly->setDistribution(true); // The output of this is a distribution
     ws_sampleOnly->setYUnitLabel("Multiple Scattering Correction factor");
     //-- Fill the workspace with sample only correction factors
-    const auto &sampleShape = m_inputWS->sample().getShape();
-    calculateSingleComponent(ws_sampleOnly, sampleShape, m_sampleElementSize);
+    calculateSingleComponent(ws_sampleOnly, *API::labFrameSampleShape(*m_inputWS), m_sampleElementSize);
     //-- Package output to workspace group
     const std::string outWSName = getProperty("OutputWorkspace");
     std::vector<std::string> names;
@@ -374,7 +374,8 @@ void MultipleScatteringCorrection::calculateSampleAndContainer(const API::Matrix
   const auto &containerMaterial = sample.getEnvironment().getContainer().material();
 
   // get the sample and container shapes
-  const auto &sampleShape = sample.getShape();
+  const auto labFrameSampleShape = API::labFrameSampleShape(*m_inputWS);
+  const auto &sampleShape = *labFrameSampleShape;
   const auto &containerShape = sample.getEnvironment().getContainer();
 
   MultipleScatteringCorrectionDistGraber distGraberSample(sampleShape, m_sampleElementSize);

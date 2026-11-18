@@ -16,6 +16,7 @@
 #include "MantidKernel/Interpolation.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/VectorHelper.h"
+#include "SampleFrameEquivalence.h"
 #include <cxxtest/TestSuite.h>
 #include <math.h>
 #include <string>
@@ -40,7 +41,7 @@ public:
     TestableXrayAbsorptionCorrection alg;
     API::MatrixWorkspace_sptr muonProfile = createWorkspace(1.0);
     API::MatrixWorkspace_sptr inputWS = createWorkspaceWithDummyShape(20.0);
-    std::vector<Kernel::V3D> muonPos = alg.calculateMuonPos(muonProfile, inputWS, 100.0);
+    std::vector<Kernel::V3D> muonPos = alg.calculateMuonPos(muonProfile, inputWS->sample().getShape(), 100.0);
     double z = 1.0;
     for (auto x : muonPos) {
       z -= 0.01;
@@ -101,6 +102,12 @@ public:
     TS_ASSERT(result);
   }
 
+  void test_both_ways_of_orienting_the_sample_agree() {
+    SampleFrameEquivalence::assertFramesAgree(
+        SampleFrameEquivalence::rotationY(30.0),
+        [this](const auto &r, bool baked) { return runXrayCorrection(createWorkspaceWithPlate(r, baked))->y(0); });
+  }
+
   void test_exec_with_non_valid_shape() {
     API::MatrixWorkspace_sptr muonProfile = createWorkspace(100);
     API::MatrixWorkspace_sptr inputWS = createWorkspaceWithDummyShape(20, false);
@@ -115,6 +122,40 @@ public:
   }
 
 private:
+  /// A plate sample in the given frame, carrying its x-ray attenuation profile.
+  API::MatrixWorkspace_sptr createWorkspaceWithPlate(const Kernel::Matrix<double> &rotation, const bool baked) {
+    API::MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create1DWorkspaceConstant(10, 20.0, 0.0, true);
+
+    Kernel::Material sampleMaterial;
+    Kernel::AttenuationProfile sampleProfile;
+    sampleProfile.setAttenuationCoefficient(1.0, 1.0);
+    sampleProfile.setAttenuationCoefficient(10.0, 1.0);
+    sampleProfile.setAttenuationCoefficient(100.0, 1.0);
+    sampleProfile.setAttenuationCoefficient(1000.0, 1.0);
+    sampleMaterial.setXRayAttenuationProfile(sampleProfile);
+
+    SampleFrameEquivalence::setSample(*ws, rotation, baked, sampleMaterial);
+    return ws;
+  }
+
+  API::MatrixWorkspace_sptr runXrayCorrection(const API::MatrixWorkspace_sptr &inputWS) {
+    API::MatrixWorkspace_sptr muonProfile = createWorkspace(100.0);
+    auto &muonDepth = muonProfile->mutableX(0);
+    for (size_t i = 0; i < muonDepth.size(); i++) {
+      muonDepth[i] = 0.1;
+    }
+    Algorithms::XrayAbsorptionCorrection algo;
+    algo.initialize();
+    algo.setChild(true);
+    algo.setProperty("InputWorkspace", inputWS);
+    algo.setProperty("MuonImplantationProfile", muonProfile);
+    algo.setProperty("OutputWorkspace", "outputWS");
+    algo.setProperty("DetectorDistance", 1000.0);
+    algo.setProperty("DetectorAngle", 45.0);
+    algo.execute();
+    return algo.getProperty("OutputWorkspace");
+  }
+
   API::MatrixWorkspace_sptr createWorkspaceWithDummyShape(double value, bool hasXrayAttenuationProfile = true) {
     API::MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::create1DWorkspaceConstant(10, value, 0.0, true);
 

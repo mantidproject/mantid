@@ -30,6 +30,11 @@ Finding the :ref:`UB matrix <Lattice>` occurs on a :py:obj:`PeaksWorkspace <mant
 In order to convertthe data to HKL space, one needs to copy the oriented lattice
 to the individual data workspaces.
 
+Sample Orientation
+##################
+
+When the shape is copied, it is turned by the destination workspace's goniometer rotation, which replaces any goniometer rotation it already carried, so it is never turned twice. A rotation within the shape's own frame, for example from :ref:`algm-RotateSampleShape` or a ``rotate-all`` tag, is kept. The environment is copied unrotated.
+
 Usage
 -----
 

@@ -90,6 +90,11 @@ Similarly, the term :math:`A_{2}` is now
 
 where the distance within different material (sample and container) are summed independently.
 
+Sample Orientation
+##################
+
+The sample shape is used where the run's goniometer, for example from :ref:`algm-SetGoniometer`, puts it. A shape that already carries that rotation, for example one copied by :ref:`algm-CopySample`, is not turned again. A sample in a container or sample environment is used as defined, with a warning, because the environment is not currently rotated by the goniometer.
+
 Example
 -------
 

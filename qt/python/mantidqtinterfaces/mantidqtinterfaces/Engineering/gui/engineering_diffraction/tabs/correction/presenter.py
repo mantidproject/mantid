@@ -281,7 +281,7 @@ class TextureCorrectionPresenter(RbScopeConsumer, InstrumentScopeConsumer, Algor
         ref_ws = self.model.reference_ws
         if ref_ws:
             wss = self.view.get_selected_workspaces()
-            self.model.copy_sample_info(ref_ws, wss, True)
+            self.model.copy_sample_info(ref_ws, wss)
 
     def _on_worker_success(self) -> None:
         self.correction_notifier.notify_subscribers(self.model.get_corrected_files())
