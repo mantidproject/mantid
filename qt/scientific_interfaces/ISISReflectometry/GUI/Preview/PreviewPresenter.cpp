@@ -94,8 +94,9 @@ void PreviewPresenter::notifyAutoreductionPaused() { updateWidgetEnabledState();
 void PreviewPresenter::notifySetYAxisSymlogChanged() { updatePlotAxes(); }
 
 void PreviewPresenter::notifyPlotAllGroupMembersChanged() {
-  if (m_model->getReducedWs())
+  if (m_model->getReducedWss().size() > 0) {
     plotLinePlot();
+  }
 }
 
 void PreviewPresenter::updateWidgetEnabledState() {

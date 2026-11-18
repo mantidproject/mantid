@@ -12,6 +12,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmProperties.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
@@ -368,7 +369,7 @@ std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps
   }
   updateProcessingInstructionsProperties(*properties, previewRow);
 
-  properties->setProperty("HideInputWorkspaces", true);
+  properties->setProperty("HideInputWorkspaces", false);
   if (std::dynamic_pointer_cast<WorkspaceGroup>(previewRow.getLoadedWs())) {
     properties->setProperty("GroupTOFWorkspaces", false);
   }
@@ -377,8 +378,19 @@ std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps
 
 void updateRowOnAlgorithmComplete(const IAlgorithm_sptr &algorithm, Item &item) {
   auto &row = dynamic_cast<PreviewRow &>(item);
-  Workspace_sptr outputWs = algorithm->getProperty("OutputWorkspaceBinned");
-  row.setReducedWs(outputWs);
+  if (algorithm->getProperty("UsingMultiOutputs")) {
+    std::vector<Workspace_sptr> wss = {};
+    std::vector<std::string> wsNames = algorithm->getProperty("OutputWorkspacesBinned");
+    wss.reserve(wsNames.size());
+    auto const &ads = AnalysisDataService::Instance();
+    for (auto const &wsName : wsNames) {
+      wss.emplace_back(ads.retrieve(wsName));
+    }
+    row.setReducedWss(wss);
+  } else {
+    Workspace_sptr outputWs = algorithm->getProperty("OutputWorkspaceBinned");
+    row.setReducedWss({outputWs});
+  }
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry::Reduction
 

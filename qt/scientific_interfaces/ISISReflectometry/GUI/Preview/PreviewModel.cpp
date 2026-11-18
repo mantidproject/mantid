@@ -91,16 +91,22 @@ Workspace_sptr PreviewModel::getSummedWs() const { return m_runDetails->getSumme
 MatrixWorkspace_sptr PreviewModel::getSelectedSummedWs() const {
   return getWorkspaceGroupMember(m_runDetails->getSummedWs());
 }
-Workspace_sptr PreviewModel::getReducedWs() const { return m_runDetails->getReducedWs(); }
+std::vector<Workspace_sptr> PreviewModel::getReducedWss() const { return m_runDetails->getReducedWss(); }
 
-void PreviewModel::clearReducedWorkspace() { m_runDetails->setReducedWs(nullptr); }
+void PreviewModel::clearReducedWorkspace() { m_runDetails->setReducedWss({}); }
 
 MatrixWorkspace_sptr PreviewModel::getSelectedReducedWs() const {
-  return getWorkspaceGroupMember(m_runDetails->getReducedWs());
+  return getWorkspaceGroupMember(m_runDetails->getReducedWss()[m_selectedSlice]);
 }
 
 std::vector<MatrixWorkspace_sptr> PreviewModel::getReducedWorkspaceMembers() const {
-  return getMembers(m_runDetails->getReducedWs());
+  std::vector<MatrixWorkspace_sptr> members = {};
+  for (auto const &workspace : m_runDetails->getReducedWss()) {
+    auto const &matrixWorkspaces = getMembers(workspace);
+    members.reserve(members.size() + matrixWorkspaces.size());
+    members.insert(members.end(), matrixWorkspaces.cbegin(), matrixWorkspaces.cend());
+  }
+  return members;
 }
 
 bool PreviewModel::isWorkspaceGroup() const {
@@ -229,8 +235,11 @@ void PreviewModel::exportSummedWsToAds() const {
 }
 
 void PreviewModel::exportReducedWsToAds() const {
-  if (auto reducedWs = m_runDetails->getReducedWs()) {
-    AnalysisDataService::Instance().addOrReplace("preview_reduced_ws", reducedWs);
+  auto reducedWss = m_runDetails->getReducedWss();
+  if (reducedWss.size() > 0) {
+    for (size_t i = 0; i < reducedWss.size(); ++i) {
+      AnalysisDataService::Instance().addOrReplace("preview_reduced_ws_" + std::to_string(i), reducedWss[i]);
+    }
   } else {
     g_log.error(
         "Could not export reduced WS. No selection has been made on the instrument viewer and/or region selector.");

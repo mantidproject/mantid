@@ -36,7 +36,7 @@ public:
   virtual std::optional<ProcessingInstructions> getSelectedBanks() const = 0;
   virtual Mantid::API::Workspace_sptr getSummedWs() const = 0;
   virtual Mantid::API::MatrixWorkspace_sptr getSelectedSummedWs() const = 0;
-  virtual Mantid::API::Workspace_sptr getReducedWs() const = 0;
+  virtual std::vector<Mantid::API::Workspace_sptr> getReducedWss() const = 0;
   virtual Mantid::API::MatrixWorkspace_sptr getSelectedReducedWs() const = 0;
   virtual std::vector<Mantid::API::MatrixWorkspace_sptr> getReducedWorkspaceMembers() const = 0;
   virtual bool isWorkspaceGroup() const = 0;

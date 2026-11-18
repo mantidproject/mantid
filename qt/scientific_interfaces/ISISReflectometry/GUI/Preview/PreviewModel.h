@@ -40,7 +40,7 @@ public:
   Mantid::API::Workspace_sptr getSummedWs() const override;
   Mantid::API::MatrixWorkspace_sptr getSelectedSummedWs() const override;
   std::optional<ProcessingInstructions> getProcessingInstructions(ROIType regionType) const override;
-  Mantid::API::Workspace_sptr getReducedWs() const override;
+  std::vector<Mantid::API::Workspace_sptr> getReducedWss() const override;
   Mantid::API::MatrixWorkspace_sptr getSelectedReducedWs() const override;
   std::vector<Mantid::API::MatrixWorkspace_sptr> getReducedWorkspaceMembers() const override;
   bool isWorkspaceGroup() const override;
@@ -65,6 +65,7 @@ public:
 private:
   std::optional<PreviewRow> m_runDetails;
   size_t m_selectedGroupMember{0};
+  size_t m_selectedSlice{0};
 
   void createRunDetails(std::string const &workspaceName);
   Mantid::API::MatrixWorkspace_sptr getWorkspaceGroupMember(Mantid::API::Workspace_sptr const &workspace) const;
