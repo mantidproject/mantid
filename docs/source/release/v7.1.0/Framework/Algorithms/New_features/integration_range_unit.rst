@@ -1,0 +1,1 @@
+- :ref:`Integration <algm-Integration>` has a new ``RangeUnit`` property, which allows the integration limits to be given in a different unit to the X axis of the input workspace, for example a wavelength range for a time-of-flight workspace.

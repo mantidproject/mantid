@@ -9,19 +9,32 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Integration.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitConversion.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
 
+#include <algorithm>
 #include <cmath>
+#include <limits>
+#include <memory>
 #include <numeric>
+#include <optional>
+#include <string>
+#include <tuple>
+#include <utility>
 
 namespace Mantid::Algorithms {
 
@@ -32,6 +45,117 @@ using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 using namespace HistogramData;
+
+namespace {
+/// Stands in for a lower integration limit that was not given
+constexpr double NO_LOWER_LIMIT = std::numeric_limits<double>::lowest();
+
+bool canConvertQuickly(const Unit &from, const Unit &to) {
+  double factor{0.0}, power{0.0};
+  return from.quickConversion(to, factor, power);
+}
+
+/// True if RangeUnit was given and is not the X unit of the workspace
+bool rangeUnitDiffersFromXUnit(const std::string &rangeUnit, const MatrixWorkspace &workspace) {
+  return !rangeUnit.empty() && rangeUnit != workspace.getAxis(0)->unit()->unitID();
+}
+
+/// The first and last workspace indices to integrate, replacing any that are out of range
+std::pair<int, int> workspaceIndexRange(int first, int last, const int numberOfSpectra) {
+  if (first >= numberOfSpectra)
+    first = 0;
+  if (last == EMPTY_INT() || last > numberOfSpectra - 1 || last < first)
+    last = numberOfSpectra - 1;
+  return {first, last};
+}
+
+/**
+ * The stricter of the single and list limits for a spectrum
+ * @param listIndex :: The position of the spectrum among those being integrated
+ * @return The lower limit, or NO_LOWER_LIMIT, and the upper limit, or EMPTY_DBL()
+ */
+std::pair<double, double> spectrumLimits(const std::size_t listIndex, const double minRange, const double maxRange,
+                                         const std::vector<double> &minRanges, const std::vector<double> &maxRanges) {
+  const double lower = minRange == EMPTY_DBL() ? NO_LOWER_LIMIT : minRange;
+  return {minRanges.empty() ? lower : std::max(lower, minRanges[listIndex]),
+          maxRanges.empty() ? maxRange : std::min(maxRange, maxRanges[listIndex])};
+}
+
+/// Converts the integration limits of a spectrum from RangeUnit to the X unit of the workspace
+class LimitConverter {
+public:
+  LimitConverter(const MatrixWorkspace &workspace, const std::string &rangeUnit)
+      : m_spectrumInfo(workspace.spectrumInfo()), m_rangeUnit(UnitFactory::Instance().create(rangeUnit)),
+        m_xUnit(workspace.getAxis(0)->unit()),
+        m_isQuick(canConvertQuickly(*m_rangeUnit, *m_xUnit) && canConvertQuickly(*m_xUnit, *m_rangeUnit)),
+        m_l1(m_isQuick ? 0.0 : m_spectrumInfo.l1()), m_emode(m_isQuick ? DeltaEMode::Elastic : workspace.getEMode()) {}
+
+  /**
+   * @param index :: The workspace index of the spectrum
+   * @param x :: The X values of the spectrum
+   * @param lower :: The lower limit in RangeUnit, or NO_LOWER_LIMIT
+   * @param upper :: The upper limit in RangeUnit, or EMPTY_DBL()
+   * @return The limits in the X unit
+   * @throw std::runtime_error if the limits cannot be converted
+   */
+  std::pair<double, double> convert(const std::size_t index, const HistogramX &x, const double lower,
+                                    const double upper) const {
+    const bool hasLower = lower != NO_LOWER_LIMIT;
+    const bool hasUpper = upper != EMPTY_DBL();
+    std::pair<double, double> limits{NO_LOWER_LIMIT, EMPTY_DBL()};
+    // Conversion changes the state of a unit, so each spectrum needs its own copies
+    const std::unique_ptr<Unit> rangeUnit(m_rangeUnit->clone());
+    const std::unique_ptr<Unit> xUnit(m_xUnit->clone());
+    try {
+      UnitParametersMap params;
+      if (!m_isQuick) {
+        if (!m_spectrumInfo.hasDetectors(index))
+          throw std::runtime_error("the spectrum has no detectors");
+        m_spectrumInfo.getDetectorValues(*rangeUnit, *xUnit, m_emode, false, static_cast<int64_t>(index), params);
+      }
+      const auto toX = [&](const double value) {
+        return UnitConversion::run(*rangeUnit, *xUnit, value, m_l1, m_emode, params);
+      };
+      const auto toRangeUnit = [&](const double value) {
+        return UnitConversion::run(*xUnit, *rangeUnit, value, m_l1, m_emode, params);
+      };
+
+      if (hasLower && hasUpper) {
+        // The units may run in opposite directions, e.g. energy falls as time-of-flight rises
+        limits = std::minmax({toX(lower), toX(upper)});
+      } else if (hasLower || hasUpper) {
+        const double first = toRangeUnit(x.front());
+        const double last = toRangeUnit(x.back());
+        if (std::isnan(first) || std::isnan(last))
+          throw std::runtime_error("the X values cannot be converted to " + m_rangeUnit->unitID());
+        const bool reversed = first > last;
+        const double limit = toX(hasLower ? lower : upper);
+        if (hasLower != reversed)
+          limits.first = limit;
+        else
+          limits.second = limit;
+      }
+    } catch (const std::exception &error) {
+      throw std::runtime_error("Unable to convert the integration limits from " + m_rangeUnit->unitID() + " to " +
+                               m_xUnit->unitID() + " for workspace index " + std::to_string(index) + ": " +
+                               error.what());
+    }
+
+    if (std::isnan(limits.first) || std::isnan(limits.second))
+      throw std::runtime_error("The integration limits for workspace index " + std::to_string(index) +
+                               " are not valid values of " + m_rangeUnit->unitID() + ".");
+    return limits;
+  }
+
+private:
+  const SpectrumInfo &m_spectrumInfo;
+  const Unit_const_sptr m_rangeUnit;
+  const Unit_const_sptr m_xUnit;
+  const bool m_isQuick;
+  const double m_l1;
+  const DeltaEMode::Type m_emode;
+};
+} // namespace
 
 /** Initialisation method.
  *
@@ -56,6 +180,16 @@ void Integration::init() {
                   "A list of lower integration limits (as X values).");
   declareProperty(std::make_unique<ArrayProperty<double>>("RangeUpperList"),
                   "A list of upper integration limits (as X values).");
+
+  // An empty value means that the limits are in the X unit of the input workspace
+  std::vector<std::string> rangeUnits{""};
+  const auto convertibleUnits = UnitFactory::Instance().getConvertibleUnits();
+  rangeUnits.insert(rangeUnits.end(), convertibleUnits.cbegin(), convertibleUnits.cend());
+  declareProperty("RangeUnit", "", std::make_shared<StringListValidator>(rangeUnits),
+                  "The unit of the integration limits. If not given, the limits are in the X unit of the input "
+                  "workspace. At least one limit is required if this differs from the X unit. Only the limits are "
+                  "converted, separately for each spectrum, and this must be possible for every spectrum integrated. "
+                  "The output X values remain in the X unit of the input workspace.");
 }
 
 /**
@@ -81,13 +215,13 @@ void Integration::exec() {
   // Try and retrieve the optional properties
 
   /// The value in X to start the integration from
-  double minRange = getProperty("RangeLower");
+  const double minRange = getProperty("RangeLower");
   /// The value in X to finish the integration at
-  double maxRange = getProperty("RangeUpper");
-  /// The spectrum to start the integration from
-  int minWsIndex = getProperty("StartWorkspaceIndex");
-  /// The spectrum to finish the integration at
-  int maxWsIndex = getProperty("EndWorkspaceIndex");
+  const double maxRange = getProperty("RangeUpper");
+  /// The spectrum requested to start the integration from
+  const int requestedMinWsIndex = getProperty("StartWorkspaceIndex");
+  /// The spectrum requested to finish the integration at
+  const int requestedMaxWsIndex = getProperty("EndWorkspaceIndex");
   /// Flag for including partial bins
   const bool incPartBins = getProperty("IncludePartialBins");
   /// List of X values to start the integration from
@@ -100,46 +234,35 @@ void Integration::exec() {
 
   const auto numberOfSpectra = static_cast<int>(localworkspace->getNumberHistograms());
 
-  // Check 'StartWorkspaceIndex' is in range 0-numberOfSpectra
-  if (minWsIndex >= numberOfSpectra) {
+  // Check the workspace indices are in range 0-numberOfSpectra
+  int minWsIndex{0}, maxWsIndex{0};
+  std::tie(minWsIndex, maxWsIndex) = workspaceIndexRange(requestedMinWsIndex, requestedMaxWsIndex, numberOfSpectra);
+  if (minWsIndex != requestedMinWsIndex)
     g_log.warning("StartWorkspaceIndex out of range! Set to 0.");
-    minWsIndex = 0;
-  }
-  if (isEmpty(maxWsIndex))
-    maxWsIndex = numberOfSpectra - 1;
-  if (maxWsIndex > numberOfSpectra - 1 || maxWsIndex < minWsIndex) {
+  if (!isEmpty(requestedMaxWsIndex) && maxWsIndex != requestedMaxWsIndex)
     g_log.warning("EndWorkspaceIndex out of range! Set to max workspace index.");
-    maxWsIndex = numberOfSpectra - 1;
-  }
-  auto rangeListCheck = [minWsIndex, maxWsIndex](const std::vector<double> &list, const char *name) {
-    if (!list.empty() && list.size() != static_cast<size_t>(maxWsIndex - minWsIndex) + 1) {
-      std::ostringstream sout;
-      sout << name << " has " << list.size() << " values but it should contain " << maxWsIndex - minWsIndex + 1 << '\n';
-      throw std::runtime_error(sout.str());
-    }
-  };
-  rangeListCheck(minRanges, "RangeLowerList");
-  rangeListCheck(maxRanges, "RangeUpperList");
+
+  // validateInputs has checked that the limits of every spectrum can be converted
+  const std::string rangeUnit = getProperty("RangeUnit");
+  std::optional<LimitConverter> limitConverter;
+  if (rangeUnitDiffersFromXUnit(rangeUnit, *localworkspace))
+    limitConverter.emplace(*localworkspace, rangeUnit);
 
   double progressStart = 0.0;
   //---------------------------------------------------------------------------------
   // Now, determine if the input workspace is actually an EventWorkspace
   EventWorkspace_sptr eventInputWS = std::dynamic_pointer_cast<EventWorkspace>(localworkspace);
 
-  if (eventInputWS != nullptr) {
+  // Converted limits differ between spectra, which a single rebin cannot represent, so in that case the existing bins
+  // of the EventWorkspace are integrated
+  if (eventInputWS != nullptr && !limitConverter) {
     //------- EventWorkspace as input -------------------------------------
-    if (!minRanges.empty() || !maxRanges.empty()) {
-      throw std::runtime_error("Range lists not supported for EventWorkspaces.");
-    }
     // Get the eventworkspace rebinned to apply the upper and lowerrange
     double evntMinRange = isEmpty(minRange) ? eventInputWS->getEventXMin() : minRange;
     double evntMaxRange = isEmpty(maxRange) ? eventInputWS->getEventXMax() : maxRange;
     localworkspace = rangeFilterEventWorkspace(eventInputWS, evntMinRange, evntMaxRange);
 
     progressStart = 0.5;
-  }
-  if (isEmpty(minRange)) {
-    minRange = std::numeric_limits<double>::lowest();
   }
 
   // Create the 2D workspace (with 1 bin) for the output
@@ -186,8 +309,9 @@ void Integration::exec() {
     if (rebinned_output)
       Fout = &rebinned_output->dataF(outWI);
 
-    const double lowerLimit = minRanges.empty() ? minRange : std::max(minRange, minRanges[outWI]);
-    const double upperLimit = maxRanges.empty() ? maxRange : std::min(maxRange, maxRanges[outWI]);
+    double lowerLimit{0.0}, upperLimit{0.0};
+    std::tie(lowerLimit, upperLimit) =
+        spectrumLimits(static_cast<std::size_t>(outWI), minRange, maxRange, minRanges, maxRanges);
 
     if (upperLimit < lowerLimit) {
       std::ostringstream sout;
@@ -196,6 +320,11 @@ void Integration::exec() {
       g_log.warning() << sout.str();
       progress.report();
       continue;
+    }
+
+    if (limitConverter) {
+      std::tie(lowerLimit, upperLimit) =
+          limitConverter->convert(static_cast<std::size_t>(i), inSpec.x(), lowerLimit, upperLimit);
     }
 
     integrateSpectrum(inSpec, outSpec, Fin, Fout, lowerLimit, upperLimit, incPartBins);
@@ -446,6 +575,70 @@ std::map<std::string, std::string> Integration::validateInputs() {
     if (std::any_of(maxRanges.cbegin(), maxRanges.cend(), [minRange](const auto x) { return x < minRange; })) {
       issues["RangeUpperList"] = "RangeUpperList has a value lower than RangeLower.";
     }
+  }
+
+  const MatrixWorkspace_const_sptr workspace = getProperty("InputWorkspace");
+  if (!workspace)
+    return issues;
+
+  const int startIndex = getProperty("StartWorkspaceIndex");
+  const int endIndex = getProperty("EndWorkspaceIndex");
+  const auto [firstIndex, lastIndex] =
+      workspaceIndexRange(startIndex, endIndex, static_cast<int>(workspace->getNumberHistograms()));
+  const auto numberIntegrated = static_cast<std::size_t>(lastIndex - firstIndex + 1);
+  for (const auto &[name, list] : {std::pair<std::string, const std::vector<double> &>{"RangeLowerList", minRanges},
+                                   std::pair<std::string, const std::vector<double> &>{"RangeUpperList", maxRanges}}) {
+    if (!list.empty() && list.size() != numberIntegrated) {
+      issues[name] = name + " has " + std::to_string(list.size()) + " values but it should contain " +
+                     std::to_string(numberIntegrated) + ".";
+    }
+  }
+
+  const std::string rangeUnit = getProperty("RangeUnit");
+  const bool convertLimits = rangeUnitDiffersFromXUnit(rangeUnit, *workspace);
+  if (!convertLimits && std::dynamic_pointer_cast<const EventWorkspace>(workspace) &&
+      (!minRanges.empty() || !maxRanges.empty())) {
+    issues[minRanges.empty() ? "RangeUpperList" : "RangeLowerList"] =
+        "Range lists are not supported for EventWorkspaces unless the limits are converted using RangeUnit.";
+  }
+  if (!convertLimits)
+    return issues;
+
+  const Unit_const_sptr xUnit = workspace->getAxis(0)->unit();
+  const Unit_const_sptr limitUnit = UnitFactory::Instance().create(rangeUnit);
+  if (!xUnit->isConvertible()) {
+    issues["RangeUnit"] = "RangeUnit requires an input workspace with a convertible X unit.";
+    return issues;
+  }
+  if (isEmpty(minRange) && isEmpty(maxRange) && minRanges.empty() && maxRanges.empty()) {
+    issues["RangeUnit"] = "RangeUnit was given but there are no integration limits to convert. Give at least one limit "
+                          "or leave RangeUnit empty.";
+    return issues;
+  }
+  if (!canConvertQuickly(*limitUnit, *xUnit) || !canConvertQuickly(*xUnit, *limitUnit)) {
+    const auto instrument = workspace->getInstrument();
+    if (!instrument->getSource() || !instrument->getSample()) {
+      issues["InputWorkspace"] = "Converting the integration limits from " + rangeUnit + " to " + xUnit->unitID() +
+                                 " requires an instrument with a source and a sample.";
+      return issues;
+    }
+  }
+  if (!issues.empty())
+    return issues;
+
+  // Every spectrum being integrated must have limits that can be converted
+  try {
+    const LimitConverter converter(*workspace, rangeUnit);
+    for (int i = firstIndex; i <= lastIndex; ++i) {
+      const auto [lower, upper] =
+          spectrumLimits(static_cast<std::size_t>(i - firstIndex), minRange, maxRange, minRanges, maxRanges);
+      // exec sets the integral to zero for these spectra without using the limits
+      if (upper < lower)
+        continue;
+      converter.convert(static_cast<std::size_t>(i), workspace->x(i), lower, upper);
+    }
+  } catch (const std::exception &error) {
+    issues["RangeUnit"] = error.what();
   }
   return issues;
 }
