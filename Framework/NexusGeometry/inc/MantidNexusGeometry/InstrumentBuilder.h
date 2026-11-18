@@ -48,9 +48,9 @@ public:
   /// Adds detector to instrument
   void addMonitor(const std::string &detName, detid_t detId, const Eigen::Vector3d &position,
                   std::shared_ptr<const Mantid::Geometry::IObject> const &shape);
-  /// Add sample
+  /// Add sample. Only the first sample added is the instrument's sample.
   void addSample(const std::string &sampleName, const Eigen::Vector3d &position);
-  /// Add source
+  /// Add source. Only the first source added is the instrument's source.
   void addSource(const std::string &sourceName, const Eigen::Vector3d &position);
 
   void addBank(const std::string &localName, const Eigen::Vector3d &position, const Eigen::Quaterniond &rotation);

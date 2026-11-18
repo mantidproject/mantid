@@ -55,13 +55,14 @@ public:
   /// An assembly with an outline shape, as ObjCompAssembly. It is an outline composite if the shape is valid.
   Node addOutlineAssembly(Node const parent, std::string name, Kernel::V3D const &position,
                           Kernel::Quat const &rotation, std::shared_ptr<const IObject> shape);
-  /// A rectangular bank. Its pixels are added under it as for any assembly.
+  /// A rectangular bank. Its pixels are added under it as for any assembly: nX columns, each of nY detectors.
   Node addRectangularBank(Node const parent, std::string name, Kernel::V3D const &position,
                           Kernel::Quat const &rotation, Beamline::PixelGridComponent pixelGrid);
-  /// A 3D grid bank. Its pixels are added under it as for any assembly.
+  /// A 3D grid bank. Its pixels are added under it as for any assembly: nZ layers (if nZ > 0), each of nX columns of
+  /// nY detectors.
   Node addGridBank(Node const parent, std::string name, Kernel::V3D const &position, Kernel::Quat const &rotation,
                    Beamline::PixelGridComponent pixelGrid);
-  /// A structured bank. Its pixels are added under it as for any assembly.
+  /// A structured bank. Its pixels are added under it as for any assembly: nX columns, each of nY detectors.
   Node addStructuredBank(Node const parent, std::string name, Kernel::V3D const &position, Kernel::Quat const &rotation,
                          Beamline::StructuredGridComponent structuredGrid);
   /// A component without a shape, which has no children.
@@ -74,7 +75,9 @@ public:
   Node addDetector(Node const parent, std::string name, detid_t const id, Kernel::V3D const &position,
                    Kernel::Quat const &rotation, std::shared_ptr<const IObject> shape, bool const isMonitor = false);
 
+  /// The source. As in the legacy instrument, only the first source set is kept; later ones are warned about.
   void setSource(Node const node);
+  /// The sample. As in the legacy instrument, only the first sample set is kept; later ones are warned about.
   void setSample(Node const node);
   /// The node's scale factor. It is (1, 1, 1) unless set.
   void setScaleFactor(Node const node, Kernel::V3D const &scaleFactor);
@@ -83,6 +86,7 @@ public:
   void setReferenceFrame(std::shared_ptr<const ReferenceFrame> referenceFrame);
   void setMetadata(std::shared_ptr<const InstrumentMetadata> metadata);
 
+  /// Every build shares the parameter objects: changing one changes it in every beamline built.
   void addParameter(Node const node, std::shared_ptr<Parameter> parameter);
   void addLogfileParameter(Node const node, std::string const &cacheKey,
                            std::shared_ptr<const XMLInstrumentParameter> parameter);
@@ -90,7 +94,8 @@ public:
   /// The number of nodes added.
   size_t size() const;
 
-  /// Lay out the nodes and make the Infos. The builder can be built again.
+  /// Lay out the nodes and make the Infos. The builder can be built again; the builds share their parameters.
+  /// Throws if a detector ID is used twice, or a bank does not hold the grid of pixels it describes.
   BeamlineRef build() const;
 
 private:
@@ -119,6 +124,8 @@ private:
 
   Node add(NodeRecord record);
   void checkNode(Node const node) const;
+  bool isPixelGrid(Node const node, int const columns, int const pixels) const;
+  void checkBanks() const;
 
   std::vector<NodeRecord> m_nodes;
   std::vector<std::vector<Node>> m_children;

@@ -12,6 +12,8 @@
 #include "MantidGeometry/Instrument/ParameterInfo.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/EigenConversionHelpers.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 
 #include <algorithm>
 #include <iterator>
@@ -25,6 +27,10 @@ namespace Mantid::Geometry {
 using Kernel::Quat;
 using Kernel::V2D;
 using Kernel::V3D;
+
+namespace {
+Kernel::Logger g_log("BeamlineBuilder");
+}
 
 /// Lays out the nodes as InstrumentVisitor does, filling the arrays the Infos are made from.
 class BeamlineBuilder::Layout {
@@ -43,8 +49,8 @@ public:
         std::adjacent_find(detectors.cbegin(), detectors.cend(),
                            [&nodes](Node const a, Node const b) { return nodes[a].id == nodes[b].id; });
     if (duplicate != detectors.cend()) {
-      throw std::invalid_argument("BeamlineBuilder: detector ID " + std::to_string(nodes[*duplicate].id) +
-                                  " is used more than once");
+      throw Kernel::Exception::InstrumentDefinitionError(
+          "BeamlineBuilder: detector ID " + std::to_string(nodes[*duplicate].id) + " is used more than once");
     }
     auto const nDetectors = detectors.size();
     m_detectorIds = std::make_shared<std::vector<detid_t>>(nDetectors);
@@ -330,11 +336,19 @@ void BeamlineBuilder::checkNode(Node const node) const {
 
 void BeamlineBuilder::setSource(Node const node) {
   checkNode(node);
+  if (m_source) {
+    g_log.warning("Have already added source component to the _sourceCache.");
+    return;
+  }
   m_source = node;
 }
 
 void BeamlineBuilder::setSample(Node const node) {
   checkNode(node);
+  if (m_sample) {
+    g_log.warning("Have already added samplePos component to the _sampleCache.");
+    return;
+  }
   m_sample = node;
 }
 
@@ -358,21 +372,67 @@ void BeamlineBuilder::setMetadata(std::shared_ptr<const InstrumentMetadata> meta
 
 void BeamlineBuilder::addParameter(Node const node, std::shared_ptr<Parameter> parameter) {
   checkNode(node);
+  if (!parameter) {
+    throw std::invalid_argument("BeamlineBuilder: a parameter cannot be null");
+  }
   m_parameters.emplace_back(node, std::move(parameter));
 }
 
 void BeamlineBuilder::addLogfileParameter(Node const node, std::string const &cacheKey,
                                           std::shared_ptr<const XMLInstrumentParameter> parameter) {
   checkNode(node);
+  if (!parameter) {
+    throw std::invalid_argument("BeamlineBuilder: a logfile parameter cannot be null");
+  }
   m_logfileParameters.emplace_back(node, cacheKey, std::move(parameter));
 }
 
 size_t BeamlineBuilder::size() const { return m_nodes.size(); }
 
+/// True if the node is an assembly of `columns` columns, each holding `pixels` detectors.
+bool BeamlineBuilder::isPixelGrid(Node const node, int const columns, int const pixels) const {
+  auto const &columnNodes = m_children[node];
+  if (columns <= 0 || pixels <= 0 || columnNodes.size() != static_cast<size_t>(columns)) {
+    return false;
+  }
+  return std::ranges::all_of(columnNodes, [this, pixels](Node const column) {
+    auto const &pixelNodes = m_children[column];
+    return m_nodes[column].isAssembly && pixelNodes.size() == static_cast<size_t>(pixels) &&
+           std::ranges::all_of(pixelNodes, [this](Node const pixel) { return m_nodes[pixel].isDetector; });
+  });
+}
+
+/// Banks are read as grids of pixels (see ComponentInfo::quadrilateralComponent), so each must hold its grid.
+void BeamlineBuilder::checkBanks() const {
+  for (Node node = 0; node < m_nodes.size(); ++node) {
+    auto const &record = m_nodes[node];
+    bool valid = true;
+    if (record.structuredGrid) {
+      valid = isPixelGrid(node, record.structuredGrid->nX, record.structuredGrid->nY);
+    } else if (record.pixelGrid) {
+      auto const &grid = *record.pixelGrid;
+      if (record.type == Beamline::ComponentType::Grid && grid.nZ > 0) {
+        auto const &layers = m_children[node];
+        valid = layers.size() == static_cast<size_t>(grid.nZ) &&
+                std::ranges::all_of(layers, [this, &grid](Node const layer) {
+                  return m_nodes[layer].isAssembly && isPixelGrid(layer, grid.nX, grid.nY);
+                });
+      } else {
+        valid = isPixelGrid(node, grid.nX, grid.nY);
+      }
+    }
+    if (!valid) {
+      throw std::invalid_argument("BeamlineBuilder: bank " + record.name +
+                                  " does not hold the grid of pixels it describes");
+    }
+  }
+}
+
 BeamlineRef BeamlineBuilder::build() const {
   if (m_nodes.empty()) {
     throw std::logic_error("BeamlineBuilder: there is no root node to build");
   }
+  checkBanks();
   Layout const layout(*this);
 
   auto parameterInfo = std::make_shared<ParameterInfo>();
@@ -390,7 +450,19 @@ BeamlineRef BeamlineBuilder::build() const {
                                                        m_referenceFrame);
   auto detectorInfo = std::make_unique<DetectorInfo>(std::move(beamlineDetectorInfo), layout.detectorIds(),
                                                      layout.detectorIdToIndex(), parameterInfo, m_referenceFrame);
-  return {std::move(componentInfo), std::move(detectorInfo), m_metadata};
+  return makeBeamlineRef(std::move(componentInfo), std::move(detectorInfo), m_metadata);
+}
+
+BeamlineRef makeBeamlineRef(std::unique_ptr<ComponentInfo> componentInfo, std::unique_ptr<DetectorInfo> detectorInfo,
+                            std::shared_ptr<const InstrumentMetadata> metadata) {
+  // The ComponentInfo points at its DetectorInfo, so one owner keeps both
+  struct Infos {
+    std::unique_ptr<ComponentInfo> componentInfo;
+    std::unique_ptr<DetectorInfo> detectorInfo;
+  };
+  auto const infos = std::make_shared<Infos>(std::move(componentInfo), std::move(detectorInfo));
+  return {std::shared_ptr<const ComponentInfo>(infos, infos->componentInfo.get()),
+          std::shared_ptr<const DetectorInfo>(infos, infos->detectorInfo.get()), std::move(metadata)};
 }
 
 } // namespace Mantid::Geometry

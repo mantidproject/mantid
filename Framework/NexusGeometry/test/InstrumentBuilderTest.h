@@ -128,6 +128,22 @@ public:
     TS_ASSERT_EQUALS(instrument->getDefaultView(), "3D");
   }
 
+  void test_the_first_source_and_sample_are_kept() {
+    InstrumentBuilder builder(this->iTestName);
+    builder.addSource("source", {0, 0, -10});
+    builder.addSource("second source", {0, 0, -20});
+    builder.addSample("sample", {0, 0, 0});
+    builder.addSample("second sample", {0, 0, 1});
+    auto const instrument = builder.createInstrument();
+    auto const [componentInfo, detectorInfo] = instrument->makeBaseBeamline();
+    TS_ASSERT_EQUALS(componentInfo->name(componentInfo->source()), "source");
+    TS_ASSERT_EQUALS(componentInfo->name(componentInfo->sample()), "sample");
+    TS_ASSERT_EQUALS(instrument->getSource()->getName(), "source");
+    TS_ASSERT_EQUALS(instrument->getSample()->getName(), "sample");
+    TS_ASSERT_THROWS_NOTHING(componentInfo->indexOfAny("second source"));
+    TS_ASSERT_THROWS_NOTHING(componentInfo->indexOfAny("second sample"));
+  }
+
   void test_bank_contents_need_a_bank() {
     InstrumentBuilder builder(this->iTestName);
     TS_ASSERT_THROWS(builder.addDetectorToLastBank(this->dTestName, 1, this->testPos1, this->shape),
@@ -141,7 +157,6 @@ private:
   /// An instrument with a monitor, and a bank rotated 90 degrees about y holding a pixel and a tube of two pixels
   std::shared_ptr<const Geometry::Instrument> makeInstrument() const {
     InstrumentBuilder builder(this->iTestName);
-    builder.addMonitor("monitor", 1, Eigen::Vector3d(0, 0, -1), this->shape);
     builder.addBank("bank", Eigen::Vector3d(0, 0, 1),
                     Eigen::Quaterniond(Eigen::AngleAxisd(M_PI / 2, Eigen::Vector3d::UnitY())));
     builder.addDetectorToLastBank("pixel", 3, Eigen::Vector3d(0.1, 0, 0), this->shape);
@@ -149,6 +164,8 @@ private:
     detail::TubeBuilder tube(*pixelShape, Eigen::Vector3d(0.00202, 1, 0), 10);
     tube.addDetectorIfCoLinear(Eigen::Vector3d(0.00404, 1, 0), 11);
     builder.addTubes("bank", {tube}, pixelShape);
+    // Added last, but first by detector ID
+    builder.addMonitor("monitor", 1, Eigen::Vector3d(0, 0, -1), this->shape);
     builder.addSample("sample", {0, 0, 0});
     builder.addSource("source", {0, 0, -10});
     return builder.createInstrument();

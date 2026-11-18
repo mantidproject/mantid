@@ -126,6 +126,20 @@ void initializeGridBank(GridDetector &bank, ComponentInfo const &componentInfo, 
   }
 }
 
+/// True if a component a bank made for itself is where the beamline puts it.
+bool samePlacement(IComponent const &component, ComponentInfo const &componentInfo, size_t const index) {
+  auto const expectedPosition = componentInfo.position(index);
+  auto const tolerance = 1e-9 * std::max(1.0, expectedPosition.norm());
+  if (component.getPos().distance(expectedPosition) > tolerance) {
+    return false;
+  }
+  // q and -q are the same rotation
+  auto const rotation = component.getRotation();
+  auto const expected = componentInfo.rotation(index);
+  return rotation == expected ||
+         rotation == Quat(-expected.real(), -expected.imagI(), -expected.imagJ(), -expected.imagK());
+}
+
 /// Adds the legacy components for the children of the component at `index` to `parent`, and so on down the tree.
 /// Banks make their own pixels.
 void addTreeChildren(ICompAssembly &parent, ComponentInfo const &componentInfo, DetectorInfo const &detectorInfo,
@@ -1668,7 +1682,16 @@ std::unique_ptr<Instrument> Instrument::treeFromBeamline(ComponentInfo const &co
   if (componentInfo.sharedParameterInfo() && !componentInfo.sharedParameterInfo()->empty()) {
     throw std::invalid_argument("Instrument::fromBeamline: a legacy instrument holds only logfile parameters");
   }
+  for (size_t index = 0; index < componentInfo.size(); ++index) {
+    if (componentInfo.scaleFactor(index) != V3D(1, 1, 1)) {
+      throw std::invalid_argument("Instrument::fromBeamline: a legacy instrument cannot scale " +
+                                  componentInfo.name(index));
+    }
+  }
   auto const root = componentInfo.root();
+  if (componentInfo.componentType(root) != Beamline::ComponentType::Unstructured) {
+    throw std::invalid_argument("Instrument::fromBeamline: the root of a legacy instrument is a plain assembly");
+  }
   auto instrument = std::make_unique<Instrument>(componentInfo.name(root));
   instrument->setPos(componentInfo.position(root));
   instrument->setRot(componentInfo.rotation(root));
@@ -1678,14 +1701,23 @@ std::unique_ptr<Instrument> Instrument::treeFromBeamline(ComponentInfo const &co
 
   // Pair the tree with the beamline: record each component's index and mark the detectors. The banks made their own
   // pixels, so this also checks that those match the beamline.
+  struct Pending {
+    IComponent const *component;
+    size_t index;
+    bool madeByBank;
+  };
   std::vector<IComponent const *> components(componentInfo.size(), nullptr);
-  std::vector<std::pair<IComponent const *, size_t>> pending{{instrument.get(), root}};
+  std::vector<Pending> pending{{instrument.get(), root, false}};
   while (!pending.empty()) {
-    auto const [component, index] = pending.back();
+    auto const [component, index, madeByBank] = pending.back();
     pending.pop_back();
     if (component->getName() != componentInfo.name(index)) {
       throw std::invalid_argument("Instrument::fromBeamline: made " + component->getName() + " for component " +
                                   componentInfo.name(index));
+    }
+    if (madeByBank && !samePlacement(*component, componentInfo, index)) {
+      throw std::invalid_argument("Instrument::fromBeamline: bank pixel " + component->getName() +
+                                  " is not where the beamline puts it");
     }
     components[index] = component;
     if (auto const *const comp = dynamic_cast<Component const *>(component)) {
@@ -1714,8 +1746,12 @@ std::unique_ptr<Instrument> Instrument::treeFromBeamline(ComponentInfo const &co
                                   " children for " + componentInfo.name(index) + ", which has " +
                                   std::to_string(children.size()));
     }
+    auto const type = componentInfo.componentType(index);
+    bool const childrenMadeByBank = madeByBank || type == Beamline::ComponentType::Rectangular ||
+                                    type == Beamline::ComponentType::Grid ||
+                                    type == Beamline::ComponentType::Structured;
     for (size_t i = 0; i < children.size(); ++i) {
-      pending.emplace_back(legacyChildren[i].get(), children[i]);
+      pending.push_back({legacyChildren[i].get(), children[i], childrenMadeByBank});
     }
   }
   instrument->markAsDetectorFinalize();

@@ -85,11 +85,11 @@ void InstrumentBuilder::addMonitor(const std::string &detName, detid_t detId, co
   m_builder.addDetector(m_root, detName, detId, toV3D(position), Quat(), shape, /*isMonitor*/ true);
 }
 
-/// Add sample
+/// Add sample. As in the legacy instrument, a later sample is only a component.
 void InstrumentBuilder::addSample(const std::string &sampleName, const Eigen::Vector3d &position) {
   m_builder.setSample(m_builder.addAssembly(m_root, sampleName, toV3D(position)));
 }
-/// Add source
+/// Add source. As in the legacy instrument, a later source is only a component.
 void InstrumentBuilder::addSource(const std::string &sourceName, const Eigen::Vector3d &position) {
   m_builder.setSource(m_builder.addAssembly(m_root, sourceName, toV3D(position)));
 }

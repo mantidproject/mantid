@@ -24,6 +24,9 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/StructuredDetector.h"
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Objects/IObject.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/Interpolation.h"
 
 using namespace Mantid::Geometry;
@@ -111,7 +114,7 @@ BeamlineRef walk(Instrument_sptr const &instrument) {
   InstrumentVisitor visitor(instrument);
   visitor.walkInstrument();
   auto [componentInfo, detectorInfo] = visitor.makeWrappers();
-  return {std::move(componentInfo), std::move(detectorInfo), nullptr};
+  return makeBeamlineRef(std::move(componentInfo), std::move(detectorInfo));
 }
 
 /// A legacy tree holding a 3D grid bank and a structured bank, as InstrumentDefinitionParser makes them.
@@ -141,6 +144,12 @@ Instrument_sptr makeBankInstrument() {
   return instrument;
 }
 
+/// A column holding one pixel, as a bank's grid of pixels needs.
+void addPixelColumn(BeamlineBuilder &builder, Node const bank, detid_t const id) {
+  auto const column = builder.addAssembly(bank, "column" + std::to_string(id));
+  builder.addDetector(column, "pixel" + std::to_string(id), id, V3D(), Quat(), nullptr);
+}
+
 /// Asserts that two beamlines hold the same instrument, field by field.
 void assertSameBeamline(ComponentInfo const &componentInfo, DetectorInfo const &detectorInfo,
                         ComponentInfo const &expectedComponentInfo, DetectorInfo const &expectedDetectorInfo) {
@@ -162,6 +171,10 @@ void assertSameBeamline(ComponentInfo const &componentInfo, DetectorInfo const &
     TS_ASSERT_EQUALS(componentInfo.sideBySideViewPosition(i), expectedComponentInfo.sideBySideViewPosition(i));
     TS_ASSERT_EQUALS(componentInfo.componentType(i), expectedComponentInfo.componentType(i));
     TS_ASSERT_EQUALS(componentInfo.hasValidShape(i), expectedComponentInfo.hasValidShape(i));
+    if (componentInfo.hasValidShape(i) && expectedComponentInfo.hasValidShape(i)) {
+      TS_ASSERT_EQUALS(componentInfo.shape(i).getBoundingBox().width(),
+                       expectedComponentInfo.shape(i).getBoundingBox().width());
+    }
     TS_ASSERT_EQUALS(componentInfo.hasParent(i), expectedComponentInfo.hasParent(i));
     if (componentInfo.hasParent(i)) {
       TS_ASSERT_EQUALS(componentInfo.parent(i), expectedComponentInfo.parent(i));
@@ -232,9 +245,17 @@ public:
   void test_component_types() {
     BeamlineBuilder builder;
     auto const root = builder.addAssembly(BeamlineBuilder::noParent, "root");
-    builder.addRectangularBank(root, "rectangular", V3D(), Quat(), {});
-    builder.addGridBank(root, "grid", V3D(), Quat(), {});
-    builder.addStructuredBank(root, "structured", V3D(), Quat(), {});
+    Mantid::Beamline::PixelGridComponent pixelGrid;
+    pixelGrid.nX = 1;
+    pixelGrid.nY = 1;
+    addPixelColumn(builder, builder.addRectangularBank(root, "rectangular", V3D(), Quat(), pixelGrid), 1);
+    pixelGrid.nZ = 1;
+    auto const grid = builder.addGridBank(root, "grid", V3D(), Quat(), pixelGrid);
+    addPixelColumn(builder, builder.addAssembly(grid, "layer"), 2);
+    Mantid::Beamline::StructuredGridComponent structuredGrid;
+    structuredGrid.nX = 1;
+    structuredGrid.nY = 1;
+    addPixelColumn(builder, builder.addStructuredBank(root, "structured", V3D(), Quat(), structuredGrid), 3);
     builder.addOutlineAssembly(root, "outline", V3D(), Quat(), ComponentCreationHelper::createSphere(0.01));
     builder.addOutlineAssembly(root, "unshaped", V3D(), Quat(), nullptr);
     builder.addObjComponent(root, "finite", V3D(), Quat(), ComponentCreationHelper::createSphere(0.01));
@@ -270,24 +291,50 @@ public:
     pixelGrid.nX = 1;
     pixelGrid.nY = 1;
     pixelGrid.idStart = 3;
-    auto const bank = builder.addRectangularBank(root, "bank", V3D(), Quat(), pixelGrid);
-    builder.addDetector(bank, "pixel", 3, V3D(), Quat(), nullptr);
+    addPixelColumn(builder, builder.addRectangularBank(root, "bank", V3D(), Quat(), pixelGrid), 3);
     Mantid::Beamline::StructuredGridComponent structuredGrid;
     structuredGrid.nX = 1;
     structuredGrid.nY = 1;
     structuredGrid.idStart = 4;
     structuredGrid.xVertices = {0, 1, 0, 1};
     structuredGrid.yVertices = {0, 0, 1, 1};
-    auto const structured = builder.addStructuredBank(root, "structured", V3D(), Quat(), structuredGrid);
-    builder.addDetector(structured, "structured pixel", 4, V3D(), Quat(), nullptr);
+    addPixelColumn(builder, builder.addStructuredBank(root, "structured", V3D(), Quat(), structuredGrid), 4);
     auto const result = builder.build();
     auto const &componentInfo = *result.componentInfo;
-    // Two detectors, then the two banks in post-order, then the root
-    TS_ASSERT_EQUALS(componentInfo.name(2), "bank");
-    TS_ASSERT_EQUALS(componentInfo.pixelGridComponent(2).idStart, 3);
-    TS_ASSERT_EQUALS(componentInfo.name(3), "structured");
-    TS_ASSERT_EQUALS(componentInfo.structuredGridComponent(3).idStart, 4);
-    TS_ASSERT_EQUALS(componentInfo.structuredGridComponent(3).xVertices, structuredGrid.xVertices);
+    // Two detectors, then each column and its bank in post-order, then the root
+    TS_ASSERT_EQUALS(componentInfo.name(3), "bank");
+    TS_ASSERT_EQUALS(componentInfo.pixelGridComponent(3).idStart, 3);
+    TS_ASSERT_EQUALS(componentInfo.name(5), "structured");
+    TS_ASSERT_EQUALS(componentInfo.structuredGridComponent(5).idStart, 4);
+    TS_ASSERT_EQUALS(componentInfo.structuredGridComponent(5).xVertices, structuredGrid.xVertices);
+  }
+
+  void test_banks_must_hold_their_grid_of_pixels() {
+    Mantid::Beamline::PixelGridComponent pixelGrid;
+    pixelGrid.nX = 1;
+    pixelGrid.nY = 2;
+    {
+      BeamlineBuilder builder;
+      auto const root = builder.addAssembly(BeamlineBuilder::noParent, "root");
+      builder.addRectangularBank(root, "empty", V3D(), Quat(), pixelGrid);
+      TS_ASSERT_THROWS(builder.build(), std::invalid_argument const &);
+    }
+    {
+      BeamlineBuilder builder;
+      auto const root = builder.addAssembly(BeamlineBuilder::noParent, "root");
+      addPixelColumn(builder, builder.addRectangularBank(root, "short column", V3D(), Quat(), pixelGrid), 1);
+      TS_ASSERT_THROWS(builder.build(), std::invalid_argument const &);
+    }
+    {
+      BeamlineBuilder builder;
+      auto const root = builder.addAssembly(BeamlineBuilder::noParent, "root");
+      pixelGrid.nZ = 2;
+      auto const grid = builder.addGridBank(root, "one layer", V3D(), Quat(), pixelGrid);
+      auto const column = builder.addAssembly(builder.addAssembly(grid, "layer"), "column");
+      builder.addDetector(column, "a", 1, V3D(), Quat(), nullptr);
+      builder.addDetector(column, "b", 2, V3D(), Quat(), nullptr);
+      TS_ASSERT_THROWS(builder.build(), std::invalid_argument const &);
+    }
   }
 
   void test_parameters_are_keyed_by_component_index() {
@@ -349,7 +396,7 @@ public:
     auto const root = builder.addAssembly(BeamlineBuilder::noParent, "root");
     builder.addDetector(root, "a", 1, V3D(), Quat(), nullptr);
     builder.addDetector(root, "b", 1, V3D(), Quat(), nullptr);
-    TS_ASSERT_THROWS(builder.build(), std::invalid_argument const &);
+    TS_ASSERT_THROWS(builder.build(), Mantid::Kernel::Exception::InstrumentDefinitionError const &);
   }
 
   void test_building_nothing_throws() { TS_ASSERT_THROWS(BeamlineBuilder().build(), std::logic_error const &); }
@@ -361,6 +408,32 @@ public:
     TS_ASSERT_THROWS(builder.setSample(1), std::out_of_range const &);
     TS_ASSERT_THROWS(builder.setScaleFactor(1, V3D(1, 1, 1)), std::out_of_range const &);
     TS_ASSERT_THROWS(builder.addParameter(1, nullptr), std::out_of_range const &);
+  }
+
+  void test_the_first_source_and_sample_are_kept() {
+    BeamlineBuilder builder;
+    auto const root = builder.addAssembly(BeamlineBuilder::noParent, "root");
+    builder.setSource(builder.addComponent(root, "source"));
+    builder.setSource(builder.addComponent(root, "second source"));
+    builder.setSample(builder.addComponent(root, "sample"));
+    builder.setSample(builder.addComponent(root, "second sample"));
+    auto const result = builder.build();
+    TS_ASSERT_EQUALS(result.componentInfo->name(result.componentInfo->source()), "source");
+    TS_ASSERT_EQUALS(result.componentInfo->name(result.componentInfo->sample()), "sample");
+  }
+
+  void test_null_parameters_throw() {
+    BeamlineBuilder builder;
+    auto const root = builder.addAssembly(BeamlineBuilder::noParent, "root");
+    TS_ASSERT_THROWS(builder.addParameter(root, nullptr), std::invalid_argument const &);
+    TS_ASSERT_THROWS(builder.addLogfileParameter(root, "a", nullptr), std::invalid_argument const &);
+  }
+
+  void test_either_info_keeps_both_alive() {
+    auto componentInfo = makeBuilder(Placement()).build().componentInfo;
+    // The DetectorInfo pointer is gone, but the ComponentInfo still reads detector positions through it
+    TS_ASSERT_EQUALS(componentInfo->name(0), "monitor");
+    TS_ASSERT_EQUALS(componentInfo->position(0), makeBuilder(Placement()).build().detectorInfo->position(0));
   }
   void test_a_tree_made_from_a_built_beamline_walks_back_to_it() {
     auto const beamline = makeBuilder(Placement()).build();
@@ -432,6 +505,29 @@ public:
     TS_ASSERT_EQUALS(instrument->getDefaultView(), "3D");
     TS_ASSERT_EQUALS(instrument->getDefaultAxis(), "Z+");
     TS_ASSERT_EQUALS(instrument->getPhysicalInstrument()->getName(), "physical");
+  }
+
+  void test_a_tree_cannot_hold_scale_factors() {
+    BeamlineBuilder builder;
+    auto const root = builder.addAssembly(BeamlineBuilder::noParent, "root");
+    builder.setScaleFactor(builder.addComponent(root, "scaled"), V3D(2, 1, 1));
+    TS_ASSERT_THROWS(Instrument::fromBeamline(builder.build()), std::invalid_argument const &);
+  }
+
+  void test_a_tree_root_is_a_plain_assembly() {
+    BeamlineBuilder builder;
+    builder.addOutlineAssembly(BeamlineBuilder::noParent, "outlined", V3D(), Quat(),
+                               ComponentCreationHelper::createSphere(0.01));
+    TS_ASSERT_THROWS(Instrument::fromBeamline(builder.build()), std::invalid_argument const &);
+  }
+
+  void test_bank_pixels_must_be_where_the_beamline_puts_them() {
+    InstrumentVisitor visitor(ComponentCreationHelper::createTestInstrumentRectangular2(1, 2));
+    visitor.walkInstrument();
+    auto [componentInfo, detectorInfo] = visitor.makeWrappers();
+    detectorInfo->setPosition(0, detectorInfo->position(0) + V3D(0, 0, 1));
+    auto const beamline = makeBeamlineRef(std::move(componentInfo), std::move(detectorInfo));
+    TS_ASSERT_THROWS(Instrument::fromBeamline(beamline), std::invalid_argument const &);
   }
 
   void test_a_tree_cannot_hold_plain_parameters() {
