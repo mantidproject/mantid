@@ -207,6 +207,10 @@ jobs:
       # Records this job's cache hits and misses, which the shared cache statistics cannot
       # separate from those of other runners on the same host
       CCACHE_STATSLOG: ${{ github.workspace }}/build/test_logs/ccache_stats.log
+      # Temporary, while the move to Ninja without precompiled headers exposes headers that do
+      # not include what they use under MSVC: report every compile error in one run, not only
+      # the first. Remove once the Windows build is clean.
+      BUILD_KEEP_GOING: ${{ matrix.os == 'Windows' }}
 
     steps:
       - name: Print shell environment vars (debug)
