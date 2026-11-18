@@ -1,17 +1,23 @@
 name: 'Install pixi environment'
 description: |
-  Run `pixi install --frozen` with a time limit on each attempt and a bounded number of retries.
-  A stalled package download on a self-hosted runner otherwise spins until the job timeout, so each
-  attempt is killed after attempt-timeout seconds and retried, and the step fails after the last one.
+  Run `pixi install --frozen` under a watchdog, with a bounded number of retries.
+  A stalled install on a self-hosted runner otherwise spins until the job timeout. An attempt is
+  stopped when pixi has written nothing for stall-timeout seconds, or after attempt-timeout seconds
+  in total, so a slow install that is still making progress is left to finish. Each attempt's
+  output is streamed to the job log and kept in build/test_logs, which the workflows upload.
 inputs:
   attempts:
     description: 'Number of attempts before failing'
     required: false
-    default: '3'
-  attempt-timeout:
-    description: 'Seconds allowed for each attempt before it is killed'
+    default: '2'
+  stall-timeout:
+    description: 'Seconds without any output from pixi before an attempt is treated as hung'
     required: false
     default: '600'
+  attempt-timeout:
+    description: 'Seconds allowed for each attempt in total, however much output it produces'
+    required: false
+    default: '1800'
 runs:
   using: "composite"
   steps:
@@ -20,14 +26,94 @@ runs:
       working-directory: ${{ github.workspace }}
       env:
         ATTEMPTS: ${{ inputs.attempts }}
+        STALL_TIMEOUT: ${{ inputs.stall-timeout }}
         ATTEMPT_TIMEOUT: ${{ inputs.attempt-timeout }}
       run: |
+        LOG_DIR="${GITHUB_WORKSPACE}/build/test_logs"
+        mkdir -p "${LOG_DIR}"
+
+        # A second pixi waiting on the environment lock held by the first looks exactly like a hang,
+        # so list any that are running whenever an attempt is given up on
+        list_pixi_processes() {
+          echo "Running pixi processes:"
+          if [[ "${RUNNER_OS}" == "Windows" ]]; then
+            tasklist //FI "IMAGENAME eq pixi.exe" || true
+          else
+            pgrep -a pixi || echo "none"
+          fi
+        }
+
+        # Stop pixi and everything it started. In Git Bash a signal only reaches the MSYS wrapper of
+        # a native program, which can leave pixi.exe running and holding its lock, so the Windows
+        # process tree is stopped with taskkill instead.
+        stop_tree() {
+          local pid=$1
+          if [[ -r "/proc/${pid}/winpid" ]]; then
+            taskkill //F //T //PID "$(cat "/proc/${pid}/winpid")" || true
+          else
+            # pixi was started in its own session, so its process group shares its pid
+            kill -TERM -- "-${pid}" 2>/dev/null || true
+            for _ in {1..30}; do
+              kill -0 "${pid}" 2>/dev/null || return 0
+              sleep 1
+            done
+            kill -KILL -- "-${pid}" 2>/dev/null || true
+          fi
+        }
+
         for (( attempt = 1; attempt <= ATTEMPTS; attempt++ )); do
-          # -k escalates to SIGKILL if pixi ignores the initial SIGTERM
-          if timeout -k 30 "${ATTEMPT_TIMEOUT}" pixi install --frozen -v; then
+          log="${LOG_DIR}/pixi_install_attempt_${attempt}.log"
+          : > "${log}"
+          echo "::group::pixi install attempt ${attempt} of ${ATTEMPTS}"
+          if [[ "${RUNNER_OS}" == "Windows" ]]; then
+            pixi install --frozen -v > "${log}" 2>&1 &
+          else
+            # its own session, so that stop_tree can stop anything pixi started along with it
+            setsid pixi install --frozen -v > "${log}" 2>&1 &
+          fi
+          pixi_pid=$!
+          tail -n +1 -f --pid="${pixi_pid}" "${log}" &
+          tail_pid=$!
+
+          started=${SECONDS}
+          last_output=${SECONDS}
+          last_size=0
+          reason=""
+          while kill -0 "${pixi_pid}" 2>/dev/null; do
+            sleep 10
+            size=$(wc -c < "${log}")
+            if (( size != last_size )); then
+              last_size=${size}
+              last_output=${SECONDS}
+            fi
+            if (( SECONDS - last_output >= STALL_TIMEOUT )); then
+              reason="no output for ${STALL_TIMEOUT}s"
+              break
+            fi
+            if (( SECONDS - started >= ATTEMPT_TIMEOUT )); then
+              reason="still running after ${ATTEMPT_TIMEOUT}s"
+              break
+            fi
+          done
+
+          if [[ -n "${reason}" ]]; then
+            list_pixi_processes
+            stop_tree "${pixi_pid}"
+          fi
+          status=0
+          wait "${pixi_pid}" || status=$?
+          kill "${tail_pid}" 2>/dev/null || true
+          wait "${tail_pid}" 2>/dev/null || true
+          echo "::endgroup::"
+
+          if [[ -z "${reason}" && ${status} -eq 0 ]]; then
+            echo "pixi install succeeded on attempt ${attempt} after $(( SECONDS - started ))s"
             exit 0
           fi
-          echo "::warning::pixi install attempt ${attempt} of ${ATTEMPTS} failed or exceeded ${ATTEMPT_TIMEOUT}s"
+          reason=${reason:-"exited with status ${status}"}
+          echo "::warning::pixi install attempt ${attempt} of ${ATTEMPTS} stopped: ${reason} after $(( SECONDS - started ))s. Full output in ${log}"
+          echo "Last lines of output:"
+          tail -n 40 "${log}"
           if (( attempt < ATTEMPTS )); then
             sleep 30
           fi

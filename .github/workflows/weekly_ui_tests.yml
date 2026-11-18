@@ -115,8 +115,9 @@ jobs:
 
       - name: Install pixi environment
         uses: ./.github/actions/install-pixi-env
-        # three ten minute attempts plus the pauses between them
-        timeout-minutes: 35
+        # backstop only: the action stops a hung attempt itself, after 10 minutes without output,
+        # and allows two attempts of up to 30 minutes each
+        timeout-minutes: 65
 
       # JOB_NAME is deliberately left unset: it is what tells the Jenkins scripts to configure with
       # -DPR_JOB=True and to exclude the slower tests, and neither applies to a weekly run.

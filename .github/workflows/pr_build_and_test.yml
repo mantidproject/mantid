@@ -286,8 +286,9 @@ jobs:
       - name: Install pixi environment
         uses: ./.github/actions/install-pixi-env
         if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
-        # three ten minute attempts plus the pauses between them
-        timeout-minutes: 35
+        # backstop only: the action stops a hung attempt itself, after 10 minutes without output,
+        # and allows two attempts of up to 30 minutes each
+        timeout-minutes: 65
 
       - name: Build code
         if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
@@ -355,10 +356,12 @@ jobs:
             echo
             echo "| Seconds | Test |"
             echo "|--:|:--|"
-            # each line is "<name> <runs> <average seconds>"; the failed test list follows "---"
+            # each line is "<name> <runs> <average seconds>"; the failed test list follows "---".
+            # The final awk reads all of its input rather than stopping at 30 lines, as head would,
+            # because closing the pipe early fails sort with SIGPIPE under pipefail.
             awk '/^---/ { exit } NF >= 3 { printf "%.1f %s\n", $3, $1 }' \
                 ${GITHUB_WORKSPACE}/build/Testing/Temporary/CTestCostData.txt \
-              | sort -rn | head -n 30 | awk '{ printf "| %s | %s |\n", $1, $2 }'
+              | sort -rn | awk 'NR <= 30 { printf "| %s | %s |\n", $1, $2 }'
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Archive unit test output (Linux)
@@ -471,8 +474,9 @@ jobs:
       - name: Install pixi environment
         uses: ./.github/actions/install-pixi-env
         if: ${{ needs.check-filters.outputs.user_docs == 'true' }}
-        # three ten minute attempts plus the pauses between them
-        timeout-minutes: 35
+        # backstop only: the action stops a hung attempt itself, after 10 minutes without output,
+        # and allows two attempts of up to 30 minutes each
+        timeout-minutes: 65
 
       - name: Build code and user docs
         if: ${{ needs.check-filters.outputs.user_docs == 'true' }}
