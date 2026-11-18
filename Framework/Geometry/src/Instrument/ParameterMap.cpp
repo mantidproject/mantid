@@ -30,6 +30,15 @@ using Kernel::Quat;
 using Kernel::V3D;
 
 namespace {
+/// The root of the unparametrized tree a component belongs to
+const IComponent *baseRoot(const IComponent &comp) {
+  const IComponent *root = comp.getBaseComponent();
+  while (auto const parent = root->getBareParent()) {
+    root = parent;
+  }
+  return root;
+}
+
 // names of common parameter types
 const std::string POS_PARAM_NAME = "pos";
 const std::string POSX_PARAM_NAME = "x";
@@ -75,8 +84,8 @@ ParameterMap::ParameterMap(const ParameterMap &other)
     // The store is deep-copied, not shared: a copied ParameterMap is an independent map, and
     // sharing would make a write through either one visible to the other.
     : m_parameterFileNames(other.m_parameterFileNames),
-      m_parameterInfo(std::make_shared<ParameterInfo>(*other.m_parameterInfo)), m_domainIds(other.m_domainIds),
-      m_domainIndices(other.m_domainIndices), m_instrument(other.m_instrument) {
+      m_parameterInfo(std::make_shared<ParameterInfo>(*other.m_parameterInfo)), m_domain(other.m_domain),
+      m_instrument(other.m_instrument) {
   // Deliberately does NOT rebuild the beamline. That is now ExperimentInfo's job, via rebuildBeamlineFrom()
 }
 
@@ -106,20 +115,14 @@ ParameterMap::~ParameterMap() = default;
 //--------------------------------------------------------------------------------------------
 
 size_t ParameterMap::indexOf(const IComponent *comp) const {
-  size_t result = ComponentInfo::invalidIndex;
-  if (comp && m_domainIndices) {
-    auto const found = m_domainIndices->find(comp->getComponentID());
-    if (found != m_domainIndices->end()) {
-      result = found->second;
-    }
-  }
-  return result;
+  // A detached map has no instrument, so no component's root matches it
+  return comp && baseRoot(*comp) == m_domain ? comp->index() : ComponentInfo::invalidIndex;
 }
 
 size_t ParameterMap::indexForWrite(const IComponent *comp) {
   size_t result = indexOf(comp);
   if (comp && result == ComponentInfo::invalidIndex) {
-    if (!m_domainIndices) {
+    if (!m_domain) {
       throw std::logic_error("ParameterMap: cannot add a parameter to component '" + comp->getFullName() +
                              "' before the map is attached to an instrument");
     }
@@ -134,10 +137,6 @@ std::string ParameterMap::componentName(const size_t index) const { return compo
 std::string ParameterMap::componentFullName(const size_t index) const { return componentInfo().fullName(index); }
 
 std::vector<ParameterMap::Entry> ParameterMap::entries() const {
-  if (!m_domainIds) {
-    throw std::logic_error("ParameterMap::entries: the map is not attached to an instrument, so its components "
-                           "have no component indices");
-  }
   std::vector<Entry> result;
   result.reserve(m_parameterInfo->size());
   for (auto const &[index, parameters] : *m_parameterInfo) {
@@ -151,44 +150,14 @@ std::vector<ParameterMap::Entry> ParameterMap::entries() const {
 
 //--------------------------------------------------------------------------------------------
 
-std::shared_ptr<ParameterInfo> ParameterMap::rekey(std::shared_ptr<const ComponentIDs> componentIds,
-                                                   std::shared_ptr<const ComponentIndices> componentIndices) {
-  if (componentIds == m_domainIds) {
+std::shared_ptr<ParameterInfo> ParameterMap::rekey(const Instrument &domain) {
+  if (&domain == m_domain) {
     return m_parameterInfo;
   }
-  if (!m_domainIds) {
-    // A detached map holds no parameters by component, so there is nothing to translate
-    m_domainIds = std::move(componentIds);
-    m_domainIndices = std::move(componentIndices);
-    return m_parameterInfo;
-  }
-  // The components the current indices refer to
-  const auto &oldIds = *m_domainIds;
-  auto rekeyed = std::make_shared<ParameterInfo>();
-  for (auto const &[oldIndex, parameters] : *m_parameterInfo) {
-    auto const found = componentIndices->find(oldIds[oldIndex]);
-    if (found == componentIndices->end()) {
-      continue;
-    }
-    for (auto const &[parameterName, parameter] : parameters) {
-      static_cast<void>(parameterName);
-      // insert() rather than add(): this map's contents have already had the legacy
-      // deduplication applied
-      rekeyed->insert(found->second, parameter);
-    }
-  }
-  for (auto const &[key, parameter] : m_parameterInfo->logfileParameters()) {
-    auto const found = componentIndices->find(oldIds[key.first]);
-    if (found != componentIndices->end()) {
-      rekeyed->addLogfileParameter(found->second, key.second, parameter);
-    }
-  }
-
-  // Adopt the rekeyed store and the instrument's index domain, so that this map and the
-  // ComponentInfo built alongside it share one set of parameters from here on.
-  m_parameterInfo = rekeyed;
-  m_domainIds = std::move(componentIds);
-  m_domainIndices = std::move(componentIndices);
+  // Start afresh in this instrument's index domain, so that this map and the ComponentInfo built alongside it
+  // share one set of parameters from here on
+  m_parameterInfo = std::make_shared<ParameterInfo>();
+  m_domain = &domain;
   return m_parameterInfo;
 }
 
@@ -466,7 +435,7 @@ void ParameterMap::add(const IComponent *comp, const std::shared_ptr<Parameter> 
 
 void ParameterMap::add(const size_t componentIndex, const std::shared_ptr<Parameter> &par,
                        const std::string *const pDescription) {
-  checkIsAttached(static_cast<bool>(m_domainIndices));
+  checkIsAttached(m_domain != nullptr);
   if (!par || componentIndex == ComponentInfo::invalidIndex)
     return;
   checkIsNotMaskingParameter(par->name());
@@ -509,7 +478,7 @@ void ParameterMap::addFittingParameter(const IComponent *comp, const std::string
 void ParameterMap::addFittingParameter(const size_t componentIndex, const std::string &name,
                                        const std::string &fittingFunction, const std::string &value,
                                        const std::string *const pDescription, const std::string &pVisible) {
-  checkIsAttached(static_cast<bool>(m_domainIndices));
+  checkIsAttached(m_domain != nullptr);
   checkIsNotMaskingParameter(name);
   if (componentIndex == ComponentInfo::invalidIndex)
     return;
@@ -1150,13 +1119,6 @@ const Geometry::InstrumentMetadata &ParameterMap::instrumentMetadata() const {
   return *m_instrumentMetadata;
 }
 
-/// Only for use by Detector. Returns a detector index for a detector ID.
-size_t ParameterMap::detectorIndex(const detid_t detID) const { return m_instrument->detectorIndex(detID); }
-
-size_t ParameterMap::componentIndex(const ComponentID componentId) const {
-  return m_componentInfo->indexOf(componentId);
-}
-
 /// Only for use by Instrument. Sets the pointer to the owning instrument.
 void ParameterMap::setInstrument(const Instrument *instrument) {
   if (instrument == m_instrument)
@@ -1176,13 +1138,11 @@ void ParameterMap::setInstrument(const Instrument *instrument) {
   m_instrument = instrument;
   // Assigned one at a time rather than through std::tie: the members are shared_ptr while
   // makeBeamline returns unique_ptr, and the conversion is clearer spelled out.
-  auto [newComponentInfo, newDetectorInfo] =
-      m_parameterInfo->empty() ? m_instrument->makeBeamlineNew(*this) : m_instrument->makeBeamline(*this);
+  auto [newComponentInfo, newDetectorInfo] = m_instrument->makeBeamline(*this);
   m_componentInfo = std::move(newComponentInfo);
   m_detectorInfo = std::move(newDetectorInfo);
-  // The visitor called rekey() while building the beamline, so this map and the new
-  // ComponentInfo now share one store. Re-point at it to be certain of that even on the
-  // makeBeamlineNew() path, where there were no parameters to rekey.
+  // makeBeamline() called rekey() while building the beamline, so this map and the new
+  // ComponentInfo now share one store. Re-point at it to be certain of that.
   if (m_componentInfo) {
     m_parameterInfo = m_componentInfo->sharedParameterInfo();
     seedLogfileParameters();
@@ -1195,7 +1155,7 @@ void ParameterMap::setInstrument(const Instrument *instrument) {
 /// including any added since from a parameter file.
 void ParameterMap::seedLogfileParameters() {
   for (auto const &[key, parameter] : m_instrument->getLogfileCache()) {
-    auto const index = m_componentInfo->indexOfOrInvalid(key.second);
+    auto const index = indexOf(key.second);
     if (index != ComponentInfo::invalidIndex) {
       m_parameterInfo->addLogfileParameter(index, key.first, parameter);
     }
@@ -1208,7 +1168,7 @@ void ParameterMap::buildInstrumentMetadata() {
   std::shared_ptr<const DetectorInfo> physicalDetectorInfo;
   if (const auto &basePhysicalInstrument = m_instrument->getPhysicalInstrument()) {
     // This map's parameters are keyed by the neutronic instrument's components, so none apply to the
-    // physical one and it is walked unparametrized. The visitor keeps it alive inside the DetectorInfo.
+    // physical one and it is walked unparametrized.
     InstrumentVisitor visitor(basePhysicalInstrument);
     visitor.walkInstrument();
     std::tie(physicalComponentInfo, physicalDetectorInfo) = visitor.makeWrappers();

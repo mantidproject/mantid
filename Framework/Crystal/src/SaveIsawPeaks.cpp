@@ -457,7 +457,7 @@ V3D SaveIsawPeaks::findPixelPos(const std::string &bankName, int col, int row) {
   auto parent = inst->getComponentByName(bankName);
   if (parent->type() == "RectangularDetector") {
     const auto &componentInfo = this->m_ws->componentInfo();
-    const size_t bankIndex = componentInfo.indexOf(parent->getComponentID());
+    const size_t bankIndex = parent->index();
     return componentInfo.position(componentInfo.detectorIndexAtXYZ(bankIndex, col, row, 0));
   } else {
     const auto &componentInfo = this->m_ws->componentInfo();

@@ -476,8 +476,7 @@ public:
     // But the data should be different
     TS_ASSERT_DIFFERS(outsptr1->y(1)[8], outsptr2->y(1)[8])
 
-    TS_ASSERT_EQUALS(WorkspaceCreationHelper::baseInstrumentID(*outsptr1),
-                     WorkspaceCreationHelper::baseInstrumentID(*outsptr2))
+    TS_ASSERT(WorkspaceCreationHelper::haveSameBaseInstrument(*outsptr1, *outsptr2))
     TS_ASSERT_EQUALS(&(outsptr1->sample()), &(outsptr2->sample()))
     TS_ASSERT_DIFFERS(&(outsptr1->run()), &(outsptr2->run()))
 

@@ -72,7 +72,7 @@ public:
   void testGetNumberParameter() {
     auto const [instrument, det, pmap] = attachedDetector();
     auto &componentInfo = pmap->mutableComponentInfo();
-    componentInfo.addDouble(componentInfo.indexOf(det), "testparam", 5.0);
+    componentInfo.addDouble(det->index(), "testparam", 5.0);
     std::shared_ptr<Detector> pdet(det->cloneParameterized(pmap.get()));
     IDetector *idet = static_cast<IDetector *>(pdet.get());
 
@@ -83,7 +83,7 @@ public:
   void testGetPositionParameter() {
     auto const [instrument, det, pmap] = attachedDetector();
     auto &componentInfo = pmap->mutableComponentInfo();
-    componentInfo.addV3D(componentInfo.indexOf(det), "testparam", Mantid::Kernel::V3D(0.5, 1.0, 1.5));
+    componentInfo.addV3D(det->index(), "testparam", Mantid::Kernel::V3D(0.5, 1.0, 1.5));
     std::shared_ptr<Detector> pdet(det->cloneParameterized(pmap.get()));
     IDetector *idet = static_cast<IDetector *>(pdet.get());
 
@@ -98,7 +98,7 @@ public:
   void testGetRotationParameter() {
     auto const [instrument, det, pmap] = attachedDetector();
     auto &componentInfo = pmap->mutableComponentInfo();
-    componentInfo.addQuat(componentInfo.indexOf(det), "testparam", Mantid::Kernel::Quat(1.0, 0.25, 0.5, 0.75));
+    componentInfo.addQuat(det->index(), "testparam", Mantid::Kernel::Quat(1.0, 0.25, 0.5, 0.75));
     std::shared_ptr<Detector> pdet(det->cloneParameterized(pmap.get()));
     IDetector *idet = static_cast<IDetector *>(pdet.get());
 

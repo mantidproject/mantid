@@ -544,6 +544,45 @@ public:
     TS_ASSERT_EQUALS(instr->findRectDetectors(), expectedDetectors);
   }
 
+  void test_component_index_is_set_when_the_beamline_is_cached() {
+    auto const instrument = ComponentCreationHelper::createTestInstrumentRectangular2(2, 2);
+    auto const [componentInfo, detectorInfo] = instrument->makeBaseBeamline();
+
+    auto const bank = instrument->getComponentByName("bank2");
+    TS_ASSERT_EQUALS(componentInfo->name(bank->index()), "bank2");
+    auto const detector = instrument->getDetector(detectorInfo->detectorIDs()[1]);
+    TS_ASSERT_EQUALS(detector->index(), 1);
+
+    // A parametrized component has the index of its base component
+    auto const parametrized = std::make_shared<Instrument>(instrument, std::make_shared<ParameterMap>());
+    TS_ASSERT_EQUALS(parametrized->getComponentByName("bank2")->index(), bank->index());
+    TS_ASSERT_EQUALS(parametrized->getDetector(detectorInfo->detectorIDs()[1])->index(), 1);
+  }
+
+  void test_beamline_of_a_map_attached_elsewhere_has_the_same_base_and_no_parameters() {
+    auto const instrument = ComponentCreationHelper::createTestInstrumentRectangular2(2, 2);
+    auto const [baseComponentInfo, baseDetectorInfo] = instrument->makeBaseBeamline();
+    // A map with a parameter, attached to another instrument
+    auto const other = ComponentCreationHelper::createTestInstrumentRectangular2(2, 2);
+    ParameterMap pmap;
+    pmap.setInstrument(other.get());
+    auto &otherComponentInfo = pmap.mutableComponentInfo();
+    otherComponentInfo.addDouble(otherComponentInfo.root(), "a", 1.0);
+
+    auto const [componentInfo, detectorInfo] = instrument->makeBeamline(pmap);
+    TS_ASSERT(componentInfo->hasSameBase(*baseComponentInfo));
+    // None of the other instrument's parameters are for this one
+    TS_ASSERT(pmap.empty());
+  }
+
+  void test_ignored_mark_as_source_keeps_the_cached_beamline() {
+    auto const instrument = ComponentCreationHelper::createTestInstrumentRectangular2(2, 2);
+    auto const [componentInfo, detectorInfo] = instrument->makeBaseBeamline();
+    // The source is already marked, so this is ignored
+    instrument->markAsSource(instrument->getSource().get());
+    TS_ASSERT(instrument->makeBaseBeamline().first->hasSameBase(*componentInfo));
+  }
+
   void test_detectorIndex() {
     auto i = ComponentCreationHelper::createTestInstrumentRectangular(1, 2);
     TS_ASSERT_EQUALS(i->detectorIndex(4), 0);
@@ -569,9 +608,9 @@ public:
     auto &detInfo = pmap->mutableDetectorInfo();
     auto &compInfo = pmap->mutableComponentInfo();
     // The instrument is at the origin, unrotated, so absolute and relative bank positions coincide
-    auto const bank1Index = compInfo.indexOf(bank1->getComponentID());
-    auto const bank2Index = compInfo.indexOf(bank2->getComponentID());
-    auto const bank3Index = compInfo.indexOf(bank3->getComponentID());
+    auto const bank1Index = bank1->index();
+    auto const bank2Index = bank2->index();
+    auto const bank3Index = bank3->index();
     compInfo.setPosition(bank1Index, bankOffset);
     compInfo.setPosition(bank2Index, bankEpsilon);
     compInfo.setRotation(bank3Index, bankRot);
@@ -669,7 +708,7 @@ public:
 
     // 2 bank parameters + 0 det parameters: the scaled pixels are where the scale factors put them
     TS_ASSERT_EQUALS(legacy.size(), 2);
-    auto const bank1Index = pmap->componentInfo().indexOf(bank1->getComponentID());
+    auto const bank1Index = bank1->index();
     TS_ASSERT_EQUALS(legacyValue<double>(legacy, bank1Index, "scalex"), scalex);
     TS_ASSERT_EQUALS(legacyValue<double>(legacy, bank1Index, "scaley"), scaley);
   }

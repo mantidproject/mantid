@@ -215,7 +215,7 @@ void SaveIsawDetCal::exec() {
 V3D SaveIsawDetCal::findPixelPos(const std::string &bankName, int col, int row, const ComponentInfo &componentInfo) {
   std::shared_ptr<const IComponent> parent = inst->getComponentByName(bankName);
   if (parent->type() == "RectangularDetector") {
-    const size_t bankIndex = componentInfo.indexOf(parent->getComponentID());
+    const size_t bankIndex = parent->index();
     return componentInfo.position(componentInfo.detectorIndexAtXYZ(bankIndex, col, row, 0));
   } else {
     const size_t parentIndex = componentInfo.indexOfAny(bankName);
@@ -238,7 +238,7 @@ void SaveIsawDetCal::sizeBanks(const std::string &bankName, int &NCOLS, int &NRO
     return;
   std::shared_ptr<const IComponent> parent = inst->getComponentByName(bankName);
   if (parent->type() == "RectangularDetector") {
-    const auto grid = componentInfo.pixelGridComponent(componentInfo.indexOf(parent->getComponentID()));
+    const auto grid = componentInfo.pixelGridComponent(parent->index());
 
     NCOLS = grid.nX;
     NROWS = grid.nY;
