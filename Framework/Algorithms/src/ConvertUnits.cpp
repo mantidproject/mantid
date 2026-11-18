@@ -9,6 +9,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/SpectrumUnitConversion.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -386,24 +387,24 @@ MatrixWorkspace_sptr ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUni
   std::vector<std::string> parameters = inputWS->getInstrument()->getStringParameter("show-signed-theta");
   bool signedTheta = (!parameters.empty()) && find(parameters.begin(), parameters.end(), "Always") != parameters.end();
 
-  auto checkFromUnit = std::unique_ptr<Unit>(fromUnit->clone());
-  auto checkOutputUnit = std::unique_ptr<Unit>(outputUnit->clone());
+  /// @todo Don't yet consider hold-off (delta)
+  UnitParametersMap initialParams = {{UnitParams::delta, 0.0}};
+  if (efixedProp != EMPTY_DBL()) {
+    initialParams[UnitParams::efixed] = efixedProp;
+  }
 
   // Perform Sanity Validation before creating workspace
-  const double checkdelta = 0.0;
-  UnitParametersMap upmap = {{UnitParams::delta, checkdelta}};
-  if (efixedProp != EMPTY_DBL()) {
-    upmap[UnitParams::efixed] = efixedProp;
-  }
+  const UnitConversionSetup checkSetup{spectrumInfo, *fromUnit, *outputUnit, emode, signedTheta, initialParams};
+  SpectrumUnitConversion checkConversion(checkSetup);
   size_t checkIndex = 0;
-  spectrumInfo.getDetectorValues(*fromUnit, *outputUnit, emode, signedTheta, checkIndex, upmap);
+  checkConversion.readDetectorValues(checkIndex);
   // copy the X values for the check
   auto checkXValues = inputWS->x(checkIndex);
   try {
     // Convert the input unit to time-of-flight
-    checkFromUnit->toTOF(checkXValues.begin(), checkXValues.end(), l1, emode, upmap);
+    checkConversion.from->toTOF(checkXValues.begin(), checkXValues.end(), l1, emode, checkConversion.params);
     // Convert from time-of-flight to the desired unit
-    checkOutputUnit->fromTOF(checkXValues.begin(), checkXValues.end(), l1, emode, upmap);
+    checkConversion.to->fromTOF(checkXValues.begin(), checkXValues.end(), l1, emode, checkConversion.params);
   } catch (std::runtime_error &) { // if it's a detector specific problem then ignore
   }
 
@@ -413,34 +414,23 @@ MatrixWorkspace_sptr ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUni
   assert(static_cast<bool>(eventWS) == m_inputEvents); // Sanity check
 
   auto &outSpectrumInfo = outputWS->mutableSpectrumInfo();
+  const UnitConversionSetup conversionSetup{outSpectrumInfo, *fromUnit, *outputUnit, emode, signedTheta, initialParams};
   // Loop over the histograms (detector spectra)
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int64_t i = 0; i < numberOfSpectra_i; ++i) {
     PARALLEL_START_INTERRUPT_REGION
-    double efixed = efixedProp;
-
-    // Now get the detector object for this histogram
-    /// @todo Don't yet consider hold-off (delta)
-    const double delta = 0.0;
-
-    auto localFromUnit = std::unique_ptr<Unit>(fromUnit->clone());
-    auto localOutputUnit = std::unique_ptr<Unit>(outputUnit->clone());
-
     // TODO toTOF and fromTOF need to be reimplemented outside of kernel
-    UnitParametersMap pmap = {{UnitParams::delta, delta}};
-    if (efixedProp != EMPTY_DBL()) {
-      pmap[UnitParams::efixed] = efixed;
-    }
-    outSpectrumInfo.getDetectorValues(*fromUnit, *outputUnit, emode, signedTheta, i, pmap);
+    SpectrumUnitConversion conversion(conversionSetup);
+    conversion.readDetectorValues(static_cast<std::size_t>(i));
     try {
       auto &xValues = outputWS->mutableX(i);
-      localFromUnit->toTOF(xValues.begin(), xValues.end(), l1, emode, pmap);
+      conversion.from->toTOF(xValues.begin(), xValues.end(), l1, emode, conversion.params);
       // Convert from time-of-flight to the desired unit
-      localOutputUnit->fromTOF(xValues.begin(), xValues.end(), l1, emode, pmap);
+      conversion.to->fromTOF(xValues.begin(), xValues.end(), l1, emode, conversion.params);
 
       // EventWorkspace part, modifying the EventLists.
       if (m_inputEvents) {
-        eventWS->getSpectrum(i).convertUnitsViaTof(localFromUnit.get(), localOutputUnit.get());
+        eventWS->getSpectrum(i).convertUnitsViaTof(conversion.from.get(), conversion.to.get());
       }
     } catch (std::runtime_error &) {
       // Get to here if exception thrown in unit conversion eg when calculating

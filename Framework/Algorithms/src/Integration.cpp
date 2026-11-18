@@ -10,6 +10,7 @@
 #include "MantidAlgorithms/Integration.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/SpectrumUnitConversion.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
@@ -85,10 +86,15 @@ std::pair<double, double> spectrumLimits(const std::size_t listIndex, const doub
 class LimitConverter {
 public:
   LimitConverter(const MatrixWorkspace &workspace, const std::string &rangeUnit)
-      : m_spectrumInfo(workspace.spectrumInfo()), m_rangeUnit(UnitFactory::Instance().create(rangeUnit)),
-        m_xUnit(workspace.getAxis(0)->unit()),
+      : m_rangeUnit(UnitFactory::Instance().create(rangeUnit)), m_xUnit(workspace.getAxis(0)->unit()),
         m_isQuick(canConvertQuickly(*m_rangeUnit, *m_xUnit) && canConvertQuickly(*m_xUnit, *m_rangeUnit)),
-        m_l1(m_isQuick ? 0.0 : m_spectrumInfo.l1()), m_emode(m_isQuick ? DeltaEMode::Elastic : workspace.getEMode()) {}
+        m_l1(m_isQuick ? 0.0 : workspace.spectrumInfo().l1()),
+        m_setup{workspace.spectrumInfo(),
+                *m_rangeUnit,
+                *m_xUnit,
+                m_isQuick ? DeltaEMode::Elastic : workspace.getEMode(),
+                false,
+                {}} {}
 
   /**
    * @param index :: The workspace index of the spectrum
@@ -103,21 +109,18 @@ public:
     const bool hasLower = lower != NO_LOWER_LIMIT;
     const bool hasUpper = upper != EMPTY_DBL();
     std::pair<double, double> limits{NO_LOWER_LIMIT, EMPTY_DBL()};
-    // Conversion changes the state of a unit, so each spectrum needs its own copies
-    const std::unique_ptr<Unit> rangeUnit(m_rangeUnit->clone());
-    const std::unique_ptr<Unit> xUnit(m_xUnit->clone());
+    SpectrumUnitConversion conversion(m_setup);
     try {
-      UnitParametersMap params;
       if (!m_isQuick) {
-        if (!m_spectrumInfo.hasDetectors(index))
+        if (!m_setup.spectrumInfo.hasDetectors(index))
           throw std::runtime_error("the spectrum has no detectors");
-        m_spectrumInfo.getDetectorValues(*rangeUnit, *xUnit, m_emode, false, static_cast<int64_t>(index), params);
+        conversion.readDetectorValues(index);
       }
       const auto toX = [&](const double value) {
-        return UnitConversion::run(*rangeUnit, *xUnit, value, m_l1, m_emode, params);
+        return UnitConversion::run(*conversion.from, *conversion.to, value, m_l1, m_setup.emode, conversion.params);
       };
       const auto toRangeUnit = [&](const double value) {
-        return UnitConversion::run(*xUnit, *rangeUnit, value, m_l1, m_emode, params);
+        return UnitConversion::run(*conversion.to, *conversion.from, value, m_l1, m_setup.emode, conversion.params);
       };
 
       if (hasLower && hasUpper) {
@@ -148,12 +151,11 @@ public:
   }
 
 private:
-  const SpectrumInfo &m_spectrumInfo;
   const Unit_const_sptr m_rangeUnit;
   const Unit_const_sptr m_xUnit;
   const bool m_isQuick;
   const double m_l1;
-  const DeltaEMode::Type m_emode;
+  const UnitConversionSetup m_setup;
 };
 } // namespace
 
