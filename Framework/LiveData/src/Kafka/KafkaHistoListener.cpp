@@ -22,6 +22,8 @@ DECLARE_LISTENER(KafkaHistoListener)
 
 KafkaHistoListener::KafkaHistoListener() { declareProperty("InstrumentName", ""); }
 
+KafkaHistoListener::~KafkaHistoListener() = default;
+
 void KafkaHistoListener::setAlgorithm(const Mantid::API::IAlgorithm &callingAlgorithm) {
   this->updatePropertyValues(callingAlgorithm);
   // Get the instrument name from StartLiveData so we can sub to correct topics

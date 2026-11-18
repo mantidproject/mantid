@@ -27,6 +27,8 @@ KafkaEventListener::KafkaEventListener() : API::LiveListener() {
                   "buffer will be flushed to the buffered EventWorkspace.");
 }
 
+KafkaEventListener::~KafkaEventListener() = default;
+
 void KafkaEventListener::setAlgorithm(const Mantid::API::IAlgorithm &callingAlgorithm) {
   this->updatePropertyValues(callingAlgorithm);
   // Get the instrument name from StartLiveData so we can sub to correct topics

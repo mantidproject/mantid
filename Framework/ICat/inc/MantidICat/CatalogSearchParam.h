@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include <ctime>
 #include <stdexcept>
 #include <string>
 

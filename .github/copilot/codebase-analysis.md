@@ -2,9 +2,9 @@
 
 ## 1. Repository Overview
 
-- **Language Stack**: C++20 and Python 3.12
+- **Language Stack**: C++23 and Python 3.13
 - **GUI Framework**: Qt6-based Workbench
-- **Build System**: CMake 3.21+ with Ninja generator
+- **Build System**: CMake 4.2+ with Ninja generator
 - **Package Manager**: Conda (with pixi for development)
 - **Purpose**: High-performance framework for materials-science data processing (Neutron scattering, Muon spectroscopy)
 - **License**: GPL-3.0+
@@ -466,13 +466,13 @@ pre-commit run --all-files           # Run all pre-commit hooks
 
 ### Build
 
-- CMake 3.21+
+- CMake 4.2+
 - Ninja (preferred)
 - Visual Studio 2022 (Windows) or GCC/Clang (Linux/macOS)
 
 ### Runtime
 
-- Python 3.12
+- Python 3.13
 - Qt6 / PyQt6
 - HDF5 (NeXus format)
 - Boost

@@ -101,7 +101,7 @@ public:
   void makeComplement();
   void convertComplement(const std::map<int, CSGObject> &);
 
-  virtual void print() const;
+  void print() const;
   void printTree() const;
 
   bool isValid(const Kernel::V3D &) const override; ///< Check if a point is valid

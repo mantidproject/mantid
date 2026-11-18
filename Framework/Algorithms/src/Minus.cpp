@@ -24,7 +24,6 @@ void Minus::performBinaryOperation(const HistogramData::Histogram &lhs, const Hi
 
 void Minus::performBinaryOperation(const HistogramData::Histogram &lhs, const double rhsY, const double rhsE,
                                    HistogramData::HistogramY &YOut, HistogramData::HistogramE &EOut) {
-  using std::placeholders::_1;
   std::transform(lhs.y().begin(), lhs.y().end(), YOut.begin(), [rhsY](double l) { return l - rhsY; });
   // Only do E if non-zero, otherwise just copy
   if (rhsE != 0) {

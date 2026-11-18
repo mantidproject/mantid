@@ -8,6 +8,7 @@
 
 #include <atomic>
 #include <mutex>
+#include <type_traits>
 
 namespace Mantid {
 namespace Kernel {
