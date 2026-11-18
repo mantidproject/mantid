@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <string>
+
 namespace MantidQt::CustomInterfaces {
 
 class MANTIDQT_MUONINTERFACE_DLL IALCPeakFittingModelSubscriber {

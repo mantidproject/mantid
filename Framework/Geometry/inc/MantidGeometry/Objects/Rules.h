@@ -6,8 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidGeometry/DllConfig.h"
+
 #include <map>
 #include <memory>
+#include <string>
+#include <vector>
 
 class TopoDS_Shape;
 

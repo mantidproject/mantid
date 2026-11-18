@@ -8,6 +8,10 @@
 
 #include "MantidGeometry/DllConfig.h"
 
+#include <cstdint>
+#include <string>
+#include <vector>
+
 namespace Poco {
 namespace XML {
 class Document;
