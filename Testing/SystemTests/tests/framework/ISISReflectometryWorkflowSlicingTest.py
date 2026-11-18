@@ -37,8 +37,8 @@ class ISISReflectometryWorkflowSlicingTest(systemtesting.MantidSystemTest, ISISR
         reduceRun(self.run_numbers[0], 0.5, self.first_transmission_runs, self.second_transmission_runs, time_interval=60)
         run = self.run_numbers[0]
         intervals = [(0, 60), (60, 120), (120, 180), (180, 240), (240, 279)]
-        output_names = [f"{run}_{suffix}_sliced_{start}_{stop}" for suffix in ("IvsQ", "IvsQ_binned") for start, stop in intervals]
-        output_names += [f"TOF_{run}_sliced_{start}_{stop}" for start, stop in intervals]
+        output_names = [f"{run}_{suffix}_{index}" for suffix in ("IvsQ", "IvsQ_binned") for index in range(1, len(intervals) + 1)]
+        output_names += [f"{run}_IvsQ_{start}_{stop}" for start, stop in intervals]
         self.finaliseResults(["TRANS_LAM_45226_45227", *output_names], expected_workspace_count=27)
 
     def regenerateReferenceFileByReducing(self):

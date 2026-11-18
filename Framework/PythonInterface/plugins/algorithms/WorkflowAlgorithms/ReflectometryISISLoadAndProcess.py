@@ -121,9 +121,14 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         cloned_workspace_names, cloned_workspace_objects = zip(*cloned_workspaces)
         adjusted_theta = self._calibrate(*cloned_workspace_objects)
         self._should_sum_banks(*cloned_workspace_objects)
+        sliced_tof_workspace_names = []
+        slice_group_names_for_cleanup = []
         if self._slicingEnabled():
             # clones monitor workspace - input detector workspace is already a clone
             to_reduce = self._sliceWorkspace(cloned_workspace_objects[self._INPUT_WS_INDEX], cloned_workspace_names[self._INPUT_WS_INDEX])
+            slice_group_names_for_cleanup = [workspace.name() for workspace in to_reduce]
+            # Get member names early as reduction can overwrite input workspace groups due to shared naming convention.
+            sliced_tof_workspace_names = self._get_flattened_tof_workspace_names(slice_group_names_for_cleanup)
         else:
             to_reduce = [cloned_workspace_objects[self._INPUT_WS_INDEX]]
         # Perform the reduction
@@ -145,7 +150,9 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         self._finalize(finished_algs)
         processed_workspace_name = self._publish_processed_input(cloned_workspace_objects[self._INPUT_WS_INDEX], finished_algs)
         self._groupTOFWorkspaces(input_workspace_names)
-        self._groupProcessedTOFWorkspaces([processed_workspace_name, *(workspace.name() for workspace in to_reduce)], input_workspace_names)
+        self._groupProcessedTOFWorkspaces(
+            [processed_workspace_name, *sliced_tof_workspace_names], input_workspace_names, slice_group_names_for_cleanup
+        )
 
     def _publish_processed_input(self, cloned_workspace: MatrixWorkspace | WorkspaceGroup, finished_algs: Sequence[IAlgorithm]) -> str:
         """Retain the full-detector working input for diagnostics without another copy."""
@@ -240,7 +247,9 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         for workspace_name in cached_group_names:
             AnalysisDataService.remove(workspace_name)
 
-    def _groupProcessedTOFWorkspaces(self, workspace_names: Iterable[str], input_workspace_names: Iterable[str]) -> None:
+    def _groupProcessedTOFWorkspaces(
+        self, workspace_names: Iterable[str], input_workspace_names: Iterable[str], slice_group_names_for_cleanup: Iterable[str]
+    ) -> None:
         """Group processed inputs, collapsed slices and bank sums in TOF_processed or __TOF_processed."""
         if not self.getProperty(Prop.GROUP_TOF).value:
             return
@@ -250,11 +259,16 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             if AnalysisDataService.doesExist(summed_workspace_name):
                 processed_workspace_names.append(summed_workspace_name)
         processed_workspace_names = list(dict.fromkeys(processed_workspace_names))
+        group_names_for_cleanup = [
+            *slice_group_names_for_cleanup,
+            *(name for name in processed_workspace_names if isinstance(AnalysisDataService.retrieve(name), WorkspaceGroup)),
+        ]
         group_name = "__TOF_processed" if self.getProperty(Prop.HIDE_INPUT).value else "TOF_processed"
         self._group_workspaces(processed_workspace_names, group_name)
-        # Only the flattened TOF members are needed after successful grouping.
-        for workspace_name in processed_workspace_names:
-            if isinstance(AnalysisDataService.retrieve(workspace_name), WorkspaceGroup):
+        # Remove redundant TOF containers, preserving reduction output groups that replaced slice containers under the same name.
+        for workspace_name in dict.fromkeys(group_names_for_cleanup):
+            # Empty if workspace contains no TOF workspaces (was replaced by reduced output)
+            if self._get_flattened_tof_workspace_names([workspace_name]):
                 AnalysisDataService.remove(workspace_name)
 
     def validateInputs(self):
@@ -740,13 +754,13 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         # Not found
         return None
 
-    def _collapse_workspace_groups(self, workspaces):
+    def _get_flattened_tof_workspace_names(self, workspaces):
         """Return unique TOF members in input order."""
         ungrouped_workspaces = []
         for name in workspaces:
             workspace = self._get_cached_workspace(name)
             if isinstance(workspace, WorkspaceGroup):
-                ungrouped_workspaces.extend(self._collapse_workspace_groups(workspace.getNames()))
+                ungrouped_workspaces.extend(self._get_flattened_tof_workspace_names(workspace.getNames()))
             elif workspace.getAxis(0).getUnit().unitID() == "TOF":
                 ungrouped_workspaces.append(name)
         return list(dict.fromkeys(ungrouped_workspaces))
@@ -759,7 +773,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         if len(workspaces) < 1:
             return
 
-        workspaces = self._collapse_workspace_groups(workspaces)
+        workspaces = self._get_flattened_tof_workspace_names(workspaces)
 
         if not workspaces:
             return
@@ -981,7 +995,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             ("MonitorWorkspaceName", input_monitor_workspace_name, cloned_monitor_workspace),
         ]
         with self._temporary_ads_workspaces(workspace_inputs, require_names=True) as (input_properties, workspace_names):
-            sliced_workspace_name = input_workspace_name + "_sliced"
+            sliced_workspace_name = self._getSlicedWorkspaceGroupName(input_workspace_name)
             output_workspace_names = self._runSliceAlgorithm(
                 input_properties["InputWorkspaceName"], input_properties["MonitorWorkspaceName"], sliced_workspace_name
             )
@@ -997,6 +1011,11 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
                     if public_workspace_name != member_workspace.name():
                         RenameWorkspace(InputWorkspace=member_workspace, OutputWorkspace=public_workspace_name)
         return [AnalysisDataService.retrieve(workspace_name) for workspace_name in sliced_workspace_names]
+
+    def _getSlicedWorkspaceGroupName(self, input_workspace_name: str) -> str:
+        if not self.getProperty(Prop.OUTPUT_WS).isDefault:
+            return self.getPropertyValue(Prop.OUTPUT_WS)
+        return input_workspace_name + "_sliced"
 
     def _reduce(
         self,

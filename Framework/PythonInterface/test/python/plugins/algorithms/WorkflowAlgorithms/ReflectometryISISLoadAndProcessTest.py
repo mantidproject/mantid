@@ -468,6 +468,22 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         history = ["ReflectometryReductionOneAuto", "ReflectometryReductionOneAuto", "ReflectometryReductionOneAuto", "GroupWorkspaces"]
         self._check_history(AnalysisDataService.retrieve("IvsQ_binned_38415_sliced_0_1200"), history, False)
 
+    def test_slicing_uses_specified_output_name_for_slices_and_reduced_outputs(self):
+        self._create_event_workspace(38415, "TOF_")
+        args = dict(
+            self._default_options,
+            **self._default_slice_options_dummy_run,
+            **self._all_output_names,
+            InputRunList="38415",
+            ProcessingInstructions="4",
+            rethrow=True,
+        )
+        self._assert_run_algorithm_succeeds(args)
+        for index, (start, stop) in enumerate(((0, 1200), (1200, 2400), (2400, 3600)), start=1):
+            self.assertIn(f"testIvsQ_{start}_{stop}", AnalysisDataService.retrieve("TOF_processed").getNames())
+            for output_name in self._all_output_names.values():
+                self.assertIn(f"{output_name}_{index}", AnalysisDataService.retrieve(output_name).getNames())
+
     def test_slicing_uses_run_in_ADS_with_no_prefix(self):
         self._create_event_workspace(38415)
         args = self._default_options
