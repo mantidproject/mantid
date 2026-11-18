@@ -178,7 +178,7 @@ jobs:
       matrix:
         # Skip Windows when the PR targets ornl-next (ORNL-specific branch, Linux only)
         # Windows builds with Ninja rather than Visual Studio so that ccache can be used
-        include: ${{ fromJson(github.base_ref == 'ornl-next' && '[{"os":"Linux","cmake_preset":"linux-64-ci"}]' || '[{"os":"Linux","cmake_preset":"linux-64-ci"},{"os":"Windows","cmake_preset":"win-64-ci-ninja"}]') }}
+        include: ${{ fromJson(github.base_ref == 'ornl-next' && '[{"os":"Linux","cmake_preset":"linux-64-ci"}]' || '[{"os":"Linux","cmake_preset":"linux-64-ci"},{"os":"Windows","cmake_preset":"win-64-ci"}]') }}
 
     runs-on:
       - ${{ (inputs.RUNNER_LABEL == '' && 'self-hosted') || inputs.RUNNER_LABEL }}

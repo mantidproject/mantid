@@ -51,7 +51,7 @@ jobs:
           - os: Windows
             # must match pr_build_and_test.yml, as both share the runner's build directory and a
             # change of generator forces a full rebuild
-            cmake_preset: win-64-ci-ninja
+            cmake_preset: win-64-ci
           # macOS is missing because there is no self-hosted macOS GitHub Actions runner; osx-arm64
           # exists only as a Jenkins agent. Add an {os: macOS, cmake_preset: osx-arm64-ci} entry here
           # once one is available.
