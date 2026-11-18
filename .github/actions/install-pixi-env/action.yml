@@ -2,16 +2,19 @@ name: 'Install pixi environment'
 description: |
   Run `pixi install --frozen` under a watchdog, with a bounded number of retries.
   A stalled install on a self-hosted runner otherwise spins until the job timeout. An attempt is
-  stopped when pixi has written nothing for stall-timeout seconds, or after attempt-timeout seconds
-  in total, so a slow install that is still making progress is left to finish. Each attempt's
-  output is streamed to the job log and kept in build/test_logs, which the workflows upload.
+  stopped when it has made no progress for stall-timeout seconds, or after attempt-timeout seconds
+  in total, so a slow install that is still making progress is left to finish. Progress is new log
+  output, a new package in the rattler cache, or a new package linked into the environment: pixi
+  draws its download and link progress bars only on a terminal, so its log can be silent for many
+  minutes while it is working. Each attempt's output is streamed to the job log and kept in
+  build/test_logs, which the workflows upload.
 inputs:
   attempts:
     description: 'Number of attempts before failing'
     required: false
     default: '2'
   stall-timeout:
-    description: 'Seconds without any output from pixi before an attempt is treated as hung'
+    description: 'Seconds without any progress before an attempt is treated as hung'
     required: false
     default: '600'
   attempt-timeout:
@@ -32,16 +35,33 @@ runs:
         LOG_DIR="${GITHUB_WORKSPACE}/build/test_logs"
         mkdir -p "${LOG_DIR}"
 
-        # A second pixi waiting on the environment lock held by the first looks exactly like a hang,
-        # so list any that are running whenever an attempt is given up on
+        # A second pixi waiting on a lock held by the first looks exactly like a hang, so list any
+        # that are running whenever an attempt is given up on. The CPU time tells a pixi that is
+        # busy from one that is blocked.
         list_pixi_processes() {
           echo "Running pixi processes:"
           if [[ "${RUNNER_OS}" == "Windows" ]]; then
-            tasklist //FI "IMAGENAME eq pixi.exe" || true
+            tasklist //V //FI "IMAGENAME eq pixi.exe" || true
           else
-            pgrep -a pixi || echo "none"
+            ps -o pid,etime,time,args -C pixi || echo "none"
           fi
         }
+
+        if [[ -n "${PIXI_CACHE_DIR:-}" ]]; then
+          cache_dir="${PIXI_CACHE_DIR}"
+        elif [[ -n "${RATTLER_CACHE_DIR:-}" ]]; then
+          cache_dir="${RATTLER_CACHE_DIR}"
+        elif [[ "${RUNNER_OS}" == "Windows" ]]; then
+          cache_dir="$(cygpath -u "${LOCALAPPDATA}")/rattler/cache"
+        else
+          cache_dir="${XDG_CACHE_HOME:-${HOME}/.cache}/rattler/cache"
+        fi
+        conda_meta="${GITHUB_WORKSPACE}/.pixi/envs/default/conda-meta"
+        # the directories do not exist until pixi creates them, and a failing find would end the step
+        count_entries() {
+          { find "$1" -mindepth 1 -maxdepth 1 2>/dev/null || true; } | wc -l
+        }
+        echo "Watching ${cache_dir}/pkgs for downloads and ${conda_meta} for linked packages"
 
         # Stop pixi and everything it started. In Git Bash a signal only reaches the MSYS wrapper of
         # a native program, which can leave pixi.exe running and holding its lock, so the Windows
@@ -66,28 +86,35 @@ runs:
           : > "${log}"
           echo "::group::pixi install attempt ${attempt} of ${ATTEMPTS}"
           if [[ "${RUNNER_OS}" == "Windows" ]]; then
-            pixi install --frozen -v > "${log}" 2>&1 &
+            pixi install --frozen -vv > "${log}" 2>&1 &
           else
             # its own session, so that stop_tree can stop anything pixi started along with it
-            setsid pixi install --frozen -v > "${log}" 2>&1 &
+            setsid pixi install --frozen -vv > "${log}" 2>&1 &
           fi
           pixi_pid=$!
           tail -n +1 -f --pid="${pixi_pid}" "${log}" &
           tail_pid=$!
 
           started=${SECONDS}
-          last_output=${SECONDS}
-          last_size=0
+          last_progress=${SECONDS}
+          last_state=""
+          last_heartbeat=${SECONDS}
           reason=""
           while kill -0 "${pixi_pid}" 2>/dev/null; do
             sleep 10
-            size=$(wc -c < "${log}")
-            if (( size != last_size )); then
-              last_size=${size}
-              last_output=${SECONDS}
+            cached=$(count_entries "${cache_dir}/pkgs")
+            linked=$(count_entries "${conda_meta}")
+            state="$(wc -c < "${log}") ${cached} ${linked}"
+            if [[ "${state}" != "${last_state}" ]]; then
+              last_state=${state}
+              last_progress=${SECONDS}
             fi
-            if (( SECONDS - last_output >= STALL_TIMEOUT )); then
-              reason="no output for ${STALL_TIMEOUT}s"
+            if (( SECONDS - last_heartbeat >= 60 )); then
+              last_heartbeat=${SECONDS}
+              echo "[watchdog] $(( SECONDS - started ))s: ${cached} packages in cache, ${linked} linked, last progress $(( SECONDS - last_progress ))s ago"
+            fi
+            if (( SECONDS - last_progress >= STALL_TIMEOUT )); then
+              reason="no progress for ${STALL_TIMEOUT}s (${cached} packages in cache, ${linked} linked)"
               break
             fi
             if (( SECONDS - started >= ATTEMPT_TIMEOUT )); then
