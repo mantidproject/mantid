@@ -1746,10 +1746,10 @@ std::unique_ptr<Instrument> Instrument::treeFromBeamline(ComponentInfo const &co
                                   " children for " + componentInfo.name(index) + ", which has " +
                                   std::to_string(children.size()));
     }
-    auto const type = componentInfo.componentType(index);
-    bool const childrenMadeByBank = madeByBank || type == Beamline::ComponentType::Rectangular ||
-                                    type == Beamline::ComponentType::Grid ||
-                                    type == Beamline::ComponentType::Structured;
+    auto const componentType = componentInfo.componentType(index);
+    bool const childrenMadeByBank = madeByBank || componentType == Beamline::ComponentType::Rectangular ||
+                                    componentType == Beamline::ComponentType::Grid ||
+                                    componentType == Beamline::ComponentType::Structured;
     for (size_t i = 0; i < children.size(); ++i) {
       pending.push_back({legacyChildren[i].get(), children[i], childrenMadeByBank});
     }
