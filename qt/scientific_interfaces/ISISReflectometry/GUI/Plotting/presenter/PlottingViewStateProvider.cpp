@@ -9,6 +9,7 @@
 #include "GUI/Plotting/presenter/PlotOutputTypeProperties.h"
 
 #include <algorithm>
+#include <iterator>
 #include <utility>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
