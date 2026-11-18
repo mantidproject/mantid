@@ -1,6 +1,6 @@
 # Mantid Copilot Instructions
 
-Mantid is a C++20 / Python 3.12 framework for processing materials-science data (neutron scattering, muon spectroscopy). It has a Qt5 GUI frontend called Workbench. Build system is CMake + Ninja; dependencies are managed via Conda/Pixi.
+Mantid is a C++22 / Python 3.13 framework for processing materials-science data (neutron scattering, muon spectroscopy). It has a Qt6 GUI frontend called Workbench. Build system is CMake + Ninja; dependencies are managed via Conda/Pixi.
 
 ## Environment setup
 
@@ -159,7 +159,7 @@ All files must start with:
 ```cpp
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright © 2018 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright © 2026 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX-License-Identifier: GPL-3.0+

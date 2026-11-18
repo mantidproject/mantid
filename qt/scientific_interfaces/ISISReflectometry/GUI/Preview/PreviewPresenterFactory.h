@@ -10,6 +10,7 @@
 #include "IPreviewPresenter.h"
 #include "IPreviewView.h"
 #include "MantidQtWidgets/Common/QtJobRunner.h"
+#include "MantidQtWidgets/RegionSelector/IRegionSelector.h"
 #include "PreviewJobManager.h"
 #include "PreviewModel.h"
 #include "PreviewPresenter.h"

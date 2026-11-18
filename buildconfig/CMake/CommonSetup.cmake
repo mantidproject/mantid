@@ -144,9 +144,9 @@ if(OpenMP_CXX_FOUND)
 endif()
 
 # ######################################################################################################################
-# Set the c++ standard to 20 - cmake should do the right thing with msvc
+# Set the c++ standard to 23 - cmake should do the right thing with msvc
 # ######################################################################################################################
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 

@@ -40,7 +40,7 @@ public:
     TS_ASSERT_LESS_THAN(capacityAfterShrinkToFit, capacityAfterResize);
 
     // Use shrink-to-fit idiom and compare against shrink_to_fit()
-    original.resize(1000);
+    original.assign(oldsize, 0.0);
     TS_ASSERT_EQUALS(original.size(), oldsize);
     original.resize(100);
     TS_ASSERT_EQUALS(original.size(), newsize);

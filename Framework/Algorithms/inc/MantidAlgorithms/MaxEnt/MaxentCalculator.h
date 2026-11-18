@@ -28,7 +28,7 @@ public:
   // Deleted default constructor
   MaxentCalculator() = delete;
   // Destructor
-  virtual ~MaxentCalculator() = default;
+  ~MaxentCalculator() = default;
 
   // Runs maxent iteration
   void iterate(const std::vector<double> &data, const std::vector<double> &errors, const std::vector<double> &image,
