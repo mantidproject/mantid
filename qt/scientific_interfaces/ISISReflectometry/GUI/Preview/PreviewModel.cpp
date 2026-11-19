@@ -136,6 +136,35 @@ void PreviewModel::setSelectedGroupMember(size_t index) {
   m_selectedGroupMember = index;
 }
 
+std::vector<std::string> PreviewModel::getSliceDisplayNames() {
+  auto const &reducedWss = m_runDetails->getReducedWss();
+  if (reducedWss.empty() || reducedWss.size() == 1) { // No reduction completed or not sliced.
+    m_selectedSlice = 0;
+    return {};
+  }
+  std::vector<std::string> sliceNames = {};
+  sliceNames.reserve(reducedWss.size());
+
+  for (auto const &ws : reducedWss) {
+    // Find the second to last underscore.
+    auto const &wsName = ws->getName();
+    sliceNames.emplace_back(wsName.substr(wsName.rfind("_"), wsName.size() - 1));
+  }
+  if (m_selectedSlice >= sliceNames.size()) {
+    m_selectedSlice = 0;
+  }
+  return sliceNames;
+}
+
+size_t PreviewModel::getSelectedSlice() const { return m_selectedSlice; }
+
+void PreviewModel::setSelectedSlice(size_t index) {
+  if (index >= m_runDetails->getReducedWss().size()) {
+    throw std::out_of_range("Slice index is out of range.");
+  }
+  m_selectedSlice = index;
+}
+
 std::optional<double> PreviewModel::getDefaultTheta() const {
   auto theta = getThetaFromLogs("Theta");
   if (theta && *theta > Tolerance) {
@@ -218,6 +247,7 @@ std::optional<IPreviewModel::Selection> const PreviewModel::getSelectedRegion(RO
 void PreviewModel::createRunDetails(const std::string &workspaceName) {
   m_runDetails = std::make_optional<PreviewRow>(std::vector<std::string>{workspaceName});
   m_selectedGroupMember = 0;
+  m_selectedSlice = 0;
 }
 
 MatrixWorkspace_sptr PreviewModel::getWorkspaceGroupMember(Workspace_sptr const &workspace) const {

@@ -388,8 +388,17 @@ void updateRowOnAlgorithmComplete(const IAlgorithm_sptr &algorithm, Item &item) 
     }
     row.setReducedWss(wss);
   } else {
-    Workspace_sptr outputWs = algorithm->getProperty("OutputWorkspaceBinned");
-    row.setReducedWss({outputWs});
+    if (Workspace_sptr outputWs = algorithm->getProperty("OutputWorkspaceBinned")) {
+      if (!algorithm->getProperty("SliceWorkspace")) {
+        row.setReducedWss({outputWs});
+      } else {
+        if (auto wsGroup = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(outputWs)) {
+          row.setReducedWss(wsGroup->getAllItems());
+        } else {
+          row.setReducedWss({outputWs});
+        }
+      }
+    }
   }
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry::Reduction

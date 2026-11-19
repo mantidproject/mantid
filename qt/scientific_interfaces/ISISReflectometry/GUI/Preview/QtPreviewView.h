@@ -45,11 +45,13 @@ public:
 
   std::string getWorkspaceName() const override;
   size_t getSelectedGroupMember() const override;
+  size_t getSelectedSlice() const override;
   double getAngle() const override;
   void setAngle(double angle) override;
   void setUpdateAngleButtonEnabled(bool enable) override;
   void setTitle(const std::string &title) override;
   void setGroupMembers(std::vector<std::string> const &workspaceNames) override;
+  void setSlices(std::vector<std::string> const &sliceNames) override;
 
 private:
   Ui::PreviewWidget m_ui;
@@ -62,6 +64,7 @@ private:
 private slots:
   void onLoadWorkspaceRequested() const;
   void onGroupMemberSelectionChanged() const;
+  void onSliceSelectionChanged() const;
   void onUpdateClicked() const;
   void onAngleEdited();
   void onApplyClicked() const;

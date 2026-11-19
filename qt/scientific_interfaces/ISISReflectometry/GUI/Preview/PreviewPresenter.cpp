@@ -126,6 +126,7 @@ void PreviewPresenter::updatePlotAxes() {
 void PreviewPresenter::notifyLoadWorkspaceRequested() {
   m_view->disableMainWidget();
   m_view->setGroupMembers({});
+  m_view->setSlices({});
   m_dockedWidgets->setPlotAllGroupMembersCheckboxVisible(false);
   auto const name = m_view->getWorkspaceName();
   try {
@@ -189,6 +190,11 @@ void PreviewPresenter::updateSelectedGroupMemberDisplay() {
     plotLinePlot();
 }
 
+void PreviewPresenter::notifySliceSelectionChanged() {
+  m_model->setSelectedSlice(m_view->getSelectedSlice());
+  plotLinePlot();
+}
+
 void PreviewPresenter::notifyUpdateAngle() {
   // Re-run from the sum banks step to ensure the sliceviewer plot is up to date
   runSumBanks(true);
@@ -203,6 +209,7 @@ void PreviewPresenter::notifySumBanksCompleted() {
 
 void PreviewPresenter::notifyReductionCompleted() {
   // Update the final plot
+  m_view->setSlices(m_model->getSliceDisplayNames());
   plotLinePlot();
   m_view->enableMainWidget();
 }
