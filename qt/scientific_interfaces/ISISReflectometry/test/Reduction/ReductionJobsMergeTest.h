@@ -7,10 +7,10 @@
 #pragma once
 
 #include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
-#include "Common/ZipRange.h"
 #include "Reduction/ReductionJobs.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
+#include <ranges>
 
 using testing::_;
 using testing::Mock;
@@ -171,10 +171,8 @@ public:
 
   bool haveEqualRunNumbers(ReductionJobs const &lhs, ReductionJobs const &rhs) {
     if (lhs.groups().size() == rhs.groups().size()) {
-      for (auto groupPair : zip_range(lhs.groups(), rhs.groups())) {
-        for (auto rowPair : zip_range(boost::get<0>(groupPair).rows(), boost::get<1>(groupPair).rows())) {
-          auto const &lhsRow = boost::get<0>(rowPair);
-          auto const &rhsRow = boost::get<1>(rowPair);
+      for (auto const &[lhsGroup, rhsGroup] : std::views::zip(lhs.groups(), rhs.groups())) {
+        for (auto const &[lhsRow, rhsRow] : std::views::zip(lhsGroup.rows(), rhsGroup.rows())) {
           if (lhsRow.has_value() != rhsRow.has_value())
             return false;
           else if (lhsRow.has_value())
