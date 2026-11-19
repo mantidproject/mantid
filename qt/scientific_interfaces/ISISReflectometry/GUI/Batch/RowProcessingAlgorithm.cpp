@@ -369,7 +369,7 @@ std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps
   }
   updateProcessingInstructionsProperties(*properties, previewRow);
 
-  properties->setProperty("HideInputWorkspaces", false);
+  properties->setProperty("HideInputWorkspaces", isNoSlicing(model.slicing()));
   if (std::dynamic_pointer_cast<WorkspaceGroup>(previewRow.getLoadedWs())) {
     properties->setProperty("GroupTOFWorkspaces", false);
   }
