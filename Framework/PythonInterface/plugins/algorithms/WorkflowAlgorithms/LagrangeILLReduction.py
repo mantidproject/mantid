@@ -147,7 +147,7 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
 
         empty_cell_files = self.getPropertyValue("ContainerRuns").split(",")
         # empty cell treatment, if there is any
-        if empty_cell_files[0] != str():
+        if empty_cell_files[0] != "":
             self.process_empty_cell(empty_cell_files)
 
         # sample load and formatting

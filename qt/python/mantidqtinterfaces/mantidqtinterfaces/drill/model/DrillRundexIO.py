@@ -17,7 +17,7 @@ class DrillRundexIO:
     Name of the file where the data will be read or saved.
     """
 
-    _filename = str()
+    _filename = ""
 
     """
     Drill model. Used to set and get the data.

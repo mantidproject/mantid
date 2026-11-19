@@ -38,9 +38,7 @@ lint.ignore = [
   "UP006", # non-pep585-annotation https://docs.astral.sh/ruff/rules/non-pep585-annotation
   "UP007", # non-pep604-annotation-union https://docs.astral.sh/ruff/rules/non-pep604-annotation-union
   "UP008", # super-call-with-parameters https://docs.astral.sh/ruff/rules/super-call-with-parameters
-  "UP009", # utf8-encoding-declaration https://docs.astral.sh/ruff/rules/utf8-encoding-declaration
   "UP015", # redundant-open-modes https://docs.astral.sh/ruff/rules/redundant-open-modes
-  "UP018", # native-literals https://docs.astral.sh/ruff/rules/native-literals
   "UP024", # os-error-alias https://docs.astral.sh/ruff/rules/os-error-alias
   "UP028", # yield-in-for-loop https://docs.astral.sh/ruff/rules/yield-in-for-loop
   "UP030", # format-literals https://docs.astral.sh/ruff/rules/format-literals
@@ -48,9 +46,7 @@ lint.ignore = [
   "UP032", # f-string https://docs.astral.sh/ruff/rules/format-literals
   "UP034", # extraneous-parentheses https://docs.astral.sh/ruff/rules/extraneous-parentheses
   "UP035", # deprecated-import https://docs.astral.sh/ruff/rules/deprecated-import
-  "UP037", # quoted-annotation https://docs.astral.sh/ruff/rules/quoted-annotation
   "UP040", # non-pep695-type-alias https://docs.astral.sh/ruff/rules/non-pep695-type-alias
-  "UP041", # timeout-error-alias https://docs.astral.sh/ruff/rules/timeout-error-alias
   "UP045", # non-pep604-annotation-optional https://docs.astral.sh/ruff/rules/non-pep604-annotation-optional
 ]
 exclude = [
