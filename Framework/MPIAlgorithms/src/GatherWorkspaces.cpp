@@ -75,6 +75,7 @@ std::map<std::string, std::string> GatherWorkspaces::validateInputs() {
   const int rank = 0;
 #endif
   const MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
+  // cppcheck-suppress knownConditionTrueFalse ; rank is always 0 when not built with MPI
   if (rank == 0 && !inputWorkspace)
     issues["InputWorkspace"] = "An InputWorkspace is required on the root process";
   return issues;
