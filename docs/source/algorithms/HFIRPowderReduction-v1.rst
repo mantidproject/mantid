@@ -11,7 +11,9 @@ Description
 
 This algorithm is used to reduce powder diffraction data from the HFIR instruments at ORNL. It is a
 workflow algorithm that uses several other algorithms to perform the reduction. The input data can be
-specified either as a list of files or as an IPTS number and a list of run numbers. This works for both WAND and MIDAS instruments.
+specified either as a list of files or as a list of run numbers. The IPTS number of the runs is optional: when it is left
+empty, it is looked up from the run numbers through the data catalog, so the IPTS only needs to be given if the lookup
+is not available. This works for both WAND and MIDAS instruments.
 Reducing WAND^2 data with HFIRPowderReduction is very similar to using :ref:`algm-WANDPowderReduction`, but with some differences in the input parameters,
 and reduction steps are slightly modified.
 
@@ -132,13 +134,13 @@ corresponding subtraction is skipped.
    * - Symbol
      - Property
    * - :math:`S`
-     - ``SampleFilename``, or ``SampleIPTS`` and ``SampleRunNumbers``
+     - ``SampleFilename``, or ``SampleRunNumbers`` with an optional ``SampleIPTS``
    * - :math:`S_B`
-     - ``SampleBackgroundFilename``, or ``SampleBackgroundIPTS`` and ``SampleBackgroundRunNumbers``
+     - ``SampleBackgroundFilename``, or ``SampleBackgroundRunNumbers`` with an optional ``SampleBackgroundIPTS``
    * - :math:`V`
-     - ``VanadiumFilename``, or ``VanadiumIPTS`` and ``VanadiumRunNumbers``
+     - ``VanadiumFilename``, or ``VanadiumRunNumbers`` with an optional ``VanadiumIPTS``
    * - :math:`V_B`
-     - ``VanadiumBackgroundFilename``, or ``VanadiumBackgroundIPTS`` and ``VanadiumBackgroundRunNumbers``
+     - ``VanadiumBackgroundFilename``, or ``VanadiumBackgroundRunNumbers`` with an optional ``VanadiumBackgroundIPTS``
    * - :math:`c_X`
      - ``NormaliseBy``
    * - :math:`f_B`
@@ -194,9 +196,12 @@ The default ``OutputWorkspace`` name is built from the sample IPTS and run numbe
 where consecutive runs are collapsed into ranges. For IPTS-1234 this gives ``IPTS1234_Run5`` for the single run 5,
 ``IPTS1234_Run5-7`` for the runs 5 to 7, ``IPTS1234_Run5-7_9-10`` for the runs 5 to 7 and 9 to 10, and
 ``IPTS1234_Run5_7_9`` for the runs 5, 7 and 9. The IPTS and run numbers are taken from ``SampleIPTS`` and
-``SampleRunNumbers``, or from the paths in ``SampleFilename`` when those files are in the standard HFIR layout.
+``SampleRunNumbers``, with the IPTS looked up from the runs when ``SampleIPTS`` is empty, or from the paths in
+``SampleFilename`` when those files are in the standard HFIR layout.
 When ``OutputDirectory`` is a directory, the saved files are named after the output workspace, so the reduction of
 runs 5 to 7 of IPTS-1234 is saved as ``IPTS1234_Run5-7.dat`` and ``IPTS1234_Run5-7.nxs``.
+The ``.dat`` file holds space separated X, Y and E columns with no header lines, and the spectra are separated by
+an empty line.
 
 .. categories::
 
