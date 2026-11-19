@@ -356,10 +356,20 @@ class CreateVanadiumAndFocusCustomMode(systemtesting.MantidSystemTest):
     def runTest(self):
         setup_mantid_paths()
         inst_object = setup_inst_object(tt_mode="tt70", focus_mode="Trans")
+        single_group_spline_params = {
+            "vanadium_strip_peak_fwhm": 15,
+            "vanadium_strip_peak_tolerance": 8,
+            "vanadium_strip_peak_repeat": 1,
+            "spline_coefficient": 45,
+        }
         # for tt_mode=custom you can specify a different grouping file on each run. So need
         # to make sure the V file is tracked per grouping file and focus actions use the correct one
         run_vanadium_calibration(
-            inst_object, tt_mode="custom", focus_mode="Trans", custom_grouping_filename=os.path.join(calibration_dir, "DAC_group.cal")
+            inst_object,
+            tt_mode="custom",
+            focus_mode="Trans",
+            custom_grouping_filename=os.path.join(calibration_dir, "DAC_group.cal"),
+            **single_group_spline_params,
         )
         run_vanadium_calibration(
             inst_object,
