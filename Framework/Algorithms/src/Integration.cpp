@@ -588,11 +588,12 @@ std::map<std::string, std::string> Integration::validateInputs() {
   const auto [firstIndex, lastIndex] =
       workspaceIndexRange(startIndex, endIndex, static_cast<int>(workspace->getNumberHistograms()));
   const auto numberIntegrated = static_cast<std::size_t>(lastIndex - firstIndex + 1);
-  for (const auto &[name, list] : {std::pair<std::string, const std::vector<double> &>{"RangeLowerList", minRanges},
-                                   std::pair<std::string, const std::vector<double> &>{"RangeUpperList", maxRanges}}) {
+  for (const auto &[rangeName, list] :
+       {std::pair<std::string, const std::vector<double> &>{"RangeLowerList", minRanges},
+        std::pair<std::string, const std::vector<double> &>{"RangeUpperList", maxRanges}}) {
     if (!list.empty() && list.size() != numberIntegrated) {
-      issues[name] = name + " has " + std::to_string(list.size()) + " values but it should contain " +
-                     std::to_string(numberIntegrated) + ".";
+      issues[rangeName] = rangeName + " has " + std::to_string(list.size()) + " values but it should contain " +
+                          std::to_string(numberIntegrated) + ".";
     }
   }
 
