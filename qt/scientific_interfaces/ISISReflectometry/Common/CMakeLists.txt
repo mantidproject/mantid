@@ -23,7 +23,6 @@ set(COMMON_INC_FILES
     Parse.h
     QWidgetGroup.h
     ValidationResult.h
-    ZipRange.h
 )
 
 prepend(COMMON_SRC_FILES Common ${COMMON_SRC_FILES})
