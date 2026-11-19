@@ -102,10 +102,11 @@ distance-dirty = "{base_version}.dev{distance}+uncommitted"
 # .pre-commit-config.yaml); run locally as: pre-commit run codespell --all-files
 skip = '.git,.git-meta,.gitattributes,.*cache,.venv,.tox,.eggs,*.egg-info,__pycache__,.pixi,./build,*.pdf,*.svg,*.png,*.jpg,*.lock,*.css,*.min.*,*-min.*,.npm,*/diagrams/*.xml,*/images/Workbench/*.xml'
 check-hidden = true
-# Ignore URLs, escaped newlines (e.g. "\nin" in graphviz labels), a person's name, the tthe row of the LoadDetectorInfo table, and camelCase and PascalCase identifiers (common in code)
-ignore-regex = 'https?://\S+|\\n|\bMial Lewis\b|\|\s+theta\s+\|\s+tthe\s+\|\s+tthe\s+\||\b[a-z]+[A-Z]\w*\b|\b[A-Z][a-z]+[A-Z]\w*\b'
-# nd: ND (normal direction) and number of dimensions; others are valid spellings
-# discus: DISCUS multiple scattering program; mot: SNS log names (BL3:Mot:...);
-# ser: "J. Phys.: Conf. Ser."; edn: edition; namd: NAMD software; ines: INES instrument;
-# delt, ths: field/metadata names; ontop: workbench setting value
-ignore-words-list = 'nd,re-use,re-used,co-ordinate,co-ordinates,pre-empts,precessing,discus,mot,ser,edn,namd,ines,delt,ths,ontop'
+# Ignore URLs, escaped newlines (e.g. "\nin" in graphviz labels), a person's name, and camelCase and PascalCase
+# identifiers (common in code). Words that are only valid in a narrow context are ignored there rather than
+# added to ignore-words-list: the tthe and delt rows of the LoadDetectorInfo table, the ths metadata name,
+# SNS log names (BL3:Mot:...), "J. Phys.: Conf. Ser.", "online edn" (edition), and the INES instrument
+ignore-regex = 'https?://\S+|\\n|\bMial Lewis\b|\|\s+theta\s+\|\s+tthe\s+\|\s+tthe\s+\||\|\s+delta\s+\|\s+delt\s+\|\s+delt\s+\||\btthd and ths\b|\bBL\d+:Mot:|\bConf\. Ser\.|\bonline edn\b|\bINES\b|\b[a-z]+[A-Z]\w*\b|\b[A-Z][a-z]+[A-Z]\w*\b'
+# nd: ND (normal direction) and number of dimensions; discus: DISCUS multiple scattering program;
+# namd: NAMD software; others are valid spellings
+ignore-words-list = 'nd,re-use,re-used,co-ordinate,co-ordinates,pre-empts,precessing,discus,namd'

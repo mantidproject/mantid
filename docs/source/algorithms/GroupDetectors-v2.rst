@@ -229,7 +229,7 @@ Output
 
   # Create a workspace filled with a constant value = 0.3
   ws=CreateSampleWorkspace()
-  # Group detectots using a list of spectrum numbers
+  # Group detectors using a list of spectrum numbers
   grouped = GroupDetectors(ws,SpectraList=[1,3,5])
 
   # Check the result
@@ -260,7 +260,7 @@ Output
 
   # Create a workspace filled with a constant value = 0.3
   ws=CreateSampleWorkspace()
-  # Group detectots using a list of detector IDs
+  # Group detectors using a list of detector IDs
   grouped = GroupDetectors(ws,DetectorList=[100,102,104])
 
   # Check the result
@@ -290,7 +290,7 @@ Output
 
   # Create a workspace filled with a constant value = 0.3
   ws=CreateSampleWorkspace()
-  # Group detectots using a list of workspace indices
+  # Group detectors using a list of workspace indices
   grouped = GroupDetectors(ws,WorkspaceIndexList=[0,2,4])
 
   # Check the result
