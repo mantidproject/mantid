@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import gc
+import sys
 import unittest
 
 import numpy as np
@@ -210,18 +210,25 @@ class ExperimentInfoTest(unittest.TestCase):
         self._assert_upright(ws.getLabFrameSampleShape())
         self._assert_upright(ws.getLabFrameSample().getShape())
 
-    def test_the_lab_frame_environment_outlives_the_temporary_sample(self):
-        container_shape = self._ws_with_a_sample_in_a_can().getLabFrameSample().getEnvironment().getContainer().getShape()
-        gc.collect()
+    def _get_holding_parent(self, parent, accessor):
+        """Checks the reference rather than reading through it: freed memory often still holds the old values."""
+        before = sys.getrefcount(parent)
+        child = accessor(parent)
+        self.assertEqual(sys.getrefcount(parent), before + 1, "the child does not keep its parent alive")
+        return child
 
-        self._assert_upright(container_shape)
+    def test_the_lab_frame_environment_keeps_the_temporary_sample_alive(self):
+        sample = self._ws_with_a_sample_in_a_can().getLabFrameSample()
 
-    def test_the_lab_frame_lattice_outlives_the_temporary_sample(self):
+        environment = self._get_holding_parent(sample, lambda s: s.getEnvironment())
+        container = self._get_holding_parent(environment, lambda e: e.getContainer())
+        self._get_holding_parent(container, lambda c: c.getShape())
+
+    def test_the_lab_frame_lattice_keeps_the_temporary_sample_alive(self):
         ws = CreateSampleWorkspace()
         SetUB(ws, a=4.2, b=5.0, c=6.1)
-        lattice = ws.getLabFrameSample().getOrientedLattice()
-        gc.collect()
 
+        lattice = self._get_holding_parent(ws.getLabFrameSample(), lambda s: s.getOrientedLattice())
         self.assertAlmostEqual(lattice.a(), 4.2)
 
 

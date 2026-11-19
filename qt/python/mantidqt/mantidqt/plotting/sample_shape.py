@@ -222,7 +222,7 @@ def get_valid_container_mesh_from_workspace(workspace):
 
 def get_container_shape_from_workspace(workspace_with_container):
     if workspace_with_container.sample():
-        return lab_frame_sample(workspace_with_container).getEnvironment().getContainer().getShape()
+        return workspace_with_container.sample().getEnvironment().getContainer().getShape()
 
 
 def get_valid_component_meshes_from_workspace(workspace):
@@ -239,7 +239,7 @@ def get_valid_component_meshes_from_workspace(workspace):
 
 def get_component_shape_from_workspace(workspace_with_components, component_index):
     if workspace_with_components.sample():
-        return lab_frame_sample(workspace_with_components).getEnvironment().getComponent(component_index)
+        return workspace_with_components.sample().getEnvironment().getComponent(component_index)
 
 
 def plot_sample_only(figure, mesh, alpha=1.0, specified_face_color=None):

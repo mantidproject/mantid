@@ -9,7 +9,7 @@ from mantid.kernel import logger
 
 
 def lab_frame_sample(workspace):
-    """The sample, and any environment, where the goniometer puts them; as defined if they cannot be turned."""
+    """The sample where the goniometer puts it, or as defined if it cannot be turned. Any environment is as defined."""
     try:
         return workspace.getLabFrameSample()
     except ValueError as err:  # a CSG shape built from surfaces, e.g. SaveHKL's sphere, has no XML to turn

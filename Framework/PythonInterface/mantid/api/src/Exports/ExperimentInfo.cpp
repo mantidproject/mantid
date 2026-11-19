@@ -145,8 +145,8 @@ void export_ExperimentInfo() {
            "already-rotated shape a second time. This applies only what is outstanding; the "
            "workspace's own sample is unchanged. A sample in an environment is returned as defined.")
       .def("getLabFrameSample", &getLabFrameSample, args("self"),
-           "Return a copy of the :class:`~mantid.api.Sample` with its shape, and the environment around "
-           "it, where the goniometer puts them in the lab frame. See getLabFrameSampleShape.")
+           "Return a copy of the :class:`~mantid.api.Sample` carrying the shape getLabFrameSampleShape "
+           "gives. The environment is not currently rotated by the goniometer, so it is copied as defined.")
       .def("run", &ExperimentInfo::run, return_value_policy<reference_existing_object>(), args("self"),
            "Return the :class:`~mantid.api.Run` object. This cannot be "
            "modified, use mutableRun to modify.")
