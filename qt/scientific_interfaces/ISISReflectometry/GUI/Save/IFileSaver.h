@@ -47,7 +47,6 @@ public:
   ORSOModelOptions(std::map<std::string, std::string> workspaceModels = {}, bool validate = false);
   std::map<std::string, std::string> const &workspaceModels() const;
   std::string model(std::string const &workspaceName) const;
-  std::vector<std::string> models(std::vector<std::string> const &workspaceNames) const;
   bool validate() const;
 
 private:

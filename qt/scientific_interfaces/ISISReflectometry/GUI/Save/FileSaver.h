@@ -36,8 +36,7 @@ private:
                              std::vector<std::string> const &logParameters, FileFormatOptions const &fileFormat) const;
 
   void runSaveORSOAlgorithm(std::string const &savePath, std::vector<std::string> const &workspaceNames,
-                            std::vector<std::string> const &models, FileFormatOptions const &fileFormat,
-                            ORSOModelOptions const &modelOptions) const;
+                            FileFormatOptions const &fileFormat, ORSOModelOptions const &modelOptions) const;
 
   std::string assembleSavePath(std::string const &saveDirectory, std::string const &prefix, std::string const &name,
                                std::string const &extension) const;
@@ -45,7 +44,7 @@ private:
   Mantid::API::Workspace_sptr workspace(std::string const &workspaceName) const;
   void save(Mantid::API::Workspace_sptr const &workspace, std::string const &saveDirectory,
             std::vector<std::string> const &logParameters, FileFormatOptions const &fileFormat,
-            std::string const &model, ORSOModelOptions const &modelOptions) const;
+            ORSOModelOptions const &modelOptions) const;
 
   void saveToSingleFile(std::vector<std::string> const &workspaceNames, std::string const &saveDirectory,
                         FileFormatOptions const &fileFormat, ORSOModelOptions const &modelOptions) const;

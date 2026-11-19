@@ -147,33 +147,47 @@ public:
                                                  expectedFileName);
   }
 
-  void test_save_orso_passes_model_for_each_workspace_saved_to_single_file() {
+  void test_save_orso_passes_models_for_workspaces_saved_to_single_file() {
     createWorkspaces({"ws_1", "ws_2", "ws_3"});
     auto const modelOptions = ORSOModelOptions({{"ws_1", "air | Ni 100 | Si"}, {"ws_3", "air | Si"}}, true);
-    auto const expectedModels = std::vector<std::string>{"air | Ni 100 | Si", "", "air | Si"};
 
-    runTestSaveORSOWithModels({"ws_1", "ws_2", "ws_3"}, modelOptions, {expectedModels}, true);
+    runTestSaveORSOWithModels(
+        {"ws_1", "ws_2", "ws_3"}, modelOptions,
+        {{{"ws_1", "ws_2", "ws_3"}, R"({"ws_1":{"model":"air | Ni 100 | Si"},"ws_3":{"model":"air | Si"}})"}}, true);
   }
 
   void test_save_orso_passes_model_for_each_workspace_saved_to_separate_files() {
     createWorkspaces({"ws_1", "ws_2"});
     auto const modelOptions = ORSOModelOptions({{"ws_1", "air | Ni 100 | Si"}, {"ws_2", "air | Si"}}, true);
 
-    runTestSaveORSOWithModels({"ws_1", "ws_2"}, modelOptions, {{"air | Ni 100 | Si"}, {"air | Si"}}, false);
+    runTestSaveORSOWithModels(
+        {"ws_1", "ws_2"}, modelOptions,
+        {{{"ws_1"}, R"({"ws_1":{"model":"air | Ni 100 | Si"}})"}, {{"ws_2"}, R"({"ws_2":{"model":"air | Si"}})"}},
+        false);
   }
 
   void test_save_orso_uses_group_model_for_child_workspaces_saved_to_separate_files() {
     createWorkspaceGroup("ws_grp_1", {"ws_1", "ws_2"});
     auto const modelOptions = ORSOModelOptions({{"ws_grp_1", "air | Ni 100 | Si"}}, false);
 
-    runTestSaveORSOWithModels({"ws_grp_1"}, modelOptions, {{"air | Ni 100 | Si"}, {"air | Ni 100 | Si"}}, false);
+    runTestSaveORSOWithModels({"ws_grp_1"}, modelOptions,
+                              {{{"ws_1"}, R"({"ws_1":{"model":"air | Ni 100 | Si"}})"},
+                               {{"ws_2"}, R"({"ws_2":{"model":"air | Ni 100 | Si"}})"}},
+                              false);
   }
 
   void test_save_orso_uses_group_model_when_saving_group_to_single_file() {
     createWorkspaceGroup("ws_grp_1", {"ws_1", "ws_2"});
     auto const modelOptions = ORSOModelOptions({{"ws_grp_1", "air | Ni 100 | Si"}}, false);
 
-    runTestSaveORSOWithModels({"ws_grp_1"}, modelOptions, {{"air | Ni 100 | Si"}}, true);
+    runTestSaveORSOWithModels({"ws_grp_1"}, modelOptions,
+                              {{{"ws_grp_1"}, R"({"ws_grp_1":{"model":"air | Ni 100 | Si"}})"}}, true);
+  }
+
+  void test_save_orso_passes_empty_metadata_when_there_are_no_models() {
+    createWorkspaces({"ws_1", "ws_2"});
+
+    runTestSaveORSOWithModels({"ws_1", "ws_2"}, m_modelOptions, {{{"ws_1", "ws_2"}, ""}}, true);
   }
 
   void test_invalid_save_path_throws_exception() {
@@ -211,22 +225,22 @@ private:
     return ws;
   }
 
+  /// The workspaces saved by one run of the save algorithm, and the dataset metadata JSON passed to it
+  using ExpectedORSOSave = std::pair<std::vector<std::string>, std::string>;
+
   void runTestSaveORSOWithModels(std::vector<std::string> const &workspacesToSave, ORSOModelOptions const &modelOptions,
-                                 std::vector<std::vector<std::string>> const &expectedModelsPerSave,
-                                 const bool saveAsSingleFile) {
+                                 std::vector<ExpectedORSOSave> const &expectedSaves, const bool saveAsSingleFile) {
     auto mockSaveAlgorithmRunner = std::make_unique<MockSaveAlgorithmRunner>();
     auto mockFileHandler = MockFileHandler();
     std::vector<std::string> logParams;
     auto formatOptions = createFileFormatOptions(NamedFormat::ORSOAscii, saveAsSingleFile);
 
     expectIsValidSaveDirectory(mockFileHandler);
-    std::map<std::vector<std::string>, int> expectedCallCounts;
-    for (auto const &expectedModels : expectedModelsPerSave)
-      ++expectedCallCounts[expectedModels];
-    for (auto const &[expectedModels, count] : expectedCallCounts) {
-      EXPECT_CALL(*mockSaveAlgorithmRunner, runSaveORSOAlgorithm(_, _, m_includeQResolution, m_includeAdditionalColumns,
-                                                                 expectedModels, modelOptions.validate()))
-          .Times(count);
+    for (auto const &[expectedWorkspaces, expectedMetadata] : expectedSaves) {
+      EXPECT_CALL(*mockSaveAlgorithmRunner,
+                  runSaveORSOAlgorithm(expectedWorkspaces, _, m_includeQResolution, m_includeAdditionalColumns,
+                                       expectedMetadata, modelOptions.validate()))
+          .Times(1);
     }
 
     auto saver = createSaver(std::move(mockSaveAlgorithmRunner), mockFileHandler);

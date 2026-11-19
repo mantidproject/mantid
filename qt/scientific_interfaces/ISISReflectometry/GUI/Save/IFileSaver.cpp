@@ -6,8 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IFileSaver.h"
 
-#include <algorithm>
-#include <iterator>
 #include <utility>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
@@ -60,16 +58,5 @@ bool ORSOModelOptions::validate() const { return m_validate; }
 std::string ORSOModelOptions::model(std::string const &workspaceName) const {
   auto const it = m_workspaceModels.find(workspaceName);
   return it != m_workspaceModels.cend() ? it->second : "";
-}
-
-/** Get the model descriptions for a list of workspaces
- * @return : a list with one model for each workspace, with an empty string for a workspace that has no model
- */
-std::vector<std::string> ORSOModelOptions::models(std::vector<std::string> const &workspaceNames) const {
-  std::vector<std::string> models;
-  models.reserve(workspaceNames.size());
-  std::transform(workspaceNames.cbegin(), workspaceNames.cend(), std::back_inserter(models),
-                 [this](auto const &workspaceName) { return model(workspaceName); });
-  return models;
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
