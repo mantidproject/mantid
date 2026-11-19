@@ -43,7 +43,13 @@ public:
     MPIAlgorithms::BroadcastWorkspace broadcaster;
     TS_ASSERT_THROWS_NOTHING(broadcaster.initialize());
     TS_ASSERT_THROWS_NOTHING(broadcaster.setPropertyValue("OutputWorkspace", "blah"));
-    TS_ASSERT_THROWS(broadcaster.setProperty("BroadcasterRank", 1), const std::invalid_argument &);
+    TS_ASSERT_THROWS(broadcaster.setProperty("BroadcasterRank", -1), const std::invalid_argument &);
+    // The upper bound depends on the number of processes, so it is only checked once the algorithm runs
+    TS_ASSERT_THROWS_NOTHING(broadcaster.setProperty("BroadcasterRank", 1));
+    const auto issues = broadcaster.validateInputs();
+    TS_ASSERT_EQUALS(issues.count("BroadcasterRank"), 1);
+    TS_ASSERT_THROWS(broadcaster.execute(), const std::runtime_error &);
+    TS_ASSERT(!broadcaster.isExecuted());
   }
 
   void testExecute() {
