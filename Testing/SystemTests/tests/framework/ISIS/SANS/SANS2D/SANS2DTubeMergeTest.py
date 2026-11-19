@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import systemtesting
-from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
+from isis_sans_system_test import ISISSansSystemTest
 from sans.common.enums import SANSInstrument
 
 from mantid.simpleapi import SANSTubeMerge

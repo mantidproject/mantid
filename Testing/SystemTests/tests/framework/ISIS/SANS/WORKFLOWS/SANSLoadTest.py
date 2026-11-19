@@ -8,7 +8,7 @@
 
 import unittest
 import systemtesting
-from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
+from isis_sans_system_test import ISISSansSystemTest
 
 from mantid.dataobjects import Workspace2D, EventWorkspace
 from mantid.api import AnalysisDataService, AlgorithmManager
