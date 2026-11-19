@@ -1,0 +1,1 @@
+- :ref:`Integration <algm-Integration>` no longer sets the output X values to very large numbers when ``IncludePartialBins`` is used without ``RangeLower`` or ``RangeUpper``. They are now the first or last bin edge of the spectrum.

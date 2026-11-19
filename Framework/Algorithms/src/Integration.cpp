@@ -328,6 +328,11 @@ void Integration::exec() {
       std::tie(lowerLimit, upperLimit) =
           limitConverter->convert(static_cast<std::size_t>(i), inSpec.x(), lowerLimit, upperLimit);
     }
+    // A side without a limit is integrated to the end of the spectrum, which is also what the output X records
+    if (lowerLimit == NO_LOWER_LIMIT)
+      lowerLimit = inSpec.x().front();
+    if (upperLimit == EMPTY_DBL())
+      upperLimit = inSpec.x().back();
 
     integrateSpectrum(inSpec, outSpec, Fin, Fout, lowerLimit, upperLimit, incPartBins);
 

@@ -972,7 +972,59 @@ public:
     TS_ASSERT(validationIssues(input, "dSpacing", 10.0, Mantid::EMPTY_DBL(), 1, 1).empty());
   }
 
+  void testPartialBinsWithUpperLimitOnlyStartsAtFirstBinEdge() {
+    // Spectrum 0 of testSpace has X values 0 to 5 and Y values 0, 1, 2, 3, 4
+    const auto output = integrate(testSpace(), "", Mantid::EMPTY_DBL(), 3.5, true);
+
+    TS_ASSERT_EQUALS(output->x(0)[0], 0.0);
+    TS_ASSERT_EQUALS(output->x(0)[1], 3.5);
+    TS_ASSERT_DELTA(output->y(0)[0], 4.5, 1e-10);
+  }
+
+  void testPartialBinsWithLowerLimitOnlyEndsAtLastBinEdge() {
+    const auto output = integrate(testSpace(), "", 1.5, Mantid::EMPTY_DBL(), true);
+
+    TS_ASSERT_EQUALS(output->x(0)[0], 1.5);
+    TS_ASSERT_EQUALS(output->x(0)[1], 5.0);
+    TS_ASSERT_DELTA(output->y(0)[0], 9.5, 1e-10);
+  }
+
+  void testPartialBinsWithoutLimitsCoversWholeSpectrum() {
+    const auto output = integrate(testSpace(), "", Mantid::EMPTY_DBL(), Mantid::EMPTY_DBL(), true);
+
+    TS_ASSERT_EQUALS(output->x(0)[0], 0.0);
+    TS_ASSERT_EQUALS(output->x(0)[1], 5.0);
+    TS_ASSERT_DELTA(output->y(0)[0], 10.0, 1e-10);
+  }
+
+  void testPartialBinsWithConvertedLowerLimitOnlyRunningOppositeToXAxis() {
+    // A lower energy limit becomes an upper time-of-flight limit, so the integration starts at the first bin edge
+    const auto input = createTofWorkspace();
+
+    const auto output = integrate(input, "Energy", 100.0, Mantid::EMPTY_DBL(), true);
+
+    for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
+      TS_ASSERT_EQUALS(output->x(i)[0], 0.0);
+      TS_ASSERT_DELTA(output->x(i)[1], toTOF(*input, i, "Energy", 100.0), 1e-6);
+    }
+  }
+
+  void testPartialBinsWithConvertedUpperLimitOnlyRunningOppositeToXAxis() {
+    const auto input = createTofWorkspace();
+
+    const auto output = integrate(input, "Energy", Mantid::EMPTY_DBL(), 100.0, true);
+
+    for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
+      TS_ASSERT_DELTA(output->x(i)[0], toTOF(*input, i, "Energy", 100.0), 1e-6);
+      TS_ASSERT_EQUALS(output->x(i)[1], 10000.0);
+    }
+  }
+
 private:
+  static MatrixWorkspace_sptr testSpace() {
+    return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("testSpace");
+  }
+
   /// Each bin of createTofWorkspace holds 2 counts and is 100 microseconds wide
   static constexpr double COUNTS_PER_MICROSECOND = 0.02;
 
