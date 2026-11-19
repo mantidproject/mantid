@@ -283,7 +283,7 @@ FileType DetermineChunking::getFileType(const string &filename) {
 bool DetermineChunking::filenameHasExtension(const std::string &filename,
                                              const std::vector<std::string> &fileExtensions) {
   return std::any_of(fileExtensions.cbegin(), fileExtensions.cend(),
-                     [&filename](const auto &extension) { return filename.find(extension) != std::string::npos; });
+                     [&filename](const auto &extension) { return filename.contains(extension); });
 }
 
 } // namespace Mantid::DataHandling

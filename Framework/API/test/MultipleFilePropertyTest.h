@@ -740,7 +740,7 @@ public:
     MultipleFileProperty p("Filename", FileProperty::Load);
     const std::string result = p.setValue("");
     TS_ASSERT_DIFFERS(result, "");
-    TS_ASSERT(result.find("No file(s) specified.") != std::string::npos);
+    TS_ASSERT(result.contains("No file(s) specified."));
   }
 
 private:

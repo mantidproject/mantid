@@ -44,7 +44,7 @@ boost::python::object getEmptyArrayObject() {
 }
 
 boost::python::object wrapMeshWithNDArray(const CSGObject *self) {
-  if (self->getShapeXML().find("infinite") != std::string::npos) {
+  if (self->getShapeXML().contains("infinite")) {
     throw std::runtime_error("Cannot plot Shapes of infinite extent.");
   }
   try {

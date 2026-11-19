@@ -342,7 +342,7 @@ std::string getUnmangledTypeName(const std::type_info &type) {
   N6Mantid6Kernel16EnumeratedStringINS_12_GLOBAL__N_111BinningModeEXadL_ZNS2_L16binningModeNamesEEEXadL_ZNS0_12_GLOBAL__N_114compareStringsEEEEE
   we assume it is a EnumeratedStringProperty and return a "string" for it */
   string type_name = type.name();
-  if (type_name.find("Mantid") != std::string::npos && type_name.find("EnumeratedString") != std::string::npos) {
+  if (type_name.contains("Mantid") && type_name.contains("EnumeratedString")) {
     return "string";
   }
   return type.name();

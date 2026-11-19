@@ -86,13 +86,13 @@ bool QuasiModel::isResolution(std::string const &workspaceName) const {
 }
 
 std::optional<std::string> QuasiModel::curveColour(std::string const &label) const {
-  if (label.find("fit 1") != std::string::npos) {
+  if (label.contains("fit 1")) {
     return "red";
-  } else if (label.find("fit 2") != std::string::npos) {
+  } else if (label.contains("fit 2")) {
     return "magenta";
-  } else if (label.find("diff 1") != std::string::npos) {
+  } else if (label.contains("diff 1")) {
     return "blue";
-  } else if (label.find("diff 2") != std::string::npos) {
+  } else if (label.contains("diff 2")) {
     return "cyan";
   }
   return std::nullopt;

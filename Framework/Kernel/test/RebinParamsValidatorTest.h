@@ -45,7 +45,7 @@ public:
 
   void testFailOutOfOrder() {
     std::vector<double> vec = {1.0, 0.1, 2.0, 0.2, 1.5};
-    TS_ASSERT(standardValidator.isValid(vec).find("Bin boundary values") != std::string::npos);
+    TS_ASSERT(standardValidator.isValid(vec).contains("Bin boundary values"));
   }
 
   void testFailZeroBin_only() {

@@ -1094,7 +1094,7 @@ public:
     } catch (const std::runtime_error &e) {
       const std::string msg{e.what()};
       TSM_ASSERT("Expected message to contain 'stream ended before workspace initialization'",
-                 msg.find("stream ended before workspace initialization") != std::string::npos);
+                 msg.contains("stream ended before workspace initialization"));
     } catch (...) {
       TS_FAIL("Expected std::runtime_error but got a different exception type");
     }
@@ -1114,7 +1114,7 @@ public:
     } catch (const std::runtime_error &e) {
       const std::string msg{e.what()};
       TSM_ASSERT("Expected 'stream ended before workspace initialization'",
-                 msg.find("stream ended before workspace initialization") != std::string::npos);
+                 msg.contains("stream ended before workspace initialization"));
     } catch (...) {
       TS_FAIL("Expected std::runtime_error but got a different exception type");
     }
@@ -1151,7 +1151,7 @@ public:
     } catch (const std::runtime_error &e) {
       const std::string msg{e.what()};
       TSM_ASSERT("Expected 'stream ended after server disconnect'",
-                 msg.find("stream ended after server disconnect") != std::string::npos);
+                 msg.contains("stream ended after server disconnect"));
     } catch (...) {
       TS_FAIL("Expected std::runtime_error but got a different exception type");
     }
@@ -1275,8 +1275,7 @@ public:
       TS_FAIL("Expected std::runtime_error from extractData() — nothing was thrown");
     } catch (const std::runtime_error &e) {
       const std::string msg{e.what()};
-      TSM_ASSERT("Expected message to contain 'SNSLiveEventDataListener:'",
-                 msg.find("SNSLiveEventDataListener:") != std::string::npos);
+      TSM_ASSERT("Expected message to contain 'SNSLiveEventDataListener:'", msg.contains("SNSLiveEventDataListener:"));
     } catch (...) {
       TS_FAIL("Expected std::runtime_error but got a different exception type");
     }
@@ -1339,7 +1338,7 @@ public:
       TS_FAIL("Expected stream-ended throw on second extract — nothing thrown");
     } catch (const std::runtime_error &e) {
       const std::string msg{e.what()};
-      TSM_ASSERT("Expected 'stream ended' message", msg.find("stream ended") != std::string::npos);
+      TSM_ASSERT("Expected 'stream ended' message", msg.contains("stream ended"));
     } catch (...) {
       TS_FAIL("Unexpected exception type on second extract");
     }
@@ -1448,7 +1447,7 @@ public:
       // Check 2 ("stream ended after server disconnect").  Both contain
       // "stream ended" — verify the invariant without over-specifying which
       // check fires.
-      TSM_ASSERT("Expected 'stream ended' message", msg.find("stream ended") != std::string::npos);
+      TSM_ASSERT("Expected 'stream ended' message", msg.contains("stream ended"));
     } catch (...) {
       TS_FAIL("Unexpected exception type on third extract");
     }
@@ -1570,7 +1569,7 @@ public:
     } catch (const std::runtime_error &e) {
       const std::string msg{e.what()};
       TSM_ASSERT("Expected 'stream ended after server disconnect'",
-                 msg.find("stream ended after server disconnect") != std::string::npos);
+                 msg.contains("stream ended after server disconnect"));
     } catch (...) {
       TS_FAIL("Unexpected exception type on third extract");
     }
@@ -1622,7 +1621,7 @@ public:
       TS_FAIL("Expected stream-ended throw on third extract — nothing thrown");
     } catch (const std::runtime_error &e) {
       const std::string msg{e.what()};
-      TSM_ASSERT("Expected 'stream ended' message", msg.find("stream ended") != std::string::npos);
+      TSM_ASSERT("Expected 'stream ended' message", msg.contains("stream ended"));
     } catch (...) {
       TS_FAIL("Unexpected exception type on third extract");
     }

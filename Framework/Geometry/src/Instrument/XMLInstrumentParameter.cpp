@@ -190,7 +190,7 @@ double XMLInstrumentParameter::createParamValue(const TimeSeriesProperty<double>
 
   // check if more than one 'value' in m_eq
 
-  while (equationStr.find("value") != std::string::npos) {
+  while (equationStr.contains("value")) {
     found = equationStr.find("value");
     equationStr.replace(found, 5, extractedValueStr);
   }

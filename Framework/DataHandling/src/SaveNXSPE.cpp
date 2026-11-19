@@ -75,7 +75,7 @@ void SaveNXSPE::init() {
 std::map<std::string, std::string> SaveNXSPE::validateInputs() {
   std::map<std::string, std::string> issues;
   std::string inputWS = getPropertyValue("InputWorkspace");
-  if (inputWS.find("/") != std::string::npos) {
+  if (inputWS.contains("/")) {
     issues["InputWorkspace"] = "The input workspace name cannot contain a '/' character.";
   }
   return issues;

@@ -150,7 +150,7 @@ bool LoadAscii2::setDistribution(std::ifstream &file) {
     file.clear();
     file.seekg(0);
     while (std::getline(file, newLine)) {
-      if (newLine.find("Distribution=true") != std::string::npos) {
+      if (newLine.contains("Distribution=true")) {
         isDistribution = true;
         break;
       }

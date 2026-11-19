@@ -435,8 +435,8 @@ public:
   void test_getFunctionNamesGUI() {
     const auto &names = FunctionFactory::Instance().getFunctionNamesGUI();
     TS_ASSERT(!names.empty());
-    auto i = std::find_if(names.begin(), names.end(),
-                          [](const std::string &name) { return name.find("CrystalField") != std::string::npos; });
+    auto i =
+        std::find_if(names.begin(), names.end(), [](const std::string &name) { return name.contains("CrystalField"); });
     TS_ASSERT(i == names.end());
   }
 };

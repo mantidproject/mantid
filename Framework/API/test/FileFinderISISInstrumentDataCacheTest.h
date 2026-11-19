@@ -158,7 +158,7 @@ public:
       TS_ASSERT(!fileInfo.found);
       TS_ASSERT_EQUALS(fileInfo.path.generic_string(), "");
       if (fileInfo.hint == "GEM90421")
-        TS_ASSERT(fileInfo.errorMsg.find("Permission denied") != std::string::npos);
+        TS_ASSERT(fileInfo.errorMsg.contains("Permission denied"));
     }
   }
 };

@@ -368,7 +368,7 @@ void Run::integrateProtonCharge(const std::string &logname) const {
 
     const std::string &unit = log->units();
     // Do we need to take account of a unit
-    if (unit.find("picoCoulomb") != std::string::npos) {
+    if (unit.contains("picoCoulomb")) {
       /// Conversion factor between picoColumbs and microAmp*hours
       const double currentConversion = 1.e-6 / 3600.;
       total *= currentConversion;

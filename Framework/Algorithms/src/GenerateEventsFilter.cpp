@@ -244,10 +244,10 @@ void GenerateEventsFilter::processInputTime() {
 
   // Determine format
   bool instringformat = true;
-  if (!defaultstart && s_inpt0.find(':') == std::string::npos) {
+  if (!defaultstart && !s_inpt0.contains(':')) {
     // StartTime is not empty and does not contain ":": not ISO
     instringformat = false;
-  } else if (!defaultstop && s_inptf.find(':') == std::string::npos) {
+  } else if (!defaultstop && !s_inptf.contains(':')) {
     // StopTime is not empty and does not contain ":": not ISO format
     instringformat = false;
   }

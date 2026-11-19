@@ -43,7 +43,7 @@ double stringToRoundedNumber(const std::string &s) {
   // Unfortunately,
   // commas seem to confuse it ("0,0,0" is converted to "0" without any
   // warning).
-  const bool containsComma = s.find(",") != std::string::npos;
+  const bool containsComma = s.contains(",");
   if (containsComma)
     throw std::runtime_error("string contains a comma");
 

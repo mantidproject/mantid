@@ -1859,29 +1859,29 @@ private:
 
     using SCompT = std::pair<int, std::string>;
     std::vector<SCompT> SurfLine;
-    if (desired.find("60001") != std::string::npos)
+    if (desired.contains("60001"))
       SurfLine.emplace_back(SCompT(60001, "px -1"));
-    if (desired.find("60002") != std::string::npos)
+    if (desired.contains("60002"))
       SurfLine.emplace_back(SCompT(60002, "px 1"));
-    if (desired.find("60003") != std::string::npos)
+    if (desired.contains("60003"))
       SurfLine.emplace_back(SCompT(60003, "py -2"));
-    if (desired.find("60004") != std::string::npos)
+    if (desired.contains("60004"))
       SurfLine.emplace_back(SCompT(60004, "py 2"));
-    if (desired.find("60005") != std::string::npos)
+    if (desired.contains("60005"))
       SurfLine.emplace_back(SCompT(60005, "pz -3"));
-    if (desired.find("60006") != std::string::npos)
+    if (desired.contains("60006"))
       SurfLine.emplace_back(SCompT(60006, "pz 3"));
 
-    if (desired.find("80001") != std::string::npos)
+    if (desired.contains("80001"))
       SurfLine.emplace_back(SCompT(80001, "px 4.5"));
-    if (desired.find("80002") != std::string::npos)
+    if (desired.contains("80002"))
       SurfLine.emplace_back(SCompT(80002, "px 6.5"));
 
-    if (desired.find("71") != std::string::npos)
+    if (desired.contains("71"))
       SurfLine.emplace_back(SCompT(71, "so 0.8"));
-    if (desired.find("72") != std::string::npos)
+    if (desired.contains("72"))
       SurfLine.emplace_back(SCompT(72, "s -0.7 0 0 0.3"));
-    if (desired.find("73") != std::string::npos)
+    if (desired.contains("73"))
       SurfLine.emplace_back(SCompT(73, "s 0.6 0 0 0.4"));
 
     // Note that the testObject now manages the "new Plane"

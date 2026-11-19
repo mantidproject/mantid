@@ -82,7 +82,7 @@ public:
     std::string fullline;
     auto it = data.begin();
     while (std::getline(in, fullline)) {
-      if (fullline.find(" : ") == std::string::npos)
+      if (!fullline.contains(" : "))
         TS_ASSERT_EQUALS(fullline, *(it++));
     }
     TS_ASSERT(in.eof())
@@ -121,7 +121,7 @@ public:
     auto it = data.begin();
     TS_ASSERT(not_empty(in))
     while (std::getline(in, fullline)) {
-      if (fullline.find(" : ") == std::string::npos)
+      if (!fullline.contains(" : "))
         TS_ASSERT_EQUALS(fullline, *(it++))
     }
     TS_ASSERT(in.eof())
@@ -205,7 +205,7 @@ public:
     std::string fullline;
     auto it = data.begin();
     while (std::getline(in, fullline)) {
-      if (fullline.find(" : ") == std::string::npos)
+      if (!fullline.contains(" : "))
         TS_ASSERT_EQUALS(fullline, *(it++))
     }
     in.close();
@@ -675,7 +675,7 @@ public:
     std::string fullline;
     auto it = data.begin();
     while (std::getline(in, fullline)) {
-      if (fullline.find(" : ") == std::string::npos)
+      if (!fullline.contains(" : "))
         TS_ASSERT_EQUALS(fullline, *(it++))
     }
 
@@ -717,7 +717,7 @@ public:
     std::string fullline;
     auto it = data.begin();
     while (std::getline(in, fullline)) {
-      if (fullline.find(" : ") == std::string::npos)
+      if (!fullline.contains(" : "))
         TS_ASSERT_EQUALS(fullline, *(it++))
     }
 

@@ -531,7 +531,7 @@ std::vector<std::string> ScriptRepositoryImpl::listFiles() {
 
     // is this entry a child of the last directory?
     if (!last_directory.empty()) {
-      if (entry_path.find(last_directory) == std::string::npos) {
+      if (!entry_path.contains(last_directory)) {
         // no, this entry is not a child of the last directory
         // restart the status
         acc_status = Mantid::API::BOTH_UNCHANGED;
@@ -724,7 +724,7 @@ void ScriptRepositoryImpl::download_file(const std::string &file_path, Repositor
     const char *python_sc_option = "pythonscripts.directories";
     ConfigServiceImpl &config = ConfigService::Instance();
     std::string python_dir = config.getString(python_sc_option);
-    if (python_dir.find(dir_path) == std::string::npos) {
+    if (!python_dir.contains(dir_path)) {
       // this means that the directory is not inside the
       // pythonscripts.directories
       // add to the repository
@@ -950,7 +950,7 @@ void ScriptRepositoryImpl::doDownloadFile(const std::string &url_file, const std
   if (path.empty())
     path = "/";
   std::string given_path;
-  if (path.find("/scriptrepository") != std::string::npos)
+  if (path.contains("/scriptrepository"))
     given_path = std::string(path.begin() + 18,
                              path.end()); // remove the "/scriptrepository/" from the path
   else

@@ -574,7 +574,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(ws2.loadExperimentInfoNexus(filename, th.file.get(), parameterStr));
     Instrument_const_sptr inst = ws2.getInstrument();
     TS_ASSERT_EQUALS(ws2.getInstrumentName(), "GEM");
-    TS_ASSERT(inst->getFilename().find("GEM_Definition.xml", 0) != std::string::npos);
+    TS_ASSERT(inst->getFilename().contains("GEM_Definition.xml"));
     TS_ASSERT_EQUALS(parameterStr, "");
   }
 

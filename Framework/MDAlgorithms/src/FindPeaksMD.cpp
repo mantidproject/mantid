@@ -444,7 +444,7 @@ template <typename MDE, size_t nd> void FindPeaksMD::findPeaks(typename MDEventW
   prog = std::make_unique<Progress>(this, 0.30, 0.95, m_maxPeaks);
 
   // used for selecting method for calculating BinCount
-  bool isMDEvent(ws->id().find("MDEventWorkspace") != std::string::npos);
+  bool isMDEvent(ws->id().contains("MDEventWorkspace"));
 
   int64_t numBoxesFound = 0;
   // Now we go (backwards) through the map

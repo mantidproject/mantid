@@ -266,7 +266,7 @@ void MuonNexusReader::readLogData(const string &filename) {
     }
     if (nxname == START_TIME) {
       handle.readData(START_TIME, m_startTime);
-      if ((m_startTime.find('T')) != string::npos)
+      if (m_startTime.contains('T'))
         m_startTime.replace(m_startTime.find('T'), 1, " ");
       boost::posix_time::ptime pt = boost::posix_time::time_from_string(m_startTime);
       m_startTime_time_t = to_time_t(pt);

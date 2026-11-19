@@ -518,12 +518,12 @@ void SetupEQSANSReduction::exec() {
   // If we normalize to monitor, force the loading of monitor data
   auto normAlg = createChildAlgorithm("EQSANSNormalise");
 
-  if (boost::contains(normalization, "BeamProfileAndCharge")) {
+  if (normalization.contains("BeamProfileAndCharge")) {
     normAlg->setProperty("NormaliseToBeam", true);
     normAlg->setProperty("BeamSpectrumFile", monitorRefFile);
-  } else if (boost::contains(normalization, "Charge")) {
+  } else if (normalization.contains("Charge")) {
     normAlg->setProperty("NormaliseToBeam", false);
-  } else if (boost::contains(normalization, "Monitor")) {
+  } else if (normalization.contains("Monitor")) {
     if (monitorRefFile.empty()) {
       g_log.error() << "ERROR: normalize-to-monitor was turned ON but no "
                        "reference data was selected\n";

@@ -149,17 +149,17 @@ int LoadRKH::confidence(Kernel::FileDescriptor &descriptor) const {
 
   // read 3rd line - should contain sequence "0    0    0    1"
   std::getline(file, fileline);
-  if (fileline.find("0    0    0    1") == std::string::npos)
+  if (!fileline.contains("0    0    0    1"))
     return 0;
 
   // read 4th line - should contain sequence ""0         0         0         0"
   std::getline(file, fileline);
-  if (fileline.find("0         0         0         0") == std::string::npos)
+  if (!fileline.contains("0         0         0         0"))
     return 0;
 
   // read 5th line - should contain sequence "3 (F12.5,2E16.6)"
   std::getline(file, fileline);
-  if (fileline.find("3 (F12.5,2E16.6)") == std::string::npos)
+  if (!fileline.contains("3 (F12.5,2E16.6)"))
     return 0;
 
   return 20; // Better than LoadAscii

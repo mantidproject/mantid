@@ -294,7 +294,7 @@ std::string checkForBadConfigOptions(const std::string &filename, const std::str
     // out.
     if (line.empty() || (Kernel::Strings::strip(line)[0] == '#')) {
       // do nothing
-    } else if (line.find("FilterChannel") != std::string::npos) {
+    } else if (line.contains("FilterChannel")) {
       is_ok = false;
     }
 
@@ -1183,7 +1183,7 @@ std::string ConfigServiceImpl::getOSVersionReadable() {
     // go through the file
     std::string line;
     while (std::getline(handle, line)) {
-      if (line.find(PRETTY_NAME) != std::string::npos) {
+      if (line.contains(PRETTY_NAME)) {
         if (line.length() > PRETTY_NAME.length() + 1) {
           size_t length = line.length() - PRETTY_NAME.length() - 2;
           description = line.substr(PRETTY_NAME.length() + 1, length);
@@ -2022,7 +2022,7 @@ std::string ConfigServiceImpl::getFullPath(const std::string &filename, const bo
 // For this reason, and since windows is case insensitive anyway
 // a special case is made for windows
 #ifdef _WIN32
-    if (fName.find("*") != std::string::npos) {
+    if (fName.contains("*")) {
 #endif
       std::filesystem::path path = std::filesystem::path(searchPath) / fName;
       std::set<std::string> files;

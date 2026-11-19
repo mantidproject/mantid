@@ -1091,9 +1091,9 @@ QMap<int, QColor> getWorkspaceColors(const std::vector<Workspace_sptr> &workspac
     if (const auto group = std::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
       for (size_t i = 0; i < group->size(); ++i) {
         const auto &wsInGroup = group->getItem(i);
-        if (wsInGroup->getName().find("_Parameters") != std::string::npos) {
+        if (wsInGroup->getName().contains("_Parameters")) {
           params = getKeysFromTable(std::dynamic_pointer_cast<ITableWorkspace>(wsInGroup));
-        } else if (wsInGroup->getName().find("_Workspace") != std::string::npos) {
+        } else if (wsInGroup->getName().contains("_Workspace")) {
           ++nRuns;
         }
       }

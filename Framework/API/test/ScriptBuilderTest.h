@@ -580,8 +580,8 @@ public:
     ScriptBuilder builder(wsHist.createView());
     std::string scriptText = builder.build();
 
-    TS_ASSERT(scriptText.find(dead_time_string) != std::string::npos);
-    TS_ASSERT(scriptText.find(grouping_string) != std::string::npos);
+    TS_ASSERT(scriptText.contains(dead_time_string));
+    TS_ASSERT(scriptText.contains(grouping_string));
 
     m_ads.remove("MUSR00022725");
   }
@@ -601,8 +601,8 @@ public:
     std::string scriptText = builder.build();
     const std::string input_string = "IRS21360.raw";
     const std::string output_string = "IRS21360";
-    TS_ASSERT(scriptText.find(input_string) != std::string::npos);
-    TS_ASSERT(scriptText.find(output_string) != std::string::npos);
+    TS_ASSERT(scriptText.contains(input_string));
+    TS_ASSERT(scriptText.contains(output_string));
 
     m_ads.remove("IRS21360");
   }
@@ -638,8 +638,8 @@ public:
         "ws = CreateWorkspace(DataX='1,2,3', DataY='1,2,3', StoreInADS=False)";
     const std::string expectedRebinLine =
         "Rebin(InputWorkspace=ws, OutputWorkspace='result', Params='1,3,10', Power=0.5)";
-    TS_ASSERT(scriptText.find(expectedCreateWorkspaceLine) != std::string::npos);
-    TS_ASSERT(scriptText.find(expectedRebinLine) != std::string::npos);
+    TS_ASSERT(scriptText.contains(expectedCreateWorkspaceLine));
+    TS_ASSERT(scriptText.contains(expectedRebinLine));
   }
 
 private:

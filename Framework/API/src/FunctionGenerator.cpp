@@ -297,7 +297,7 @@ bool FunctionGenerator::isSourceName(const std::string &aName) const {
   if (aName.empty()) {
     throw std::invalid_argument("Parameter or attribute name cannot be empty string.");
   }
-  return (aName.front() != 'f' || aName.find('.') == std::string::npos);
+  return (aName.front() != 'f' || !aName.contains('.'));
 }
 
 /// Update spectrum function if necessary.

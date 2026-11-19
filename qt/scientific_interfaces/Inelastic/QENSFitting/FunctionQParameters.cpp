@@ -22,7 +22,7 @@ std::vector<PairNameSpectra> findAxisLabels(TextAxis const *axis, std::vector<st
   for (auto i = 0u; i < axis->length(); ++i) {
     auto const label = axis->label(i);
     if (std::any_of(parameterSuffixes.cbegin(), parameterSuffixes.cend(),
-                    [&](auto const &str) { return label.rfind(str) != std::string::npos; })) {
+                    [&](auto const &str) { return label.contains(str); })) {
       labelAndSpectra.emplace_back(std::make_pair(label, i));
     }
   }
