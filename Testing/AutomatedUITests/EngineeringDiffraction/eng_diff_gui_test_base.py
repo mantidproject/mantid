@@ -513,7 +513,7 @@ def _fill_ceria_peaks(ws, tof, full_calib, expected_d_values):
     d_values = [d for d in expected_d_values if _D_MIN <= d <= _D_MAX]
 
     for index in range(ws.getNumberHistograms()):
-        difc = difc_by_detid.get(ws.getDetector(index).getID())
+        difc = difc_by_detid.get(ws.getSpectrum(index).getDetectorIDs()[0])
         if difc is None:
             # no calibration entry for this detector, so leave it as background only
             ws.setSharedY(index, background)
