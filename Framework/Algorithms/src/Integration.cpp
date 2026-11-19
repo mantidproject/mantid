@@ -124,8 +124,14 @@ public:
       };
 
       if (hasLower && hasUpper) {
+        const double convertedLower = toX(lower);
+        const double convertedUpper = toX(upper);
+        // Some spectra convert every value to the same result instead of failing, e.g. a monitor has no d-spacing
+        if (lower < upper && convertedLower == convertedUpper)
+          throw std::runtime_error("the spectrum does not support this conversion, as both limits convert to " +
+                                   std::to_string(convertedLower));
         // The units may run in opposite directions, e.g. energy falls as time-of-flight rises
-        limits = std::minmax({toX(lower), toX(upper)});
+        limits = std::minmax({convertedLower, convertedUpper});
       } else if (hasLower || hasUpper) {
         const double first = toRangeUnit(x.front());
         const double last = toRangeUnit(x.back());

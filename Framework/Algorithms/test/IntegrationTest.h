@@ -972,6 +972,22 @@ public:
     TS_ASSERT(validationIssues(input, "dSpacing", 10.0, Mantid::EMPTY_DBL(), 1, 1).empty());
   }
 
+  void testMonitorWithBothLimitsInUnsupportedUnitIsAnIssue() {
+    // Both d-spacing limits convert to zero time-of-flight for a monitor, rather than failing
+    const auto input = createTofWorkspace(4, true);
+
+    assertIssue(validationIssues(input, "dSpacing", 10.0, 20.0, 1), "RangeUnit", "workspace index 2");
+    TS_ASSERT(validationIssues(input, "dSpacing", 10.0, 20.0, 1, 1).empty());
+  }
+
+  void testDetectorOnBeamAxisWithBothLimitsInDSpacingIsAnIssue() {
+    // The first detector is on the beam axis, so has no d-spacing. The others do.
+    const auto input = createTofWorkspace();
+
+    assertIssue(validationIssues(input, "dSpacing", 10.0, 20.0), "RangeUnit", "workspace index 0");
+    TS_ASSERT(validationIssues(input, "dSpacing", 10.0, 20.0, 1).empty());
+  }
+
   void testPartialBinsWithUpperLimitOnlyStartsAtFirstBinEdge() {
     // Spectrum 0 of testSpace has X values 0 to 5 and Y values 0, 1, 2, 3, 4
     const auto output = integrate(testSpace(), "", Mantid::EMPTY_DBL(), 3.5, true);
