@@ -302,7 +302,6 @@ void QtRunsView::onShowSearchContextMenuRequested(const QPoint &pos) {
 
 /** This is slot is triggered when any of the instrument combo boxes changes. It
  * notifies the main presenter and updates the Slit Calculator
- * @param index : The index of the combo box
  */
 void QtRunsView::onInstrumentChanged() {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(

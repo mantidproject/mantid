@@ -635,7 +635,7 @@ void RunsPresenter::finishHandle([[maybe_unused]] const IAlgorithm *alg) {
 
 /** Handler called when the monitor algorithm errors
  */
-void RunsPresenter::errorHandle([[maybe_unused]] const IAlgorithm *alg, [[maybe_unused]] const std::string &what) {
+void RunsPresenter::errorHandle([[maybe_unused]] const IAlgorithm *alg, const std::string &what) {
   stopObserving(m_monitorAlg);
   m_monitorAlg.reset();
   updateViewWhenMonitorStopped();

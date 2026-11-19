@@ -110,8 +110,7 @@ void TransmissionCalc::algorithmComplete(bool error) {
 }
 
 /**
- * Set the file browser to use the default save directory
- * when browsing for input files.
+ * This interface has no file browser, so there are no settings to restore.
  *
  * @param settings The settings to loading into the interface
  */
