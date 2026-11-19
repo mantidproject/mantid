@@ -25,6 +25,7 @@ from mantid.simpleapi import (
     MoveInstrumentComponent,
     RotateInstrumentComponent,
     SetSample,
+    SetUB,
 )
 
 
@@ -214,6 +215,14 @@ class ExperimentInfoTest(unittest.TestCase):
         gc.collect()
 
         self._assert_upright(container_shape)
+
+    def test_the_lab_frame_lattice_outlives_the_temporary_sample(self):
+        ws = CreateSampleWorkspace()
+        SetUB(ws, a=4.2, b=5.0, c=6.1)
+        lattice = ws.getLabFrameSample().getOrientedLattice()
+        gc.collect()
+
+        self.assertAlmostEqual(lattice.a(), 4.2)
 
 
 if __name__ == "__main__":
