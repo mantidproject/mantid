@@ -96,7 +96,7 @@ void SaveCSV::exec() {
   const std::string workspaceID = inputWorkspace->id();
   // seperating out code depending on the workspace ID
 
-  if (workspaceID.find("Workspace2D") != std::string::npos) {
+  if (workspaceID.contains("Workspace2D")) {
     const Workspace2D_sptr localworkspace = std::dynamic_pointer_cast<Workspace2D>(inputWorkspace);
 
     // Get info from 2D workspace

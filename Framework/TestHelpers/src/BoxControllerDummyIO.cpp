@@ -89,13 +89,13 @@ bool BoxControllerDummyIO::openFile(const std::string &fileName, const std::stri
 
   m_ReadOnly = true;
   ;
-  if (mode.find('w') != std::string::npos || mode.find('W') != std::string::npos) {
+  if (mode.contains('w') || mode.contains('W')) {
     m_ReadOnly = false;
   }
 
   // open file if it exists or crate it if not in the mode requested
   // bool fileExists(true);
-  if (fileName.find("exist") != std::string::npos) {
+  if (fileName.contains("exist")) {
     size_t nEvents = 1000;
     fileContents.assign(nEvents * m_EventSize, 0);
     this->setFileLength(nEvents);

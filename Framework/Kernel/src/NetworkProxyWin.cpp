@@ -22,7 +22,7 @@ bool get_proxy_configuration_win(const std::string &target_url, std::string &pro
   HINTERNET hSession = NULL;
   std::wstring proxy;
   std::wstring wtarget_url;
-  if (target_url.find("http://") == std::string::npos) {
+  if (!target_url.contains("http://")) {
     wtarget_url = L"http://";
   }
   wtarget_url += std::wstring(target_url.begin(), target_url.end());

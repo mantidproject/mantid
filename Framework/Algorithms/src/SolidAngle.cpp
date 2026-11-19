@@ -84,9 +84,9 @@ struct SolidAngleCalculator {
                        const double pixelArea)
       : m_componentInfo(componentInfo), m_detectorInfo(detectorInfo), m_pixelArea(pixelArea),
         m_samplePos(detectorInfo.samplePosition()), m_beamLine(m_samplePos - detectorInfo.sourcePosition()) {
-    if (method.find("Vertical") != std::string::npos) {
+    if (method.contains("Vertical")) {
       m_alphaAngleCalculator = std::make_unique<AlphaAngleVertical>(detectorInfo);
-    } else if (method.find("Horizontal") != std::string::npos) {
+    } else if (method.contains("Horizontal")) {
       m_alphaAngleCalculator = std::make_unique<AlphaAngleHorizontal>(detectorInfo);
     }
   }

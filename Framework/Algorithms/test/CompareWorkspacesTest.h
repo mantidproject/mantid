@@ -938,7 +938,7 @@ public:
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
     table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("compare_msgs");
-    TS_ASSERT(table->cell<std::string>(0, 0).find("Source mismatch") != std::string::npos);
+    TS_ASSERT(table->cell<std::string>(0, 0).contains("Source mismatch"));
 
     // Compare different sample position
     Workspace2D_sptr ws4 = ws->clone(); // shared to unique ptr conversion
@@ -948,7 +948,7 @@ public:
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
     table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("compare_msgs");
-    TS_ASSERT(table->cell<std::string>(0, 0).find("Sample mismatch") != std::string::npos);
+    TS_ASSERT(table->cell<std::string>(0, 0).contains("Sample mismatch"));
   }
 
   void testDifferentParameterMaps() {

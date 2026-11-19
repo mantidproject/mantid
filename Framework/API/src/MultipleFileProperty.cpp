@@ -28,7 +28,7 @@ using namespace Mantid::API;
 namespace {
 Mantid::Kernel::Logger g_log("MultipleFileProperty");
 
-bool doesNotContainWildCard(const std::string &ext) { return std::string::npos == ext.find('*'); }
+bool doesNotContainWildCard(const std::string &ext) { return !ext.contains('*'); }
 
 static const std::string SUCCESS("");
 
@@ -336,7 +336,7 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
   // Cycle through each vector of unresolvedFileNames in allUnresolvedFileNames.
   // Remember, each vector contains files that are to be added together.
   for (const auto &unresolvedFileNames : allUnresolvedFileNames) {
-    const auto hasWildCard = [](const std::string &name) { return name.find('*') != std::string::npos; };
+    const auto hasWildCard = [](const std::string &name) { return name.contains('*'); };
     if (std::any_of(unresolvedFileNames.cbegin(), unresolvedFileNames.cend(), hasWildCard))
       return "Searching for files by wildcards is not currently supported.";
 

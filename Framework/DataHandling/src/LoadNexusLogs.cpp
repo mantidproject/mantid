@@ -595,7 +595,7 @@ void LoadNexusLogs::exec() {
       std::string units;
       file.getAttr("units", units);
       double charge = values.front();
-      if (units.find("picoCoulomb") != std::string::npos) {
+      if (units.contains("picoCoulomb")) {
         charge *= 1.e-06 / 3600.;
       }
       workspace->mutableRun().setProtonCharge(charge);

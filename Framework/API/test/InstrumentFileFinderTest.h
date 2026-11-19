@@ -139,8 +139,8 @@ public:
 
     const auto result = InstrumentFileFinder::getParameterPath("test", tmpDir.string());
     // Ensure file was found and it's in the tmp dir
-    TS_ASSERT(result.find(filename) != std::string::npos);
-    TS_ASSERT(result.find(tmpDir.string()) != std::string::npos);
+    TS_ASSERT(result.contains(filename));
+    TS_ASSERT(result.contains(tmpDir.string()));
 
     std::filesystem::remove(expectedPath);
   }

@@ -341,7 +341,7 @@ bool ALCDataLoadingModel::loadFilesFromWatchingDirectory(const std::string &firs
   if (runNumber == m_lastRunLoadedAuto + 1) {
     // Add as range
     // Check if last added was a range
-    if (newText.find('-') != std::string::npos) {
+    if (newText.contains('-')) {
       // Remove last run number from text
       newText = newText.substr(0, newText.find_last_of('-'));
     }

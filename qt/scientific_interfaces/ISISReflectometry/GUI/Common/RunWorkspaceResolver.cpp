@@ -48,7 +48,7 @@ getFirstValidRun(std::string const &name, const std::optional<int> period,
           continue;
 
       // Do not return monitor workspaces, as they do not contain angle correction metadata.
-      if (workspace->getName().find("_monitors") != std::string::npos)
+      if (workspace->getName().contains("_monitors"))
         continue;
 
       return std::pair{value, workspace};

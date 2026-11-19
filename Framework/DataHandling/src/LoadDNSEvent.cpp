@@ -61,7 +61,7 @@ int LoadDNSEvent::confidence(Kernel::FileDescriptor &descriptor) const {
 
   std::string fileline;
   std::getline(file, fileline);
-  if (fileline.find("mesytec psd listmode data") != std::string::npos) {
+  if (fileline.contains("mesytec psd listmode data")) {
     return 80;
   } else
     return 0;

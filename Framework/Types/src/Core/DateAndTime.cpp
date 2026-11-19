@@ -397,7 +397,7 @@ void DateAndTime::setFromISO8601(const std::string &str) {
   // the
   // string to always denote the full timestamp so we check for a colon and if
   // it is not present then throw an exception.
-  if (time.find(':') == std::string::npos)
+  if (!time.contains(':'))
     throw std::invalid_argument("Error interpreting string '" + str + "' as a date/time.");
   try {
     if (positive_offset)

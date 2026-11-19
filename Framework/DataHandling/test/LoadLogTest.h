@@ -329,7 +329,7 @@ private:
     } catch (std::exception &ex) {
       std::string errorMessage(ex.what());
 
-      if (errorMessage.find("old unsupported format") != std::string::npos) {
+      if (errorMessage.contains("old unsupported format")) {
         return true;
       }
     }

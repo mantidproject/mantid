@@ -226,7 +226,7 @@ void LoadSpiceAscii::parseSPICEAscii(const std::string &filename, std::vector<st
       line.erase(0, 1);
       boost::trim(line);
 
-      if (line.find('=') != std::string::npos) {
+      if (line.contains('=')) {
         // run information line
         std::vector<std::string> terms;
         boost::split(terms, line, boost::is_any_of("="));
@@ -249,7 +249,7 @@ void LoadSpiceAscii::parseSPICEAscii(const std::string &filename, std::vector<st
           g_log.warning(wss.str());
         }
         runinfodict.emplace(terms[0], infovalue);
-      } else if (line.find("Pt.") != std::string::npos) {
+      } else if (line.contains("Pt.")) {
         // Title line
         boost::split(titles, line, boost::is_any_of("\t\n "), boost::token_compress_on);
       } else if (endswith(line, "scan completed.")) {
@@ -353,7 +353,7 @@ API::MatrixWorkspace_sptr LoadSpiceAscii::createRunInfoWS(const std::map<std::st
       double value, error;
 
       // Convert to float value and error (if exists)
-      if (strvalue.find("+/-") != std::string::npos) {
+      if (strvalue.contains("+/-")) {
         adderrorvalue = true;
 
         std::vector<std::string> terms;
@@ -444,11 +444,11 @@ void LoadSpiceAscii::setupRunStartTime(const API::MatrixWorkspace_sptr &runinfow
 std::string LoadSpiceAscii::processDateString(const std::string &rawdate, const std::string &dateformat) {
   // Identify splitter
   std::string splitter;
-  if (dateformat.find('/') != std::string::npos)
+  if (dateformat.contains('/'))
     splitter += "/";
-  else if (dateformat.find('-') != std::string::npos)
+  else if (dateformat.contains('-'))
     splitter += "-";
-  else if (dateformat.find('.') != std::string::npos)
+  else if (dateformat.contains('.'))
     splitter += ".";
   else
     throw std::runtime_error("Input date format does not contain any of / - "
@@ -466,9 +466,9 @@ std::string LoadSpiceAscii::processDateString(const std::string &rawdate, const 
   std::string month;
   std::string day;
   for (size_t i = 0; i < 3; ++i) {
-    if (formatterms[i].find('Y') != std::string::npos)
+    if (formatterms[i].contains('Y'))
       year = dateterms[i];
-    else if (formatterms[i].find('M') != std::string::npos) {
+    else if (formatterms[i].contains('M')) {
       month = dateterms[i];
       if (month.size() == 1)
         month.insert(0, 1, '0');
@@ -497,7 +497,7 @@ std::string LoadSpiceAscii::processTimeString(const std::string &rawtime, const 
   boost::trim(timeformatcpy);
 
   int format;
-  if (timeformatcpy.find(' ') == std::string::npos)
+  if (!timeformatcpy.contains(' '))
     format = 24;
   else
     format = 12;

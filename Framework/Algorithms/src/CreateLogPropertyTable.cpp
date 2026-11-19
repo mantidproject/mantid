@@ -126,7 +126,7 @@ void CreateLogPropertyTable::exec() {
       Property const *prop = matrixWs->run().getProperty(propName);
       std::stringstream propValue;
 
-      if (prop->type().find("TimeValue") != std::string::npos) {
+      if (prop->type().contains("TimeValue")) {
         propValue << matrixWs->run().getLogAsSingleValue(propName, timeSeriesStat);
       } else {
         propValue << prop->value();

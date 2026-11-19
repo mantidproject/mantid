@@ -22,7 +22,6 @@
 #include "MantidKernel/VisibleWhenProperty.h"
 
 #include <boost/algorithm/string/erase.hpp>
-#include <boost/algorithm/string/predicate.hpp>
 #include <sstream>
 
 using namespace Mantid::Kernel;
@@ -538,7 +537,7 @@ void DgsReduction::exec() {
   // Put all properties except input files/workspaces into property manager.
   const std::vector<Property *> props = this->getProperties();
   for (auto prop : props) {
-    if (!boost::contains(prop->name(), "Input")) {
+    if (!prop->name().contains("Input")) {
       this->reductionManager->declareProperty(std::unique_ptr<Property>(prop->clone()));
     }
   }

@@ -123,7 +123,7 @@ void InstrumentDefinitionParser::initialise(const std::string &filename, const s
 
   // do quick check for side-by-side-view-location string, if it doesn't exist we can skip checking every element,
   // thereby speeding up processing
-  m_sideBySideViewLocation_exists = xmlText.find("side-by-side-view-location") != std::string::npos;
+  m_sideBySideViewLocation_exists = xmlText.contains("side-by-side-view-location");
 
   // Create our new instrument
   // We don't want the instrument name taken out of the XML file itself, it
@@ -2485,7 +2485,7 @@ void InstrumentDefinitionParser::setComponentLinks(const std::shared_ptr<const G
         }
       } else {
         // No detector id given, fall back to using the name
-        if (name.find('/', 0) == std::string::npos) { // Simple name, look for all components of that name.
+        if (!name.contains('/')) { // Simple name, look for all components of that name.
           sharedIComp = instrument->getAllComponentsWithName(name);
         } else { // Pathname given. Assume it is unique.
           std::shared_ptr<const Geometry::IComponent> shared = instrument->getComponentByName(name);

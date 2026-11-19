@@ -167,7 +167,7 @@ void GeneratePeaks::processAlgProperties(std::string &peakfunctype, std::string 
 
   peakfunctype = getPropertyValue("PeakType");
   // Remove extra helping message
-  if (peakfunctype.find('(') != std::string::npos) {
+  if (peakfunctype.contains('(')) {
     std::vector<std::string> strs;
     boost::split(strs, peakfunctype, boost::is_any_of(" ("));
     peakfunctype = strs[0];
@@ -175,7 +175,7 @@ void GeneratePeaks::processAlgProperties(std::string &peakfunctype, std::string 
 
   bkgdfunctype = getPropertyValue("BackgroundType");
   // Remove extra helping message
-  if (bkgdfunctype.find('(') != std::string::npos) {
+  if (bkgdfunctype.contains('(')) {
     std::vector<std::string> strs;
     boost::split(strs, bkgdfunctype, boost::is_any_of(" ("));
     bkgdfunctype = strs[0];

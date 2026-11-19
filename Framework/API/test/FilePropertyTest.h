@@ -117,10 +117,10 @@ public:
     // I'm using part of the file's path to check that the property really has
     // found the file, with OptionalLoad the property returns valid whether it
     // finds the file or not
-    TS_ASSERT(fp.value().find("UnitTest") != std::string::npos);
+    TS_ASSERT(fp.value().contains("UnitTest"));
     // do this in parts making no assumptions about the identity of the slash
     // that separates directories
-    TS_ASSERT(fp.value().find("Test") != std::string::npos);
+    TS_ASSERT(fp.value().contains("Test"));
 
     msg = fp.setValue("LOQ48127.raw");
     TS_ASSERT_EQUALS(msg, "");

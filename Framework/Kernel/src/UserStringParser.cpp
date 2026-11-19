@@ -22,7 +22,7 @@ std::vector<std::vector<unsigned int>> UserStringParser::parse(const std::string
   std::vector<std::vector<unsigned int>> numbers;
   // first separate commas
   std::vector<std::string> commaseparatedstrings;
-  if (userString.find(',') != std::string::npos) {
+  if (userString.contains(',')) {
     commaseparatedstrings = separateComma(userString);
   }
   if (!commaseparatedstrings.empty()) {

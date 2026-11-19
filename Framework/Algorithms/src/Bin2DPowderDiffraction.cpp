@@ -311,7 +311,7 @@ void Bin2DPowderDiffraction::ReadBinsFromFile(std::vector<double> &Ybins,
         Ybins.emplace_back(dp2);
       }
       dpno++;
-    } else if (line.find("#") == std::string::npos) {
+    } else if (!line.contains("#")) {
       std::stringstream ss(line);
       double d;
       while (ss >> d) {

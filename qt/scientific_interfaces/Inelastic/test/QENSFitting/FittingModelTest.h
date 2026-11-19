@@ -505,8 +505,8 @@ public:
     m_model->setFitFunction(function);
     m_model->updateFitTypeString();
     auto const fitString = m_model->getFitString();
-    TS_ASSERT(fitString.find("1E") != std::string::npos);
-    TS_ASSERT(fitString.find("1S") != std::string::npos);
+    TS_ASSERT(fitString.contains("1E"));
+    TS_ASSERT(fitString.contains("1S"));
   }
 
   void test_that_no_matched_name_is_correct() {

@@ -86,7 +86,7 @@ double FitParameter::getValue(const double &at) const {
 
     // check if more than one string to replace in m_eq
 
-    while (equationStr.find(toReplace) != std::string::npos) {
+    while (equationStr.contains(toReplace)) {
       found = equationStr.find(toReplace);
       equationStr.replace(found, len, extractedValueStr);
     }

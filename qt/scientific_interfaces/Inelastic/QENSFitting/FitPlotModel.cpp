@@ -60,7 +60,7 @@ std::optional<double> firstParameterValue(const IFunction_sptr &function, const 
 
 void findFunctionsWithParameter(const IFunction_sptr &function, const std::string &category,
                                 const std::string &parameterName, std::vector<IFunction_sptr> &functions) {
-  if (function->category().find(category) != std::string::npos && function->hasParameter(parameterName)) {
+  if (function->category().contains(category) && function->hasParameter(parameterName)) {
     functions.emplace_back(function);
     return;
   }

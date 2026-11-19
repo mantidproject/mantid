@@ -1099,7 +1099,7 @@ std::vector<int> parseRange(const std::string &str, const std::string &elemSep, 
 
   Tokenizer elements;
 
-  if (elemSep.find(' ') != std::string::npos) {
+  if (elemSep.contains(' ')) {
     // If element separator contains space character it's a special case,
     // because in that case
     // it is allowed to have element separator inside a range, e.g. "4 - 5", but

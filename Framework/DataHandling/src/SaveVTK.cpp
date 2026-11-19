@@ -80,7 +80,7 @@ void SaveVTK::exec() {
             "<UnstructuredGrid>\n";
 
   const std::string workspaceID = inputWorkspace->id();
-  if (workspaceID.find("Workspace2D") != std::string::npos) {
+  if (workspaceID.contains("Workspace2D")) {
     const Workspace2D_sptr localWorkspace = std::dynamic_pointer_cast<Workspace2D>(inputWorkspace);
 
     // Write out whole range

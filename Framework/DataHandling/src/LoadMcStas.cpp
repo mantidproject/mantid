@@ -86,7 +86,7 @@ void LoadMcStas::exec() {
   std::vector<std::string> eventEntries;
   std::map<std::string, std::vector<std::string>> histogramEntries;
   for (std::string const &entry : entries) {
-    if (entry.find("/entry1/data") == std::string::npos) {
+    if (!entry.contains("/entry1/data")) {
       continue;
     }
 
@@ -105,7 +105,7 @@ void LoadMcStas::exec() {
 
     std::string nameAttrValue;
     H5Util::readStringAttribute(dataset, attributeName, nameAttrValue);
-    if (nameAttrValue.find("Neutron_ID") != std::string::npos) {
+    if (nameAttrValue.contains("Neutron_ID")) {
       eventEntries.emplace_back(groupAddress);
     } else if (histogramEntries.find(groupAddress) == histogramEntries.cend()) {
       histogramEntries[groupAddress] = {datasetName};

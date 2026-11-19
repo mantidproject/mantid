@@ -50,7 +50,7 @@ void assert_peak_centres_equal(const Mantid::API::WorkspaceGroup_sptr &groupWs,
   const auto colNames = resultWs->getColumnNames();
   for (int i = static_cast<int>(resultWs->columnCount()) - 1; i >= 0; i--) {
     std::string colName{colNames[i]};
-    if (colName.find("PeakCentre") != std::string::npos) {
+    if (colName.contains("PeakCentre")) {
       double cellValue{resultWs->Double(0, i)};
       TS_ASSERT_DELTA(expectedPeakCentres.back(), cellValue, 0.01);
       expectedPeakCentres.pop_back();

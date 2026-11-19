@@ -72,7 +72,7 @@ void LoadIsawSpectrum::exec() {
     if (infile.eof())
       break;
     std::stringstream ss(STRING);
-    if (STRING.find("Bank") == std::string::npos) {
+    if (!STRING.contains("Bank")) {
       double time0, spectra0;
       ss >> time0 >> spectra0;
       time[a].emplace_back(time0);

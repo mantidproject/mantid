@@ -62,9 +62,7 @@ std::vector<std::string> splitStringBy(const std::string &str, const std::string
  * @param separator The separator to search for.
  * @returns :: True if the string contains the specified separator.
  */
-bool hasSeparator(const std::string &str, const std::string &separator) {
-  return str.find(separator) != std::string::npos;
-}
+bool hasSeparator(const std::string &str, const std::string &separator) { return str.contains(separator); }
 
 /** Returns a vector of detector IDs (in string format) contained within the
  * lower and upper limits of a range.

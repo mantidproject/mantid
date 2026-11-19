@@ -116,7 +116,7 @@ void ConvertAxisByFormula::exec() {
 
   bool isGeometryRequired = false;
   for (auto variablesIter = variables.begin(); variablesIter != variables.end();) {
-    if (formula.find((*variablesIter)->name) != std::string::npos) {
+    if (formula.contains((*variablesIter)->name)) {
       if ((*variablesIter)->isGeometric) {
         if (!spectrumAxisPtr) {
           throw std::invalid_argument("To use geometry values in the equation, "

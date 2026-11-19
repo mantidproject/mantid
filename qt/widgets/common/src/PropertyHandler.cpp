@@ -363,7 +363,7 @@ PropertyHandler *PropertyHandler::addFunction(const std::string &fnName) {
   m_browser->disableUndo();
   Mantid::API::IFunction_sptr f;
   // Create new function
-  if (fnName.find("=") == std::string::npos) { // either from name
+  if (!fnName.contains("=")) { // either from name
     f = Mantid::API::FunctionFactory::Instance().createFunction(fnName);
   } else { // of from full initialization expression
     f = Mantid::API::FunctionFactory::Instance().createInitialized(fnName);

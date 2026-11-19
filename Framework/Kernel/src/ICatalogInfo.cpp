@@ -20,7 +20,7 @@ std::string ICatalogInfo::transformArchivePath(const std::string &path) const {
   ret = replaceAllOccurences(ret, "\\", "/");
 #elif _WIN32
   // Check to see if path is a windows path.
-  if (path.find("\\") == std::string::npos) {
+  if (!path.contains("\\")) {
     ret = replacePrefix(path, linuxPrefix(), windowsPrefix());
     ret = replaceAllOccurences(ret, "/", "\\");
   } else {

@@ -84,7 +84,7 @@ std::string getSpectraRange(std::string const &string) {
 }
 
 std::string rearrangeSpectraSubString(std::string const &string) {
-  return string.find("-") != std::string::npos ? getSpectraRange(string) : string;
+  return string.contains("-") ? getSpectraRange(string) : string;
 }
 
 // Swaps the two numbers in a spectra range if they go from large to small

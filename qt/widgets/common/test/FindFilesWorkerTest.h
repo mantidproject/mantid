@@ -11,7 +11,6 @@
 
 #include <QCoreApplication>
 #include <QThreadPool>
-#include <boost/algorithm/string/predicate.hpp>
 #include <cxxtest/TestSuite.h>
 
 using MantidQt::API::FakeFileFinderWidget;
@@ -40,7 +39,7 @@ public:
     TS_ASSERT(widget->isFinishedSignalRecieved())
     TS_ASSERT_EQUALS(results.error, "")
     TS_ASSERT_EQUALS(results.filenames.size(), 1)
-    TS_ASSERT(boost::algorithm::contains(results.filenames[0], parameters.searchText))
+    TS_ASSERT(results.filenames[0].contains(parameters.searchText))
     TS_ASSERT_EQUALS(results.valueForProperty, results.filenames[0])
   }
 
@@ -61,7 +60,7 @@ public:
     TS_ASSERT(widget->isFinishedSignalRecieved())
     TS_ASSERT_EQUALS(results.error, "")
     TS_ASSERT_EQUALS(results.filenames.size(), 1)
-    TS_ASSERT(boost::algorithm::contains(results.filenames[0], parameters.searchText))
+    TS_ASSERT(results.filenames[0].contains(parameters.searchText))
     TS_ASSERT_EQUALS(results.valueForProperty, results.filenames[0])
   }
 
