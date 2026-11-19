@@ -335,6 +335,7 @@ class PythonFileInterpreterPresenter(QObject):
 
     @is_executing.setter
     def is_executing(self, value):
+        self.view.editor.runProgressMarkerTimer(value)
         self._is_executing = value
 
     def req_abort(self):
