@@ -2,16 +2,15 @@
 
 # Python type stubs
 
-This guide describes how to regenerate and validate Mantid's
-`mantid.simpleapi` type stub. The stub is generated from registered algorithm
-and property metadata in a configured Mantid build.
+This guide describes how to generate and validate Mantid's
+`mantid.simpleapi` type stub. The stub is a build output: it is generated from
+registered algorithm and property metadata in a configured Mantid build, and
+is not committed to git.
 
 ## Requirements
 
 Use the Mantid developer environment and a completed build that can import
-`mantid.simpleapi` and load the registered algorithms. The generator formats
-its output with the repository's Ruff formatter through `prek` or
-`pre-commit`; one of those commands must be available in the environment.
+`mantid.simpleapi` and load the registered algorithms.
 
 ## Configure Pyright import paths
 
@@ -32,7 +31,7 @@ checkout and build:
 }
 ```
 
-`Framework/PythonInterface` contains the `mantid` package and
+`Framework/PythonInterface` contains the `mantid` package and, once generated,
 `simpleapi.pyi`; `mantid-build/bin` contains the compiled extension modules.
 Use the matching Python environment when running Pyright or launching its
 language server from an editor.
@@ -52,13 +51,16 @@ ninja simpleapi_stubs
 
 This builds the framework libraries and Python plugins that register
 algorithms, then writes `Framework/PythonInterface/mantid/simpleapi.pyi` in the
-source tree. The target is not part of the default build because it changes a
-committed file. It is re-run only when a framework library, Python extension
-module, Python algorithm, the `mantid` package, or the generator has changed.
-It runs the generator with an empty Mantid user properties directory, so local
-settings such as `default.facility` do not end up in the committed stub.
-Because the stub is the target's output, `ninja clean` deletes it; restore it
-with `git checkout` or by running the target again.
+source tree, next to `simpleapi.py`, where git ignores it. The target is not
+part of the default build, because regenerating the stub after every relink
+would add seconds to each build; run it again when you want your editor to see
+changed algorithm signatures. Configure with `-DSIMPLEAPI_STUBS_IN_ALL=ON` to
+add it to the default build instead, as the CI presets in `CMakePresets.json`
+do. It is re-run only when a framework library,
+Python extension module, Python algorithm, the `mantid` package, or the
+generator has changed. It runs the generator with an empty Mantid user
+properties directory, so local settings such as `default.facility` do not end
+up in the stub. `ninja clean` deletes the stub.
 
 To run the generator directly instead, from the repository root in the
 configured build environment, with the build's `bin` directory on
@@ -70,31 +72,27 @@ python tools/python_typing/generate_simpleapi_stubs.py --all
 
 Settings in your `Mantid.user.properties` affect the output of a direct run.
 To generate a small subset while developing the generator, pass algorithm names
-instead of `--all`. The committed file should be generated with `--all`.
+instead of `--all`.
 
 Algorithms in the `MPI` category (`BroadcastWorkspace`, `GatherWorkspaces`)
 are left out of `simpleapi.pyi`, because the `MPIAlgorithms` plugin is only
-built on Linux and including them would make the committed stub depend on
-where it was generated. Instead, `simpleapi.pyi` star-imports
+built on Linux and including them would make the stub depend on where it was
+generated. Instead, `simpleapi.pyi` star-imports
 `mantid._simpleapi_mpi`, a stub that `--mpi-only` writes to
 `Framework/PythonInterface/mantid/_simpleapi_mpi.pyi`. `ninja simpleapi_stubs`
-generates it wherever the plugin is built. It is ignored by git and shipped
-only in the `mantidmpi` conda package. Where it is missing, type checkers
+generates it wherever the plugin is built. It is shipped only in the
+`mantidmpi` conda package. Where it is missing, type checkers
 resolve the MPI algorithms through the stub's `__getattr__` fallback as `Any`.
 
-Do not format the stub by hand. The generator runs Ruff on the generated file.
-When formatting or output needs correction, update the generator or its
-explicit wrapper-specific declarations, regenerate the file, and review the
-resulting diff.
+When output needs correction, update the generator or its explicit
+wrapper-specific declarations and regenerate the file.
 
-## Packages and the committed stub
+## Packages
 
-The conda package build regenerates both stubs from the build it is packaging,
-by running the `simpleapi_stubs` target before install with
-`-DSIMPLEAPI_STUBS_ARGS=--no-format`. Packaged stubs therefore always match
-their algorithms. `--no-format` skips Ruff formatting, which needs `prek` or
-`pre-commit` and a git checkout. Formatting matters only for the reviewed diff
-of the committed file.
+The conda package build generates both stubs from the build it is packaging,
+by configuring with `-DSIMPLEAPI_STUBS_IN_ALL=ON`, so they are in place
+before install. Packaged stubs
+therefore always match their algorithms.
 
 Generating the stub imports every Python algorithm plugin, so the staging
 `host` requirements in `conda/recipes/mantid/recipe.yaml` must include the
@@ -108,14 +106,8 @@ rather than writing a stub without their algorithms. An optional import that
 only skips registering an algorithm cannot be detected; that algorithm is then
 missing from the packaged stub until its package is added to `host`.
 
-The committed stub is not checked for freshness in CI, so pull requests that
-change algorithm properties do not need to regenerate it, and feature branches
-do not conflict over it. It may lag behind the algorithms on `main` until
-someone regenerates it. To check whether it is stale, run:
-
-```sh
-python tools/python_typing/generate_simpleapi_stubs.py --all --check
-```
+Because the stub is not committed, pull requests that change algorithm
+properties never need to update it, and branches cannot disagree about it.
 
 ## Validate and review
 
@@ -128,7 +120,9 @@ ctest -R 'tools\.python_typing\.' --output-on-failure
 
 The tests cover generator behavior and an analyzer smoke check for the
 `ConvertUnits` signature that requires Pyright to reject an invalid
-`Target` value. The PR workflow runs these tests as part of its `UnitTest`
+`Target` value. The smoke check reads the generated stub, so CTest runs the
+`simpleapi_stubs` target first (a CTest fixture); this is quick when the stub
+is up to date. The PR workflow runs these tests as part of its `UnitTest`
 selection.
 
 For an interactive fixture named `check_mantid_types.py` in the configured

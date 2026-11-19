@@ -79,14 +79,12 @@ add_custom_target(Framework DEPENDS ${FRAMEWORK_LIBS})
 # ######################################################################################################################
 # mantid.simpleapi type stub
 # ######################################################################################################################
-# Regenerate the committed PythonInterface/mantid/simpleapi.pyi with `ninja simpleapi_stubs`. It is not part of "all"
-# because it rewrites a file in the source tree. Note that `clean` deletes the stub; restore it with git or rerun the
-# target. Where the MPIAlgorithms plugin is built (Linux), the target also writes the uncommitted _simpleapi_mpi.pyi for
-# its algorithms. Package builds pass --no-format here, because formatting needs prek or pre-commit.
-set(SIMPLEAPI_STUBS_ARGS
-    ""
-    CACHE STRING "Extra arguments for generate_simpleapi_stubs.py, e.g. --no-format"
-)
+# Generate PythonInterface/mantid/simpleapi.pyi, which git ignores, with `ninja simpleapi_stubs`. It sits next to
+# simpleapi.py in the source tree because developer builds import mantid from there. It is not part of "all" by default
+# (see SIMPLEAPI_STUBS_IN_ALL) because regenerating it after every relink would add seconds to each build; CI presets
+# and conda package builds turn it on, so every CI build checks that the stubs can be generated. Where the MPIAlgorithms
+# plugin is built (Linux), the target also writes _simpleapi_mpi.pyi for its algorithms.
+option(SIMPLEAPI_STUBS_IN_ALL "Generate the mantid.simpleapi type stubs as part of the default build" OFF)
 set(_simpleapi_stub ${CMAKE_CURRENT_SOURCE_DIR}/PythonInterface/mantid/simpleapi.pyi)
 set(_simpleapi_stub_generator ${CMAKE_SOURCE_DIR}/tools/python_typing/generate_simpleapi_stubs.py)
 # Python algorithms and the mantid package are read from the source tree
@@ -124,7 +122,7 @@ endif()
 set(_simpleapi_stub_command
     ${CMAKE_COMMAND} -E env "PYTHONDONTWRITEBYTECODE=1" "PYTHONPATH=${_simpleapi_stub_pythonpath}"
     "HOME=${_simpleapi_stub_home}" "APPDATA=${_simpleapi_stub_home}" ${_simpleapi_stub_timeout} ${Python_EXECUTABLE}
-    ${_simpleapi_stub_generator} ${SIMPLEAPI_STUBS_ARGS}
+    ${_simpleapi_stub_generator}
 )
 set(_simpleapi_stub_outputs ${_simpleapi_stub})
 set(_simpleapi_mpi_stub_commands)
@@ -143,7 +141,14 @@ add_custom_command(
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   VERBATIM
 )
-add_custom_target(simpleapi_stubs DEPENDS ${_simpleapi_stub})
+if(SIMPLEAPI_STUBS_IN_ALL)
+  set(_simpleapi_stubs_all ALL)
+endif()
+add_custom_target(
+  simpleapi_stubs
+  ${_simpleapi_stubs_all}
+  DEPENDS ${_simpleapi_stub}
+)
 set_property(TARGET simpleapi_stubs PROPERTY FOLDER "MantidFramework/Python")
 
 # Installation settings These need to be here so that a Framework only install will pick them up
