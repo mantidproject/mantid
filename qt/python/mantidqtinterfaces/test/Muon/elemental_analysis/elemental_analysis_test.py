@@ -235,7 +235,7 @@ class ElementalAnalysisTest(unittest.TestCase):
     @mock.patch("mantidqtinterfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.MultiPlotWindow")
     def test_load_run_does_not_open_new_plot_window_if_one_is_open(self, mock_multi_plot_window):
         self.gui.add_detector_to_plot = mock.Mock()
-        self.gui.plot_window = MultiPlotWindow(str("2695"))
+        self.gui.plot_window = MultiPlotWindow("2695")
         self.gui.load_run("GE1", 2695)
         self.assertEqual(mock_multi_plot_window.call_count, 0)
 

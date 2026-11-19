@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,

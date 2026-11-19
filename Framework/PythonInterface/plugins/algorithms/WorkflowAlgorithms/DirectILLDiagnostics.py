@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-# Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
@@ -225,7 +224,7 @@ def _maskedListToStr(masked):
             string += str(blockBegin) + "-" + str(blockEnd) + ", "
         return string
 
-    string = str()
+    string = ""
     blockBegin = None
     blockEnd = None
     maxMasked = max(masked)

@@ -115,7 +115,7 @@ class WorkspaceCalculatorModel:
 
     def _validateMD(self):
         multi_dim_err_msg = "Only one of the provided workspaces is multidimensional."
-        err_msg = str()
+        err_msg = ""
         if isinstance(mtd[self._lhs_ws], WorkspaceGroup) or isinstance(mtd[self._rhs_ws], WorkspaceGroup):
             if isinstance(mtd[self._lhs_ws], WorkspaceGroup):
                 err_msg = self._check_group_for_md(self._lhs_ws, "LHS")
@@ -134,7 +134,7 @@ class WorkspaceCalculatorModel:
             not isinstance(mtd[self._lhs_ws], WorkspaceSingleValue) and not isinstance(mtd[self._rhs_ws], WorkspaceSingleValue)
         ):
             err_msg = multi_dim_err_msg
-        return err_msg == str(), err_msg
+        return err_msg == "", err_msg
 
     def _validateSingleInput(self, ws, info):
         try:
@@ -144,7 +144,7 @@ class WorkspaceCalculatorModel:
             return False, err_msg
         if isinstance(mtd[ws], WorkspaceGroup):
             err_msg = self._check_group_for_md(ws, info)
-            if err_msg != str():
+            if err_msg != "":
                 return False, err_msg
         elif isinstance(mtd[ws], MDHistoWorkspace):
             if info == "LHS":
@@ -182,7 +182,7 @@ class WorkspaceCalculatorModel:
 
     def updateParameters(self, lhs_scale, lhs_ws, rhs_scale, rhs_ws, output_ws, operation):
         lhs_valid, rhs_valid, err_msg = self.validateInputs(lhs_ws=lhs_ws, rhs_ws=rhs_ws, operation=operation)
-        if err_msg == str():
+        if err_msg == "":
             self._lhs_scale = lhs_scale
             self._lhs_ws = lhs_ws
             self._rhs_scale = rhs_scale
@@ -233,7 +233,7 @@ class WorkspaceCalculatorModel:
 
     def performOperation(self):
         lhs_valid, rhs_valid, err_msg = self.validateInputs()
-        if err_msg != str():
+        if err_msg != "":
             return lhs_valid, rhs_valid, err_msg
         lhs_ws, rhs_ws = self._scale_input_workspaces()
         try:
