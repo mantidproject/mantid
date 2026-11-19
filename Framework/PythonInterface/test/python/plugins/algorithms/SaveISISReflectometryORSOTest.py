@@ -1125,65 +1125,60 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
             excluded_header_values=["#     - file: pol_corr.nxs\n#       comment: Polarization efficiencies file"],
         )
 
-    def test_model_descriptions_are_set_for_each_dataset(self):
+    def test_models_are_set_for_each_dataset(self):
         ws_names = self._create_sample_workspaces(["ws_1", "ws_2"])
+        metadata = self._create_model_metadata({"ws_1": "air | Ni 100 | Si", "ws_2": "air | Si"})
 
-        self._run_save_alg(ws_names, write_resolution=False, MetadataSource="Manual", ModelDescriptions=["air | Ni 100 | Si", "air | Si"])
+        self._run_save_alg(ws_names, write_resolution=False, MetadataSource="Manual", DatasetSpecificMetadata=metadata)
 
         self.assertEqual(["air | Ni 100 | Si", "air | Si"], self._get_model_stacks_from_file())
 
-    def test_model_descriptions_are_set_for_each_dataset_with_hybrid_metadata_source(self):
+    def test_models_are_set_for_each_dataset_with_hybrid_metadata_source(self):
         ws_names = self._create_sample_workspaces(["ws_1", "ws_2"])
+        metadata = self._create_model_metadata({"ws_1": "air | Ni 100 | Si", "ws_2": "air | Si"})
 
         self._run_save_alg(
             ws_names,
             write_resolution=False,
             MetadataSource="HistoryWherePossible",
             IgnoredProperties=self._ALL_HYBRID_OPTIONAL_PROPS,
-            ModelDescriptions=["air | Ni 100 | Si", "air | Si"],
+            DatasetSpecificMetadata=metadata,
         )
 
         self.assertEqual(["air | Ni 100 | Si", "air | Si"], self._get_model_stacks_from_file())
 
-    def test_model_descriptions_are_ignored_with_history_metadata_source(self):
+    def test_models_are_ignored_with_history_metadata_source(self):
         ws_names = self._create_sample_workspaces(["ws_1", "ws_2"])
+        metadata = self._create_model_metadata({"ws_1": "air | Ni 100 | Si", "ws_2": "air | Si"})
 
-        self._run_save_alg(
-            ws_names,
-            write_resolution=False,
-            MetadataSource="History",
-            ModelDescriptions=["air | Ni 100 | Si", "air | Si"],
-        )
+        self._run_save_alg(ws_names, write_resolution=False, MetadataSource="History", DatasetSpecificMetadata=metadata)
 
         self.assertEqual([None, None], self._get_model_stacks_from_file())
 
-    def test_empty_model_descriptions_entry_excludes_model(self):
+    def test_dataset_without_model_entry_has_no_model(self):
         ws_names = self._create_sample_workspaces(["ws_1", "ws_2"])
+        metadata = self._create_model_metadata({"ws_2": "air | Si"})
 
-        self._run_save_alg(ws_names, write_resolution=False, MetadataSource="Manual", ModelDescriptions=["", "air | Si"])
+        self._run_save_alg(ws_names, write_resolution=False, MetadataSource="Manual", DatasetSpecificMetadata=metadata)
 
         self.assertEqual([None, "air | Si"], self._get_model_stacks_from_file())
 
-    def test_model_descriptions_entry_is_used_for_all_workspace_group_members(self):
+    def test_model_is_used_for_all_workspace_group_members(self):
         ws_grp = self._create_sample_workspace_group(["ws_1", "ws_2"])
         self._create_sample_workspace(ws_name="ws_3")
+        metadata = self._create_model_metadata({ws_grp.name(): "air | Ni 100 | Si", "ws_3": "air | Si"})
 
-        self._run_save_alg(
-            [ws_grp.name(), "ws_3"], write_resolution=False, MetadataSource="Manual", ModelDescriptions=["air | Ni 100 | Si", "air | Si"]
-        )
+        self._run_save_alg([ws_grp.name(), "ws_3"], write_resolution=False, MetadataSource="Manual", DatasetSpecificMetadata=metadata)
 
         self.assertEqual(["air | Ni 100 | Si", "air | Ni 100 | Si", "air | Si"], self._get_model_stacks_from_file())
-
-    def test_model_descriptions_with_wrong_length_raises_error(self):
-        ws_names = self._create_sample_workspaces(["ws_1", "ws_2"])
-
-        with self.assertRaisesRegex(RuntimeError, "ModelDescriptions must either be empty or contain one entry for each workspace"):
-            self._run_save_alg(ws_names, write_resolution=False, MetadataSource="Manual", ModelDescriptions=["air | Si"])
 
     def _create_sample_workspaces(self, ws_names):
         for ws_name in ws_names:
             self._create_sample_workspace(ws_name=ws_name)
         return ws_names
+
+    def _create_model_metadata(self, models_by_ws_name):
+        return json.dumps({ws_name: {"model": model} for ws_name, model in models_by_ws_name.items()})
 
     def _get_model_stacks_from_file(self):
         self.assertTrue(os.path.exists(self._output_filename))

@@ -65,7 +65,6 @@ class Prop:
     WRITE_RESOLUTION = "WriteResolution"
     INCLUDE_EXTRA_COLS = "IncludeAdditionalColumns"
     FILENAME = "Filename"
-    MODEL_LIST = "ModelDescriptions"
     VALIDATION = "ValidateModel"
     META_SOURCE = "MetadataSource"
     IGNORED_OPTIONAL_PROPS = "IgnoredProperties"
@@ -91,6 +90,7 @@ class MetaDictKeys:
     ANGLE_FILES_FILENAME = "file-name"
     ANGLE_FILES_ANGLE = "angle"
     SCRIPT = "reduction-call"
+    MODEL = "model"
 
     GROUP_MEMBERS = "group-members"
 
@@ -763,18 +763,10 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         )
 
         self.declareProperty(
-            StringArrayProperty(Prop.MODEL_LIST, values=[]),
-            doc=f"A list of sample model descriptions, one for each workspace in {Prop.WORKSPACE_LIST}. "
-            "A workspace with an empty entry is saved without a model. "
-            f"Ignored when using the '{MetadataSourceOptions.FROM_HISTORY}' metadata source.",
-        )
-        self.setPropertySettings(Prop.MODEL_LIST, manual_metadata_condition)
-
-        self.declareProperty(
             name=Prop.VALIDATION,
             defaultValue=False,
             direction=Direction.Input,
-            doc=f"Whether or not to validate the model descriptions provided to `{Prop.MODEL_LIST}`.",
+            doc=f"Whether or not to validate the model descriptions provided in `{Prop.META_JSON}`.",
         )
         self.setPropertySettings(Prop.VALIDATION, manual_metadata_condition)
 
@@ -793,12 +785,6 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             issues[Prop.FILENAME] = (
                 f"File path to save to must end with a supported ORSO extension. Use {MantidORSOSaver.ASCII_FILE_EXT} "
                 f"to save as ORSO ASCII or {MantidORSOSaver.NEXUS_FILE_EXT} to save as ORSO Nexus."
-            )
-
-        model_list = self.getProperty(Prop.MODEL_LIST).value
-        if len(model_list) > 0 and len(model_list) != len(ws_list):
-            issues[Prop.MODEL_LIST] = (
-                f"{Prop.MODEL_LIST} must either be empty or contain one entry for each workspace in {Prop.WORKSPACE_LIST}."
             )
 
         metadata_json_issue = self._validate_manual_metadata_json()
@@ -904,10 +890,8 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
 
         dataset_list = []
         manual_metadata = self._get_manual_metadata_json()
-        ws_names = self.getProperty(Prop.WORKSPACE_LIST).value
-        models = self._get_model_for_each_workspace(len(ws_names))
 
-        for ws_name, model in zip(ws_names, models):
+        for ws_name in self.getProperty(Prop.WORKSPACE_LIST).value:
             ws = AnalysisDataService.retrieve(ws_name)
             try:
                 ws_meta = manual_metadata[ws_name]
@@ -915,22 +899,15 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
                 # There wasn't a manual metadata entry for this workspace.
                 ws_meta = None
             if isinstance(ws, WorkspaceGroup):
-                ws_datasets = [self._create_single_refl_dataset(child_ws, True, model, metadata_dict=ws_meta) for child_ws in ws]
+                dataset_list.extend([self._create_single_refl_dataset(child_ws, True, metadata_dict=ws_meta) for child_ws in ws])
             else:
-                ws_datasets = [self._create_single_refl_dataset(ws, is_workspace_group_member(ws_name), model, metadata_dict=ws_meta)]
-            dataset_list.extend(ws_datasets)
+                dataset_list.append(self._create_single_refl_dataset(ws, is_workspace_group_member(ws_name), metadata_dict=ws_meta))
 
         # Stitched datasets should be sorted to the end of the list
         dataset_list.sort(key=lambda refl_dataset: refl_dataset.is_stitched)
         return dataset_list
 
-    def _get_model_for_each_workspace(self, num_workspaces: int) -> List[Optional[str]]:
-        model_list = self.getProperty(Prop.MODEL_LIST).value
-        if len(model_list) != num_workspaces:
-            return [None] * num_workspaces
-        return [model or None for model in model_list]
-
-    def _create_single_refl_dataset(self, ws, is_child, model, metadata_dict=None) -> ReflectometryDatasetBase:
+    def _create_single_refl_dataset(self, ws, is_child, metadata_dict=None) -> ReflectometryDatasetBase:
         match self.getPropertyValue(Prop.META_SOURCE):
             case MetadataSourceOptions.FROM_HISTORY:
                 return ReflectometryDatasetHistory(ws, is_child, self.getPropertyValue(Prop.Q_CONVERT_METHOD))
@@ -942,8 +919,6 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
                 use_default = True
             case _:
                 raise RuntimeError("An invalid metadata source was given.")
-
-        dataset.model = model
 
         def set_simple_dataset_value_from_property(dataset_attr: str, value, alg_prop: str) -> None:
             if use_default or not self.getProperty(alg_prop).isDefault:
@@ -998,6 +973,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         set_dataset_value_from_meta_dict("resolution", MetaDictKeys.RESOLUTION, metadata_dict)
         set_dataset_value_from_meta_dict("reduction_script", MetaDictKeys.SCRIPT, metadata_dict)
         set_dataset_value_from_meta_dict("is_stitched", MetaDictKeys.STITCHED, metadata_dict)
+        set_dataset_value_from_meta_dict("model", MetaDictKeys.MODEL, metadata_dict)
 
         try:
             group_member_dict = metadata_dict[MetaDictKeys.GROUP_MEMBERS][ws.name()]
