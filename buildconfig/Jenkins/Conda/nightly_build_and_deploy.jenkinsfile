@@ -124,6 +124,10 @@ pipeline {
             // This will throw an error and exit the pipeline if no token exists in the map.
             anacondaChannelToCredId(params.ANACONDA_CHANNEL.trim())
           }
+
+          if(params.PUBLISH_TO_GITHUB && !params.BUILD_STANDALONE) {
+            error("Publishing to GitHub requires the standalone packages. Enable BUILD_STANDALONE or disable PUBLISH_TO_GITHUB.")
+          }
         }
       }
     }
@@ -415,8 +419,6 @@ pipeline {
         beforeOptions true
         allOf {
           expression { params.PUBLISH_TO_GITHUB }
-          // The GitHub release requires the standalone packages
-          expression { params.BUILD_STANDALONE }
           expression { params.GITHUB_RELEASES_REPO.trim() != '' }
         }
       }
