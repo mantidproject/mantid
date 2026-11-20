@@ -174,9 +174,9 @@ class FittingDataPresenter(object):
         for row_no in row_numbers:
             ws_name = self.row_numbers.pop(row_no)
             removed_ws_list = self.model.delete_workspace(ws_name)
-            for ws in removed_ws_list:
+            for removed_name in removed_ws_list:
                 # plot_removed_notifier will be done in _repopulate_table
-                self.plotted.discard(ws.name())
+                self.plotted.discard(removed_name)
         self._repopulate_table()
 
     def _remove_all_tracked_workspaces(self) -> None:

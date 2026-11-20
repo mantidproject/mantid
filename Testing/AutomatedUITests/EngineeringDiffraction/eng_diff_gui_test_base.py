@@ -487,7 +487,9 @@ def _write_synthetic_run(instrument, template, full_calib, run_number, out_dir, 
 
 
 def _fill_ceria_peaks(ws, tof, full_calib, expected_d_values):
-    """Write one Gaussian per expected ceria peak into every spectrum.
+    """Write one Gaussian per expected ceria peak into every spectrum. Function designed to be
+    used for workspaces with a 1-1 spectra-detector mapping
+    i.e simulating uncalibrated raw ENGINX/IMAT data.
 
     Gaussians rather than the instrument's own ``IkedaCarpenterPV``, and the calibration is run with
     the peak function set to ``Gaussian`` to match (see ``EngDiffGuiImatCalibrateAndFocusTest``).
@@ -513,7 +515,12 @@ def _fill_ceria_peaks(ws, tof, full_calib, expected_d_values):
     d_values = [d for d in expected_d_values if _D_MIN <= d <= _D_MAX]
 
     for index in range(ws.getNumberHistograms()):
-        difc = difc_by_detid.get(ws.getDetector(index).getID())
+        det_ids = ws.getSpectrum(index).getDetectorIDs()
+        if len(det_ids) != 1:
+            raise AssertionError(
+                f"Workspace should have a 1-1 detector-spectra mapping. Spectrum Number: {index} has {len(det_ids)} detectors"
+            )
+        difc = difc_by_detid.get(det_ids[0])
         if difc is None:
             # no calibration entry for this detector, so leave it as background only
             ws.setSharedY(index, background)
