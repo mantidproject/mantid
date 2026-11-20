@@ -165,9 +165,9 @@ class PredictPeaksTestDEMAND(systemtesting.MantidSystemTest):
         self.assertEqual(peak0.getK(), 0)
         self.assertEqual(peak0.getL(), -14)
         q_sample = peak0.getQSampleFrame()
-        self.assertDelta(q_sample[0], 4.45402, 1e-5)
-        self.assertDelta(q_sample[1], -0.419157, 1e-5)
-        self.assertDelta(q_sample[2], 0.0906594, 1e-5)
+        self.assertDelta(q_sample[0], 4.45541, 1e-5)
+        self.assertDelta(q_sample[1], -0.420383, 1e-5)
+        self.assertDelta(q_sample[2], 0.0913072, 1e-5)
 
         # test predicting with LeanElasticPeak, filter any peak with 0 intensity
         PredictPeaks(

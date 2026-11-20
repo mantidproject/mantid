@@ -1264,6 +1264,72 @@ public:
     }
   }
 
+  void test_load_peaksWorkspace_detector_position() {
+    auto peaksTestWS = WorkspaceCreationHelper::createPeaksWorkspace(2);
+    const std::string filename = FileFinder::Instance().getFullPath("unit_testing/MINITOPAZ_Definition.xml").string();
+    InstrumentDefinitionParser parser(filename, "MINITOPAZ", Strings::loadFile(filename));
+    auto instrument = parser.parseXML(nullptr);
+    peaksTestWS->populateInstrumentParameters();
+    peaksTestWS->setInstrument(instrument);
+    // move a peak away from the centre of its detector
+    auto &peak = peaksTestWS->getPeak(0);
+    const int detID = peak.getDetectorID();
+    const V3D offset(0.001, 0.002, 0.003);
+    peak.setDetPos(peak.getDetPos() + offset);
+    // add a peak that is not on a detector
+    const Peak noDetPeak(instrument, 0.5, 1.0);
+    const V3D noDetPos = noDetPeak.getDetPos();
+    peaksTestWS->addPeak(noDetPeak);
+
+    SaveNexusProcessed saveAlg;
+    saveAlg.setChild(true);
+    saveAlg.initialize();
+    saveAlg.setProperty("InputWorkspace", peaksTestWS);
+    saveAlg.setPropertyValue("Filename", "test_load_peaksWorkspace_detector_position.nxs");
+    saveAlg.execute();
+    std::string filePath = saveAlg.getPropertyValue("Filename");
+
+    LoadNexusProcessed loadAlg;
+    loadAlg.setChild(true);
+    loadAlg.initialize();
+    loadAlg.setPropertyValue("Filename", filePath);
+    loadAlg.setPropertyValue("OutputWorkspace", "dummy");
+    loadAlg.execute();
+
+    Mantid::API::Workspace_sptr loadedWS = loadAlg.getProperty("OutputWorkspace");
+    auto loadedPeaksWS = std::dynamic_pointer_cast<Mantid::DataObjects::PeaksWorkspace>(loadedWS);
+    TS_ASSERT(loadedPeaksWS);
+    TS_ASSERT_EQUALS(loadedPeaksWS->getNumberPeaks(), 3);
+
+    // The peaks were created on a different instrument to the one saved, so the reloaded detector positions differ.
+    // The offset from the detector centre should be kept.
+    const auto &movedPeak = loadedPeaksWS->getPeak(0);
+    TS_ASSERT_EQUALS(movedPeak.getDetectorID(), detID);
+    const V3D expectedPos = movedPeak.getDetectorPosition() + offset;
+    TS_ASSERT_DELTA(movedPeak.getDetPos().X(), expectedPos.X(), 1e-10);
+    TS_ASSERT_DELTA(movedPeak.getDetPos().Y(), expectedPos.Y(), 1e-10);
+    TS_ASSERT_DELTA(movedPeak.getDetPos().Z(), expectedPos.Z(), 1e-10);
+
+    // A peak at the centre of its detector stays there
+    const auto &centredPeak = loadedPeaksWS->getPeak(1);
+    const V3D centre = centredPeak.getDetectorPosition();
+    TS_ASSERT_DELTA(centredPeak.getDetPos().X(), centre.X(), 1e-10);
+    TS_ASSERT_DELTA(centredPeak.getDetPos().Y(), centre.Y(), 1e-10);
+    TS_ASSERT_DELTA(centredPeak.getDetPos().Z(), centre.Z(), 1e-10);
+
+    // A peak with no detector keeps its absolute position
+    const auto &loadedNoDetPeak = loadedPeaksWS->getPeak(2);
+    TS_ASSERT_EQUALS(loadedNoDetPeak.getDetectorID(), -1);
+    TS_ASSERT_DELTA(loadedNoDetPeak.getDetPos().X(), noDetPos.X(), 1e-10);
+    TS_ASSERT_DELTA(loadedNoDetPeak.getDetPos().Y(), noDetPos.Y(), 1e-10);
+    TS_ASSERT_DELTA(loadedNoDetPeak.getDetPos().Z(), noDetPos.Z(), 1e-10);
+
+    AnalysisDataService::Instance().remove("dummy");
+    if (std::filesystem::exists(filePath)) {
+      std::filesystem::remove(filePath);
+    }
+  }
+
   void test_ws_run_title_failover_to_title() {
     IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("CreateWorkspace");
     TS_ASSERT_THROWS_NOTHING(alg->initialize());
