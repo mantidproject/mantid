@@ -6,6 +6,10 @@ option(DOCS_SCREENSHOTS "If enabled include automatically generated screenshots 
 option(DOCS_PLOTDIRECTIVE "If enabled include plots generated with the plot directive. " OFF)
 option(SPHINX_WARNINGS_AS_ERRORS "non-zero exit if there are sphinx warnings" ON)
 option(SPHINX_FRESH_ENV "Don't use a saved environment, but rebuild it completely" ON)
+set(SPHINX_PARALLEL_JOBS
+    4
+    CACHE STRING "Set to 1 to disable parallel docs build"
+)
 
 # Build layout
 set(SPHINX_CONF_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source)
@@ -40,6 +44,11 @@ if(SPHINX_FRESH_ENV)
 else()
   set(SPHINX_FRESH_ENV_FLAG "")
 endif()
+if(SPHINX_PARALLEL_JOBS GREATER 1)
+  set(SPHINX_PARALLEL_JOBS_FLAG "--jobs" ${SPHINX_PARALLEL_JOBS})
+else()
+  set(SPHINX_PARALLEL_JOBS_FLAG "")
+endif()
 
 # Add a sphinx build target to build documentation builder - Name of the sphinx builder: html, qthelp etc target_name -
 # Optional target name. Default=docs-${builder}
@@ -62,6 +71,7 @@ function(add_sphinx_build_target builder)
       ${SPHINX_KEEPGOING}
       ${SPHINX_WARNINGS_AS_ERRORS_FLAG}
       ${SPHINX_FRESH_ENV_FLAG}
+      ${SPHINX_PARALLEL_JOBS_FLAG}
       -b
       ${builder}
       -d
