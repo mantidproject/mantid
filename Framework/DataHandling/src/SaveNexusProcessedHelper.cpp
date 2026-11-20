@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 // NexusFileIO
 // @author Ronald Fowler
+#include <algorithm>
 #include <sstream>
 #include <vector>
 
@@ -226,7 +227,7 @@ void _writeChunkedData(std::shared_ptr<Nexus::File> dest, // Must have open grou
                        std::shared_ptr<const WS> src, // Do not pass std::shared_ptr<..> by reference!
                        const std::vector<int> &indices, _VAccessor<V, WS> vData, bool raggedSpectra = false,
                        NXcompression compressionType = NXcompression::NONE, double fillValue = _DEFAULT_FILL_VALUE,
-                       bool closeData = true) {
+                       bool closeData = true, size_t writeBlockSize = 1) {
 
   const size_t N_chunk = indices.size(); // number of spectra
 
@@ -243,6 +244,26 @@ void _writeChunkedData(std::shared_ptr<Nexus::File> dest, // Must have open grou
   // Create and open the dataset.
   // (If compressionType == NXcompression::NONE, this just creates a non-compressed dataset.)
   dest->makeCompData(name, NXnumtype::FLOAT64, dims, compressionType, chunk_dims, true);
+
+  // Keep on-disk chunk dimensions unchanged; only batch the HDF5 write calls.
+  const bool rectangular = writeBlockSize > 1 && !raggedSpectra &&
+                           std::all_of(indices.cbegin(), indices.cend(),
+                                       [&](const auto index) { return ((*src).*vData)(index).size() == chunk_size; });
+  const auto blockSize = rectangular ? std::min(writeBlockSize, N_chunk) : size_t{1};
+  if (blockSize > 1) {
+    std::vector<double> buffer(blockSize * chunk_size);
+    for (size_t row = 0; row < N_chunk; row += blockSize) {
+      const auto rows = std::min(blockSize, N_chunk - row);
+      for (size_t offset = 0; offset < rows; ++offset) {
+        const auto &v = ((*src).*vData)(indices[row + offset]);
+        std::copy_n(_dataPointer<V>(v), chunk_size, buffer.data() + offset * chunk_size);
+      }
+      dest->putSlab(buffer.data(), Nexus::DimVector{row, 0}, Nexus::DimVector{rows, chunk_size});
+    }
+    if (closeData)
+      dest->closeData();
+    return;
+  }
 
   // Prepare a padding vector. (Unfortunately, NeXus-api does not access `setFillValue`.)
   const bool pad_data(fillValue != _DEFAULT_FILL_VALUE);
@@ -277,7 +298,8 @@ void _writeChunkedData(std::shared_ptr<Nexus::File> dest, // Must have open grou
 int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr &localworkspace,
                                            const bool &uniformSpectra, const bool &raggedSpectra,
                                            const std::vector<int> &indices, const std::string &group_name,
-                                           bool write2Ddata) const {
+                                           bool write2Ddata, bool compressHistogramData,
+                                           size_t histogramWriteBlockSize) const {
 
   // write data entry
   try {
@@ -323,9 +345,10 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
 
   // -------------- Actually write the 2D data ----------------------------
   if (write2Ddata) {
+    const auto compression = compressHistogramData ? m_nexuscompression : NXcompression::NONE;
     _writeChunkedData<HistogramY, MatrixWorkspace>(m_filehandle, "values", localworkspace, indices, &MatrixWorkspace::y,
-                                                   raggedSpectra, m_nexuscompression, _DEFAULT_FILL_VALUE,
-                                                   false // don't close the dataset
+                                                   raggedSpectra, compression, _DEFAULT_FILL_VALUE, false,
+                                                   histogramWriteBlockSize // don't close the dataset
     );
 
     if (m_progress != nullptr)
@@ -339,7 +362,8 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
 
     // errors
     _writeChunkedData<HistogramE, MatrixWorkspace>(m_filehandle, "errors", localworkspace, indices, &MatrixWorkspace::e,
-                                                   raggedSpectra, m_nexuscompression);
+                                                   raggedSpectra, compression, _DEFAULT_FILL_VALUE, true,
+                                                   histogramWriteBlockSize);
     if (m_progress != nullptr)
       m_progress->reportIncrement(1, "Writing data");
 
@@ -347,10 +371,9 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
     if (localworkspace->id() == "RebinnedOutput") {
       RebinnedOutput_const_sptr rebin_workspace = std::dynamic_pointer_cast<const RebinnedOutput>(localworkspace);
 
-      _writeChunkedData<MantidVec, RebinnedOutput>(m_filehandle, "frac_area", rebin_workspace, indices,
-                                                   &RebinnedOutput::readF, raggedSpectra, m_nexuscompression,
-                                                   _DEFAULT_FILL_VALUE,
-                                                   false // don't close the dataset
+      _writeChunkedData<MantidVec, RebinnedOutput>(
+          m_filehandle, "frac_area", rebin_workspace, indices, &RebinnedOutput::readF, raggedSpectra, compression,
+          _DEFAULT_FILL_VALUE, false, histogramWriteBlockSize // don't close the dataset
       );
 
       std::string finalized = (rebin_workspace->isFinalized()) ? "1" : "0";
@@ -366,7 +389,8 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
     // x errors
     if (localworkspace->hasDx(0)) {
       _writeChunkedData<HistogramDx, MatrixWorkspace>(m_filehandle, "xerrors", localworkspace, indices,
-                                                      &MatrixWorkspace::dx, raggedSpectra, m_nexuscompression);
+                                                      &MatrixWorkspace::dx, raggedSpectra, compression,
+                                                      _DEFAULT_FILL_VALUE, true, histogramWriteBlockSize);
     }
   }
 

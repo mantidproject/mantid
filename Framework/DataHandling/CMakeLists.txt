@@ -56,6 +56,7 @@ set(SRC_FILES
     src/LoadEmptyInstrument.cpp
     src/LoadErrorEventsNexus.cpp
     src/LoadEventAsWorkspace2D.cpp
+    src/LoadEventNexusAsHistogram.cpp
     src/LoadEventNexus.cpp
     src/LoadEventNexusIndexSetup.cpp
     src/LoadFITS.cpp
@@ -279,6 +280,7 @@ set(INC_FILES
     inc/MantidDataHandling/LoadEmptyInstrument.h
     inc/MantidDataHandling/LoadErrorEventsNexus.h
     inc/MantidDataHandling/LoadEventAsWorkspace2D.h
+    inc/MantidDataHandling/LoadEventNexusAsHistogram.h
     inc/MantidDataHandling/LoadEventNexus.h
     inc/MantidDataHandling/LoadEventNexusIndexSetup.h
     inc/MantidDataHandling/LoadFITS.h
@@ -499,6 +501,7 @@ set(TEST_FILES
     LoadEmptyInstrumentTest.h
     LoadErrorEventsNexusTest.h
     LoadEventAsWorkspace2DTest.h
+    LoadEventNexusAsHistogramTest.h
     LoadEventNexusIndexSetupTest.h
     LoadEventNexusTest.h
     LoadFITSTest.h
