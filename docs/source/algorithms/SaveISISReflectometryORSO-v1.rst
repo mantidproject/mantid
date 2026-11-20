@@ -66,6 +66,17 @@ saving process sources any metadata.
 |                          | list of the metadata and their relevant properties is included below.                         |
 +--------------------------+-----------------------------------------------------------------------------------------------+
 
+Model description
+-----------------
+
+A model description of the sample, for example ``air | Ni 100 | SiO2 0.5 | Si``, can be included in the header of each dataset.
+To include a model, add a ``"model"`` entry for the workspace to the ``DatasetSpecificMetadata`` JSON string (see :ref:`Dataset-Specific Metadata <orso-dataset-specific-metadata>` below).
+All the datasets created from a workspace group use the model given for that group.
+A workspace without a ``"model"`` entry is saved without a model.
+If ``ValidateModel`` is set to ``True`` then the syntax of each model is checked using the orsopy library.
+The model is not stored in the workspace history, so it is only used with the ``HistoryWherePossible`` and ``Manual`` metadata sources.
+It is ignored with the ``History`` metadata source.
+
 Data values
 -----------
 
@@ -168,6 +179,8 @@ An explicitly set blank value can be used to clear a value found in the history.
      - The calibration file from history is used where possible.
      - ``""`` clears the calibration file.
 
+.. _orso-dataset-specific-metadata:
+
 Dataset-Specific Metadata
 -------------------------
 
@@ -206,6 +219,9 @@ Metadata Fields
 +----------------------+------------------------------------------------------------------------------------------------+-------------------------+-------------------------+
 | ``"reduction-call"`` | The script used to perform the reduction.                                                      | ``"ReflectometryI...""``| ``call``                |
 +----------------------+------------------------------------------------------------------------------------------------+-------------------------+-------------------------+
+| ``"model"``          | The model description of the sample, for example ``air | Ni 100 | SiO2 0.5 | Si``. Not used in | ``"air | Si"``          | ``sample.model``        |
+|                      | ``History`` mode. See the model description section above.                                     |                         |                         |
++----------------------+------------------------------------------------------------------------------------------------+-------------------------+-------------------------+
 
 .. _orsopy documentation: https://www.reflectometry.org/orsopy/api/orsopy.fileio.html#orsopy.fileio.data_source.Polarization
 
@@ -226,6 +242,7 @@ Example
           "angle" : 0.5
         }
       ],
+      "model" : "air | Ni 100 | SiO2 0.5 | Si",
       "reduction-call" : "ReflectometryISISLoadAndProcess(InputRunL..."
     },
     "IvsQ_47041_47042" : {
@@ -275,6 +292,7 @@ Matrix Workspace
           "angle" : <RUN FILE ANGLE (float)>
         }
       ],
+      "model" : "<MODEL DESCRIPTION (string)>",
       "reduction-call" : "<REDUCTION SCRIPT (string)>"
     }
   }
@@ -307,6 +325,7 @@ Workspace Group
           "angle" : <RUN FILE ANGLE (float)>
         }
       ],
+      "model" : "<MODEL DESCRIPTION (string)>",
       "reduction-call" : "<REDUCTION SCRIPT (string)>"
   }
 

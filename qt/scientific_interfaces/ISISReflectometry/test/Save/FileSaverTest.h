@@ -17,6 +17,7 @@
 #include <cxxtest/TestSuite.h>
 #include <filesystem>
 #include <gmock/gmock.h>
+#include <map>
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using Mantid::API::AnalysisDataService;
@@ -62,16 +63,16 @@ public:
     auto mockFileHandler = MockFileHandler();
     auto wsNames = createWorkspaces();
     std::vector<std::string> logParams;
-    auto formatOptions = FileFormatOptions(NamedFormat::ORSOAscii, m_prefix, m_includeHeader, m_separator, false, true,
-                                           false, m_model, m_validation);
+    auto formatOptions =
+        FileFormatOptions(NamedFormat::ORSOAscii, m_prefix, m_includeHeader, m_separator, false, true, false);
 
     expectIsValidSaveDirectory(mockFileHandler);
-    EXPECT_CALL(*mockSaveAlgorithmRunner, runSaveORSOAlgorithm(_, expectedSavePath("ws_1", NamedFormat::ORSOAscii),
-                                                               false, true, m_model, m_validation))
+    EXPECT_CALL(*mockSaveAlgorithmRunner,
+                runSaveORSOAlgorithm(_, expectedSavePath("ws_1", NamedFormat::ORSOAscii), false, true, _, m_validation))
         .Times(1);
 
     auto saver = createSaver(std::move(mockSaveAlgorithmRunner), mockFileHandler);
-    saver.save(m_saveDirectory, wsNames, logParams, formatOptions);
+    saver.save(m_saveDirectory, wsNames, logParams, formatOptions, m_modelOptions);
   }
 
   void test_saving_multiple_workspaces_to_separate_files_with_save_ascii_algorithm() {
@@ -146,6 +147,49 @@ public:
                                                  expectedFileName);
   }
 
+  void test_save_orso_passes_models_for_workspaces_saved_to_single_file() {
+    createWorkspaces({"ws_1", "ws_2", "ws_3"});
+    auto const modelOptions = ORSOModelOptions({{"ws_1", "air | Ni 100 | Si"}, {"ws_3", "air | Si"}}, true);
+
+    runTestSaveORSOWithModels(
+        {"ws_1", "ws_2", "ws_3"}, modelOptions,
+        {{{"ws_1", "ws_2", "ws_3"}, R"({"ws_1":{"model":"air | Ni 100 | Si"},"ws_3":{"model":"air | Si"}})"}}, true);
+  }
+
+  void test_save_orso_passes_model_for_each_workspace_saved_to_separate_files() {
+    createWorkspaces({"ws_1", "ws_2"});
+    auto const modelOptions = ORSOModelOptions({{"ws_1", "air | Ni 100 | Si"}, {"ws_2", "air | Si"}}, true);
+
+    runTestSaveORSOWithModels(
+        {"ws_1", "ws_2"}, modelOptions,
+        {{{"ws_1"}, R"({"ws_1":{"model":"air | Ni 100 | Si"}})"}, {{"ws_2"}, R"({"ws_2":{"model":"air | Si"}})"}},
+        false);
+  }
+
+  void test_save_orso_uses_group_model_for_child_workspaces_saved_to_separate_files() {
+    createWorkspaceGroup("ws_grp_1", {"ws_1", "ws_2"});
+    auto const modelOptions = ORSOModelOptions({{"ws_grp_1", "air | Ni 100 | Si"}}, false);
+
+    runTestSaveORSOWithModels({"ws_grp_1"}, modelOptions,
+                              {{{"ws_1"}, R"({"ws_1":{"model":"air | Ni 100 | Si"}})"},
+                               {{"ws_2"}, R"({"ws_2":{"model":"air | Ni 100 | Si"}})"}},
+                              false);
+  }
+
+  void test_save_orso_uses_group_model_when_saving_group_to_single_file() {
+    createWorkspaceGroup("ws_grp_1", {"ws_1", "ws_2"});
+    auto const modelOptions = ORSOModelOptions({{"ws_grp_1", "air | Ni 100 | Si"}}, false);
+
+    runTestSaveORSOWithModels({"ws_grp_1"}, modelOptions,
+                              {{{"ws_grp_1"}, R"({"ws_grp_1":{"model":"air | Ni 100 | Si"}})"}}, true);
+  }
+
+  void test_save_orso_passes_empty_metadata_when_there_are_no_models() {
+    createWorkspaces({"ws_1", "ws_2"});
+
+    runTestSaveORSOWithModels({"ws_1", "ws_2"}, m_modelOptions, {{{"ws_1", "ws_2"}, ""}}, true);
+  }
+
   void test_invalid_save_path_throws_exception() {
     auto mockSaveAlgorithmRunner = std::make_unique<MockSaveAlgorithmRunner>();
     auto mockFileHandler = MockFileHandler();
@@ -156,7 +200,8 @@ public:
     expectIsValidSaveDirectory(mockFileHandler, false);
 
     auto saver = createSaver(std::move(mockSaveAlgorithmRunner), mockFileHandler);
-    TS_ASSERT_THROWS(saver.save(m_saveDirectory, wsNames, logParams, formatOptions), InvalidSavePath const &);
+    TS_ASSERT_THROWS(saver.save(m_saveDirectory, wsNames, logParams, formatOptions, m_modelOptions),
+                     InvalidSavePath const &);
   }
 
 private:
@@ -167,8 +212,8 @@ private:
   const std::string m_prefix = "test_";
   const std::string m_saveDirectory = "Test";
   const std::string m_multiFileSuffix = "_multi";
-  const std::string m_model = "";
   const bool m_validation = false;
+  const ORSOModelOptions m_modelOptions{{}, m_validation};
 
   FileSaver createSaver(std::unique_ptr<MockSaveAlgorithmRunner> saveAlgRunner, MockFileHandler &mockFileHandler) {
     return FileSaver(std::move(saveAlgRunner), &mockFileHandler);
@@ -178,6 +223,28 @@ private:
     Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace(name, ws);
     return ws;
+  }
+
+  /// The workspaces saved by one run of the save algorithm, and the dataset metadata JSON passed to it
+  using ExpectedORSOSave = std::pair<std::vector<std::string>, std::string>;
+
+  void runTestSaveORSOWithModels(std::vector<std::string> const &workspacesToSave, ORSOModelOptions const &modelOptions,
+                                 std::vector<ExpectedORSOSave> const &expectedSaves, const bool saveAsSingleFile) {
+    auto mockSaveAlgorithmRunner = std::make_unique<MockSaveAlgorithmRunner>();
+    auto mockFileHandler = MockFileHandler();
+    std::vector<std::string> logParams;
+    auto formatOptions = createFileFormatOptions(NamedFormat::ORSOAscii, saveAsSingleFile);
+
+    expectIsValidSaveDirectory(mockFileHandler);
+    for (auto const &[expectedWorkspaces, expectedMetadata] : expectedSaves) {
+      EXPECT_CALL(*mockSaveAlgorithmRunner,
+                  runSaveORSOAlgorithm(expectedWorkspaces, _, m_includeQResolution, m_includeAdditionalColumns,
+                                       expectedMetadata, modelOptions.validate()))
+          .Times(1);
+    }
+
+    auto saver = createSaver(std::move(mockSaveAlgorithmRunner), mockFileHandler);
+    saver.save(m_saveDirectory, workspacesToSave, logParams, formatOptions, modelOptions);
   }
 
   std::vector<std::string> createWorkspaces(std::vector<std::string> const &workspaceNames = {"ws_1"}) {
@@ -197,7 +264,7 @@ private:
 
   const FileFormatOptions createFileFormatOptions(NamedFormat format, const bool saveAsSingleFile = false) {
     return FileFormatOptions(format, m_prefix, m_includeHeader, m_separator, m_includeQResolution,
-                             m_includeAdditionalColumns, saveAsSingleFile, m_model, m_validation);
+                             m_includeAdditionalColumns, saveAsSingleFile);
   }
 
   const std::string expectedExtension(NamedFormat format) {
@@ -248,8 +315,8 @@ private:
                                      const NamedFormat format) {
     auto extension = expectedExtension(format);
     auto savePath = expectedSavePath(wsName, format);
-    EXPECT_CALL(mockSaveAlgorithmRunner, runSaveORSOAlgorithm(_, savePath, m_includeQResolution,
-                                                              m_includeAdditionalColumns, m_model, m_validation))
+    EXPECT_CALL(mockSaveAlgorithmRunner,
+                runSaveORSOAlgorithm(_, savePath, m_includeQResolution, m_includeAdditionalColumns, _, m_validation))
         .Times(1);
   }
 
@@ -272,7 +339,7 @@ private:
     }
 
     auto saver = createSaver(std::move(mockSaveAlgorithmRunner), mockFileHandler);
-    saver.save(m_saveDirectory, wsNames, logParams, formatOptions);
+    saver.save(m_saveDirectory, wsNames, logParams, formatOptions, m_modelOptions);
   }
 
   void runTestSaveORSOAlgorithmCalledForFileFormat(NamedFormat format,
@@ -298,7 +365,7 @@ private:
     }
 
     auto saver = createSaver(std::move(mockSaveAlgorithmRunner), mockFileHandler);
-    saver.save(m_saveDirectory, workspacesToSave, logParams, formatOptions);
+    saver.save(m_saveDirectory, workspacesToSave, logParams, formatOptions, m_modelOptions);
   }
 
   void runTestSaveToSingleORSOFileForWorkspaceGroup(NamedFormat format, const std::string &workspaceGrpToSave,
@@ -315,6 +382,6 @@ private:
 
     auto saver = createSaver(std::move(mockSaveAlgorithmRunner), mockFileHandler);
     auto const saveList = {workspaceGrpToSave};
-    saver.save(m_saveDirectory, saveList, logParams, formatOptions);
+    saver.save(m_saveDirectory, saveList, logParams, formatOptions, m_modelOptions);
   }
 };

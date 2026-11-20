@@ -11,12 +11,30 @@
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include <filesystem>
+#include <json/value.h>
+#include <json/writer.h>
 #include <utility>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 namespace {
 static auto constexpr MULTI_DATASET_FILE_SUFFIX = "_multi";
+
+/** Create the DatasetSpecificMetadata JSON string giving the model for each workspace that has one
+ * @return : the JSON string, or an empty string if no workspace has a model
+ */
+std::string createDatasetMetadata(std::map<std::string, std::string> const &workspaceModels) {
+  Json::Value metadata(Json::objectValue);
+  for (auto const &[workspaceName, model] : workspaceModels) {
+    if (!model.empty())
+      metadata[workspaceName]["model"] = model;
+  }
+  if (metadata.empty())
+    return "";
+  Json::StreamWriterBuilder writer;
+  writer["indentation"] = "";
+  return Json::writeString(writer, metadata);
+}
 } // unnamed namespace
 
 namespace FileExtensions {
@@ -88,33 +106,34 @@ void FileSaver::runSaveAsciiAlgorithm(std::string const &savePath, std::string c
 }
 
 void FileSaver::runSaveORSOAlgorithm(std::string const &savePath, std::vector<std::string> const &workspaceNames,
-                                     FileFormatOptions const &fileFormat) const {
+                                     FileFormatOptions const &fileFormat, ORSOModelOptions const &modelOptions) const {
   m_saveAlgRunner->runSaveORSOAlgorithm(workspaceNames, savePath, fileFormat.shouldIncludeQResolution(),
-                                        fileFormat.shouldIncludeAdditionalColumns(), fileFormat.model(),
-                                        fileFormat.validate());
+                                        fileFormat.shouldIncludeAdditionalColumns(),
+                                        createDatasetMetadata(modelOptions.workspaceModels()), modelOptions.validate());
 }
 
 void FileSaver::save(Mantid::API::Workspace_sptr const &workspace, std::string const &saveDirectory,
-                     std::vector<std::string> const &logParameters, FileFormatOptions const &fileFormat) const {
+                     std::vector<std::string> const &logParameters, FileFormatOptions const &fileFormat,
+                     ORSOModelOptions const &modelOptions) const {
   auto const extension = extensionForFormat(fileFormat.format());
   auto const savePath = assembleSavePath(saveDirectory, fileFormat.prefix(), workspace->getName(), extension);
 
   if (fileFormat.isORSOFormat()) {
     std::vector<std::string> const workspaceNames{workspace->getName()};
-    runSaveORSOAlgorithm(savePath, workspaceNames, fileFormat);
+    runSaveORSOAlgorithm(savePath, workspaceNames, fileFormat, modelOptions);
   } else {
     runSaveAsciiAlgorithm(savePath, extension, workspace, logParameters, fileFormat);
   }
 }
 
 void FileSaver::saveToSingleFile(std::vector<std::string> const &workspaceNames, std::string const &saveDirectory,
-                                 FileFormatOptions const &fileFormat) const {
+                                 FileFormatOptions const &fileFormat, ORSOModelOptions const &modelOptions) const {
   auto const extension = extensionForFormat(fileFormat.format());
   auto const filename = workspaceNames.front() + MULTI_DATASET_FILE_SUFFIX;
   auto const savePath = assembleSavePath(saveDirectory, fileFormat.prefix(), filename, extension);
 
   if (fileFormat.isORSOFormat()) {
-    runSaveORSOAlgorithm(savePath, workspaceNames, fileFormat);
+    runSaveORSOAlgorithm(savePath, workspaceNames, fileFormat, modelOptions);
   } else {
     throw std::invalid_argument(
         "Saving multiple workspaces to a single file is not supported for the selected file format.");
@@ -122,26 +141,31 @@ void FileSaver::saveToSingleFile(std::vector<std::string> const &workspaceNames,
 }
 
 void FileSaver::save(std::string const &saveDirectory, std::vector<std::string> const &workspaceNames,
-                     std::vector<std::string> const &logParameters, FileFormatOptions const &fileFormat) const {
+                     std::vector<std::string> const &logParameters, FileFormatOptions const &fileFormat,
+                     ORSOModelOptions const &modelOptions) const {
   if (!isValidSaveDirectory(saveDirectory)) {
     throw InvalidSavePath(saveDirectory);
   }
 
   // Setup the appropriate save algorithm
   if (shouldSaveToSingleFile(workspaceNames, fileFormat)) {
-    saveToSingleFile(workspaceNames, saveDirectory, fileFormat);
+    saveToSingleFile(workspaceNames, saveDirectory, fileFormat, modelOptions);
   } else {
     for (auto const &name : workspaceNames) {
       auto const ws = workspace(name);
       if (ws->isGroup()) {
-        // Save child workspaces into separate files
+        // Save child workspaces into separate files, each using the model for the group
         Mantid::API::WorkspaceGroup_sptr group = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws);
-        for (auto child : group->getAllItems())
-          save(child, saveDirectory, logParameters, fileFormat);
+        for (auto child : group->getAllItems()) {
+          auto const childModelOptions =
+              ORSOModelOptions({{child->getName(), modelOptions.model(name)}}, modelOptions.validate());
+          save(child, saveDirectory, logParameters, fileFormat, childModelOptions);
+        }
         continue;
       }
 
-      save(ws, saveDirectory, logParameters, fileFormat);
+      save(ws, saveDirectory, logParameters, fileFormat,
+           ORSOModelOptions({{name, modelOptions.model(name)}}, modelOptions.validate()));
     }
   }
 }

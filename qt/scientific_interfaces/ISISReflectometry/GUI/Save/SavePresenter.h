@@ -77,6 +77,7 @@ private:
   std::vector<std::string> getAvailableWorkspaceNames();
   NamedFormat formatFromIndex(int formatIndex) const;
   FileFormatOptions getSaveParametersFromView(bool const isAutoSave) const;
+  ORSOModelOptions getModelOptions(std::vector<std::string> const &workspaceNames) const;
   void enableAutosave();
   void disableAutosave();
   void updateWidgetEnabledState() const;

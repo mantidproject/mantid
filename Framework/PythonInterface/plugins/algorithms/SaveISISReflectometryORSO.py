@@ -65,7 +65,6 @@ class Prop:
     WRITE_RESOLUTION = "WriteResolution"
     INCLUDE_EXTRA_COLS = "IncludeAdditionalColumns"
     FILENAME = "Filename"
-    MODEL = "ModelDescription"
     VALIDATION = "ValidateModel"
     META_SOURCE = "MetadataSource"
     IGNORED_OPTIONAL_PROPS = "IgnoredProperties"
@@ -91,6 +90,7 @@ class MetaDictKeys:
     ANGLE_FILES_FILENAME = "file-name"
     ANGLE_FILES_ANGLE = "angle"
     SCRIPT = "reduction-call"
+    MODEL = "model"
 
     GROUP_MEMBERS = "group-members"
 
@@ -106,6 +106,7 @@ class ReflectometryDatasetBase:
         self._name: str = ""
         self._ws = ws
         self._is_ws_grp_member: bool = is_ws_grp_member
+        self._model: Optional[str] = None
         self._reduction_timestamp: datetime = None
         self._is_stitched: bool = False
         self._q_conversion_theta: Optional[float] = None
@@ -199,6 +200,10 @@ class ReflectometryDatasetBase:
     def resolution(self) -> Optional[float]:
         return self._resolution
 
+    @property
+    def model(self) -> Optional[str]:
+        return self._model
+
     @name.setter
     @check_read_only
     def name(self, name: str) -> None:
@@ -263,6 +268,11 @@ class ReflectometryDatasetBase:
     @check_read_only
     def resolution(self, resolution: Optional[float]) -> None:
         self._resolution = resolution
+
+    @model.setter
+    @check_read_only
+    def model(self, model: Optional[str]) -> None:
+        self._model = model
 
 
 class ReflectometryDatasetManual(ReflectometryDatasetBase):
@@ -753,18 +763,12 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         )
 
         self.declareProperty(
-            name=Prop.MODEL,
-            defaultValue="",
-            direction=Direction.Input,
-            doc="The model description of the sample.",
-        )
-
-        self.declareProperty(
             name=Prop.VALIDATION,
             defaultValue=False,
             direction=Direction.Input,
-            doc="Whether or not to validate the model provided to `ModelDescription`.",
+            doc=f"Whether or not to validate the model descriptions provided in `{Prop.META_JSON}`.",
         )
+        self.setPropertySettings(Prop.VALIDATION, manual_metadata_condition)
 
     def validateInputs(self):
         """Return a dictionary containing issues found in properties."""
@@ -969,6 +973,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         set_dataset_value_from_meta_dict("resolution", MetaDictKeys.RESOLUTION, metadata_dict)
         set_dataset_value_from_meta_dict("reduction_script", MetaDictKeys.SCRIPT, metadata_dict)
         set_dataset_value_from_meta_dict("is_stitched", MetaDictKeys.STITCHED, metadata_dict)
+        set_dataset_value_from_meta_dict("model", MetaDictKeys.MODEL, metadata_dict)
 
         try:
             group_member_dict = metadata_dict[MetaDictKeys.GROUP_MEMBERS][ws.name()]
@@ -1120,7 +1125,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             creator_name=self.name(),
             creator_affiliation=MantidORSODataset.SOFTWARE_NAME,
             enable_instrument_settings=refl_dataset.is_polarized,  # instrument settings only for polarization data
-            model=self.getProperty(Prop.MODEL).value,
+            model=refl_dataset.model,
             validate=self.getProperty(Prop.VALIDATION).value,
         )
 

@@ -25,20 +25,16 @@ InvalidWorkspaceName::~InvalidWorkspaceName() = default;
 std::string const &InvalidWorkspaceName::name() const { return m_name; }
 
 FileFormatOptions::FileFormatOptions(NamedFormat format, std::string prefix, bool includeHeader, std::string separator,
-                                     bool includeQResolution, bool includeAdditionalColumns, bool saveToSingleFile,
-                                     std::string model, bool model_validation)
-    : m_format(format), m_prefix(std::move(prefix)), m_model(std::move(model)),
-      m_model_validation(std::move(model_validation)), m_includeHeader(includeHeader),
-      m_separator(std::move(separator)), m_includeQResolution(includeQResolution),
-      m_includeAdditionalCols(includeAdditionalColumns), m_saveToSingleFile(saveToSingleFile) {}
+                                     bool includeQResolution, bool includeAdditionalColumns, bool saveToSingleFile)
+    : m_format(format), m_prefix(std::move(prefix)), m_includeHeader(includeHeader), m_separator(std::move(separator)),
+      m_includeQResolution(includeQResolution), m_includeAdditionalCols(includeAdditionalColumns),
+      m_saveToSingleFile(saveToSingleFile) {}
 bool FileFormatOptions::shouldIncludeHeader() const { return m_includeHeader; }
 bool FileFormatOptions::shouldIncludeQResolution() const { return m_includeQResolution; }
 bool FileFormatOptions::shouldIncludeAdditionalColumns() const { return m_includeAdditionalCols; }
 bool FileFormatOptions::shouldSaveToSingleFile() const { return m_saveToSingleFile; }
 std::string const &FileFormatOptions::separator() const { return m_separator; }
 std::string const &FileFormatOptions::prefix() const { return m_prefix; }
-std::string const &FileFormatOptions::model() const { return m_model; }
-bool FileFormatOptions::validate() const { return m_model_validation; }
 NamedFormat FileFormatOptions::format() const { return m_format; }
 bool FileFormatOptions::isORSOFormat() const {
   switch (m_format) {
@@ -49,5 +45,18 @@ bool FileFormatOptions::isORSOFormat() const {
   default:
     return false;
   }
+}
+
+ORSOModelOptions::ORSOModelOptions(std::map<std::string, std::string> workspaceModels, bool validate)
+    : m_workspaceModels(std::move(workspaceModels)), m_validate(validate) {}
+std::map<std::string, std::string> const &ORSOModelOptions::workspaceModels() const { return m_workspaceModels; }
+bool ORSOModelOptions::validate() const { return m_validate; }
+
+/** Get the model description for a workspace
+ * @return : the model, or an empty string if the workspace has no model
+ */
+std::string ORSOModelOptions::model(std::string const &workspaceName) const {
+  auto const it = m_workspaceModels.find(workspaceName);
+  return it != m_workspaceModels.cend() ? it->second : "";
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
