@@ -52,7 +52,9 @@ Sample shape
 The sample shape and any sample environment keep the orientation they were defined in. Algorithms
 that need them in the lab frame, such as :ref:`algm-MonteCarloAbsorption`, turn them by this rotation,
 together with the parts of the environment mounted on the goniometer; see
-:ref:`SampleEnvironment_goniometer`.
+:ref:`SampleEnvironment_goniometer`. A sample shape set after this algorithm by :ref:`algm-LoadSampleShape`,
+:ref:`algm-CopySample`, a 3MF file in :ref:`algm-LoadSampleEnvironment`, or :ref:`algm-SetSample` without
+an environment is instead stored already turned by the rotation, and is not turned again.
 
 
 
