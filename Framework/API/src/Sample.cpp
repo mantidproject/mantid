@@ -355,9 +355,9 @@ void Sample::saveNexus(Nexus::File *file, const std::string &group) const {
       IObject_const_sptr comp = (i == 0) ? environment.getContainer().getShapePtr() : environment.getComponentPtr(i);
       saveShapeToFile(file, comp, tag);
       comp->material().saveNexus(file, tag + "material");
-      // Only where it differs from the default - only the container turns - so a file saved before
-      // the flag existed reads the same way as one saved with the defaults.
-      if (environment.isOnGoniometer(i) != (i == 0))
+      // Only where it differs from the default, so a file saved before the flag existed reads the
+      // same way as one saved with the defaults.
+      if (environment.isOnGoniometer(i) != SampleEnvironment::onGoniometerByDefault(i))
         file->writeData(tag + "on_goniometer", int(environment.isOnGoniometer(i)));
     }
   }
@@ -428,8 +428,8 @@ int Sample::loadNexus(Nexus::File *file, const std::string &group) {
       int nElem;
       file->readData("num_env_comp", nElem);
       // Absent means the default, which is also how a file saved before the flag existed reads.
-      const auto onGoniometer = [file](const std::string &tag, const bool isContainer) {
-        int flag = isContainer;
+      const auto onGoniometer = [file](const std::string &tag, const size_t index) {
+        int flag = SampleEnvironment::onGoniometerByDefault(index);
         if (file->hasData(tag + "on_goniometer"))
           file->readData(tag + "on_goniometer", flag);
         return flag != 0;
@@ -437,11 +437,11 @@ int Sample::loadNexus(Nexus::File *file, const std::string &group) {
       // component 0 is the container; without a valid shape there is no environment to build
       if (IObject_sptr container_shape = (nElem > 0) ? loadShapeFromFile(file, "env_0_") : nullptr) {
         auto env = std::make_shared<SampleEnvironment>(env_name, std::make_shared<Container>(container_shape),
-                                                       onGoniometer("env_0_", true));
+                                                       onGoniometer("env_0_", 0));
         for (int i = 1; i < nElem; ++i) {
           const std::string tag = "env_" + Strings::toString(i) + "_";
           if (IObject_sptr comp = loadShapeFromFile(file, tag))
-            env->add(comp, onGoniometer(tag, false));
+            env->add(comp, onGoniometer(tag, env->nelements()));
         }
         m_environment = std::move(env);
       }

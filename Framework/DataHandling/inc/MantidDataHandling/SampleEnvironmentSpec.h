@@ -41,8 +41,10 @@ public:
 
   Geometry::SampleEnvironment_uptr buildEnvironment(const std::string &canID) const;
 
-  void addContainer(const Geometry::Container_const_sptr &can, bool onGoniometer = true);
-  void addComponent(const Geometry::IObject_const_sptr &component, bool onGoniometer = false);
+  void addContainer(const Geometry::Container_const_sptr &can,
+                    bool onGoniometer = Geometry::SampleEnvironment::onGoniometerByDefault(0));
+  void addComponent(const Geometry::IObject_const_sptr &component,
+                    bool onGoniometer = Geometry::SampleEnvironment::onGoniometerByDefault(1));
 
 private:
   std::string m_name;

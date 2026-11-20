@@ -204,7 +204,8 @@ void SampleEnvironmentSpecParser::parseAndAddComponents(SampleEnvironmentSpec *s
     if (nodeName == CONTAINERS_TAG) {
       parseAndAddContainers(spec, childElement);
     } else if (nodeName == COMPONENT_TAG) {
-      spec->addComponent(parseComponent(childElement), parseOnGoniometer(childElement, false));
+      spec->addComponent(parseComponent(childElement),
+                         parseOnGoniometer(childElement, Geometry::SampleEnvironment::onGoniometerByDefault(1)));
     }
     node = nodeIter.nextNode();
   }
@@ -268,7 +269,8 @@ void SampleEnvironmentSpecParser::parseAndAddContainers(SampleEnvironmentSpec *s
   while (node) {
     auto *childElement = static_cast<Element *>(node);
     if (childElement->nodeName() == CONTAINER_TAG) {
-      spec->addContainer(parseContainer(childElement), parseOnGoniometer(childElement, true));
+      spec->addContainer(parseContainer(childElement),
+                         parseOnGoniometer(childElement, Geometry::SampleEnvironment::onGoniometerByDefault(0)));
     }
     node = nodeIter.nextNode();
   }

@@ -37,9 +37,10 @@ namespace Mantid::DataHandling {
 namespace {
 double DegreesToRadians(double angle) { return angle * M_PI / 180; }
 
-/// Whether a loaded part turns with the sample: as the OnGoniometer property says, or by default only the container.
-bool onGoniometer(const Kernel::OptionalBool &flag, const bool isContainer) {
-  return flag == Kernel::OptionalBool::Unset ? isContainer : flag == Kernel::OptionalBool::True;
+/// Whether the part loaded at index turns with the sample: as the OnGoniometer property says, or by default.
+bool onGoniometer(const Kernel::OptionalBool &flag, const size_t index) {
+  return flag == Kernel::OptionalBool::Unset ? Geometry::SampleEnvironment::onGoniometerByDefault(index)
+                                             : flag == Kernel::OptionalBool::True;
 }
 } // namespace
 
@@ -254,11 +255,11 @@ void LoadSampleEnvironment::loadEnvironmentFromSTL(const std::string &filename, 
   const OptionalBool mounting = getProperty("OnGoniometer");
   if (add) {
     environment = std::make_unique<SampleEnvironment>(sample.getEnvironment().ownFrame());
-    environment->add(environmentMesh, onGoniometer(mounting, false));
+    environment->add(environmentMesh, onGoniometer(mounting, environment->nelements()));
   } else {
     auto can = std::make_shared<Container>(environmentMesh);
     std::string environmentName = getProperty("EnvironmentName");
-    environment = std::make_unique<SampleEnvironment>(environmentName, can, onGoniometer(mounting, true));
+    environment = std::make_unique<SampleEnvironment>(environmentName, can, onGoniometer(mounting, 0));
   }
 
   debugString += "Environment has: " + std::to_string(environment->nelements()) + " elements.";
@@ -317,13 +318,13 @@ void LoadSampleEnvironment::loadEnvironmentFrom3MF([[maybe_unused]] const Matrix
     if (!environment) {
       if (add) {
         environment = std::make_unique<SampleEnvironment>(sample.getEnvironment().ownFrame());
-        environment->add(environmentMesh, onGoniometer(mounting, false));
+        environment->add(environmentMesh, onGoniometer(mounting, environment->nelements()));
       } else {
         auto can = std::make_shared<Container>(environmentMesh);
-        environment = std::make_unique<SampleEnvironment>(name, can, onGoniometer(mounting, true));
+        environment = std::make_unique<SampleEnvironment>(name, can, onGoniometer(mounting, 0));
       }
     } else {
-      environment->add(environmentMesh, onGoniometer(mounting, false));
+      environment->add(environmentMesh, onGoniometer(mounting, environment->nelements()));
     }
 
     debugString += "Environment has: " + std::to_string(environment->nelements()) + " elements.";

@@ -28,7 +28,11 @@ class Track;
 */
 class MANTID_GEOMETRY_DLL SampleEnvironment {
 public:
-  SampleEnvironment(std::string name, const Container_const_sptr &getContainer, bool containerOnGoniometer = true);
+  /// Whether a part turns with the sample unless it says otherwise: only the container, index 0, which holds it.
+  static constexpr bool onGoniometerByDefault(const size_t index) { return index == 0; }
+
+  SampleEnvironment(std::string name, const Container_const_sptr &getContainer,
+                    bool containerOnGoniometer = onGoniometerByDefault(0));
 
   /// @return The name of kit
   inline const std::string &name() const { return m_name; }
@@ -59,7 +63,7 @@ public:
   bool isValid(const Kernel::V3D &point) const;
   int interceptSurfaces(Track &track) const;
 
-  void add(const IObject_const_sptr &component, bool onGoniometer = false);
+  void add(const IObject_const_sptr &component, bool onGoniometer = onGoniometerByDefault(1));
 
   /// A view of this environment as the goniometer places it: mounted components turned by
   /// goniometerR, fixed ones shared. Always built from the own-frame original, so turning a view
