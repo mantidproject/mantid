@@ -55,6 +55,15 @@ applied multiplicatively:
 
 The above procedure is repeated separately for each spectrum in the workspace.
 
+Mantid has used several different expressions to scale the multiple scattering correction factor:
+
+* :math:`(1.0 - \beta) / rns` - before Mantid 3.14
+* :math:`(1.0 - (\beta / rns))` - Mantid 3.14 to 6.5
+* :math:`(1.0 - \beta)` - Mantid 6.6 onwards
+
+The MSCorrectionMode parameter can be used to select which expression to use.
+
+
 Usage
 -----
 

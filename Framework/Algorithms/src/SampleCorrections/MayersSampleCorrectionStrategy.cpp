@@ -141,6 +141,8 @@ Mantid::HistogramData::Histogram MayersSampleCorrectionStrategy::getCorrectedHis
 
   // corrections to input
   const double muMin(xmur.front()), muMax(xmur.back()), flightPath(m_pars.l1 + m_pars.l2);
+  const double vol = M_PI * m_pars.cylHeight * pow(m_pars.cylRadius, 2);
+  const double rns = (vol * 1e6) * (m_pars.rho * 1e24) * 1e-22;
   ChebyshevSeries chebyPoly(N_POLY_ORDER);
 
   auto outputHistogram = m_histogram;
@@ -163,7 +165,19 @@ Mantid::HistogramData::Histogram MayersSampleCorrectionStrategy::getCorrectedHis
     if (m_pars.mscat) {
       const double msVal = chebyPoly(msCoeffs, xcap);
       const double beta = m_pars.sigmaSc * msVal / sigt;
-      corrfact *= (1.0 - beta);
+      switch (m_pars.msCorrMode) {
+      case MSCorrectionMode::NO_RNS:
+        corrfact *= (1.0 - beta);
+        break;
+      case MSCorrectionMode::RNS_OUT:
+        corrfact *= (1.0 - beta) / rns;
+        break;
+      case MSCorrectionMode::RNS_IN:
+        corrfact *= (1.0 - (beta / rns));
+        break;
+      case MSCorrectionMode::enum_count: // avoid warning for dummy entry
+        break;
+      }
     }
     // apply correction
 
