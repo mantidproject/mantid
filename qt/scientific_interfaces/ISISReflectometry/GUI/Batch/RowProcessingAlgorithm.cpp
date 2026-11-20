@@ -12,6 +12,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmProperties.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
@@ -368,7 +369,7 @@ std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps
   }
   updateProcessingInstructionsProperties(*properties, previewRow);
 
-  properties->setProperty("HideInputWorkspaces", true);
+  properties->setProperty("HideInputWorkspaces", isNoSlicing(model.slicing()));
   if (std::dynamic_pointer_cast<WorkspaceGroup>(previewRow.getLoadedWs())) {
     properties->setProperty("GroupTOFWorkspaces", false);
   }
@@ -377,8 +378,27 @@ std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps
 
 void updateRowOnAlgorithmComplete(const IAlgorithm_sptr &algorithm, Item &item) {
   auto &row = dynamic_cast<PreviewRow &>(item);
-  Workspace_sptr outputWs = algorithm->getProperty("OutputWorkspaceBinned");
-  row.setReducedWs(outputWs);
+  if (algorithm->getProperty("UsingMultiOutputs")) {
+    std::vector<Workspace_sptr> wss = {};
+    std::vector<std::string> wsNames = algorithm->getProperty("OutputWorkspacesBinned");
+    wss.reserve(wsNames.size());
+    auto const &ads = AnalysisDataService::Instance();
+    std::transform(wsNames.cbegin(), wsNames.cend(), std::back_inserter(wss),
+                   [&ads](auto const &wsName) { return ads.retrieve(wsName); });
+    row.setReducedWss(wss);
+  } else {
+    if (Workspace_sptr outputWs = algorithm->getProperty("OutputWorkspaceBinned")) {
+      if (!algorithm->getProperty("SliceWorkspace")) {
+        row.setReducedWss({outputWs});
+      } else {
+        if (auto wsGroup = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(outputWs)) {
+          row.setReducedWss(wsGroup->getAllItems());
+        } else {
+          row.setReducedWss({outputWs});
+        }
+      }
+    }
+  }
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry::Reduction
 

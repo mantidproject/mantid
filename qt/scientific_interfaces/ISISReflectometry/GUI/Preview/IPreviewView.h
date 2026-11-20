@@ -31,6 +31,7 @@ public:
 
   virtual void notifyLoadWorkspaceRequested() = 0;
   virtual void notifyGroupMemberSelectionChanged() = 0;
+  virtual void notifySliceSelectionChanged() = 0;
   virtual void notifyUpdateAngle() = 0;
   virtual void notifyApplyRequested() = 0;
 };
@@ -46,10 +47,12 @@ public:
 
   virtual std::string getWorkspaceName() const = 0;
   virtual size_t getSelectedGroupMember() const = 0;
+  virtual size_t getSelectedSlice() const = 0;
   virtual double getAngle() const = 0;
   virtual void setAngle(double angle) = 0;
   virtual void setUpdateAngleButtonEnabled(bool enabled) = 0;
   virtual void setTitle(const std::string &title) = 0;
   virtual void setGroupMembers(std::vector<std::string> const &workspaceNames) = 0;
+  virtual void setSlices(std::vector<std::string> const &sliceNames) = 0;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

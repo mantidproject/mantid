@@ -32,14 +32,15 @@ public:
   MOCK_METHOD(MatrixWorkspace_sptr, getSelectedLoadedWs, (), (const, override));
   MOCK_METHOD(Workspace_sptr, getSummedWs, (), (const, override));
   MOCK_METHOD(MatrixWorkspace_sptr, getSelectedSummedWs, (), (const, override));
-  MOCK_METHOD(Workspace_sptr, getReducedWs, (), (const, override));
+  MOCK_METHOD(std::vector<Workspace_sptr>, getReducedWss, (), (const, override));
   MOCK_METHOD(MatrixWorkspace_sptr, getSelectedReducedWs, (), (const, override));
   MOCK_METHOD(std::vector<MatrixWorkspace_sptr>, getReducedWorkspaceMembers, (), (const, override));
   MOCK_METHOD(bool, isWorkspaceGroup, (), (const, override));
   MOCK_METHOD(std::vector<std::string>, getGroupMemberDisplayNames, (), (const, override));
+  MOCK_METHOD(std::vector<std::string>, getSliceDisplayNames, (), (override));
   MOCK_METHOD(size_t, getNumberOfGroupMembers, (), (const, override));
   MOCK_METHOD(size_t, getSelectedGroupMember, (), (const, override));
-  MOCK_METHOD(void, setSelectedGroupMember, (size_t), (override));
+  MOCK_METHOD(size_t, getSelectedSlice, (), (const, override));
   MOCK_METHOD(std::optional<ProcessingInstructions>, getSelectedBanks, (), (const, override));
   MOCK_METHOD(std::optional<ProcessingInstructions>, getProcessingInstructions, (ROIType), (const, override));
   MOCK_METHOD(std::optional<double>, getDefaultTheta, (), (const, override));
@@ -47,10 +48,12 @@ public:
   MOCK_METHOD(std::optional<Selection> const, getSelectedRegion, (ROIType), (override));
 
   MOCK_METHOD(void, setSummedWs, (Workspace_sptr), (override));
-  MOCK_METHOD(void, clearReducedWorkspace, (), (override));
+  MOCK_METHOD(void, clearReducedWorkspaces, (), (override));
   MOCK_METHOD(void, setTheta, (double), (override));
   MOCK_METHOD(void, setSelectedBanks, (std::optional<ProcessingInstructions>), (override));
   MOCK_METHOD(void, setSelectedRegion, (ROIType, Selection const &), (override));
+  MOCK_METHOD(void, setSelectedGroupMember, (size_t), (override));
+  MOCK_METHOD(void, setSelectedSlice, (size_t), (override));
 
   MOCK_METHOD(void, sumBanksAsync, (IJobManager &), (override));
   MOCK_METHOD(void, reduceAsync, (IJobManager &), (override));

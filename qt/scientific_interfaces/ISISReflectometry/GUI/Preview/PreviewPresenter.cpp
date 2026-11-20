@@ -94,8 +94,9 @@ void PreviewPresenter::notifyAutoreductionPaused() { updateWidgetEnabledState();
 void PreviewPresenter::notifySetYAxisSymlogChanged() { updatePlotAxes(); }
 
 void PreviewPresenter::notifyPlotAllGroupMembersChanged() {
-  if (m_model->getReducedWs())
+  if (!m_model->getReducedWss().empty()) {
     plotLinePlot();
+  }
 }
 
 void PreviewPresenter::updateWidgetEnabledState() {
@@ -125,6 +126,7 @@ void PreviewPresenter::updatePlotAxes() {
 void PreviewPresenter::notifyLoadWorkspaceRequested() {
   m_view->disableMainWidget();
   m_view->setGroupMembers({});
+  m_view->setSlices({});
   m_dockedWidgets->setPlotAllGroupMembersCheckboxVisible(false);
   auto const name = m_view->getWorkspaceName();
   try {
@@ -188,6 +190,11 @@ void PreviewPresenter::updateSelectedGroupMemberDisplay() {
     plotLinePlot();
 }
 
+void PreviewPresenter::notifySliceSelectionChanged() {
+  m_model->setSelectedSlice(m_view->getSelectedSlice());
+  plotLinePlot();
+}
+
 void PreviewPresenter::notifyUpdateAngle() {
   // Re-run from the sum banks step to ensure the sliceviewer plot is up to date
   runSumBanks(true);
@@ -202,6 +209,7 @@ void PreviewPresenter::notifySumBanksCompleted() {
 
 void PreviewPresenter::notifyReductionCompleted() {
   // Update the final plot
+  m_view->setSlices(m_model->getSliceDisplayNames());
   plotLinePlot();
   m_view->enableMainWidget();
 }
@@ -216,6 +224,7 @@ void PreviewPresenter::notifySumBanksAlgorithmError() {
 
 void PreviewPresenter::notifyReductionAlgorithmError() {
   clearReductionPlot();
+  m_model->clearReducedWorkspaces();
   m_view->enableMainWidget();
 }
 
@@ -411,7 +420,7 @@ void PreviewPresenter::runReduction() {
   // Ensure the selected regions are up to date. Required when Loading new data because an empty run details is created.
   updateSelectedRegionInModelFromView();
   // Perform the reduction
-  m_model->clearReducedWorkspace();
+  m_model->clearReducedWorkspaces();
   m_model->reduceAsync(*m_jobManager);
 }
 

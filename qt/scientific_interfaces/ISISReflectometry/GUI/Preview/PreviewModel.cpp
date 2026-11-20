@@ -91,16 +91,22 @@ Workspace_sptr PreviewModel::getSummedWs() const { return m_runDetails->getSumme
 MatrixWorkspace_sptr PreviewModel::getSelectedSummedWs() const {
   return getWorkspaceGroupMember(m_runDetails->getSummedWs());
 }
-Workspace_sptr PreviewModel::getReducedWs() const { return m_runDetails->getReducedWs(); }
+std::vector<Workspace_sptr> PreviewModel::getReducedWss() const { return m_runDetails->getReducedWss(); }
 
-void PreviewModel::clearReducedWorkspace() { m_runDetails->setReducedWs(nullptr); }
+void PreviewModel::clearReducedWorkspaces() { m_runDetails->setReducedWss({}); }
 
 MatrixWorkspace_sptr PreviewModel::getSelectedReducedWs() const {
-  return getWorkspaceGroupMember(m_runDetails->getReducedWs());
+  return getWorkspaceGroupMember(m_runDetails->getReducedWss()[m_selectedSlice]);
 }
 
 std::vector<MatrixWorkspace_sptr> PreviewModel::getReducedWorkspaceMembers() const {
-  return getMembers(m_runDetails->getReducedWs());
+  std::vector<MatrixWorkspace_sptr> members = {};
+  for (auto const &workspace : m_runDetails->getReducedWss()) {
+    auto const &matrixWorkspaces = getMembers(workspace);
+    members.reserve(members.size() + matrixWorkspaces.size());
+    members.insert(members.end(), matrixWorkspaces.cbegin(), matrixWorkspaces.cend());
+  }
+  return members;
 }
 
 bool PreviewModel::isWorkspaceGroup() const {
@@ -128,6 +134,35 @@ void PreviewModel::setSelectedGroupMember(size_t index) {
   if (index >= getNumberOfGroupMembers())
     throw std::out_of_range("Workspace group member index is out of range");
   m_selectedGroupMember = index;
+}
+
+std::vector<std::string> PreviewModel::getSliceDisplayNames() {
+  auto const &reducedWss = m_runDetails->getReducedWss();
+  if (reducedWss.empty() || reducedWss.size() == 1) { // No reduction completed or not sliced.
+    m_selectedSlice = 0;
+    return {};
+  }
+  std::vector<std::string> sliceNames = {};
+  sliceNames.reserve(reducedWss.size());
+
+  for (auto const &ws : reducedWss) {
+    // Find the second to last underscore.
+    auto const &wsName = ws->getName();
+    sliceNames.emplace_back(wsName.substr(wsName.rfind("_"), wsName.size() - 1));
+  }
+  if (m_selectedSlice >= sliceNames.size()) {
+    m_selectedSlice = 0;
+  }
+  return sliceNames;
+}
+
+size_t PreviewModel::getSelectedSlice() const { return m_selectedSlice; }
+
+void PreviewModel::setSelectedSlice(size_t index) {
+  if (index >= m_runDetails->getReducedWss().size()) {
+    throw std::out_of_range("Slice index is out of range.");
+  }
+  m_selectedSlice = index;
 }
 
 std::optional<double> PreviewModel::getDefaultTheta() const {
@@ -212,6 +247,7 @@ std::optional<IPreviewModel::Selection> const PreviewModel::getSelectedRegion(RO
 void PreviewModel::createRunDetails(const std::string &workspaceName) {
   m_runDetails = std::make_optional<PreviewRow>(std::vector<std::string>{workspaceName});
   m_selectedGroupMember = 0;
+  m_selectedSlice = 0;
 }
 
 MatrixWorkspace_sptr PreviewModel::getWorkspaceGroupMember(Workspace_sptr const &workspace) const {
@@ -229,8 +265,13 @@ void PreviewModel::exportSummedWsToAds() const {
 }
 
 void PreviewModel::exportReducedWsToAds() const {
-  if (auto reducedWs = m_runDetails->getReducedWs()) {
-    AnalysisDataService::Instance().addOrReplace("preview_reduced_ws", reducedWs);
+  auto reducedWss = m_runDetails->getReducedWss();
+  if (reducedWss.size() > 0) {
+    for (size_t i = 0; i < reducedWss.size(); ++i) {
+      if (reducedWss[i]) {
+        AnalysisDataService::Instance().addOrReplace("preview_reduced_ws_" + std::to_string(i), reducedWss[i]);
+      }
+    }
   } else {
     g_log.error(
         "Could not export reduced WS. No selection has been made on the instrument viewer and/or region selector.");

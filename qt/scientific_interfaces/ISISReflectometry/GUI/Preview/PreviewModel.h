@@ -40,21 +40,24 @@ public:
   Mantid::API::Workspace_sptr getSummedWs() const override;
   Mantid::API::MatrixWorkspace_sptr getSelectedSummedWs() const override;
   std::optional<ProcessingInstructions> getProcessingInstructions(ROIType regionType) const override;
-  Mantid::API::Workspace_sptr getReducedWs() const override;
+  std::vector<Mantid::API::Workspace_sptr> getReducedWss() const override;
   Mantid::API::MatrixWorkspace_sptr getSelectedReducedWs() const override;
   std::vector<Mantid::API::MatrixWorkspace_sptr> getReducedWorkspaceMembers() const override;
   bool isWorkspaceGroup() const override;
   std::vector<std::string> getGroupMemberDisplayNames() const override;
+  std::vector<std::string> getSliceDisplayNames() override;
   size_t getNumberOfGroupMembers() const override;
   size_t getSelectedGroupMember() const override;
-  void setSelectedGroupMember(size_t index) override;
+  size_t getSelectedSlice() const override;
   std::optional<double> getDefaultTheta() const override;
   PreviewRow const &getPreviewRow() const override;
   std::optional<Selection> const getSelectedRegion(ROIType regionType) override;
 
   void setLoadedWs(Mantid::API::Workspace_sptr workspace);
   void setSummedWs(Mantid::API::Workspace_sptr workspace) override;
-  void clearReducedWorkspace() override;
+  void clearReducedWorkspaces() override;
+  void setSelectedGroupMember(size_t index) override;
+  void setSelectedSlice(size_t index) override;
   void setTheta(double theta) override;
   void setSelectedBanks(std::optional<ProcessingInstructions> selectedBanks) override;
   void setSelectedRegion(ROIType regionType, Selection const &selection) override;
@@ -65,6 +68,7 @@ public:
 private:
   std::optional<PreviewRow> m_runDetails;
   size_t m_selectedGroupMember{0};
+  size_t m_selectedSlice{0};
 
   void createRunDetails(std::string const &workspaceName);
   Mantid::API::MatrixWorkspace_sptr getWorkspaceGroupMember(Mantid::API::Workspace_sptr const &workspace) const;

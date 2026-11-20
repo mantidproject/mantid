@@ -21,7 +21,7 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 void validatePreviewWorkspace(Mantid::API::Workspace_sptr const &workspace) { getMembers(workspace, true); }
 
 PreviewRow::PreviewRow(const std::vector<std::string> &runNumbers)
-    : Item(), m_runNumbers(std::move(runNumbers)), m_theta{0.0} {
+    : Item(), m_runNumbers(std::move(runNumbers)), m_theta{0.0}, m_reducedWss{{}} {
   std::sort(m_runNumbers.begin(), m_runNumbers.end());
 }
 
@@ -41,11 +41,11 @@ int PreviewRow::completedItems() const { return 1; }
 
 Mantid::API::Workspace_sptr PreviewRow::getLoadedWs() const noexcept { return m_loadedWs; }
 Mantid::API::Workspace_sptr PreviewRow::getSummedWs() const noexcept { return m_summedWs; }
-Mantid::API::Workspace_sptr PreviewRow::getReducedWs() const noexcept { return m_reducedWs; }
+std::vector<Mantid::API::Workspace_sptr> const &PreviewRow::getReducedWss() const noexcept { return m_reducedWss; }
 
 void PreviewRow::setLoadedWs(Mantid::API::Workspace_sptr ws) noexcept { m_loadedWs = std::move(ws); }
 void PreviewRow::setSummedWs(Mantid::API::Workspace_sptr ws) noexcept { m_summedWs = std::move(ws); }
-void PreviewRow::setReducedWs(Mantid::API::Workspace_sptr ws) noexcept { m_reducedWs = std::move(ws); }
+void PreviewRow::setReducedWss(std::vector<Mantid::API::Workspace_sptr> wss) noexcept { m_reducedWss = std::move(wss); }
 
 std::optional<ProcessingInstructions> PreviewRow::getSelectedBanks() const noexcept { return m_selectedBanks; }
 

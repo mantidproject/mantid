@@ -36,21 +36,24 @@ public:
   virtual std::optional<ProcessingInstructions> getSelectedBanks() const = 0;
   virtual Mantid::API::Workspace_sptr getSummedWs() const = 0;
   virtual Mantid::API::MatrixWorkspace_sptr getSelectedSummedWs() const = 0;
-  virtual Mantid::API::Workspace_sptr getReducedWs() const = 0;
+  virtual std::vector<Mantid::API::Workspace_sptr> getReducedWss() const = 0;
   virtual Mantid::API::MatrixWorkspace_sptr getSelectedReducedWs() const = 0;
   virtual std::vector<Mantid::API::MatrixWorkspace_sptr> getReducedWorkspaceMembers() const = 0;
   virtual bool isWorkspaceGroup() const = 0;
   virtual std::vector<std::string> getGroupMemberDisplayNames() const = 0;
+  virtual std::vector<std::string> getSliceDisplayNames() = 0;
   virtual size_t getNumberOfGroupMembers() const = 0;
   virtual size_t getSelectedGroupMember() const = 0;
-  virtual void setSelectedGroupMember(size_t index) = 0;
+  virtual size_t getSelectedSlice() const = 0;
   virtual std::optional<ProcessingInstructions> getProcessingInstructions(ROIType regionType) const = 0;
   virtual std::optional<double> getDefaultTheta() const = 0;
   virtual PreviewRow const &getPreviewRow() const = 0;
   virtual std::optional<Selection> const getSelectedRegion(ROIType regionType) = 0;
 
   virtual void setSummedWs(Mantid::API::Workspace_sptr workspace) = 0;
-  virtual void clearReducedWorkspace() = 0;
+  virtual void clearReducedWorkspaces() = 0;
+  virtual void setSelectedGroupMember(size_t index) = 0;
+  virtual void setSelectedSlice(size_t index) = 0;
 
   virtual void setTheta(double theta) = 0;
 

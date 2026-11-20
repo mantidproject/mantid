@@ -43,6 +43,7 @@ void QtPreviewView::connectSignals() const {
   // Loading section
   connect(m_ui.load_button, SIGNAL(clicked()), this, SLOT(onLoadWorkspaceRequested()));
   connect(m_ui.group_member_combo_box, SIGNAL(currentIndexChanged(int)), this, SLOT(onGroupMemberSelectionChanged()));
+  connect(m_ui.slice_combo_box, SIGNAL(currentIndexChanged(int)), this, SLOT(onSliceSelectionChanged()));
   connect(m_ui.update_button, SIGNAL(clicked()), this, SLOT(onUpdateClicked()));
   connect(m_ui.angle_spin_box, SIGNAL(valueChanged(double)), this, SLOT(onAngleEdited()));
   // Apply button
@@ -51,6 +52,7 @@ void QtPreviewView::connectSignals() const {
 
 void QtPreviewView::onLoadWorkspaceRequested() const { m_notifyee->notifyLoadWorkspaceRequested(); }
 void QtPreviewView::onGroupMemberSelectionChanged() const { m_notifyee->notifyGroupMemberSelectionChanged(); }
+void QtPreviewView::onSliceSelectionChanged() const { m_notifyee->notifySliceSelectionChanged(); }
 void QtPreviewView::onUpdateClicked() const { m_notifyee->notifyUpdateAngle(); }
 
 void QtPreviewView::onAngleEdited() { m_ui.update_button->setEnabled(true); }
@@ -62,6 +64,8 @@ std::string QtPreviewView::getWorkspaceName() const { return m_ui.workspace_line
 size_t QtPreviewView::getSelectedGroupMember() const {
   return static_cast<size_t>(m_ui.group_member_combo_box->currentIndex());
 }
+
+size_t QtPreviewView::getSelectedSlice() const { return static_cast<size_t>(m_ui.slice_combo_box->currentIndex()); }
 
 double QtPreviewView::getAngle() const { return m_ui.angle_spin_box->value(); }
 
@@ -86,5 +90,17 @@ void QtPreviewView::setGroupMembers(std::vector<std::string> const &workspaceNam
   for (auto const &name : workspaceNames)
     m_ui.group_member_combo_box->addItem(QString::fromStdString(name));
   m_ui.group_member_combo_box->blockSignals(false);
+}
+
+void QtPreviewView::setSlices(std::vector<std::string> const &sliceNames) {
+  auto const isSliced = sliceNames.size() > 1;
+  m_ui.slice_label->setVisible(isSliced);
+  m_ui.slice_combo_box->setVisible(isSliced);
+  m_ui.slice_combo_box->blockSignals(true);
+  m_ui.slice_combo_box->clear();
+  for (auto const &slice : sliceNames) {
+    m_ui.slice_combo_box->addItem(QString::fromStdString(slice));
+  }
+  m_ui.slice_combo_box->blockSignals(false);
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
