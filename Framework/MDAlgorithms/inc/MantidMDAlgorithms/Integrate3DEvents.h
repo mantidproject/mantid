@@ -11,6 +11,7 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
 #include "MantidMDAlgorithms/DllConfig.h"
+#include "MantidMDAlgorithms/EllipsoidTrajectoryNorm.h"
 
 #include <memory>
 
@@ -69,11 +70,54 @@ using EventListMap =
     std::unordered_map<int64_t, std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>>>;
 using PeakQMap = std::unordered_map<int64_t, Mantid::Kernel::V3D>;
 
+/// Quantities from a flux/solid-angle normalized profile fit, for diagnostics
+struct ProfileFitNormalization {
+  /// summed event weight in the fit region
+  double counts{0.0};
+  /// fitted background counts in the fit region
+  double backgroundCounts{0.0};
+  /// expected counts per unit integrated intensity of the fitted peak
+  double peakNorm{0.0};
+  /// normalization of the fit region
+  double regionNorm{0.0};
+  /// coverage of the fit region
+  EllipsoidNormResult coverage;
+};
+
+/// Options and results for refining a peak's shape in a profile fit
+struct ProfileFitShape {
+  /// refine the shape only if the peak's intensity is at least this many standard deviations
+  double minSignalToNoise{10.0};
+  /// each principal standard deviation may change by at most this factor from the supplied shape's
+  double maxChange{2.0};
+  /// with the center, it may move at most this many of the supplied shape's standard deviations (in its own frame)
+  double maxCenterShift{3.0};
+  /// whether the peak was strong enough for its shape to be refined
+  bool attempted{false};
+  /// whether the shape was refined (and the refinement kept)
+  bool adjusted{false};
+  /// principal axes and standard deviations of the refined shape, or of the supplied one if not refined
+  DataObjects::PeakEllipsoidFrame directions;
+  DataObjects::PeakEllipsoidExtent sigmas;
+};
+
+/// Weighted event sums inside a peak ellipsoid and its background shell
+struct ShapeCounts {
+  double peak{0.0};
+  double peakErrorSq{0.0};
+  double shell{0.0};
+  double shellErrorSq{0.0};
+};
+
 class MANTID_MDALGORITHMS_DLL Integrate3DEvents {
 public:
   /// Construct object to store events around peaks and integrate peaks
   Integrate3DEvents(const std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> &peak_q_list,
                     Kernel::DblMatrix UBinv, double radius, const bool useOnePercentBackgroundCorrection = true);
+
+  /// Construct object to store events around peaks, each with its nearest peak, without indexing them
+  Integrate3DEvents(const std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> &peak_q_list,
+                    double radius, const bool useOnePercentBackgroundCorrection = true);
 
   Integrate3DEvents(const std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> &peak_q_list,
                     std::vector<Mantid::Kernel::V3D> const &hkl_list, std::vector<Mantid::Kernel::V3D> const &mnp_list,
@@ -117,6 +161,11 @@ public:
   void integrateUsingShape(const Mantid::DataObjects::PeakShapeEllipsoid &shape, const Mantid::Kernel::V3D &peak_q,
                            double &inti, double &sigi);
 
+  /// Weighted event sums (and error-squared sums) inside the peak ellipsoid
+  /// and the background shell of a shape supplied by the caller, centered on
+  /// peak_q, without the one percent background correction.
+  ShapeCounts countUsingShape(const Mantid::DataObjects::PeakShapeEllipsoid &shape, const Mantid::Kernel::V3D &peak_q);
+
   /// Integrate a peak using a shape supplied by the caller, by maximizing
   /// the Poisson log-likelihood of a Gaussian peak (amplitude fit) plus a
   /// flat background rate against the raw events, instead of counting
@@ -132,9 +181,18 @@ public:
   /// search. center returns the offset from peak_q actually used for the
   /// fit (unchanged from shape.translation() if adjustCenter is false), for
   /// the caller to persist as the output shape's translation if it wants to.
+  /// If norm is given, the expected counts are weighted by the flux and
+  /// solid angle along each detector pixel's trajectory through the fit
+  /// region (a sphere of the search radius about peak_q), so the intensity
+  /// is in normalized units, and normalization returns diagnostics. If
+  /// shapeFit is given and the peak is strong enough, the shape (and with
+  /// adjustCenter the center) is refined too, within shapeFit's bounds; a
+  /// weaker peak then keeps both its shape and its center.
   void integrateUsingShapeProfileFit(const Mantid::DataObjects::PeakShapeEllipsoid &shape,
                                      const Mantid::Kernel::V3D &peak_q, bool adjustCenter, Mantid::Kernel::V3D &center,
-                                     double &inti, double &sigi);
+                                     double &inti, double &sigi, const EllipsoidTrajectoryNorm *norm = nullptr,
+                                     ProfileFitNormalization *normalization = nullptr,
+                                     ProfileFitShape *shapeFit = nullptr);
 
   /// Estimate the signal-to-noise ratio for a peak at the given position
   /// by fitting an ellipsoid to the events and comparing peak to background
@@ -142,6 +200,16 @@ public:
                                     bool forceSpherical = false, double sphericityTol = 0.02);
 
 private:
+  /// Refine a peak's shape, and optionally its center, by maximizing the profile likelihood
+  static void refineProfileShape(const std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> &events,
+                                 const Mantid::Kernel::V3D &peak_q, const EllipsoidTrajectoryNorm *norm,
+                                 const EllipsoidChords &region, double volume, bool adjustCenter,
+                                 const DataObjects::PeakEllipsoidFrame &priorDirections,
+                                 const DataObjects::PeakEllipsoidExtent &priorSigmas, double maxChange,
+                                 const Mantid::Kernel::V3D &origin, double maxCenterShift, Mantid::Kernel::V3D &center,
+                                 double &intensity, double &background, double &sigma, double &peakNorm,
+                                 DataObjects::PeakEllipsoidFrame &directions, DataObjects::PeakEllipsoidExtent &sigmas);
+
   /// Get a list of events for a given Q
   const std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> *
   getEvents(const Mantid::Kernel::V3D &peak_q);
@@ -184,6 +252,13 @@ private:
   int64_t getHklKey2(Mantid::Kernel::V3D const &hkl);
   int64_t getHklMnpKey2(Mantid::Kernel::V3D const &hkl);
 
+  /// Form a map key for the peak of a q_vector: its h,k,l, or the nearest peak's index without indexing
+  int64_t getPeakKey(Mantid::Kernel::V3D const &q_vector);
+  /// One more than the index of the nearest peak within the radius of q_vector, or 0 if none
+  int64_t getNearestPeakKey(Mantid::Kernel::V3D const &q_vector) const;
+  /// Key of the cell of the grid of peak centers with integer coordinates i, j, k
+  static int64_t getCellKey(int64_t i, int64_t j, int64_t k);
+
   /// Add an event to the vector of events for the closest h,k,l
   void addEvent(std::pair<std::pair<double, double>, Mantid::Kernel::V3D> event_Q, bool hkl_integ);
   void addModEvent(std::pair<std::pair<double, double>, Mantid::Kernel::V3D> event_Q, bool hkl_integ);
@@ -215,6 +290,10 @@ private:
   const bool crossterm;
   const bool m_useOnePercentBackgroundCorrection =
       true; // if one perecent culling of the background should be performed.
+  // assign events to the nearest peak (within m_radius) instead of the nearest h,k,l
+  bool m_nearestPeak{false};
+  std::vector<Kernel::V3D> m_peakCenters;                       // peak Q-vectors, by index
+  std::unordered_map<int64_t, std::vector<size_t>> m_peakCells; // peak indices in cells of side m_radius
 };
 
 } // namespace MDAlgorithms
