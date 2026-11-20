@@ -357,6 +357,7 @@ set(INC_FILES
     inc/MantidAPI/SpectrumInfo.h
     inc/MantidAPI/SpectrumInfoItem.h
     inc/MantidAPI/SpectrumInfoIterator.h
+    inc/MantidAPI/SpectrumUnitConversion.h
     inc/MantidAPI/TableRow.h
     inc/MantidAPI/TaskBasedAlgorithm.h
     inc/MantidAPI/TextAxis.h
@@ -491,6 +492,7 @@ set(TEST_FILES
     SpectraAxisValidatorTest.h
     SpectrumDetectorMappingTest.h
     SpectrumInfoTest.h
+    SpectrumUnitConversionTest.h
     TaskBasedAlgorithmTest.h
     TextAxisTest.h
     TimeAtSampleStrategyDirectTest.h

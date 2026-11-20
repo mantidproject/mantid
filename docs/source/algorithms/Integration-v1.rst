@@ -44,6 +44,37 @@ If an integration limit is given that is beyond the X range covered by the spect
 the integration will proceed up to final bin boundary. The data that falls outside any
 integration limits set will not contribute to the output workspace.
 
+Limits in a different unit
+##########################
+
+By default, the integration limits are in the X unit of the input workspace. The optional
+``RangeUnit`` property allows ``RangeLower``, ``RangeUpper``, ``RangeLowerList`` and
+``RangeUpperList`` to be given in another unit, for example to integrate a time-of-flight
+workspace over a range of wavelengths.
+
+Only the limits are converted, separately for each spectrum, so spectra from detectors at
+different positions are integrated over different X ranges. The data is not converted and
+the input workspace is not changed. The two X values of each output spectrum, and the unit of
+the output X axis, remain in the X unit of the input workspace. If the unit runs in the
+opposite direction to the X axis, such as energy on a time-of-flight axis, the lower limit in
+``RangeUnit`` corresponds to the upper end of the integrated X range.
+
+Unless the two units have a direct conversion, such as wavelength and energy, the workspace
+needs an instrument with a source and a sample. The energy mode and any fixed energy are
+taken from the workspace.
+
+The conversion is checked for every spectrum being integrated before the algorithm runs, and
+the algorithm will not run if any of them fails. This includes a missing value such as ``Ei``,
+a spectrum without detectors and a monitor that has no equivalent of the limits. Use
+``StartWorkspaceIndex`` and ``EndWorkspaceIndex`` to leave out such spectra. If ``RangeUnit``
+differs from the X unit, at least one integration limit must be given.
+
+If ``RangeUnit`` is used with an :py:obj:`EventWorkspace <mantid.dataobjects.EventWorkspace>`
+then the existing bins of each spectrum are integrated, and ``RangeLowerList`` and
+``RangeUpperList`` may be used. The limits follow the same rules for bin boundaries and
+``IncludePartialBins`` as for histogram data, so :ref:`algm-Rebin` the workspace first if finer
+bins are required.
+
 EventWorkspaces
 ###############
 
@@ -124,6 +155,28 @@ Output:
     Integral of spectrum 12 is 100.0
     Integral of spectrum 13 is 100.0
     Integration range is [ 0.0, 20000.0 ]
+
+**Example - Integrating a time-of-flight workspace over a wavelength range:**
+
+.. testcode:: ExRangeUnit
+
+    # Create a workspace in time-of-flight filled with a constant value = 1.0
+    ws = CreateSampleWorkspace('Histogram', 'Flat background', NumBanks=1, BankPixelWidth=1, BinWidth=100)
+    # Integrate between 1 and 2 Angstroms
+    intg = Integration(ws, RangeLower=1.0, RangeUpper=2.0, RangeUnit='Wavelength')
+
+    # The output X values are still in time-of-flight
+    print('Output X unit is {0}'.format(intg.getAxis(0).getUnit().unitID()))
+    print('Integration range is [ {0}, {1} ]'.format(intg.x(0)[0], intg.x(0)[1]))
+    print('Integral of spectrum 0 is {0}'.format(intg.y(0)[0]))
+
+Output:
+
+.. testoutput:: ExRangeUnit
+
+    Output X unit is TOF
+    Integration range is [ 3800.0, 7500.0 ]
+    Integral of spectrum 0 is 37.0
 
 **Example - Total peak intensity:**
 

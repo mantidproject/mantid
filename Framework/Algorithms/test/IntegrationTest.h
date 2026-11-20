@@ -9,15 +9,21 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/Integration.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitConversion.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -728,7 +734,396 @@ public:
     TS_ASSERT_THROWS_ANYTHING(alg.setProperty("EndWorkspaceIndex", endIndex));
   }
 
+  void testRangeUnitConvertsLimitsForEachSpectrum() {
+    const auto input = createTofWorkspace();
+    const MatrixWorkspace_sptr inputBefore = input->clone();
+
+    const auto output = integrate(input, "Wavelength", 0.5, 1.0, true);
+
+    TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "TOF");
+    for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
+      const double lower = toTOF(*input, i, "Wavelength", 0.5);
+      const double upper = toTOF(*input, i, "Wavelength", 1.0);
+      TS_ASSERT_DELTA(output->x(i)[0], lower, 1e-6);
+      TS_ASSERT_DELTA(output->x(i)[1], upper, 1e-6);
+      TS_ASSERT_DELTA(output->y(i)[0], (upper - lower) * COUNTS_PER_MICROSECOND, 1e-6);
+    }
+    // The detectors are at different distances, so each spectrum has its own limits
+    TS_ASSERT_LESS_THAN(output->x(0)[1], output->x(4)[1]);
+
+    // The input workspace is left as it was
+    TS_ASSERT_EQUALS(input->getAxis(0)->unit()->unitID(), "TOF");
+    for (size_t i = 0; i < input->getNumberHistograms(); ++i) {
+      TS_ASSERT_EQUALS(input->x(i).rawData(), inputBefore->x(i).rawData());
+      TS_ASSERT_EQUALS(input->y(i).rawData(), inputBefore->y(i).rawData());
+      TS_ASSERT_EQUALS(input->e(i).rawData(), inputBefore->e(i).rawData());
+    }
+  }
+
+  void testRangeUnitMatchesEquivalentLimitsInXUnit() {
+    const auto input = createTofWorkspace();
+    std::vector<double> lowerLimits, upperLimits;
+    for (size_t i = 0; i < input->getNumberHistograms(); ++i) {
+      lowerLimits.emplace_back(toTOF(*input, i, "Wavelength", 0.5));
+      upperLimits.emplace_back(toTOF(*input, i, "Wavelength", 1.0));
+    }
+
+    const auto output = integrate(input, "Wavelength", 0.5, 1.0);
+    const auto expected =
+        integrate(input, "", Mantid::EMPTY_DBL(), Mantid::EMPTY_DBL(), false, lowerLimits, upperLimits);
+
+    assertWorkspacesMatch(*output, *expected);
+  }
+
+  void testRangeUnitRunningOppositeToXAxis() {
+    const auto input = createTofWorkspace();
+
+    const auto output = integrate(input, "Energy", 100.0, 300.0, true);
+
+    for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
+      TS_ASSERT_DELTA(output->x(i)[0], toTOF(*input, i, "Energy", 300.0), 1e-6);
+      TS_ASSERT_DELTA(output->x(i)[1], toTOF(*input, i, "Energy", 100.0), 1e-6);
+    }
+  }
+
+  void testRangeUnitLowerLimitOnlyRunningOppositeToXAxis() {
+    // 100 meV is between 5700 and 5800 microseconds for every detector. Energies above it are at shorter times.
+    const auto output = integrate(createTofWorkspace(), "Energy", 100.0, Mantid::EMPTY_DBL());
+
+    for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
+      TS_ASSERT_EQUALS(output->x(i)[0], 0.0);
+      TS_ASSERT_EQUALS(output->x(i)[1], 5700.0);
+      TS_ASSERT_DELTA(output->y(i)[0], 114.0, 1e-6);
+    }
+  }
+
+  void testRangeUnitUpperLimitOnlyRunningOppositeToXAxis() {
+    // Energies below 100 meV are at longer times
+    const auto output = integrate(createTofWorkspace(), "Energy", Mantid::EMPTY_DBL(), 100.0);
+
+    for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
+      TS_ASSERT_EQUALS(output->x(i)[0], 5800.0);
+      TS_ASSERT_EQUALS(output->x(i)[1], 10000.0);
+      TS_ASSERT_DELTA(output->y(i)[0], 84.0, 1e-6);
+    }
+  }
+
+  void testRangeUnitWithRangeList() {
+    const auto input = createTofWorkspace();
+    const std::vector<double> lowerLimits{0.5, 0.55, 0.6, 0.65, 0.7};
+
+    const auto output = integrate(input, "Wavelength", Mantid::EMPTY_DBL(), 1.0, true, lowerLimits);
+
+    for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
+      TS_ASSERT_DELTA(output->x(i)[0], toTOF(*input, i, "Wavelength", lowerLimits[i]), 1e-6);
+      TS_ASSERT_DELTA(output->x(i)[1], toTOF(*input, i, "Wavelength", 1.0), 1e-6);
+    }
+  }
+
+  void testRangeUnitEqualToXUnitChangesNothing() {
+    const auto input = createTofWorkspace();
+
+    assertWorkspacesMatch(*integrate(input, "TOF", 1050.0, 4050.0, true), *integrate(input, "", 1050.0, 4050.0, true));
+  }
+
+  void testRangeUnitWithoutLimitsIsAnIssue() {
+    const auto issues = validationIssues(createTofWorkspace(), "Wavelength", Mantid::EMPTY_DBL(), Mantid::EMPTY_DBL());
+
+    assertIssue(issues, "RangeUnit", "no integration limits");
+  }
+
+  void testRangeUnitEqualToXUnitWithoutLimitsIsAccepted() {
+    TS_ASSERT(validationIssues(createTofWorkspace(), "TOF", Mantid::EMPTY_DBL(), Mantid::EMPTY_DBL()).empty());
+  }
+
+  void testRangeUnitIssueStopsExecution() {
+    TS_ASSERT_THROWS(integrate(createTofWorkspace(), "Wavelength", Mantid::EMPTY_DBL(), Mantid::EMPTY_DBL()),
+                     const std::runtime_error &);
+  }
+
+  void testRangeListOfWrongLengthIsAnIssue() {
+    const std::vector<double> lowerLimits{1000.0, 2000.0};
+
+    const auto issues = validationIssues(createTofWorkspace(), "", Mantid::EMPTY_DBL(), Mantid::EMPTY_DBL(), 0,
+                                         Mantid::EMPTY_INT(), lowerLimits);
+
+    assertIssue(issues, "RangeLowerList", "should contain 5");
+  }
+
+  void testRangeListWithEventWorkspaceNeedsRangeUnit() {
+    const EventWorkspace_sptr events = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 1, false);
+    events->getAxis(0)->setUnit("TOF");
+    const std::vector<double> lowerLimits{10.0};
+
+    const auto issues =
+        validationIssues(events, "", Mantid::EMPTY_DBL(), Mantid::EMPTY_DBL(), 0, Mantid::EMPTY_INT(), lowerLimits);
+
+    assertIssue(issues, "RangeLowerList", "EventWorkspaces");
+  }
+
+  void testRangeUnitWithEventWorkspaceIntegratesExistingBins() {
+    const EventWorkspace_sptr events = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(2, 2, false);
+    events->getAxis(0)->setUnit("TOF");
+    const MatrixWorkspace_sptr input = events;
+    const auto numberOfEvents = events->getNumberEvents();
+    const auto &spectrumInfo = input->spectrumInfo();
+    const auto toWavelength = [&](const double tof) {
+      return UnitConversion::run("TOF", "Wavelength", tof, spectrumInfo.l1(), spectrumInfo.l2(0),
+                                 spectrumInfo.twoTheta(0), DeltaEMode::Elastic, 0.0);
+    };
+    const double lower = toWavelength(20.5);
+    const double upper = toWavelength(60.5);
+
+    // The same bins, and limits, as a histogram workspace
+    MatrixWorkspace_sptr histograms = create<Workspace2D>(*input, input->getNumberHistograms(), input->binEdges(0));
+    std::vector<double> lowerLimits, upperLimits;
+    for (size_t i = 0; i < input->getNumberHistograms(); ++i) {
+      histograms->setHistogram(i, input->histogram(i));
+      lowerLimits.emplace_back(toTOF(*input, i, "Wavelength", lower));
+      upperLimits.emplace_back(toTOF(*input, i, "Wavelength", upper));
+    }
+
+    const auto output = integrate(input, "Wavelength", lower, upper);
+
+    assertWorkspacesMatch(
+        *output, *integrate(histograms, "", Mantid::EMPTY_DBL(), Mantid::EMPTY_DBL(), false, lowerLimits, upperLimits));
+    // The bins from 21 to 60 hold two events each
+    TS_ASSERT_DELTA(output->y(0)[0], 78.0, 1e-6);
+    TS_ASSERT_EQUALS(events->getNumberEvents(), numberOfEvents);
+  }
+
+  void testRangeUnitWithDirectGeometry() {
+    const double ei = 50.0;
+    const auto input = createTofWorkspace();
+    input->mutableRun().addProperty("deltaE-mode", std::string("Direct"));
+    input->mutableRun().addProperty("Ei", ei);
+
+    const auto output = integrate(input, "DeltaE", 0.0, 10.0, true);
+
+    for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
+      TS_ASSERT_DELTA(output->x(i)[0], toTOF(*input, i, "DeltaE", 0.0, DeltaEMode::Direct, ei), 1e-6);
+      TS_ASSERT_DELTA(output->x(i)[1], toTOF(*input, i, "DeltaE", 10.0, DeltaEMode::Direct, ei), 1e-6);
+    }
+  }
+
+  void testMissingFixedEnergyIsAnIssue() {
+    const auto input = createTofWorkspace();
+    input->mutableRun().addProperty("deltaE-mode", std::string("Direct"));
+
+    assertIssue(validationIssues(input, "DeltaE", 0.0, 10.0), "RangeUnit", "efixed");
+  }
+
+  void testEnergyTransferOnElasticDataIsAnIssue() {
+    assertIssue(validationIssues(createTofWorkspace(), "DeltaE", 0.0, 10.0), "RangeUnit", "emode");
+  }
+
+  void testRangeUnitWithQuickConversionNeedsNoInstrument() {
+    const auto input = createWavelengthWorkspaceWithoutInstrument();
+
+    const auto output = integrate(input, "Energy", 5.0, 20.0, true);
+
+    const auto toWavelength = [](const double energy) {
+      return UnitConversion::run("Energy", "Wavelength", energy, 0.0, 0.0, 0.0, DeltaEMode::Elastic, 0.0);
+    };
+    TS_ASSERT_DELTA(output->x(0)[0], toWavelength(20.0), 1e-6);
+    TS_ASSERT_DELTA(output->x(0)[1], toWavelength(5.0), 1e-6);
+  }
+
+  void testRangeUnitUpperLimitOnlyWithQuickConversion() {
+    // 5 meV is about 4.04 Angstroms and lower energies are at longer wavelengths
+    const auto output = integrate(createWavelengthWorkspaceWithoutInstrument(), "Energy", Mantid::EMPTY_DBL(), 5.0);
+
+    TS_ASSERT_EQUALS(output->x(0)[0], 5.0);
+    TS_ASSERT_EQUALS(output->x(0)[1], 10.0);
+  }
+
+  void testLimitWithoutEquivalentInXUnitIsAnIssue() {
+    // A negative energy has no corresponding wavelength
+    assertIssue(validationIssues(createWavelengthWorkspaceWithoutInstrument(), "Energy", -1.0, 5.0), "RangeUnit",
+                "not valid values");
+  }
+
+  void testMissingInstrumentIsAnIssueIfOneIsNeeded() {
+    const MatrixWorkspace_sptr input = WorkspaceCreationHelper::create2DWorkspaceBinned(2, 10);
+    input->getAxis(0)->setUnit("TOF");
+
+    assertIssue(validationIssues(input, "Wavelength", 1.0, 2.0), "InputWorkspace", "instrument");
+  }
+
+  void testXUnitThatIsNotConvertibleIsAnIssue() {
+    const auto input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("testSpace");
+
+    assertIssue(validationIssues(input, "Wavelength", 1.0, 2.0), "RangeUnit", "convertible X unit");
+  }
+
+  void testSpectrumWithoutDetectorsIsAnIssueOnlyIfIntegrated() {
+    const auto input = createTofWorkspace();
+    input->getSpectrum(1).clearDetectorIDs();
+
+    assertIssue(validationIssues(input, "Wavelength", 0.5, 1.0), "RangeUnit", "workspace index 1");
+    TS_ASSERT(validationIssues(input, "Wavelength", 0.5, 1.0, 2).empty());
+  }
+
+  void testMonitorThatCannotBeConvertedIsAnIssueOnlyIfIntegrated() {
+    // The last two spectra are monitors, which have no d-spacing. The first detector is on the beam axis, so skip it.
+    const auto input = createTofWorkspace(4, true);
+
+    assertIssue(validationIssues(input, "dSpacing", 10.0, Mantid::EMPTY_DBL(), 1), "RangeUnit", "workspace index 2");
+    TS_ASSERT(validationIssues(input, "dSpacing", 10.0, Mantid::EMPTY_DBL(), 1, 1).empty());
+  }
+
+  void testMonitorWithBothLimitsInUnsupportedUnitIsAnIssue() {
+    // Both d-spacing limits convert to zero time-of-flight for a monitor, rather than failing
+    const auto input = createTofWorkspace(4, true);
+
+    assertIssue(validationIssues(input, "dSpacing", 10.0, 20.0, 1), "RangeUnit", "workspace index 2");
+    TS_ASSERT(validationIssues(input, "dSpacing", 10.0, 20.0, 1, 1).empty());
+  }
+
+  void testDetectorOnBeamAxisWithBothLimitsInDSpacingIsAnIssue() {
+    // The first detector is on the beam axis, so has no d-spacing. The others do.
+    const auto input = createTofWorkspace();
+
+    assertIssue(validationIssues(input, "dSpacing", 10.0, 20.0), "RangeUnit", "workspace index 0");
+    TS_ASSERT(validationIssues(input, "dSpacing", 10.0, 20.0, 1).empty());
+  }
+
+  void testPartialBinsWithUpperLimitOnlyStartsAtFirstBinEdge() {
+    // Spectrum 0 of testSpace has X values 0 to 5 and Y values 0, 1, 2, 3, 4
+    const auto output = integrate(testSpace(), "", Mantid::EMPTY_DBL(), 3.5, true);
+
+    TS_ASSERT_EQUALS(output->x(0)[0], 0.0);
+    TS_ASSERT_EQUALS(output->x(0)[1], 3.5);
+    TS_ASSERT_DELTA(output->y(0)[0], 4.5, 1e-10);
+  }
+
+  void testPartialBinsWithLowerLimitOnlyEndsAtLastBinEdge() {
+    const auto output = integrate(testSpace(), "", 1.5, Mantid::EMPTY_DBL(), true);
+
+    TS_ASSERT_EQUALS(output->x(0)[0], 1.5);
+    TS_ASSERT_EQUALS(output->x(0)[1], 5.0);
+    TS_ASSERT_DELTA(output->y(0)[0], 9.5, 1e-10);
+  }
+
+  void testPartialBinsWithoutLimitsCoversWholeSpectrum() {
+    const auto output = integrate(testSpace(), "", Mantid::EMPTY_DBL(), Mantid::EMPTY_DBL(), true);
+
+    TS_ASSERT_EQUALS(output->x(0)[0], 0.0);
+    TS_ASSERT_EQUALS(output->x(0)[1], 5.0);
+    TS_ASSERT_DELTA(output->y(0)[0], 10.0, 1e-10);
+  }
+
+  void testPartialBinsWithConvertedLowerLimitOnlyRunningOppositeToXAxis() {
+    // A lower energy limit becomes an upper time-of-flight limit, so the integration starts at the first bin edge
+    const auto input = createTofWorkspace();
+
+    const auto output = integrate(input, "Energy", 100.0, Mantid::EMPTY_DBL(), true);
+
+    for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
+      TS_ASSERT_EQUALS(output->x(i)[0], 0.0);
+      TS_ASSERT_DELTA(output->x(i)[1], toTOF(*input, i, "Energy", 100.0), 1e-6);
+    }
+  }
+
+  void testPartialBinsWithConvertedUpperLimitOnlyRunningOppositeToXAxis() {
+    const auto input = createTofWorkspace();
+
+    const auto output = integrate(input, "Energy", Mantid::EMPTY_DBL(), 100.0, true);
+
+    for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
+      TS_ASSERT_DELTA(output->x(i)[0], toTOF(*input, i, "Energy", 100.0), 1e-6);
+      TS_ASSERT_EQUALS(output->x(i)[1], 10000.0);
+    }
+  }
+
 private:
+  static MatrixWorkspace_sptr testSpace() {
+    return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("testSpace");
+  }
+
+  /// Each bin of createTofWorkspace holds 2 counts and is 100 microseconds wide
+  static constexpr double COUNTS_PER_MICROSECOND = 0.02;
+
+  static MatrixWorkspace_sptr createTofWorkspace(const int numberOfSpectra = 5, const bool includeMonitors = false) {
+    const MatrixWorkspace_sptr workspace =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(numberOfSpectra, 100, includeMonitors);
+    for (size_t i = 0; i < workspace->getNumberHistograms(); ++i) {
+      workspace->mutableX(i) *= 100.0;
+    }
+    return workspace;
+  }
+
+  static MatrixWorkspace_sptr createWavelengthWorkspaceWithoutInstrument() {
+    const MatrixWorkspace_sptr workspace = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 10);
+    workspace->getAxis(0)->setUnit("Wavelength");
+    return workspace;
+  }
+
+  static double toTOF(const MatrixWorkspace &workspace, const size_t index, const std::string &unit, const double value,
+                      const DeltaEMode::Type emode = DeltaEMode::Elastic, const double efixed = 0.0) {
+    const auto &spectrumInfo = workspace.spectrumInfo();
+    return UnitConversion::run(unit, "TOF", value, spectrumInfo.l1(), spectrumInfo.l2(index),
+                               spectrumInfo.twoTheta(index), emode, efixed);
+  }
+
+  static MatrixWorkspace_sptr integrate(const MatrixWorkspace_sptr &input, const std::string &rangeUnit,
+                                        const double lower, const double upper, const bool includePartialBins = false,
+                                        const std::vector<double> &lowerLimits = {},
+                                        const std::vector<double> &upperLimits = {}) {
+    Integration alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", input);
+    alg.setPropertyValue("OutputWorkspace", "out");
+    alg.setProperty("RangeLower", lower);
+    alg.setProperty("RangeUpper", upper);
+    alg.setProperty("RangeLowerList", lowerLimits);
+    alg.setProperty("RangeUpperList", upperLimits);
+    alg.setProperty("IncludePartialBins", includePartialBins);
+    alg.setPropertyValue("RangeUnit", rangeUnit);
+    alg.execute();
+    return alg.getProperty("OutputWorkspace");
+  }
+
+  static std::map<std::string, std::string> validationIssues(const MatrixWorkspace_sptr &input,
+                                                             const std::string &rangeUnit, const double lower,
+                                                             const double upper, const int startIndex = 0,
+                                                             const int endIndex = Mantid::EMPTY_INT(),
+                                                             const std::vector<double> &lowerLimits = {}) {
+    Integration alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", input);
+    alg.setProperty("RangeLower", lower);
+    alg.setProperty("RangeUpper", upper);
+    alg.setProperty("StartWorkspaceIndex", startIndex);
+    alg.setProperty("EndWorkspaceIndex", endIndex);
+    alg.setProperty("RangeLowerList", lowerLimits);
+    alg.setPropertyValue("RangeUnit", rangeUnit);
+    IAlgorithm &algorithm = alg;
+    return algorithm.validateInputs();
+  }
+
+  static void assertIssue(const std::map<std::string, std::string> &issues, const std::string &property,
+                          const std::string &expectedText) {
+    const auto issue = issues.find(property);
+    TS_ASSERT(issue != issues.cend());
+    if (issue != issues.cend()) {
+      TS_ASSERT_DIFFERS(issue->second.find(expectedText), std::string::npos);
+    }
+  }
+
+  static void assertWorkspacesMatch(const MatrixWorkspace &actual, const MatrixWorkspace &expected) {
+    TS_ASSERT_EQUALS(actual.getNumberHistograms(), expected.getNumberHistograms());
+    for (size_t i = 0; i < expected.getNumberHistograms(); ++i) {
+      TS_ASSERT_DELTA(actual.x(i)[0], expected.x(i)[0], 1e-6);
+      TS_ASSERT_DELTA(actual.x(i)[1], expected.x(i)[1], 1e-6);
+      TS_ASSERT_DELTA(actual.y(i)[0], expected.y(i)[0], 1e-6);
+      TS_ASSERT_DELTA(actual.e(i)[0], expected.e(i)[0], 1e-6);
+    }
+  }
+
   void assertRangeWithPartialBins(const Workspace_sptr &input, const double rangeLower, const double rangeUpper,
                                   const std::array<double, 3> yy, const std::array<double, 3> ee) {
     Integration alg;
