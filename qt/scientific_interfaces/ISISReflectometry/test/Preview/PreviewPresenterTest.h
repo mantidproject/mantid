@@ -67,6 +67,7 @@ public:
     EXPECT_CALL(*mockView, getWorkspaceName()).Times(1).WillOnce(Return(workspaceName));
     EXPECT_CALL(*mockView, disableMainWidget()).Times(1);
     EXPECT_CALL(*mockView, setGroupMembers(std::vector<std::string>{}));
+    EXPECT_CALL(*mockView, setSlices(std::vector<std::string>{}));
     EXPECT_CALL(*mockDockedWidgets, setPlotAllGroupMembersCheckboxVisible(false));
     EXPECT_CALL(*mockModel, loadWorkspaceFromAds(workspaceName)).Times(1).WillOnce(Return(false));
     EXPECT_CALL(*mockModel, loadAndPreprocessWorkspaceAsync(Eq(workspaceName), Ref(*mockJobManager))).Times(1);
@@ -329,6 +330,31 @@ public:
         PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), makeJobManager(), std::move(mockDockedWidgets),
                                   std::move(mockRegionSelector), std::move(mockLinePlot)));
     presenter.notifyGroupMemberSelectionChanged();
+  }
+
+  void test_slice_selection_changed_updates_model_and_performs_plot() {
+    auto mockModel = makeModel();
+    auto mockView = std::make_unique<MockPreviewView>();
+    auto mockDockedWidgets = std::make_unique<MockPreviewDockedWidgets>();
+    auto mockRegionSelector = makeRegionSelector();
+    auto mockLinePlot = std::make_unique<MockPlotPresenter>();
+
+    MatrixWorkspace_sptr const reduced = WorkspaceCreationHelper::create2DWorkspace(1, 1);
+    MatrixWorkspace_sptr const otherReduced = WorkspaceCreationHelper::create2DWorkspace(1, 1);
+    auto const reducedWorkspaces = std::vector<MatrixWorkspace_sptr>{reduced, otherReduced};
+    auto const reducedModelWorkspaces = std::vector<Workspace_sptr>{reduced, otherReduced};
+
+    EXPECT_CALL(*mockView, getSelectedSlice()).WillOnce(Return(1));
+    EXPECT_CALL(*mockModel, getSelectedReducedWs()).WillOnce(Return(otherReduced));
+    EXPECT_CALL(*mockModel, setSelectedSlice(1));
+    EXPECT_CALL(*mockLinePlot, setSpectrum(otherReduced, 0)).Times(1);
+    EXPECT_CALL(*mockLinePlot, plot());
+
+    auto presenter =
+        PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), makeJobManager(), std::move(mockDockedWidgets),
+                                  std::move(mockRegionSelector), std::move(mockLinePlot)));
+
+    presenter.notifySliceSelectionChanged();
   }
 
   void test_notify_load_workspace_error_reenables_load_widgets() {
