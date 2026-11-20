@@ -1,7 +1,8 @@
 set(SRC_FILES src/BroadcastWorkspace.cpp src/GatherWorkspaces.cpp src/Chunking.cpp)
 
-set(INC_FILES inc/MantidMPIAlgorithms/BroadcastWorkspace.h inc/MantidMPIAlgorithms/GatherWorkspaces.h
-              inc/MantidMPIAlgorithms/MPISerialization.h inc/MantidMPIAlgorithms/Chunking.h
+set(INC_FILES
+    inc/MantidMPIAlgorithms/BroadcastWorkspace.h inc/MantidMPIAlgorithms/GatherWorkspaces.h
+    inc/MantidMPIAlgorithms/MPISerialization.h inc/MantidMPIAlgorithms/Chunking.h inc/MantidMPIAlgorithms/MPILifetime.h
 )
 
 if(COVERAGE)

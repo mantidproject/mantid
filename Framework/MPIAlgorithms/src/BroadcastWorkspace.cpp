@@ -15,6 +15,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidMPIAlgorithms/Chunking.h"
+#include "MantidMPIAlgorithms/MPILifetime.h"
 #include <algorithm>
 
 #ifdef MPI_BUILD
@@ -38,13 +39,11 @@ void BroadcastWorkspace::init() {
                   "process should provide an InputWorkspace.");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "The OutputWorkspace will be a copy of the InputWorkspace. Some workspace metadata may be lost.");
-#ifdef MPI_BUILD
-  int maxRank = mpi::communicator().size() - 1;
-#else
-  int maxRank = 0;
-#endif
-
-  declareProperty("BroadcasterRank", 0, std::make_shared<BoundedValidator<int>>(0, maxRank),
+  // The upper bound depends on the number of MPI processes, so it is checked in validateInputs rather than here. This
+  // keeps MPI from being initialized just to create the algorithm, e.g. for its documentation or the simpleapi stubs.
+  auto nonNegative = std::make_shared<BoundedValidator<int>>();
+  nonNegative->setLower(0);
+  declareProperty("BroadcasterRank", 0, nonNegative,
                   "The rank of the process holding the workspace to broadcast (default: 0).");
 
   declareProperty("ChunkSize", 0, std::make_shared<BoundedValidator<int>>(-1, INT_MAX),
@@ -53,8 +52,23 @@ void BroadcastWorkspace::init() {
                   "(fastest but uses most memory). A positive value specifies exact number of spectra per chunk.");
 }
 
+std::map<std::string, std::string> BroadcastWorkspace::validateInputs() {
+  std::map<std::string, std::string> issues;
+#ifdef MPI_BUILD
+  ensureMPIInitialized();
+  const int numProcesses = mpi::communicator().size();
+#else
+  const int numProcesses = 1;
+#endif
+  const int root = getProperty("BroadcasterRank");
+  if (root >= numProcesses)
+    issues["BroadcasterRank"] = "Must be less than the number of MPI processes (" + std::to_string(numProcesses) + ")";
+  return issues;
+}
+
 void BroadcastWorkspace::exec() {
 #ifdef MPI_BUILD
+  ensureMPIInitialized();
   // Every process in an MPI job must hit this next line or everything hangs!
   mpi::communicator world;
 
