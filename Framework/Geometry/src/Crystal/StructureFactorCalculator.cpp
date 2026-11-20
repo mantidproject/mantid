@@ -12,7 +12,7 @@ namespace Mantid::Geometry {
  * Sets the crystal structure for which to calculate structure factors
  *
  * Additionally StructureFactorCalculator::crystalStructureSetHook() is called
- * with the CrystalStructure. This function may be re-implemented
+ * with the CrystalStructure. This function must be implemented
  * by concrete structure factor calculators to perform other necessary actions
  * that involve the crystal structure (for example extracting and storing
  * members of it).
@@ -67,10 +67,5 @@ std::vector<double> StructureFactorCalculator::getFsSquared(const std::vector<Ke
 
   return fSquareds;
 }
-
-/// This function is called from
-/// StructureFactorCalculator::setCrystalStructure() and can be overriden to
-/// perform additional actions.
-void StructureFactorCalculator::crystalStructureSetHook([[maybe_unused]] const CrystalStructure &crystalStructure) {}
 
 } // namespace Mantid::Geometry

@@ -84,24 +84,22 @@ IALCBaselineModellingView::SectionSelector ALCBaselineModellingView::sectionSele
 int ALCBaselineModellingView::noOfSectionRows() const { return m_ui.sections->rowCount(); }
 
 void ALCBaselineModellingView::setDataCurve(MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex) {
-  const auto kwargs = getPlotKwargs(m_ui.dataPlot, "Data");
+  const auto kwargs = getPlotKwargs();
 
   m_ui.dataPlot->clear();
   m_ui.dataPlot->addSpectrum("Data", workspace, workspaceIndex, defaultLineColour(), kwargs);
 }
 
 void ALCBaselineModellingView::setCorrectedCurve(MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex) {
-  const auto kwargs = getPlotKwargs(m_ui.correctedPlot, "Corrected");
+  const auto kwargs = getPlotKwargs();
 
   m_ui.correctedPlot->clear();
   m_ui.correctedPlot->addSpectrum("Corrected", workspace, workspaceIndex, Qt::blue, kwargs);
 }
 
-QHash<QString, QVariant> ALCBaselineModellingView::getPlotKwargs(PreviewPlot *plot, const QString &curveName) {
+QHash<QString, QVariant> ALCBaselineModellingView::getPlotKwargs() {
   // Ensures the plot is plotted only with data points and no lines
   QHash<QString, QVariant> kwargs;
-  UNUSED_ARG(plot);
-  UNUSED_ARG(curveName);
   kwargs.insert("linestyle", QString("None").toLatin1().constData());
   kwargs.insert("marker", QString(".").toLatin1().constData());
   kwargs.insert("distribution", QString("False").toLatin1().constData());

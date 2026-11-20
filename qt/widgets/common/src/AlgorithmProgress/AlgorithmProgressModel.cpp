@@ -69,8 +69,7 @@ void AlgorithmProgressModel::finishHandle(const Mantid::API::IAlgorithm *alg) { 
 /// same thing as the algorithm finishing
 /// @param alg The algorithm that has finished
 /// @param what Unused error message
-void AlgorithmProgressModel::errorHandle(const Mantid::API::IAlgorithm *alg, const std::string &what) {
-  UNUSED_ARG(what);
+void AlgorithmProgressModel::errorHandle(const Mantid::API::IAlgorithm *alg, [[maybe_unused]] const std::string &what) {
   this->removeFrom(alg);
 }
 

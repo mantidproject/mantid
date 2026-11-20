@@ -30,16 +30,10 @@ public:
 
   std::string name() const override { return "FitPropertyBrowserTest_Funct"; }
 
-  void function1D(double *out, const double *xValues, const size_t nData) const override {
-    UNUSED_ARG(out);
-    UNUSED_ARG(xValues);
-    UNUSED_ARG(nData);
-  }
-  void functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData) override {
-    UNUSED_ARG(out);
-    UNUSED_ARG(xValues);
-    UNUSED_ARG(nData);
-  }
+  void function1D([[maybe_unused]] double *out, [[maybe_unused]] const double *xValues,
+                  [[maybe_unused]] const size_t nData) const override {}
+  void functionDeriv1D([[maybe_unused]] Jacobian *out, [[maybe_unused]] const double *xValues,
+                       [[maybe_unused]] const size_t nData) override {}
 };
 
 DECLARE_FUNCTION(FitPropertyBrowserTest_Funct)

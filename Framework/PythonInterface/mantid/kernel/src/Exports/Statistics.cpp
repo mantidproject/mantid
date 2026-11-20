@@ -134,8 +134,7 @@ std::vector<double> getZscoreNumpy(const NDArray &data) {
  * @param data The input array
  * @param sorted True if the data is sorted (deprecated)
  */
-std::vector<double> getZscoreNumpyDeprecated(const NDArray &data, const bool sorted) {
-  UNUSED_ARG(sorted);
+std::vector<double> getZscoreNumpyDeprecated(const NDArray &data, [[maybe_unused]] const bool sorted) {
   if (PyErr_Warn(PyExc_DeprecationWarning, "getZScore no longer requires the second sorted argument.") < 0)
     throw boost::python::error_already_set();
   return getZscoreNumpy(data);
@@ -144,9 +143,10 @@ std::vector<double> getZscoreNumpyDeprecated(const NDArray &data, const bool sor
 /**
  * Proxy for @see Mantid::Kernel::getModifiedZscore so that it can accept numpy
  * arrays,
+ * @param data The input array
+ * @param sorted Ignored, as the kernel now explicitly checks whether the data is sorted
  */
-std::vector<double> getModifiedZscoreNumpy(const NDArray &data, const bool sorted = false) {
-  UNUSED_ARG(sorted); // We explicitly check in the kernel now
+std::vector<double> getModifiedZscoreNumpy(const NDArray &data, [[maybe_unused]] const bool sorted = false) {
   using Converters::NDArrayToVector;
   using Mantid::Kernel::getModifiedZscore;
 

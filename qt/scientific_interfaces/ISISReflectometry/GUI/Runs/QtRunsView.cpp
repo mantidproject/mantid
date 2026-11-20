@@ -72,7 +72,7 @@ void QtRunsView::initLayout() {
   connect(m_ui.searchPane, SIGNAL(customContextMenuRequested(const QPoint &)), this,
           SLOT(onShowSearchContextMenuRequested(const QPoint &)));
   // Synchronize the slit calculator
-  connect(m_ui.comboSearchInstrument, SIGNAL(currentIndexChanged(int)), this, SLOT(onInstrumentChanged(int)));
+  connect(m_ui.comboSearchInstrument, SIGNAL(currentIndexChanged(int)), this, SLOT(onInstrumentChanged()));
   // Connect signal for when search algorithm completes
   connect(m_algoRunner.get(), SIGNAL(algorithmComplete(bool)), this, SLOT(onSearchComplete()), Qt::UniqueConnection);
   // Connect signal for when user edits the search results table
@@ -85,7 +85,7 @@ void QtRunsView::initLayout() {
  * according to whether processing is running or not.
  * @param isProcessing: Whether processing is running
  */
-void QtRunsView::updateMenuEnabledState(bool isProcessing) { UNUSED_ARG(isProcessing); }
+void QtRunsView::updateMenuEnabledState([[maybe_unused]] bool isProcessing) {}
 
 /**
  * Sets the "Autoreduce" button enabled or disabled
@@ -302,10 +302,8 @@ void QtRunsView::onShowSearchContextMenuRequested(const QPoint &pos) {
 
 /** This is slot is triggered when any of the instrument combo boxes changes. It
  * notifies the main presenter and updates the Slit Calculator
- * @param index : The index of the combo box
  */
-void QtRunsView::onInstrumentChanged(int index) {
-  UNUSED_ARG(index);
+void QtRunsView::onInstrumentChanged() {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
       Mantid::Kernel::FeatureType::Feature, {"ISIS Reflectometry", "RunsTab", "InstrumentChanged"}, false);
   m_notifyee->notifyChangeInstrumentRequested();

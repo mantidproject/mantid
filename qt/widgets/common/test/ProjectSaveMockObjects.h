@@ -46,10 +46,7 @@ public:
   WindowStub(const std::string &name, const std::vector<std::string> &wsNames)
       : m_name(name), m_wsNames(wsNames.cbegin(), wsNames.cend()) {}
 
-  std::string saveToProject(ApplicationWindow *app) override {
-    UNUSED_ARG(app);
-    return "";
-  }
+  std::string saveToProject([[maybe_unused]] ApplicationWindow *app) override { return ""; }
 
   std::vector<std::string> getWorkspaceNames() override { return m_wsNames; }
 

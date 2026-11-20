@@ -134,7 +134,7 @@ void RunsPresenter::notifySearchFailed() {
   }
 }
 
-void RunsPresenter::notifyTransfer() { transfer(m_view->getSelectedSearchRows(), TransferMatch::Any); }
+void RunsPresenter::notifyTransfer() { transfer(m_view->getSelectedSearchRows()); }
 
 // Notification from our own view that the instrument should be changed
 void RunsPresenter::notifyChangeInstrumentRequested() {
@@ -391,7 +391,7 @@ void RunsPresenter::autoreduceNewRuns() {
   auto rowsToTransfer = m_view->getAllSearchRows();
 
   if (rowsToTransfer.size() > 0)
-    transfer(rowsToTransfer, TransferMatch::Strict);
+    transfer(rowsToTransfer);
 
   mainPresenter().notifyResumeReductionRequested();
 }
@@ -477,12 +477,9 @@ ProgressPresenter RunsPresenter::setupProgressBar(const std::set<int> &rowsToTra
 /** Transfers the selected runs in the search results to the processing table
  * @param rowsToTransfer : a set of row indices in the search results to
  * transfer
- * @param matchType : an enum specifying how strictly to match runs against
- * the transfer criteria
  * @return : The runs to transfer as a vector of maps
  */
-void RunsPresenter::transfer(const std::set<int> &rowsToTransfer, const TransferMatch matchType) {
-  UNUSED_ARG(matchType);
+void RunsPresenter::transfer(const std::set<int> &rowsToTransfer) {
   if (validateRowsToTransfer(rowsToTransfer)) {
     auto progress = setupProgressBar(rowsToTransfer);
     auto jobs = runsTable().reductionJobs();
@@ -628,8 +625,7 @@ void RunsPresenter::stopMonitor() {
 
 /** Handler called when the monitor algorithm finishes
  */
-void RunsPresenter::finishHandle(const IAlgorithm *alg) {
-  UNUSED_ARG(alg);
+void RunsPresenter::finishHandle([[maybe_unused]] const IAlgorithm *alg) {
   stopObserving(m_monitorAlg);
   m_monitorAlg.reset();
   updateViewWhenMonitorStopped();
@@ -639,9 +635,7 @@ void RunsPresenter::finishHandle(const IAlgorithm *alg) {
 
 /** Handler called when the monitor algorithm errors
  */
-void RunsPresenter::errorHandle(const IAlgorithm *alg, const std::string &what) {
-  UNUSED_ARG(alg);
-  UNUSED_ARG(what);
+void RunsPresenter::errorHandle([[maybe_unused]] const IAlgorithm *alg, const std::string &what) {
   stopObserving(m_monitorAlg);
   m_monitorAlg.reset();
   updateViewWhenMonitorStopped();

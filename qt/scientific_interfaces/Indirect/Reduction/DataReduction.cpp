@@ -359,8 +359,7 @@ void DataReduction::instrumentLoadingDone(bool error) {
  *
  * @param close Close event (unused)
  */
-void DataReduction::closeEvent(QCloseEvent *close) {
-  UNUSED_ARG(close);
+void DataReduction::closeEvent([[maybe_unused]] QCloseEvent *close) {
   Mantid::Kernel::ConfigService::Instance().removeObserver(m_changeObserver);
 }
 

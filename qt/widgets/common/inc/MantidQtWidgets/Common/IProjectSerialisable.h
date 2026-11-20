@@ -28,14 +28,6 @@ public:
   /// compiler)
   virtual ~IProjectSerialisable() = default;
 
-  static IProjectSerialisable *loadFromProject(const std::string &lines, ApplicationWindow *app,
-                                               const int fileVersion) {
-    UNUSED_ARG(lines);
-    UNUSED_ARG(app);
-    UNUSED_ARG(fileVersion);
-    throw std::runtime_error("Not implemented");
-  }
-
   /// Serialises to a string that can be saved to a project file.
   virtual std::string saveToProject(ApplicationWindow *app) = 0;
   /// Returns a list of workspace names that are used by this window
