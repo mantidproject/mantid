@@ -20,11 +20,33 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/UnitFactory.h"
+#include <algorithm>
 #include <boost/algorithm/string/predicate.hpp>
 #include <cstdio>
 #include <filesystem>
 
 namespace {
+/**
+ * Check for the start of the section address table that follows the 80
+ * character header and the format version word of every ISIS RAW file: the run
+ * section is always at word 32 and the instrument section at word 126. The file
+ * position is reset to the beginning.
+ * @param file An open RAW file
+ * @return True if the address table has the expected start
+ */
+bool hasRawAddressTable(FILE *file) {
+  constexpr long addressTableOffset = 84;
+  constexpr unsigned char expected[8] = {32, 0, 0, 0, 126, 0, 0, 0};
+  unsigned char found[8] = {};
+  bool matches = false;
+  if (fseek(file, addressTableOffset, SEEK_SET) == 0 && fread(found, 1, sizeof(found), file) == sizeof(found)) {
+    matches = std::equal(std::begin(expected), std::end(expected), std::begin(found));
+  }
+  if (fseek(file, 0, SEEK_SET) != 0)
+    throw std::runtime_error("LoadRawHelper - Cannot change position to the beginning of the file with fseek");
+  return matches;
+}
+
 /**
  * Return the path to the alternate data stream for the given path
  * @param filePath The full path to the main data path
@@ -151,8 +173,11 @@ FILE *LoadRawHelper::openRawFile(const std::string &fileName) {
   }
   // Need to check that the file is not a text file as the ISISRAW routines
   // don't deal with these very well, i.e
-  // reading continues until a bad_alloc is encountered.
-  if (Kernel::FileDescriptor::isAscii(file)) {
+  // reading continues until a bad_alloc is encountered. The start of a RAW file
+  // can itself be free of non-ascii bytes, as the header and titles are text
+  // and the section addresses and run number may all be small, so a file that
+  // has the RAW section address table is never treated as text.
+  if (Kernel::FileDescriptor::isAscii(file) && !hasRawAddressTable(file)) {
     fclose(file);
     std::stringstream os;
     os << "File \"" << fileName
