@@ -93,7 +93,7 @@ MatrixWorkspace_sptr PreviewModel::getSelectedSummedWs() const {
 }
 std::vector<Workspace_sptr> PreviewModel::getReducedWss() const { return m_runDetails->getReducedWss(); }
 
-void PreviewModel::clearReducedWorkspace() { m_runDetails->setReducedWss({}); }
+void PreviewModel::clearReducedWorkspaces() { m_runDetails->setReducedWss({}); }
 
 MatrixWorkspace_sptr PreviewModel::getSelectedReducedWs() const {
   return getWorkspaceGroupMember(m_runDetails->getReducedWss()[m_selectedSlice]);
@@ -268,7 +268,9 @@ void PreviewModel::exportReducedWsToAds() const {
   auto reducedWss = m_runDetails->getReducedWss();
   if (reducedWss.size() > 0) {
     for (size_t i = 0; i < reducedWss.size(); ++i) {
-      AnalysisDataService::Instance().addOrReplace("preview_reduced_ws_" + std::to_string(i), reducedWss[i]);
+      if (reducedWss[i]) {
+        AnalysisDataService::Instance().addOrReplace("preview_reduced_ws_" + std::to_string(i), reducedWss[i]);
+      }
     }
   } else {
     g_log.error(

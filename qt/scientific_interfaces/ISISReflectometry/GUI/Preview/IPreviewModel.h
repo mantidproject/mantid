@@ -51,7 +51,7 @@ public:
   virtual std::optional<Selection> const getSelectedRegion(ROIType regionType) = 0;
 
   virtual void setSummedWs(Mantid::API::Workspace_sptr workspace) = 0;
-  virtual void clearReducedWorkspace() = 0;
+  virtual void clearReducedWorkspaces() = 0;
   virtual void setSelectedGroupMember(size_t index) = 0;
   virtual void setSelectedSlice(size_t index) = 0;
 

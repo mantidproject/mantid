@@ -366,7 +366,7 @@ public:
 
     Reduction::updateRowOnAlgorithmComplete(mockAlg, row);
 
-    TS_ASSERT_EQUALS(row.getReducedWs(), mockWs);
+    TS_ASSERT_EQUALS(row.getReducedWss(), std::vector<Mantid::API::Workspace_sptr>{mockWs});
   }
 
   void test_preview_row_is_updated_with_workspace_group_on_reduction_algorithm_complete() {
@@ -379,7 +379,7 @@ public:
 
     Reduction::updateRowOnAlgorithmComplete(mockAlg, row);
 
-    TS_ASSERT_EQUALS(row.getReducedWs(), group);
+    TS_ASSERT_EQUALS(row.getReducedWss()[0], group);
   }
 
 private:

@@ -94,7 +94,7 @@ void PreviewPresenter::notifyAutoreductionPaused() { updateWidgetEnabledState();
 void PreviewPresenter::notifySetYAxisSymlogChanged() { updatePlotAxes(); }
 
 void PreviewPresenter::notifyPlotAllGroupMembersChanged() {
-  if (m_model->getReducedWss().size() > 0) {
+  if (!m_model->getReducedWss().empty()) {
     plotLinePlot();
   }
 }
@@ -224,6 +224,7 @@ void PreviewPresenter::notifySumBanksAlgorithmError() {
 
 void PreviewPresenter::notifyReductionAlgorithmError() {
   clearReductionPlot();
+  m_model->clearReducedWorkspaces();
   m_view->enableMainWidget();
 }
 
@@ -419,7 +420,7 @@ void PreviewPresenter::runReduction() {
   // Ensure the selected regions are up to date. Required when Loading new data because an empty run details is created.
   updateSelectedRegionInModelFromView();
   // Perform the reduction
-  m_model->clearReducedWorkspace();
+  m_model->clearReducedWorkspaces();
   m_model->reduceAsync(*m_jobManager);
 }
 

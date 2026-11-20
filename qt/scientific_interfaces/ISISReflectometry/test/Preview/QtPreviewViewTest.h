@@ -62,9 +62,11 @@ private:
     void acceptMainPresenter(IBatchPresenter *) override {}
     void notifyLoadWorkspaceRequested() override {}
     void notifyGroupMemberSelectionChanged() override { ++selectionChangedCount; }
+    void notifySliceSelectionChanged() override { ++sliceSelectionChangedCount; }
     void notifyUpdateAngle() override {}
     void notifyApplyRequested() override {}
 
     size_t selectionChangedCount{0};
+    size_t sliceSelectionChangedCount{0};
   };
 };

@@ -55,7 +55,7 @@ public:
 
   void setLoadedWs(Mantid::API::Workspace_sptr workspace);
   void setSummedWs(Mantid::API::Workspace_sptr workspace) override;
-  void clearReducedWorkspace() override;
+  void clearReducedWorkspaces() override;
   void setSelectedGroupMember(size_t index) override;
   void setSelectedSlice(size_t index) override;
   void setTheta(double theta) override;

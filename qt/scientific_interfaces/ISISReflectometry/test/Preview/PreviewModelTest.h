@@ -212,7 +212,7 @@ public:
   void test_reduce() {
     auto mockJobManager = MockJobManager();
     auto expectedWs = createWorkspace();
-    auto wsReductionEffect = [&expectedWs](PreviewRow &row) { row.setReducedWs(expectedWs); };
+    auto wsReductionEffect = [&expectedWs](PreviewRow &row) { row.setReducedWss({expectedWs}); };
     EXPECT_CALL(mockJobManager, startReduction(_)).Times(1).WillOnce(Invoke(wsReductionEffect));
 
     PreviewModel model;
@@ -235,7 +235,7 @@ public:
       TS_ASSERT_EQUALS(row.getLoadedWs(), inputGroup);
       TS_ASSERT_EQUALS(row.runNumbers().size(), 1);
       TS_ASSERT_EQUALS(row.runNumbers()[0], groupName);
-      row.setReducedWs(expectedGroup);
+      row.setReducedWss({expectedGroup});
     };
     EXPECT_CALL(mockJobManager, startReduction(_)).Times(1).WillOnce(Invoke(wsReductionEffect));
 
@@ -244,14 +244,14 @@ public:
     model.reduceAsync(mockJobManager);
     model.setSelectedGroupMember(1);
 
-    TS_ASSERT_EQUALS(model.getReducedWs(), expectedGroup);
+    TS_ASSERT_EQUALS(model.getReducedWss(), std::vector<Workspace_sptr>{expectedGroup});
     TS_ASSERT_EQUALS(model.getSelectedReducedWs(), secondOutput);
     TS_ASSERT_EQUALS(model.getReducedWorkspaceMembers(),
                      std::vector<MatrixWorkspace_sptr>({firstOutput, secondOutput}));
 
-    model.clearReducedWorkspace();
+    model.clearReducedWorkspaces();
 
-    TS_ASSERT(!model.getReducedWs());
+    TS_ASSERT_EQUALS(model.getReducedWss().size(), 0);
   }
 
   void test_export_summed_ws_to_ads() {
@@ -296,7 +296,7 @@ public:
 
     model.exportReducedWsToAds();
     auto &ads = AnalysisDataService::Instance();
-    const std::string expectedName = "preview_reduced_ws";
+    const std::string expectedName = "preview_reduced_ws_0";
 
     TS_ASSERT(ads.doesExist(expectedName));
     TS_ASSERT_EQUALS(ws, ads.retrieveWS<MatrixWorkspace>(expectedName));
@@ -309,13 +309,13 @@ public:
     auto const first = createWorkspace();
     auto const second = createWorkspace();
     auto const group = createWorkspaceGroup({first, second});
-    auto wsReductionEffect = [&group](PreviewRow &row) { row.setReducedWs(group); };
+    auto wsReductionEffect = [&group](PreviewRow &row) { row.setReducedWss({group}); };
     EXPECT_CALL(mockJobManager, startReduction(_)).WillOnce(Invoke(wsReductionEffect));
     model.reduceAsync(mockJobManager);
 
     model.exportReducedWsToAds();
 
-    auto const exported = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("preview_reduced_ws");
+    auto const exported = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("preview_reduced_ws_0");
     TS_ASSERT_EQUALS(exported, group);
     TS_ASSERT_EQUALS(exported->getItem(0), first);
     TS_ASSERT_EQUALS(exported->getItem(1), second);
@@ -401,7 +401,7 @@ private:
 
   MatrixWorkspace_sptr generateReducedWs(MockJobManager &mockJobManager, PreviewModel &model) {
     auto expectedWs = createWorkspace();
-    auto wsReduceEffect = [&expectedWs](PreviewRow &row) { row.setReducedWs(expectedWs); };
+    auto wsReduceEffect = [&expectedWs](PreviewRow &row) { row.setReducedWss({expectedWs}); };
     ON_CALL(mockJobManager, startReduction(_)).WillByDefault(Invoke(wsReduceEffect));
     model.reduceAsync(mockJobManager);
     return expectedWs;
