@@ -12,4 +12,7 @@ set(SYSTEST_NAMES
 
 if(ENABLE_WORKBENCH)
   pysystemtest_add_test(${CMAKE_CURRENT_SOURCE_DIR} qt ${SYSTEST_NAMES})
+  set_tests_properties(
+    qt.SANSDiagnosticPageTest.SANSDiagnosticPageTest PROPERTIES RESOURCE_LOCK "SANS_TEMP_SINGLE_CORE_REDUCTION"
+  )
 endif()
