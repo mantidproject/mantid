@@ -1,0 +1,1 @@
+- In a :ref:`shape definition <HowToDefineGeometricShape>`, when a hollow cylinder is turned, for example by ``rotate-all`` or a goniometer rotation, its bounding box now fits the shape. Previously it fell back to a box 200 m across, which a correction could then use to size its beam or search region.

@@ -1798,6 +1798,7 @@ void CSGObject::calcBoundingBoxByGeometry() {
       maxZ = std::max(maxZ, vector.Z());
     }
   } break;
+  case detail::ShapeInfo::GeometryShape::HOLLOWCYLINDER: // bounded by its outer surface, as a cylinder is
   case detail::ShapeInfo::GeometryShape::CYLINDER: {
     // Center-point of base and normalized axis based on IDF XML
     const auto &base = vectors[0];
