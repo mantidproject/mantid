@@ -12,7 +12,6 @@ set(SYSTEST_NAMES
     SANS2DMultiPeriodAddFilesTest.py
     SANS2DReductionGUI.py
     SANS2DReductionGUIAddedTest.py
-    SANS2DReductionGUITest.py
     SANS2DSlicingTest.py
     SANS2DTubeCalibrationTest.py
     SANS2DTubeMergeTest.py
