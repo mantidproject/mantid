@@ -67,7 +67,7 @@ be included in the summing performed in DiffractionFocussing, pushing
 down the values in that region. MaskBins is more clever. While if you
 look at the data, it will appear that it has simply set the values to 0.
 It has also set a series of flags inside that mark those bins to not be
-included in further claculations. This means that when you Focus the
+included in further calculations. This means that when you Focus the
 data these values are simply missed out of the summing that is
 performed.
 

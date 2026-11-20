@@ -206,7 +206,7 @@ class DoubleItemDelegate(QStyledItemDelegate):
 
     def createEditor(self, parent, option, index):
         line_edit = QLineEdit(parent)
-        validator = LineEditDoubleValidator(line_edit, float(0.0))
+        validator = LineEditDoubleValidator(line_edit, 0.0)
         validator.setBottom(-sys.float_info.max)
         validator.setTop(sys.float_info.max)
         line_edit.setValidator(validator)

@@ -95,14 +95,10 @@ void AddWorkspaceMultiDialog::handleFilesFound() {
   m_algRunner->executeAlgorithmQueue();
 }
 
-void AddWorkspaceMultiDialog::notifyBatchComplete(bool error) {
-  UNUSED_ARG(error);
-  updateAddButtonState(true);
-}
+void AddWorkspaceMultiDialog::notifyBatchComplete([[maybe_unused]] bool error) { updateAddButtonState(true); }
 
-void AddWorkspaceMultiDialog::notifyAlgorithmError(API::IConfiguredAlgorithm_sptr &algorithm,
+void AddWorkspaceMultiDialog::notifyAlgorithmError([[maybe_unused]] API::IConfiguredAlgorithm_sptr &algorithm,
                                                    std::string const &message) {
-  UNUSED_ARG(algorithm);
   updateAddButtonState(true);
   QMessageBox::warning(this, "Loading error", message.c_str());
 }

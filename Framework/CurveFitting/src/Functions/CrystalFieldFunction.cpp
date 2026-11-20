@@ -419,7 +419,7 @@ void CrystalFieldFunction::buildAttributeNames() const {
   // Prepend a prefix to attribute names, ignore NumDeriv attribute.
   auto prependPrefix = [&](const std::string &prefix, const std::vector<std::string> &names) {
     for (auto name : names) {
-      if (name.find("NumDeriv") != std::string::npos)
+      if (name.contains("NumDeriv"))
         continue;
       name.insert(name.begin(), prefix.begin(), prefix.end());
       m_attributeNames.emplace_back(name);
@@ -434,7 +434,7 @@ void CrystalFieldFunction::buildAttributeNames() const {
   // Only copy the unprefixed attributes - as the loop below will include
   // And modify the prefixed attributes accordingly
   std::copy_if(controlAttributeNames.begin(), controlAttributeNames.end(), std::back_inserter(m_attributeNames),
-               [](const auto &name) { return name.find(".") == std::string::npos; });
+               [](const auto &name) { return !name.contains("."); });
   // Get
   for (size_t iSpec = 0; iSpec < m_control.nFunctions(); ++iSpec) {
     std::string prefix(SPECTRUM_PREFIX);
@@ -503,7 +503,7 @@ void CrystalFieldFunction::setAttribute(const std::string &attName, const Attrib
     m_source.reset();
   }
   attRef.first->setAttribute(attRef.second, attr);
-  if (attName.find("FWHM") != std::string::npos || attName.find("Background") != std::string::npos) {
+  if (attName.contains("FWHM") || attName.contains("Background")) {
     m_dirtyTarget = true;
   }
 }
@@ -579,7 +579,7 @@ ParameterTie *CrystalFieldFunction::getTie(size_t i) const {
 bool CrystalFieldFunction::ignoreTie(const ParameterTie &tie) const {
   // Ignore height ties for Gaussian peaks as component of a CrystalFieldFunction to avoid problems during tie sorting
   return tie.ownerFunction()->name() == "Gaussian" && tie.parameterName() == "Height" &&
-         tie.asString().find("/Sigma") != std::string::npos;
+         tie.asString().contains("/Sigma");
 }
 
 /// Get the i-th constraint

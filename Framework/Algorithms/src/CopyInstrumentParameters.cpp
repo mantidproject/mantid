@@ -87,10 +87,8 @@ void CopyInstrumentParameters::exec() {
  */
 void CopyInstrumentParameters::checkProperties() {
 
-  // A component ID is the address of the base component, so the IDs of the roots identify the base instruments
-  const auto &componentInfoGiv = m_givingWorkspace->componentInfo();
-  const auto &componentInfoRec = m_receivingWorkspace->componentInfo();
-  if (componentInfoGiv.componentID(componentInfoGiv.root()) != componentInfoRec.componentID(componentInfoRec.root())) {
+  // Workspaces of the same base instrument clone their ComponentInfo from the same cached base
+  if (!m_givingWorkspace->componentInfo().hasSameBase(m_receivingWorkspace->componentInfo())) {
     m_different_instrument_sp = true;
     g_log.warning() << "The base instrument in the output workspace is not the "
                        "same as the base instrument in the input workspace.\n";

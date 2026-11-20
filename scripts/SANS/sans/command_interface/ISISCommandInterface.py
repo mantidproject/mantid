@@ -11,7 +11,7 @@ import re
 import types
 from typing import Union, Dict
 
-from SANSadd2 import add_runs
+from sans.common.run_adder import add_runs
 from mantid.api import AnalysisDataService, WorkspaceGroup
 from mantid.kernel import config
 from sans.command_interface.batch_csv_parser import BatchCsvParser
@@ -365,6 +365,19 @@ def SetSampleOffset(value):
     value = float(value)
     sample_offset_command = NParameterCommand(command_id=NParameterCommandId.SAMPLE_OFFSET, values=[value])
     director.add_command(sample_offset_command)
+
+
+def SetSampleThickness(thickness):
+    """
+    Set the sample thickness for reduction. This overrides the thickness stored in the data file.
+
+    @param thickness: thickness in mm
+    """
+    thickness = float(thickness)
+    if thickness <= 0.0:
+        raise ValueError("The sample thickness must be a positive value in mm, but got {0}.".format(thickness))
+    sample_thickness_command = NParameterCommand(command_id=NParameterCommandId.SAMPLE_THICKNESS, values=[thickness])
+    director.add_command(sample_thickness_command)
 
 
 def Detector(det_name):

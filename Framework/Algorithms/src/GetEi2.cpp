@@ -160,7 +160,7 @@ double GetEi2::calculateEi(const double initial_guess) {
     std::stringstream guess;
     guess << initial_guess;
 
-    while (formula.find("incidentEnergy") != std::string::npos) {
+    while (formula.contains("incidentEnergy")) {
       // check if more than one 'value' in m_eq
       size_t found = formula.find("incidentEnergy");
       formula.replace(found, 14, guess.str());

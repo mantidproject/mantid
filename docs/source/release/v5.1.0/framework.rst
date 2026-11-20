@@ -134,7 +134,7 @@ Bugfixes
 Deprecations
 ------------
 - **CalculateMonteCarloAbsorption** and **SimpleShapeMonteCarloAbsorption** are deprecated and functionality is replaced by the new :ref:`PaalmanPingsMonteCarloAbsorption <algm-PaalmanPingsMonteCarloAbsorption>`. While the new one provides more complete and more correct calculation, it can also fall back to the simpler calculation if the container is not specified.
-- **RecordPythonScript** algorithm hsa been deprecated and functionality continues with :ref:`GeneratePythonScript <algm-GeneratePythonScript>`
+- **RecordPythonScript** algorithm has been deprecated and functionality continues with :ref:`GeneratePythonScript <algm-GeneratePythonScript>`
 
 
 :ref:`Release 5.1.0 <v5.1.0>`

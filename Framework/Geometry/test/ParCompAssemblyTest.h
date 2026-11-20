@@ -105,7 +105,7 @@ public:
     TS_ASSERT_EQUALS(det1->getName(), det1copy->getName());
 
     auto &componentInfo = pmap->mutableComponentInfo();
-    componentInfo.setPosition(componentInfo.indexOf(det2), V3D(1, 1, 1));
+    componentInfo.setPosition(det2->index(), V3D(1, 1, 1));
     std::shared_ptr<IComponent> det2copy;
     TS_ASSERT_THROWS_NOTHING(det2copy = pbank[1]);
     TS_ASSERT_DIFFERS(det2->getPos(), det2copy->getPos());

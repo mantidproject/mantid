@@ -503,10 +503,9 @@ MatrixWorkspace_sptr DiffractionReduction::loadInstrument(const std::string &ins
  *"diffraction")
  * @param reflectionName Name of diffraction mode selected
  */
-void DiffractionReduction::instrumentSelected(const QString &instrumentName, const QString &analyserName,
+void DiffractionReduction::instrumentSelected(const QString &instrumentName,
+                                              [[maybe_unused]] const QString &analyserName,
                                               const QString &reflectionName) {
-  UNUSED_ARG(analyserName);
-
   // Set the search instrument for runs
   m_uiForm.rfSampleFiles->setInstrumentOverride(instrumentName);
   m_uiForm.rfCanFiles->setInstrumentOverride(instrumentName);

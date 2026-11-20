@@ -68,7 +68,7 @@ std::optional<std::vector<std::string>> getParamLinesFromGSASFile(const std::str
     std::vector<std::string> paramLines;
     std::string line;
     while (std::getline(paramsFile, line)) {
-      if (line.find(paramLineDelimiter) != std::string::npos) {
+      if (line.contains(paramLineDelimiter)) {
         paramLines.emplace_back(line);
       }
     }

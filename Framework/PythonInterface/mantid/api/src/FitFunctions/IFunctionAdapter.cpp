@@ -167,8 +167,8 @@ PyObject *IFunctionAdapter::getAttributeValue(const IFunction &self, const std::
  * @param attr An attribute object
  * @returns The value of the attribute
  */
-PyObject *IFunctionAdapter::getAttributeValue(const IFunction &self, const API::IFunction::Attribute &attr) {
-  UNUSED_ARG(self);
+PyObject *IFunctionAdapter::getAttributeValue([[maybe_unused]] const IFunction &self,
+                                              const API::IFunction::Attribute &attr) {
   std::string type = attr.type();
   PyObject *result(nullptr);
   GlobalInterpreterLock gilLock;

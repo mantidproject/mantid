@@ -696,7 +696,7 @@ std::string findTitlesFromLine(const std::string &line) {
 void LoadPSIMuonBin::processTitleHeaderLine(const std::string &line) {
   auto foundTitles = findTitlesFromLine(line);
   boost::trim(foundTitles);
-  if (foundTitles.find("\\") == std::string::npos) {
+  if (!foundTitles.contains("\\")) {
     boost::split(m_tempHeader.titles, foundTitles, boost::is_any_of(" "));
     m_tempHeader.delimeterOfTitlesIsBackSlash = false;
   } else {
@@ -716,7 +716,7 @@ void LoadPSIMuonBin::processDateHeaderLine(const std::string &line) {
 }
 
 void LoadPSIMuonBin::processHeaderLine(const std::string &line) {
-  if (line.find("Title") != std::string::npos) {
+  if (line.contains("Title")) {
     // Find sample log titles from the header
     processTitleHeaderLine(line);
   } else if (std::find(std::begin(PSI_MONTHS), std::end(PSI_MONTHS), line.substr(5, 3)) != std::end(PSI_MONTHS)) {
@@ -814,7 +814,7 @@ std::string LoadPSIMuonBin::detectTempFile() {
           queue.push_back(entry);
         }
       } else if (entry.extension() == TEMPERATURE_FILE_EXT &&
-                 entry.filename().string().find(std::to_string(m_header.numberOfRuns)) != std::string::npos) {
+                 entry.filename().string().contains(std::to_string(m_header.numberOfRuns))) {
         return entry.string();
       }
     }

@@ -21,6 +21,22 @@ endif()
 add_framework_test_helpers(MPIAlgorithmsTest)
 add_dependencies(FrameworkTests MPIAlgorithmsTest)
 
+# MPI can only be initialized once per process, so the tests of when it is initialized need a process of their own
+cxxtest_add_test(MPILifetimeTest MPILifetimeTest.h)
+target_link_libraries(
+  MPILifetimeTest
+  PUBLIC ${MPI_CXX_LIBRARIES}
+  PRIVATE Mantid::MPIAlgorithms
+)
+if(TARGET GTest::gmock AND TARGET GTest::gtest)
+  target_link_libraries(MPILifetimeTest PRIVATE GTest::gmock GTest::gtest)
+else()
+  target_link_libraries(MPILifetimeTest PRIVATE gmock gtest)
+endif()
+add_framework_test_helpers(MPILifetimeTest)
+add_dependencies(FrameworkTests MPILifetimeTest)
+set_property(TARGET MPILifetimeTest PROPERTY FOLDER "UnitTests")
+
 set_property(TARGET MPIAlgorithmsTest PROPERTY FOLDER "UnitTests")
 
 if(MPIEXEC_EXECUTABLE)

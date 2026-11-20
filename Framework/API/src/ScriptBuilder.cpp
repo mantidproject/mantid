@@ -304,7 +304,7 @@ const std::string ScriptBuilder::buildPropertyString(const Mantid::Kernel::Prope
     } else {
       std::string opener = "='";
       std::string closer = "'";
-      if (propHistory.value().find('\\') != std::string::npos) {
+      if (propHistory.value().contains('\\')) {
         opener = "=r'";
       } else if (propHistory.pythonVariable()) {
         opener = "=";

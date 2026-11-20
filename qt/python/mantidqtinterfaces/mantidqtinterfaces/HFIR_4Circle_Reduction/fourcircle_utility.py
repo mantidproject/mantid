@@ -15,7 +15,6 @@ try:
 except ImportError:
     from urllib2 import urlopen
     from urllib2 import URLError
-import socket
 import numpy
 import math
 
@@ -43,7 +42,7 @@ def check_url(url, read_lines=False):
             lines = url_stream.readlines()
     except URLError as url_error:
         url_stream = url_error
-    except socket.timeout:
+    except TimeoutError:
         return False, "Time out. Try again!"
 
     # Return result

@@ -42,7 +42,7 @@ public:
   virtual void handleStartXChanged(double startX) = 0;
   virtual void handleEndXChanged(double endX) = 0;
   virtual void handlePlotSpectrumChanged() = 0;
-  virtual void handleFwhmChanged(double fwhm) = 0;
+  virtual void handleFwhmChanged(std::size_t peakIndex, double fwhm) = 0;
   virtual void handleBackgroundChanged(double background) = 0;
 
   // Used by FittingPresenter
@@ -105,7 +105,7 @@ public:
   void handleStartXChanged(double startX) override;
   void handleEndXChanged(double endX) override;
   void handlePlotSpectrumChanged() override;
-  void handleFwhmChanged(double fwhm) override;
+  void handleFwhmChanged(std::size_t peakIndex, double fwhm) override;
   void handleBackgroundChanged(double background) override;
 
   void handleFunctionChanged() override;

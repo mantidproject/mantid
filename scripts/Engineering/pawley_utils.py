@@ -407,7 +407,7 @@ class OutputTableMixin(ABC):
     """
 
     @staticmethod
-    def get_parameter_errors(res: "OptimizeResult", cond_thresh: float = 1e8) -> np.ndarray:
+    def get_parameter_errors(res: OptimizeResult, cond_thresh: float = 1e8) -> np.ndarray:
         hessian = res.jac.T @ res.jac
         cond_num = np.linalg.cond(hessian)
         if not np.isfinite(cond_num) or cond_num > cond_thresh:
@@ -826,7 +826,7 @@ class PawleyPatternBase(BoundsMixin, MtdFuncMixin, OutputTableMixin, ABC):
         self.update_profile_function()
         return res
 
-    def _set_errors_from_result(self, res: "OptimizeResult"):
+    def _set_errors_from_result(self, res: OptimizeResult):
         free_errors = self.get_parameter_errors(res)
         self.param_errors = np.full_like(self.get_params(), np.nan)
         self.param_errors[self.get_isfree()] = free_errors

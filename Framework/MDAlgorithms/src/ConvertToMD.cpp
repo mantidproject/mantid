@@ -136,7 +136,7 @@ std::map<std::string, std::string> ConvertToMD::validateInputs() {
     result["Filename"] = "Filename must be given if FileBackEnd is required.";
   }
 
-  if (treeBuilderType.find("Indexed") != std::string::npos) {
+  if (treeBuilderType.contains("Indexed")) {
     if (fileBackEnd)
       result["ConverterType"] += "No file back end implemented "
                                  "for indexed version of algorithm. ";

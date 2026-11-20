@@ -174,7 +174,7 @@ void ImageInfoModelMatrixWS::createItemNames() {
   auto appendName = [this](const auto &name) { m_names.emplace_back(name); };
   auto shortUnitName = [](const Unit &unit) {
     const auto caption = unit.caption();
-    if (caption.rfind("-flight") != std::string::npos)
+    if (caption.contains("-flight"))
       return QString("TOF");
     else if (caption == "q")
       return QString("|Q|");

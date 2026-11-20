@@ -1,0 +1,1 @@
+- :ref:`SaveSESANS <algm-SaveSESANS>` now writes the facility, instrument, run number, Mantid version and date of saving to the file header, to help identify the measurement. The facility, instrument and run number are taken from the input workspace where possible and can be set using the new ``Facility``, ``Instrument`` and ``RunNumber`` properties.

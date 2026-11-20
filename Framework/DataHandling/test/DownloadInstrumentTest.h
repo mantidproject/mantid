@@ -39,7 +39,7 @@ private:
       dateTime = it->second;
 
     std::string outputString;
-    if (urlFile.find("api.github.com") != std::string::npos) {
+    if (urlFile.contains("api.github.com")) {
       outputString = "[\n"
                      "  {\n"
                      "    \"name\": \"NewFile.xml\",\n"
@@ -73,9 +73,9 @@ private:
                      "    }\n"
                      "  }\n"
                      "]";
-    } else if (urlFile.find("https://fakedomain.org/NewFile.xml") != std::string::npos) {
+    } else if (urlFile.contains("https://fakedomain.org/NewFile.xml")) {
       outputString = "Here is some sample text for NewFile.xml";
-    } else if (urlFile.find("https://fakedomain.org/UpdatableFile.xml") != std::string::npos) {
+    } else if (urlFile.contains("https://fakedomain.org/UpdatableFile.xml")) {
       outputString = "Here is some sample text for WISH_Definition.xml";
     }
 

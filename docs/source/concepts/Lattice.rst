@@ -121,7 +121,7 @@ Oriented lattices
 
 All the functions defined for :class:`~mantid.geometry.UnitCell` are inherited by the
 :class:`~mantid.geometry.OrientedLattice` objects. In addition, functions for manipulating
-the :math:`U` and :math:`UB` matricies are also provided.
+the :math:`U` and :math:`UB` matrices are also provided.
 
 Note about orientation
 ----------------------

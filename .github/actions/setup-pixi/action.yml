@@ -40,3 +40,10 @@ runs:
         run-install: ${{ inputs.run-install }}
         frozen: ${{ inputs.run-install }}
         activate-environment: ${{ inputs.activate-environment }}
+        # Self-hosted runners keep the rattler package cache between jobs: deleting it in the post
+        # step takes hours on Windows and makes every job download every package again.
+        # An empty value keeps setup-pixi's default on GitHub-hosted runners.
+        #
+        # WARN: the cache now grows without bound; clear it on the runner hosts occasionally.
+        cache: ${{ runner.environment == 'self-hosted' && 'false' || '' }}
+        post-cleanup: ${{ runner.environment == 'self-hosted' && 'false' || '' }}

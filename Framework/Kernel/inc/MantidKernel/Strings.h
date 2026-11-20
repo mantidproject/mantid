@@ -417,11 +417,11 @@ template <typename Integer> std::vector<std::vector<Integer>> parseGroups(const 
     for (const auto &token : tokens) {
       // Look for the various operators in the string. If one is found then
       // do the necessary translation into groupings.
-      if (token.find('+') != std::string::npos) {
+      if (token.contains('+')) {
         translateAdd(token);
-      } else if (token.find('-') != std::string::npos) {
+      } else if (token.contains('-')) {
         translateSumRange(token);
-      } else if (token.find(':') != std::string::npos) {
+      } else if (token.contains(':')) {
         translateRange(token);
       } else if (!token.empty()) {
         // contains a single number, just add it as a new group

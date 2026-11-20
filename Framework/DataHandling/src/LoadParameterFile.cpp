@@ -133,7 +133,7 @@ void LoadParameterFile::exec() {
   // The parameters belong to this workspace only, not to the instrument it shares with others
   auto &componentInfo = localWorkspace->mutableComponentInfo();
   for (const auto &[key, parameter] : logfileCache) {
-    const auto index = componentInfo.indexOfOrInvalid(key.second);
+    const auto index = key.second->index();
     if (index != Geometry::ComponentInfo::invalidIndex) {
       componentInfo.addLogfileParameter(index, key.first, parameter);
     }

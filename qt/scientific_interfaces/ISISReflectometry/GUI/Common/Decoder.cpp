@@ -51,8 +51,7 @@ BatchPresenter *Decoder::findBatchPresenter(const QtBatchView *gui, const IMainW
   return nullptr;
 }
 
-QWidget *Decoder::decode(const QMap<QString, QVariant> &map, const std::string &directory) {
-  UNUSED_ARG(directory);
+QWidget *Decoder::decode(const QMap<QString, QVariant> &map, [[maybe_unused]] const std::string &directory) {
   auto userSubWindow = MantidQt::API::InterfaceManager().createSubWindow("ISIS Reflectometry");
   auto mwv = dynamic_cast<QtMainWindowView *>(userSubWindow);
   auto batches = map["batches"].toList();
@@ -232,7 +231,7 @@ void Decoder::updateRunsTableViewFromModel(QtRunsTableView *view, const Reductio
     auto const &modelName = groups[groupIndex].name();
     // If name doesn't contain "HiddenGroupName" update groupname as it
     // represents a none user defined name
-    if (modelName.find("HiddenGroupName") == std::string::npos) {
+    if (!modelName.contains("HiddenGroupName")) {
       MantidQt::MantidWidgets::Batch::RowLocation location({static_cast<int>(groupIndex)});
       MantidQt::MantidWidgets::Batch::Cell groupCell(modelName);
       jobTreeView->setCellAt({location}, 0, groupCell);

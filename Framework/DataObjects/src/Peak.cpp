@@ -8,7 +8,6 @@
 #include "MantidDataObjects/NoShape.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -46,7 +45,7 @@ template <typename Func> bool withRayTracer(Instrument const &inst, Func const &
     auto const &pmap = *inst.getParameterMap();
     return func(InstrumentRayTracer(pmap.componentInfo(), pmap.detectorInfo()));
   }
-  auto const [compInfo, detInfo] = InstrumentVisitor::makeWrappers(inst);
+  auto const [compInfo, detInfo] = inst.makeBaseBeamline();
   return func(InstrumentRayTracer(*compInfo, *detInfo));
 }
 } // namespace

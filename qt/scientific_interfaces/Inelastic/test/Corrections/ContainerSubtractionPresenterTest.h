@@ -164,8 +164,7 @@ public:
     m_presenter->handleValidation(validator.get());
 
     TS_ASSERT(!validator->isAllInputValid());
-    TS_ASSERT(validator->generateErrorMessage().find("Sample or Container workspaces are not loaded") !=
-              std::string::npos);
+    TS_ASSERT(validator->generateErrorMessage().contains("Sample or Container workspaces are not loaded"));
   }
 
   void test_handle_validation_fails_for_uneven_workspaces() {
@@ -178,8 +177,8 @@ public:
 
     m_presenter->handleValidation(validator.get());
     TS_ASSERT(!validator->isAllInputValid());
-    TS_ASSERT(validator->generateErrorMessage().find(
-                  "Sample and Container do not have a matching number of Histograms") != std::string::npos);
+    TS_ASSERT(
+        validator->generateErrorMessage().contains("Sample and Container do not have a matching number of Histograms"));
   }
 
 private:

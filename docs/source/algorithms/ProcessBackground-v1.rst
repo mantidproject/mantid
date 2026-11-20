@@ -51,7 +51,7 @@ Select background points from given function
 ============================================
 
 
-In this approach, the difference from the other apporach is to use the user given background function
+In this approach, the difference from the other approach is to use the user given background function
 to select data points within a range other than fitting the background function from given data points in the
 other approach.
 Thus, it is just the last step of previous approach.

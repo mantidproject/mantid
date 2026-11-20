@@ -17,7 +17,7 @@ Remember: the peak shape is used for fitting the cross-correlation spectrum rath
 Converting peak position to offset
 ##################################
 The fit is used to calculate the centre of the fitted peak.
-In the equations below, the found centre of the cross-correlation peak is refered to as :math:`CCPeakCentre`.
+In the equations below, the found centre of the cross-correlation peak is referred to as :math:`CCPeakCentre`.
 The other parameters in the equations,
 :math:`Step` is the ``Step`` property,
 :math:`DReference` is the ``DReference`` property,

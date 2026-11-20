@@ -615,7 +615,7 @@ Material::ChemicalFormula Material::parseChemicalFormula(const std::string &chem
       uint16_t aNumber = 0;
 
       // split out the isotope bit
-      if (atom.find('(') != std::string::npos) {
+      if (atom.contains('(')) {
         // error check
         size_t end = atom.find(')');
         if (end == std::string::npos) {

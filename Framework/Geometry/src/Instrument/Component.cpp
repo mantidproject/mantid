@@ -297,8 +297,8 @@ V3D Component::getScaleFactor() const {
   return V3D(1, 1, 1);
 }
 
-/// Helper for legacy access mode. Returns the index of the component.
-size_t Component::index() const { return m_map->componentIndex(this->getComponentID()); }
+/// Returns the index of the component, or ComponentInfo::invalidIndex if the instrument has not been cached
+size_t Component::index() const { return m_base ? m_base->m_index : m_index; }
 
 bool Component::hasComponentInfo() const {
   const IComponent *root = m_base;

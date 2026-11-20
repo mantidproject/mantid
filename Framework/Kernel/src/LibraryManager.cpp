@@ -114,7 +114,7 @@ bool LibraryManagerImpl::isLoaded(const std::string &filename) const {
  */
 bool LibraryManagerImpl::isExcluded(const std::string &filename, const std::vector<std::string> &excludes) const {
   return std::any_of(excludes.cbegin(), excludes.cend(),
-                     [&filename](const auto exclude) { return filename.find(exclude) != std::string::npos; });
+                     [&filename](const auto exclude) { return filename.contains(exclude); });
 }
 
 /**

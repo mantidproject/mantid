@@ -16,4 +16,4 @@ alt: PISMuon
 ```
 
 - LoadMuonNexus now supports files from PSI.
-- A bug that diabled plotting when invalid detector ID was specified in the grouping tab has been fixed.
+- A bug that disabled plotting when invalid detector ID was specified in the grouping tab has been fixed.

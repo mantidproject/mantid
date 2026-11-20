@@ -8,9 +8,9 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 
 | Ticket                                                                   | Summary                                                                                                 |
 | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
-| [#2179](https://github.com/mantidproject/mantid/issues/2179) (Trac 1332) | Windows Mantid installer fails without administrator privilages                                         |
-| [#4279](https://github.com/mantidproject/mantid/issues/4279) (Trac 3432) | CalMuonDeadtime algorihtm                                                                               |
-| [#4289](https://github.com/mantidproject/mantid/issues/4289) (Trac 3442) | ApplyDeadtimeCorr algorihtm                                                                             |
+| [#2179](https://github.com/mantidproject/mantid/issues/2179) (Trac 1332) | Windows Mantid installer fails without administrator privileges                                         |
+| [#4279](https://github.com/mantidproject/mantid/issues/4279) (Trac 3432) | CalMuonDeadtime algorithm                                                                               |
+| [#4289](https://github.com/mantidproject/mantid/issues/4289) (Trac 3442) | ApplyDeadtimeCorr algorithm                                                                             |
 | [#4565](https://github.com/mantidproject/mantid/issues/4565) (Trac 3718) | plotting from workspaces sidebar bug linux osx and occasionally windows                                 |
 | [#4762](https://github.com/mantidproject/mantid/issues/4762) (Trac 3915) | Handle different units in proton charge logs                                                            |
 | [#4794](https://github.com/mantidproject/mantid/issues/4794) (Trac 3947) | Fix summing in SNSPowderReduction                                                                       |
@@ -18,7 +18,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 | [#4926](https://github.com/mantidproject/mantid/issues/4926) (Trac 4079) | Bad alloc when trying to open instrument view                                                           |
 | [#5007](https://github.com/mantidproject/mantid/issues/5007) (Trac 4160) | Loading User-algorithms may have gone ga ga                                                             |
 | [#5024](https://github.com/mantidproject/mantid/issues/5024) (Trac 4177) | ISIS event mode monitor bug                                                                             |
-| [#5047](https://github.com/mantidproject/mantid/issues/5047) (Trac 4200) | Investigate Diag differnce from Libisis                                                                 |
+| [#5047](https://github.com/mantidproject/mantid/issues/5047) (Trac 4200) | Investigate Diag difference from Libisis                                                                |
 | [#5048](https://github.com/mantidproject/mantid/issues/5048) (Trac 4201) | Create ConvertToMD                                                                                      |
 | [#5051](https://github.com/mantidproject/mantid/issues/5051) (Trac 4204) | Ensure old- and new-style Python APIs can coexist in the same process                                   |
 | [#5071](https://github.com/mantidproject/mantid/issues/5071) (Trac 4224) | Fix bug with error bars when plotting MatrixWorkspace data                                              |
@@ -50,7 +50,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 | [#2834](https://github.com/mantidproject/mantid/issues/2834) (Trac 1987) | Allow Fit Functions to be categorized                                                                   |
 | [#3464](https://github.com/mantidproject/mantid/issues/3464) (Trac 2617) | Evaluate static analysis tools for Mantid code                                                          |
 | [#3497](https://github.com/mantidproject/mantid/issues/3497) (Trac 2650) | Mantid Simple algorithm calls should return he output workspace                                         |
-| [#3643](https://github.com/mantidproject/mantid/issues/3643) (Trac 2796) | Add X error clumn to workspace and error to axes                                                        |
+| [#3643](https://github.com/mantidproject/mantid/issues/3643) (Trac 2796) | Add X error column to workspace and error to axes                                                       |
 | [#3768](https://github.com/mantidproject/mantid/issues/3768) (Trac 2921) | 'Hidden' workspaces show up in algorithm dialog comboboxes                                              |
 | [#3769](https://github.com/mantidproject/mantid/issues/3769) (Trac 2922) | Default file type should be 'all files' in the Load dialog on a fresh install                           |
 | [#3773](https://github.com/mantidproject/mantid/issues/3773) (Trac 2926) | Cannot resize the instrument view window on a mac                                                       |
@@ -59,13 +59,13 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 | [#3989](https://github.com/mantidproject/mantid/issues/3989) (Trac 3142) | Error in Save or Load nexus workspace -- source information lost.                                       |
 | [#4039](https://github.com/mantidproject/mantid/issues/4039) (Trac 3192) | Windows: Script generated from history contains backslash paths that don't work                         |
 | [#4194](https://github.com/mantidproject/mantid/issues/4194) (Trac 3347) | Workspace context menu plot spectrum needs error bars option                                            |
-| [#4388](https://github.com/mantidproject/mantid/issues/4388) (Trac 3541) | Make loading of files case insentive by default and user modifyable                                     |
+| [#4388](https://github.com/mantidproject/mantid/issues/4388) (Trac 3541) | Make loading of files case insensitive by default and user modifiable                                   |
 | [#4430](https://github.com/mantidproject/mantid/issues/4430) (Trac 3583) | Peaks overlay for unwrapped view                                                                        |
 | [#4433](https://github.com/mantidproject/mantid/issues/4433) (Trac 3586) | LoadSQW: optimize for very large files                                                                  |
 | [#4449](https://github.com/mantidproject/mantid/issues/4449) (Trac 3602) | Add an option on the Muon FitPropertyBrowser to fit against raw data.                                   |
 | [#4465](https://github.com/mantidproject/mantid/issues/4465) (Trac 3618) | SANS: Don't use monitor 4 to cal neutron background level                                               |
 | [#4488](https://github.com/mantidproject/mantid/issues/4488) (Trac 3641) | Workspace Mementos                                                                                      |
-| [#4541](https://github.com/mantidproject/mantid/issues/4541) (Trac 3694) | plot spectrum dialoge in mantid plot workspace bar                                                      |
+| [#4541](https://github.com/mantidproject/mantid/issues/4541) (Trac 3694) | plot spectrum dialog in mantid plot workspace bar                                                       |
 | [#4572](https://github.com/mantidproject/mantid/issues/4572) (Trac 3725) | Mac compiler warnings from calls to IFunctionMW::setMatrixWorkspace                                     |
 | [#4585](https://github.com/mantidproject/mantid/issues/4585) (Trac 3738) | Load Dialog can crash: when no loader found                                                             |
 | [#4593](https://github.com/mantidproject/mantid/issues/4593) (Trac 3746) | Segfault relating to InstrumentView and possibly masking?                                               |
@@ -124,7 +124,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 | [#4994](https://github.com/mantidproject/mantid/issues/4994) (Trac 4147) | MUON: Have 99 as peak width by default for MuonAnalysis                                                 |
 | [#4995](https://github.com/mantidproject/mantid/issues/4995) (Trac 4148) | Table Workspace From HistoWorkspace                                                                     |
 | [#4996](https://github.com/mantidproject/mantid/issues/4996) (Trac 4149) | Mac system tests are not updating the installed Mantid version                                          |
-| [#4997](https://github.com/mantidproject/mantid/issues/4997) (Trac 4150) | Ignore masked detectors in smooting                                                                     |
+| [#4997](https://github.com/mantidproject/mantid/issues/4997) (Trac 4150) | Ignore masked detectors in smoothing                                                                    |
 | [#5011](https://github.com/mantidproject/mantid/issues/5011) (Trac 4164) | Allow Save SPE to Save SPQ files                                                                        |
 | [#5014](https://github.com/mantidproject/mantid/issues/5014) (Trac 4167) | Plots: increment marker colour to match line colour                                                     |
 | [#5015](https://github.com/mantidproject/mantid/issues/5015) (Trac 4168) | Miniplot: Hold line and allow overplot of others                                                        |
@@ -267,7 +267,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 | [#4647](https://github.com/mantidproject/mantid/issues/4647) (Trac 3800) | HFIR SANS: add commands to set beam center for transmission                                             |
 | [#4657](https://github.com/mantidproject/mantid/issues/4657) (Trac 3810) | SIngle crystal peak selection gives an unhandled exception if WS has wrong axes                         |
 | [#4681](https://github.com/mantidproject/mantid/issues/4681) (Trac 3835) | Fix Plot Guess                                                                                          |
-| [#4682](https://github.com/mantidproject/mantid/issues/4682) (Trac 3836) | InstallerTests don't distingiush between mantid vates properly                                          |
+| [#4682](https://github.com/mantidproject/mantid/issues/4682) (Trac 3836) | InstallerTests don't distinguish between mantid vates properly                                          |
 | [#4685](https://github.com/mantidproject/mantid/issues/4685) (Trac 3838) | Default no-transform in Visualisation                                                                   |
 | [#4687](https://github.com/mantidproject/mantid/issues/4687) (Trac 3840) | Expose advanced features of LoadSQW through PV Plugins                                                  |
 | [#4688](https://github.com/mantidproject/mantid/issues/4688) (Trac 3841) | Reduction UI: avoid silent crash when user have reduction.py on their python path                       |
@@ -382,7 +382,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 | [#4936](https://github.com/mantidproject/mantid/issues/4936) (Trac 4089) | Improve test coverage for Python operators                                                              |
 | [#4937](https://github.com/mantidproject/mantid/issues/4937) (Trac 4090) | Devote more space to view in Multislice mode                                                            |
 | [#4942](https://github.com/mantidproject/mantid/issues/4942) (Trac 4095) | Move color options widget to dialog                                                                     |
-| [#4945](https://github.com/mantidproject/mantid/issues/4945) (Trac 4098) | Modify Normalize by Monitor algorithm to work porperly.                                                 |
+| [#4945](https://github.com/mantidproject/mantid/issues/4945) (Trac 4098) | Modify Normalize by Monitor algorithm to work properly.                                                 |
 | [#4946](https://github.com/mantidproject/mantid/issues/4946) (Trac 4099) | ConvertToEventWorkspace: skip any NAN or INF bins                                                       |
 | [#4948](https://github.com/mantidproject/mantid/issues/4948) (Trac 4101) | MultiplyMD, DivideMD: support MDEventWorkspace\*scalar                                                  |
 | [#4950](https://github.com/mantidproject/mantid/issues/4950) (Trac 4103) | Axis Scaling after Rebinning                                                                            |
@@ -421,7 +421,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 | [#5040](https://github.com/mantidproject/mantid/issues/5040) (Trac 4193) | Auto-overwrite option also to work when changing grouping tab values                                    |
 | [#5041](https://github.com/mantidproject/mantid/issues/5041) (Trac 4194) | Over Plotting of MDWorkspaces                                                                           |
 | [#5042](https://github.com/mantidproject/mantid/issues/5042) (Trac 4195) | LoadDetectorInfo takes a long time to run and consumes lots of memory                                   |
-| [#5044](https://github.com/mantidproject/mantid/issues/5044) (Trac 4197) | SANS: intepolation bug                                                                                  |
+| [#5044](https://github.com/mantidproject/mantid/issues/5044) (Trac 4197) | SANS: interpolation bug                                                                                 |
 | [#5053](https://github.com/mantidproject/mantid/issues/5053) (Trac 4206) | LineViewer: empty output in some circumstances                                                          |
 | [#5057](https://github.com/mantidproject/mantid/issues/5057) (Trac 4210) | Interface scripter: improve error handling                                                              |
 | [#5059](https://github.com/mantidproject/mantid/issues/5059) (Trac 4212) | PeakIntegration check if bank is RectangularDetector                                                    |
@@ -500,7 +500,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 | [#5237](https://github.com/mantidproject/mantid/issues/5237) (Trac 4390) | ORNL SANS: clean up GetMaskedDetectors calls                                                            |
 | [#5238](https://github.com/mantidproject/mantid/issues/5238) (Trac 4391) | ORNL SANS: add scroll bar to stitcher tab                                                               |
 | [#5240](https://github.com/mantidproject/mantid/issues/5240) (Trac 4393) | Option for faster FindPeaks                                                                             |
-| [#5242](https://github.com/mantidproject/mantid/issues/5242) (Trac 4395) | Move Algorithm categroies                                                                               |
+| [#5242](https://github.com/mantidproject/mantid/issues/5242) (Trac 4395) | Move Algorithm categories                                                                               |
 | [#5245](https://github.com/mantidproject/mantid/issues/5245) (Trac 4398) | LineViewer: expose to python                                                                            |
 | [#5249](https://github.com/mantidproject/mantid/issues/5249) (Trac 4402) | Solve Python script change bug in indirect C2E                                                          |
 | [#5259](https://github.com/mantidproject/mantid/issues/5259) (Trac 4412) | Windows starting out hidden on loading a saved project                                                  |
@@ -553,7 +553,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 | [#5460](https://github.com/mantidproject/mantid/issues/5460) (Trac 4613) | MUON: Result table changes (due to feedback)                                                            |
 | [#5462](https://github.com/mantidproject/mantid/issues/5462) (Trac 4615) | MaskWorkspaceToCalFile                                                                                  |
 | [#5466](https://github.com/mantidproject/mantid/issues/5466) (Trac 4619) | No active source in Splatter to Standard view with peaks overlay                                        |
-| [#5469](https://github.com/mantidproject/mantid/issues/5469) (Trac 4622) | Change MWRunFiles to Disallow Mutilple Files by Default                                                 |
+| [#5469](https://github.com/mantidproject/mantid/issues/5469) (Trac 4622) | Change MWRunFiles to Disallow Multiple Files by Default                                                 |
 | [#5470](https://github.com/mantidproject/mantid/issues/5470) (Trac 4623) | MUON: Add sum of counts in the run information box.                                                     |
 | [#5471](https://github.com/mantidproject/mantid/issues/5471) (Trac 4624) | MUON: Log values should be the average value while within the run time.                                 |
 | [#5473](https://github.com/mantidproject/mantid/issues/5473) (Trac 4626) | MUON: Disable sequential fit for Muon Analysis' Fit Property Browser.                                   |
@@ -634,7 +634,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 | [#4893](https://github.com/mantidproject/mantid/issues/4893) (Trac 4046) | wiki_maker: Handle versions of algorithms                                                               |
 | [#4897](https://github.com/mantidproject/mantid/issues/4897) (Trac 4050) | LoadEventNexus: swallow event_index warning for banks with no events                                    |
 | [#4914](https://github.com/mantidproject/mantid/issues/4914) (Trac 4067) | Add performance tests for our most important loading algorithms                                         |
-| [#4917](https://github.com/mantidproject/mantid/issues/4917) (Trac 4070) | Create an array lenght validator                                                                        |
+| [#4917](https://github.com/mantidproject/mantid/issues/4917) (Trac 4070) | Create an array length validator                                                                        |
 | [#4924](https://github.com/mantidproject/mantid/issues/4924) (Trac 4077) | LoadEventNexus needs to set X boundaries even if no events are loaded                                   |
 | [#4971](https://github.com/mantidproject/mantid/issues/4971) (Trac 4124) | add log normal distribution to the menu of Fit functions                                                |
 | [#4991](https://github.com/mantidproject/mantid/issues/4991) (Trac 4144) | ConvertToDiffractionMDWorkspace: Don't append by default                                                |

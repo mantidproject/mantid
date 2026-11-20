@@ -57,7 +57,7 @@ API::CatalogSession_sptr ICat4Catalog::login(const std::string &username, const 
   // Name of the authentication plugin in use.
   std::string plugin;
 
-  if (endpoint.find("sns") != std::string::npos) {
+  if (endpoint.contains("sns")) {
     plugin = std::string("ldap");
   } else {
     plugin = std::string("uows");

@@ -187,7 +187,7 @@ Letters denote the dark current (Cd/B4C) (DC), empty beam (EB), transmission (TR
 
 .. diagram:: ILLSANS-v2_all_wkflw.dot
 
-Transmission Replicae
+Transmission Replicas
 ---------------------
 
 As mentioned, the transmission runs can be repeated, in case the same run needs to be used for more than one sample.

@@ -82,8 +82,6 @@ public:
 
   /// Helper for legacy access mode. Returns a reference to the ParameterMap.
   virtual const ParameterMap &parameterMap() const = 0;
-  /// Helper for legacy access mode. Returns the index of the detector.
-  virtual size_t index() const = 0;
 
   /// (Empty) Constructor.
   /// prevent Warning C4436 and many failing unit tests on MSVC 2015.

@@ -34,7 +34,7 @@ class DNSFile(ObjectDict):
         self["scan_command"] = ""
         self["scan_position"] = ""
         self["scan_points"] = ""
-        self["selector_speed"] = float(0.0)
+        self["selector_speed"] = 0.0
         self.read_dns_file(data_path, filename)
 
     def read_dns_file(self, data_path, filename):

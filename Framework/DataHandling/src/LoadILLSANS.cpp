@@ -193,7 +193,7 @@ void LoadILLSANS::exec() {
       moveDetectorHorizontal(-offset / 1000, "detector"); // mm to meter
     }
   }
-  if (m_instrumentName.find("D16") != std::string::npos && !isDefault("SensitivityMap")) {
+  if (m_instrumentName.contains("D16") && !isDefault("SensitivityMap")) {
     applySensitivityMap();
   }
   progress.report("Setting sample logs");
@@ -319,7 +319,7 @@ void LoadILLSANS::getMonitorIndices(const std::string &filename) {
     size_t monitorIndex = 0;
     while (monitorIndex < rdata.size()) {
       const auto varName = std::string(rdata[monitorIndex]);
-      if (varName.find("Monitor") != std::string::npos)
+      if (varName.contains("Monitor"))
         m_monitorIndices.push_back(monitorIndex);
       monitorIndex++;
     }

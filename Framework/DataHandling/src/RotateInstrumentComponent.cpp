@@ -119,13 +119,10 @@ void RotateInstrumentComponent::exec() {
     // Note the unusual order. This is as in Component::getRotation().
     rotation = comp->getRotation() * rotation;
 
-  const auto componentId = comp->getComponentID();
   if (inputW) {
-    auto &componentInfo = inputW->mutableComponentInfo();
-    componentInfo.setRotation(componentInfo.indexOf(componentId), rotation);
+    inputW->mutableComponentInfo().setRotation(comp->index(), rotation);
   } else if (inputP) {
-    auto &componentInfo = inputP->mutableComponentInfo();
-    componentInfo.setRotation(componentInfo.indexOf(componentId), rotation);
+    inputP->mutableComponentInfo().setRotation(comp->index(), rotation);
   }
 }
 

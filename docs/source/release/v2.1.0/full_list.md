@@ -52,7 +52,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 | [#5306](https://github.com/mantidproject/mantid/issues/5306) (Trac 4459) | SliceViewer: choose different types of normalizations                                                       |
 | [#5318](https://github.com/mantidproject/mantid/issues/5318) (Trac 4471) | Odd behaviour with SmoothNeighbours depending upon storage location                                         |
 | [#5337](https://github.com/mantidproject/mantid/issues/5337) (Trac 4490) | SANS: loose connection                                                                                      |
-| [#5363](https://github.com/mantidproject/mantid/issues/5363) (Trac 4516) | PlusMD crashes Mantid in conjuction with SliceViewer                                                        |
+| [#5363](https://github.com/mantidproject/mantid/issues/5363) (Trac 4516) | PlusMD crashes Mantid in conjunction with SliceViewer                                                       |
 | [#5437](https://github.com/mantidproject/mantid/issues/5437) (Trac 4590) | An empty string selected from list on GUI does not change default property value                            |
 | [#5500](https://github.com/mantidproject/mantid/issues/5500) (Trac 4653) | Handle Veto pulses in LoadEventNexus (before Feb 14!)                                                       |
 | [#5571](https://github.com/mantidproject/mantid/issues/5571) (Trac 4724) | VATES crashes if you forget to hit apply                                                                    |
@@ -64,7 +64,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 | [#5648](https://github.com/mantidproject/mantid/issues/5648) (Trac 4801) | Live Data: Implement LiveListenerManager & LiveListenerFactory                                              |
 | [#5650](https://github.com/mantidproject/mantid/issues/5650) (Trac 4803) | Create a MonitorLiveData algorithm                                                                          |
 | [#5655](https://github.com/mantidproject/mantid/issues/5655) (Trac 4808) | Create a StartLiveData algorithm                                                                            |
-| [#5656](https://github.com/mantidproject/mantid/issues/5656) (Trac 4809) | Cant Visualise HistoWorkspace                                                                               |
+| [#5656](https://github.com/mantidproject/mantid/issues/5656) (Trac 4809) | Can't Visualise HistoWorkspace                                                                              |
 | [#5659](https://github.com/mantidproject/mantid/issues/5659) (Trac 4812) | Live Data: Create a 'FakeDataLiveListener'                                                                  |
 | [#5678](https://github.com/mantidproject/mantid/issues/5678) (Trac 4831) | BinMD/SliceMD: allow non-zero output origin                                                                 |
 | [#5684](https://github.com/mantidproject/mantid/issues/5684) (Trac 4837) | Allow Overlapping Date Ranges for IDFs so that Latest Range is selected                                     |
@@ -232,7 +232,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 | [#5697](https://github.com/mantidproject/mantid/issues/5697) (Trac 4850) | Updated to mantid-developer packages                                                                        |
 | [#5701](https://github.com/mantidproject/mantid/issues/5701) (Trac 4854) | MUON: Add run number to run information and change the way counts are displayed.                            |
 | [#5707](https://github.com/mantidproject/mantid/issues/5707) (Trac 4860) | ConjoinWorkspaces2 -> AppendSpectra                                                                         |
-| [#5709](https://github.com/mantidproject/mantid/issues/5709) (Trac 4862) | [C2E] Calibration - Amend Ouput Name Format                                                                 |
+| [#5709](https://github.com/mantidproject/mantid/issues/5709) (Trac 4862) | [C2E] Calibration - Amend Output Name Format                                                                |
 | [#5719](https://github.com/mantidproject/mantid/issues/5719) (Trac 4872) | [IDA] - Remove "Absorption" Tab                                                                             |
 | [#5720](https://github.com/mantidproject/mantid/issues/5720) (Trac 4873) | Create an algorithm that will run a snippet of python code                                                  |
 | [#5722](https://github.com/mantidproject/mantid/issues/5722) (Trac 4875) | [IDA] CalcCorr - UI Changes                                                                                 |
@@ -278,7 +278,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 | [#5803](https://github.com/mantidproject/mantid/issues/5803) (Trac 4957) | Add MuonFInteraction fit function                                                                           |
 | [#5804](https://github.com/mantidproject/mantid/issues/5804) (Trac 4958) | Add StaticKuboToyabe function for muon scientists                                                           |
 | [#5805](https://github.com/mantidproject/mantid/issues/5805) (Trac 4959) | Update Tzero formula in CTE gui                                                                             |
-| [#5806](https://github.com/mantidproject/mantid/issues/5806) (Trac 4960) | Implement Tobyfit like insturment resolution methods for quantification                                     |
+| [#5806](https://github.com/mantidproject/mantid/issues/5806) (Trac 4960) | Implement Tobyfit like instrument resolution methods for quantification                                     |
 | [#5808](https://github.com/mantidproject/mantid/issues/5808) (Trac 4962) | Segfault in ProcessGroups() if algorithms.retained is small                                                 |
 | [#5814](https://github.com/mantidproject/mantid/issues/5814) (Trac 4968) | BoundaryConstraint constructor with lower bound only                                                        |
 | [#5816](https://github.com/mantidproject/mantid/issues/5816) (Trac 4970) | Algorithm: add a mechanism for "holistic" validation of properties                                          |
@@ -465,5 +465,5 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 | [#5974](https://github.com/mantidproject/mantid/issues/5974) (Trac 5128) | Units: add convenience function for converting a single value                                               |
 | [#5990](https://github.com/mantidproject/mantid/issues/5990) (Trac 5144) | BinMD: does not seem to respond to Cancel when Parallel=1                                                   |
 | [#5996](https://github.com/mantidproject/mantid/issues/5996) (Trac 5150) | Implement an empty() method in the ThreadSchedulers                                                         |
-| [#5998](https://github.com/mantidproject/mantid/issues/5998) (Trac 5152) | modify buildFakeDetector's position routine to take emode and Ei from workspace if such are availible there |
+| [#5998](https://github.com/mantidproject/mantid/issues/5998) (Trac 5152) | modify buildFakeDetector's position routine to take emode and Ei from workspace if such are available there |
 | [#6024](https://github.com/mantidproject/mantid/issues/6024) (Trac 5178) | Remove unwrapref parameter in SNSPowderReduction                                                            |

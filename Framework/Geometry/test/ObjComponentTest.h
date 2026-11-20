@@ -335,7 +335,7 @@ public:
     auto map = std::make_shared<ParameterMap>();
     map->setInstrument(instrument.get());
     auto &componentInfo = map->mutableComponentInfo();
-    componentInfo.setScaleFactor(componentInfo.indexOf(base), scale);
+    componentInfo.setScaleFactor(base->index(), scale);
     return {instrument, map, std::make_unique<ObjComponent>(base, map.get())};
   }
 

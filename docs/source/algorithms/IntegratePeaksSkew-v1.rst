@@ -143,7 +143,7 @@ contiguous region of nearest-neighbour connected detectors not contributing to t
 of the peak corresponds to a background detector (as identified in step 3).
 
 If ``UpdatePeakPosition=True`` then the peak detector ID will be replaced with the detector ID corresponding to the
-maxiumum integrated intensity over the TOF window which maximises :math:`I/\sigma`. The peak TOF will be replaced
+maximum integrated intensity over the TOF window which maximises :math:`I/\sigma`. The peak TOF will be replaced
 with the TOF of the maximum in the focused spectrum.
 
 Plotting
@@ -162,7 +162,7 @@ In addition a graph of the found :math:`dTOF/TOF` vs :math:`\theta` will be save
     :alt: (Left) Found fractional TOF window and estimated curves at 4 different wavelengths from linear fit shown on
           (Right)
 
-Useage
+Usage
 -----------
 
 **Example:**

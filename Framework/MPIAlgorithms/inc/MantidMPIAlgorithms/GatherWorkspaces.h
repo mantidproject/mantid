@@ -64,6 +64,8 @@ public:
   /// Algorithm's category for identification
   const std::string category() const override { return "MPI"; }
 
+  std::map<std::string, std::string> validateInputs() override;
+
 private:
   void init() override;
   void exec() override;

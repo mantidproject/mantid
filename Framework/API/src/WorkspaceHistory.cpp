@@ -312,7 +312,7 @@ std::set<int> WorkspaceHistory::findHistoryEntries(Nexus::File const *file) {
   // Find all the unique numbers
   for (auto const &entry : entries) {
     std::string entryName = entry.first;
-    if (entryName.find("MantidAlgorithm_") != std::string::npos) {
+    if (entryName.contains("MantidAlgorithm_")) {
       // Just get the number
       entryName = entryName.substr(16, entryName.size() - 16);
       int num = -1;

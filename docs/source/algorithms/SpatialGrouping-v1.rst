@@ -28,7 +28,7 @@ Usage
 
 .. caution::
 
-    The following is a contrived example to show the functionaity of the algorithm,
+    The following is a contrived example to show the functionality of the algorithm,
     However, since the sample workspace does not have a valid instrument, the written
     grouping file is invalid and cannot be used.
 

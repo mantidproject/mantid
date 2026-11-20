@@ -327,10 +327,7 @@ void FunctionModel::removeDatasets(QList<int> &indices) {
 std::vector<std::string> FunctionModel::getDatasetNames() const {
   std::vector<std::string> allDatasetNames;
   for (const auto &dataset : m_datasets)
-    for (auto i = 0u; i < dataset.numberOfSpectra(); ++i) {
-      UNUSED_ARG(i);
-      allDatasetNames.emplace_back(dataset.datasetName());
-    }
+    allDatasetNames.insert(allDatasetNames.end(), dataset.numberOfSpectra(), dataset.datasetName());
   return allDatasetNames;
 }
 
@@ -615,7 +612,7 @@ void FunctionModel::setResolutionFromWorkspace(const IFunction_sptr &fun, const 
     if (comp && comp->hasParameter("resolution")) {
       auto params = comp->getNumberParameter("resolution", true);
       for (const auto &param : fun->getParameterNames()) {
-        if (param.find("FWHM") != std::string::npos) {
+        if (param.contains("FWHM")) {
           fun->setParameter(param, params[0]);
         }
       }

@@ -50,7 +50,7 @@ Algorithms
 - :ref:`IndexPeaks <algm-IndexPeaks>` now has options to enter modulation vectors and additional information required for satellite peak indexing. As
   a result ``IndexPeaksWithSatellites`` has been deprecated and will be removed in a future release.
 - :ref:`MaskAngle <algm-MaskAngle>` has an additional option of ``Angle='InPlane'``
-- The valiation in :ref:`SaveAscii <algm-SaveAscii>` has been improved to only accept MatrixWorkspaces.
+- The validation in :ref:`SaveAscii <algm-SaveAscii>` has been improved to only accept MatrixWorkspaces.
 - The custom dialog for :ref:`CreateSampleShape <algm-CreateSampleShape>`
   has been removed. It will now fall back to the generic one.
 - A bug in the conversion to Q3D and ModQ for indirect spectrometers at high Q in :ref:`ConvertToMD <algm-ConvertToMD>` has been fixed.

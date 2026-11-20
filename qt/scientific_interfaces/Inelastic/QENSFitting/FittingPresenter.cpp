@@ -101,7 +101,9 @@ bool FittingPresenter::isPreviouslyFit(WorkspaceID workspaceID, WorkspaceIndex s
   return m_model->isPreviouslyFit(workspaceID, spectrum);
 }
 
-void FittingPresenter::setFWHM(WorkspaceID WorkspaceID, double fwhm) { m_model->setFWHM(fwhm, WorkspaceID); }
+void FittingPresenter::setFWHM(WorkspaceID WorkspaceID, std::size_t peakIndex, double fwhm) {
+  m_model->setFWHM(fwhm, peakIndex, WorkspaceID);
+}
 
 void FittingPresenter::setBackground(WorkspaceID WorkspaceID, double background) {
   m_model->setBackground(background, WorkspaceID);

@@ -380,7 +380,7 @@ void MDNormBase::calculateNormContinuous(const std::vector<coord_t> &otherValues
   }
 
   // Convert from picoCoulomb to uA.hr for SNS data
-  if (protonlog->units().find("picoCoulomb") != std::string::npos) {
+  if (protonlog->units().contains("picoCoulomb")) {
     normfac *= 3600.e6;
   }
 

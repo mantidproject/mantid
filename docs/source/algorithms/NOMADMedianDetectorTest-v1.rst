@@ -57,7 +57,7 @@ as "banks" in the workflow picture)
 .. figure:: /images/NOMADMedianDetectorTest_4.png
    :alt: ClusterImage.png
 
-Finally, the following workflow prescribes the test using the eight-pack mediam or the panel median criterium
+Finally, the following workflow prescribes the test using the eight-pack median or the panel median criterium
 
 .. figure:: /images/NOMADMedianDetectorTest_5.png
    :alt: ClusterImage.png

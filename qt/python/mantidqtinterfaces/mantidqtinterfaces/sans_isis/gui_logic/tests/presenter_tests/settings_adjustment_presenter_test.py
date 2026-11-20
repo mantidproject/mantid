@@ -57,6 +57,19 @@ class SettingsAdjustmentPresenterTest(unittest.TestCase):
         presenter.update_instrument(param)
         self.assertEqual(param, mock_model.instrument)
 
+    def test_set_on_view_with_decimal_places_keeps_intended_precision(self):
+        mock_model = Mock()
+        mock_view = Mock()
+
+        mock_model.transmission_mn_4_shift = 0.001234
+        mock_model.transmission_mn_5_shift = 0.0012346  # 6dp is the limit so it should be rounded
+
+        presenter = SettingsAdjustmentPresenter(view=mock_view, model=mock_model)
+        presenter.update_view_from_model()
+
+        self.assertEqual(0.001234, mock_view.transmission_mn_4_shift)
+        self.assertEqual(0.001235, mock_view.transmission_mn_5_shift)
+
 
 if __name__ == "__main__":
     unittest.main()

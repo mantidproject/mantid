@@ -90,8 +90,8 @@ private slots:
   void handleNewInstrumentConfiguration();
 
 private:
-  virtual void setFileExtensionsByName(bool filter) { UNUSED_ARG(filter); };
-  virtual void setLoadHistory(bool doLoadHistory) { (void)doLoadHistory; }
+  virtual void setFileExtensionsByName([[maybe_unused]] bool filter) {};
+  virtual void setLoadHistory([[maybe_unused]] bool doLoadHistory) {}
   virtual void updateInstrumentConfiguration() = 0;
 };
 } // namespace CustomInterfaces

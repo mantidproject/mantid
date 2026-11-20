@@ -88,7 +88,7 @@ Output:
 
 .. note::
 
-    Due to nature of MPI, the output may be recieved out of order
+    Due to nature of MPI, the output may be received out of order
 
 .. code-block:: text
 

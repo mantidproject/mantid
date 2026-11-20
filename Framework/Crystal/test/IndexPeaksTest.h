@@ -516,7 +516,7 @@ public:
     TS_ASSERT(valueIter != helpMsgs.cend())
     if (valueIter != helpMsgs.cend()) {
       const auto msg = valueIter->second;
-      TS_ASSERT(msg.find(err_substring) != std::string::npos)
+      TS_ASSERT(msg.contains(err_substring))
     }
   }
 

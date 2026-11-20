@@ -172,7 +172,7 @@ class AtomsData(collections.abc.Sequence):
 
     def to_dict(self) -> "AtomsData.JSONableData":
         """Get a JSON-compatible representation of the data"""
-        data: "AtomsData.JSONableData"
+        data: AtomsData.JSONableData
         data = {
             f"atom_{i}": {
                 "coord": item["coord"].tolist(),

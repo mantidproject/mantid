@@ -252,14 +252,13 @@ SaveNXcanSASBase::validateSpinStateStrings(const std::vector<std::string> &spinV
 
   // Validating spin strings
   if (spinVec.size() == 4 && std::any_of(spinVec.cbegin(), spinVec.cend(), [](const std::string &spinPair) {
-        return (spinPair.find(SpinStateNXcanSAS::SPIN_ZERO) != std::string::npos);
+        return (spinPair.contains(SpinStateNXcanSAS::SPIN_ZERO));
       })) {
     result.emplace(PolProperties::INPUT_SPIN_STATES, "Full polarized group can't contain spin state 0");
   }
 
   if (spinVec.size() == 2) {
-    if (std::any_of(spinVec.cbegin(), spinVec.cend(),
-                    [](const std::string &state) { return state.find('1') == std::string::npos; })) {
+    if (std::any_of(spinVec.cbegin(), spinVec.cend(), [](const std::string &state) { return !state.contains('1'); })) {
       result.emplace(PolProperties::INPUT_SPIN_STATES, "There can't be 00 state");
     }
     const auto noPin =

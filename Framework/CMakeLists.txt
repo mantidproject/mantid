@@ -112,10 +112,19 @@ get_target_property(_simpleapi_stub_python_modules PythonInterface MANUALLY_ADDE
 # out of the stub. Not writing bytecode keeps .pyc files for the imported (often noarch) packages out of the conda
 # package build prefix, where they would be packaged with mantid.
 set(_simpleapi_stub_home ${CMAKE_CURRENT_BINARY_DIR}/simpleapi_stubs_home)
+# Fail rather than hang, e.g. a CI agent stuck on MPI start-up, when coreutils timeout is available. Windows has an
+# unrelated timeout.exe, so it is not used there.
+set(_simpleapi_stub_timeout)
+if(NOT WIN32)
+  find_program(TIMEOUT_EXECUTABLE NAMES timeout gtimeout)
+  if(TIMEOUT_EXECUTABLE)
+    set(_simpleapi_stub_timeout ${TIMEOUT_EXECUTABLE} 600) # 10 minutes
+  endif()
+endif()
 set(_simpleapi_stub_command
     ${CMAKE_COMMAND} -E env "PYTHONDONTWRITEBYTECODE=1" "PYTHONPATH=${_simpleapi_stub_pythonpath}"
-    "HOME=${_simpleapi_stub_home}" "APPDATA=${_simpleapi_stub_home}" ${Python_EXECUTABLE} ${_simpleapi_stub_generator}
-    ${SIMPLEAPI_STUBS_ARGS}
+    "HOME=${_simpleapi_stub_home}" "APPDATA=${_simpleapi_stub_home}" ${_simpleapi_stub_timeout} ${Python_EXECUTABLE}
+    ${_simpleapi_stub_generator} ${SIMPLEAPI_STUBS_ARGS}
 )
 set(_simpleapi_stub_outputs ${_simpleapi_stub})
 set(_simpleapi_mpi_stub_commands)

@@ -246,7 +246,7 @@ void RectangularDetector::testIntersectionWithChildren(Track &testRay,
 
   // TODO: Do I need to put something smart here for the first 3 parameters?
   auto comp = getAtXY(xIndex, yIndex);
-  testRay.addLink(intersec, intersec, 0.0, *(comp->shape()), comp->getComponentID());
+  testRay.addLink(intersec, intersec, 0.0, *(comp->shape()), comp->index());
 }
 
 /**

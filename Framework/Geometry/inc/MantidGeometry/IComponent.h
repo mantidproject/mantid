@@ -64,6 +64,8 @@ public:
   // or pointer to itself if not. Currently is the same as getComponentID bar
   // const cast;
   virtual IComponent const *getBaseComponent() const = 0;
+  //! Returns the index of the component, or ComponentInfo::invalidIndex if none
+  virtual size_t index() const = 0;
   //! Assign a parent IComponent. Previous parent link is lost
   virtual void setParent(IComponent *) = 0;
   //! Return a pointer to the current parent.

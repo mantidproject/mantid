@@ -41,7 +41,7 @@ class WorkspaceCalculator:
         parameters["rhs_ws"] = self.view.rhs_ws.currentText()
         parameters["operation"] = self.view.operation.currentText()
         output_ws = self.view.output_ws.currentText()
-        if output_ws == str():
+        if output_ws == "":
             output_ws = "output"
         parameters["output_ws"] = output_ws
         return parameters
@@ -50,8 +50,8 @@ class WorkspaceCalculator:
         parameters = self.readParameters()
         if parameters == dict():
             return
-        lhs_ws = parameters["lhs_ws"] if parameters["lhs_ws"] != str() else None
-        rhs_ws = parameters["rhs_ws"] if parameters["rhs_ws"] != str() else None
+        lhs_ws = parameters["lhs_ws"] if parameters["lhs_ws"] != "" else None
+        rhs_ws = parameters["rhs_ws"] if parameters["rhs_ws"] != "" else None
         valid_lhs, valid_rhs, err_msg = self.model.validateInputs(lhs_ws=lhs_ws, rhs_ws=rhs_ws, operation=parameters["operation"])
         if lhs_ws:
             self.view.setValidationLabel(ws="LHS", validationValue=valid_lhs, tooltip=err_msg)

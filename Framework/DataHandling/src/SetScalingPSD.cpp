@@ -86,7 +86,7 @@ bool SetScalingPSD::processScalingFile(const std::string &scalingFile, std::vect
   std::map<int, double>::iterator its;
 
   const auto &detectorInfo = m_workspace->detectorInfo();
-  if (scalingFile.find(".sca") != std::string::npos || scalingFile.find(".SCA") != std::string::npos) {
+  if (scalingFile.contains(".sca") || scalingFile.contains(".SCA")) {
     // read a .sca text format file
     // format consists of a short header followed by one line per detector
 
@@ -166,7 +166,7 @@ bool SetScalingPSD::processScalingFile(const std::string &scalingFile, std::vect
         continue;
       }
     }
-  } else if (scalingFile.find(".raw") != std::string::npos || scalingFile.find(".RAW") != std::string::npos) {
+  } else if (scalingFile.contains(".raw") || scalingFile.contains(".RAW")) {
     std::vector<int> detID;
     std::vector<Kernel::V3D> truepos;
     getDetPositionsFromRaw(scalingFile, detID, truepos);

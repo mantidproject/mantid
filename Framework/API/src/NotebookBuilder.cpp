@@ -173,7 +173,7 @@ const std::string NotebookBuilder::buildPropertyString(const PropertyHistory_con
       // Handle all other property types
     } else {
       std::string opener = "='";
-      if (propHistory->value().find('\\') != std::string::npos) {
+      if (propHistory->value().contains('\\')) {
         opener = "=r'";
       }
 

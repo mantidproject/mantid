@@ -129,7 +129,7 @@ int ObjComponent::interceptSurface(Track &track) const {
     // use the scale factor
     out *= getScaleFactor();
     out += this->getPos();
-    track.addLink(in, out, out.distance(track.startPoint()), *(this->shape()), this->getComponentID());
+    track.addLink(in, out, out.distance(track.startPoint()), *(this->shape()), this->index());
   }
 
   return intercepts;

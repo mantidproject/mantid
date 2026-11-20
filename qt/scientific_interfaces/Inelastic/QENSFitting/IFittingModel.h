@@ -39,7 +39,7 @@ public:
                                                                              WorkspaceIndex spectrum) const = 0;
 
   virtual void setFitFunction(Mantid::API::MultiDomainFunction_sptr function) = 0;
-  virtual void setFWHM(double fwhm, WorkspaceID WorkspaceID) = 0;
+  virtual void setFWHM(double fwhm, std::size_t peakIndex, WorkspaceID WorkspaceID) = 0;
   virtual void setBackground(double fwhm, WorkspaceID WorkspaceID) = 0;
   virtual void setDefaultParameterValue(const std::string &name, double value, WorkspaceID workspaceID) = 0;
 

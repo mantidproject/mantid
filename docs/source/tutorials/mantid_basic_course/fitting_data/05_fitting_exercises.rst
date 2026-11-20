@@ -93,7 +93,7 @@ Exercise 3
 #. Open the Fit property browser
 #. As described earlier, add a UserFunction with the with Formula = `h*exp(-a*x)`
 #. Set `h = 5000` and **Fix** it to this value
-#. Give `a` some positive intial value such as `1.0`
+#. Give `a` some positive initial value such as `1.0`
 #. Fit the data
 
 .. figure:: /images/ExerciseFittingMBCfit_3MUSR.png

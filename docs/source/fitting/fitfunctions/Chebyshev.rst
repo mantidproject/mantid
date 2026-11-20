@@ -14,7 +14,7 @@ This function calculates a partial Chebyshev expansion
 .. math:: \sum_{n=0}^N a_n T_n(a+bx)
 
 where :math:`a_n` are the expansion coefficients and :math:`T_n(x)` are
-Chebyshev polynomials of the first kind defined by the reccurence
+Chebyshev polynomials of the first kind defined by the recurrence
 relation
 
 .. math:: T_0(x)=1 \,\!

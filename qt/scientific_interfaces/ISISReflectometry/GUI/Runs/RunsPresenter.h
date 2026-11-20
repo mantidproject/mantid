@@ -38,12 +38,6 @@ class IPythonRunner;
 
 using MantidWidgets::ProgressableView;
 
-enum class TransferMatch {
-  Any,        // any that match the regex
-  ValidTheta, // any that match and have a valid theta value
-  Strict      // only those that exactly match all parts of the regex
-};
-
 /** @class RunsPresenter
 
 RunsPresenter is a presenter class for the Reflectometry Interface. It
@@ -167,7 +161,7 @@ private:
   void autoreduceNewRuns();
 
   ProgressPresenter setupProgressBar(const std::set<int> &rowsToTransfer);
-  void transfer(const std::set<int> &rowsToTransfer, const TransferMatch matchType = TransferMatch::Any);
+  void transfer(const std::set<int> &rowsToTransfer);
   void updateWidgetEnabledState() const;
   /// Check that a given set of row indices are valid to transfer
   bool validateRowsToTransfer(const std::set<int> &rowsToTransfer);

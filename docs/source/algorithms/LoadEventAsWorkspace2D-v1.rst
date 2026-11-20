@@ -11,7 +11,7 @@ Description
 -----------
 
 
-This algorithm loads event data, integrating the events during loading. It will also set the X-axis based on log data. This will be mostly used by contant wavelength instruments that collect event data but are not performing event filtering. It will be faster than running :ref:`LoadEventNexus <algm-LoadEventNexus>` then doing :ref:`Integration <algm-Integration>`.
+This algorithm loads event data, integrating the events during loading. It will also set the X-axis based on log data. This will be mostly used by constant wavelength instruments that collect event data but are not performing event filtering. It will be faster than running :ref:`LoadEventNexus <algm-LoadEventNexus>` then doing :ref:`Integration <algm-Integration>`.
 
 An example usage is instead of running :ref:`LoadEventNexus <algm-LoadEventNexus>` then :ref:`HFIRSANS2Wavelength <algm-HFIRSANS2Wavelength>`, you can just use ``LoadEventAsWorkspace2D``.
 

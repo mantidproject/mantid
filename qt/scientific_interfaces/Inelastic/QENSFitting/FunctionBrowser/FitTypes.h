@@ -62,6 +62,7 @@ enum class LorentzianType {
   None,
   OneLorentzian,
   TwoLorentzians,
+  ThreeLorentzians,
 };
 
 enum class FitType {

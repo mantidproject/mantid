@@ -107,7 +107,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 | [#6933](https://github.com/mantidproject/mantid/issues/6933) (Trac 6087) | Improve description and Unit test coverage for LeBailFit methods                            |
 | [#6936](https://github.com/mantidproject/mantid/issues/6936) (Trac 6090) | Add ability to read neutron weights from Event Nexus files                                  |
 | [#6937](https://github.com/mantidproject/mantid/issues/6937) (Trac 6091) | CreateMD interface should use ConvertToMD                                                   |
-| [#6949](https://github.com/mantidproject/mantid/issues/6949) (Trac 6103) | Modyfy CMAKE files to remove annoying message about dublicated integer definitions          |
+| [#6949](https://github.com/mantidproject/mantid/issues/6949) (Trac 6103) | Modify CMAKE files to remove annoying message about duplicated integer definitions          |
 | [#6950](https://github.com/mantidproject/mantid/issues/6950) (Trac 6104) | Python binary operations with groups leave temp workspaces around                           |
 | [#6953](https://github.com/mantidproject/mantid/issues/6953) (Trac 6107) | Option for SaveAscii to exclude header                                                      |
 | [#6956](https://github.com/mantidproject/mantid/issues/6956) (Trac 6110) | Expose FunctionFactory to python                                                            |

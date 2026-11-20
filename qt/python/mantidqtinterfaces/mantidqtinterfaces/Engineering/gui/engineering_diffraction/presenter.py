@@ -70,7 +70,7 @@ class EngineeringDiffractionPresenter(object):
     # itself doesn't own the view (vice versa in this instance) and that the 'child' tabs of the presenter can be mocked
     # /subbed in for other purposes i.e. testing, agnostic of the view
 
-    def setup_calibration(self, view: "EngineeringDiffractionGui") -> None:
+    def setup_calibration(self, view: EngineeringDiffractionGui) -> None:
         cal_model = CalibrationModel()
         focus_model = FocusModel()
         cal_view = CalibrationView(parent=view.tabs)
@@ -95,7 +95,7 @@ class EngineeringDiffractionPresenter(object):
             GenericObserver(self.settings_presenter.reload_settings_from_file)
         )
 
-    def setup_correction(self, view: "EngineeringDiffractionGui") -> None:
+    def setup_correction(self, view: EngineeringDiffractionGui) -> None:
         correction_model = CorrectionModel()
         correction_view = TextureCorrectionView()
         self.correction_presenter = TextureCorrectionPresenter(correction_model, correction_view)
@@ -104,7 +104,7 @@ class EngineeringDiffractionPresenter(object):
         view.tabs.addTab(correction_view, "Absorption Correction")
         self.correction_presenter.add_correction_subscriber(self.focus_presenter.correction_observer)
 
-    def setup_fitting(self, view: "EngineeringDiffractionGui") -> None:
+    def setup_fitting(self, view: EngineeringDiffractionGui) -> None:
         fitting_view = FittingView()
         self.fitting_presenter = FittingPresenter(fitting_view)
         self.fitting_presenter.set_rb_scope(self.rb_scope)
@@ -113,7 +113,7 @@ class EngineeringDiffractionPresenter(object):
         self.focus_presenter.add_focus_texture_subscriber(self.fitting_presenter.data_widget.presenter.focus_combined_observer)
         view.tabs.addTab(fitting_view, "Fitting")
 
-    def setup_gsas2(self, view: "EngineeringDiffractionGui") -> None:
+    def setup_gsas2(self, view: EngineeringDiffractionGui) -> None:
         gsas2_model = GSAS2Model()
         gsas2_view = GSAS2View(parent=view.tabs)
         self.gsas2_presenter = GSAS2Presenter(gsas2_model, gsas2_view)
@@ -122,7 +122,7 @@ class EngineeringDiffractionPresenter(object):
         self.calibration_presenter.add_prm_gsas2_subscriber(self.gsas2_presenter.prm_filepath_observer_gsas2)
         view.tabs.addTab(gsas2_view, "GSAS II")
 
-    def setup_texture(self, view: "EngineeringDiffractionGui") -> None:
+    def setup_texture(self, view: EngineeringDiffractionGui) -> None:
         texture_model = ProjectionModel()
         texture_view = TextureView()
         self.texture_presenter = TexturePresenter(texture_model, texture_view)
@@ -131,7 +131,7 @@ class EngineeringDiffractionPresenter(object):
         self.focus_presenter.add_focus_texture_subscriber(self.texture_presenter.focus_run_observer)
         view.tabs.addTab(texture_view, "Texture")
 
-    def setup_settings(self, view: "EngineeringDiffractionGui") -> None:
+    def setup_settings(self, view: EngineeringDiffractionGui) -> None:
         settings_model = SettingsModel()
         settings_view = SettingsView(view)
         settings_presenter = SettingsPresenter(settings_model, settings_view)
@@ -141,7 +141,7 @@ class EngineeringDiffractionPresenter(object):
         self.settings_presenter = settings_presenter
         self.setup_savedir_notifier(view)
 
-    def setup_savedir_notifier(self, view: "EngineeringDiffractionGui") -> None:
+    def setup_savedir_notifier(self, view: EngineeringDiffractionGui) -> None:
         self.settings_presenter.savedir_notifier.add_subscriber(view.savedir_observer)
 
     def handle_close(self) -> None:
