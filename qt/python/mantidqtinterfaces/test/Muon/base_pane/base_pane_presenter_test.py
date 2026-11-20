@@ -152,6 +152,20 @@ class BasePanePresenterTest(unittest.TestCase):
         self.figure_presenter.force_autoscale.assert_called_once()
         self.figure_presenter.plot_workspaces.assert_called_once_with(["top"], [0], hold, autoscale)
 
+    def test_add_list_to_plot_does_not_force_autoscale_when_tiled_plot_is_rebuilt(self):
+        self.figure_presenter.get_plotted_workspaces_and_indices.return_value = [["fwd"], [0]]
+
+        def rebuild_tiled_plot():
+            # Rebuilding the tiled plot creates a new, empty canvas
+            self.figure_presenter.get_plotted_workspaces_and_indices.return_value = [[], []]
+
+        self.presenter._update_tile_plot = mock.Mock(side_effect=rebuild_tiled_plot)
+        self.presenter.add_list_to_plot(["bwd"], [0], hold=False, autoscale=False)
+
+        self.presenter._update_tile_plot.assert_called_once()
+        self.figure_presenter.force_autoscale.assert_not_called()
+        self.figure_presenter.plot_workspaces.assert_called_once_with(["bwd"], [0], False, False)
+
     def test_remove_list_from_plot(self):
         self.presenter._update_tile_plot = mock.Mock()
         self.presenter.remove_list_from_plot(["top"])
