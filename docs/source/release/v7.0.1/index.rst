@@ -17,7 +17,7 @@ The changes are:
 - Removed UnwrapMonitorsInTOF and UnwrapSNS (deprecated since release 6.13.0). `#42540 <https://github.com/mantidproject/mantid/pull/42540>`_
 - In algorithm dialogs, when a workspace input is preset to a hidden workspace (one whose name starts with ``__``) and ``Show Invisible Workspaces`` is off in the :ref:`General settings <GeneralSettings>`, the dialog now keeps that workspace selected. Previously it silently switched to the first workspace in the list, so the algorithm could run on the wrong data `#42746 <https://github.com/mantidproject/mantid/pull/42746>`_
 - In ISIS Powder Scripts remove overly strict check on object types for ``SampleDetails`` to avoid misleading errors `#42805 <https://github.com/mantidproject/mantid/pull/42805>`_
-- Muon plots no longer reset user-set y-axis limits when new data is loaded with ``Autoscale y`` unticked, on the Fitting/Sequential Fitting tabs or when ``Tile plot`` is selected.
+- Muon plots no longer reset user-set y-axis limits when new data is loaded with ``Autoscale y`` unticked, on the Fitting/Sequential Fitting tabs or when ``Tile plot`` is selected `#42845 <https://github.com/mantidproject/mantid/pull/42845>`_ 
 
 
 Citation
