@@ -7,6 +7,7 @@
 import csv
 import math
 import unittest
+from unittest.mock import patch
 
 from mantid import FileFinder
 from mantid.api import AnalysisDataService, WorkspaceGroup
@@ -73,6 +74,20 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
 
         output_ws = AnalysisDataService.retrieve(output_ws_name)
         self._check_final_theta_values(ws, output_ws)
+
+    def test_calibration_can_reuse_an_owned_input_workspace(self):
+        workspace = self._create_sample_workspace("input")
+        reference = self._create_sample_workspace("reference")
+        alg = ReflectometryISISCalibration()
+        alg.initialize()
+        alg.setChild(True)
+        alg.setRethrows(True)
+        alg.setProperty("InputWorkspace", workspace)
+        alg.setProperty("PreserveInputWorkspace", False)
+        alg.setProperty("CalibrationFile", self._CALIBRATION_TEST_DATA)
+        with patch.object(alg, "_clone_workspace", side_effect=AssertionError("An in-place calibration must not clone")):
+            alg.execute()
+        self._check_final_theta_values(reference, workspace)
 
     def test_calibration_successful_for_detectors_with_negative_two_theta(self):
         input_ws_name = "test_1234"

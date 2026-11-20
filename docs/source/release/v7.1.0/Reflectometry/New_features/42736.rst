@@ -1,0 +1,1 @@
+- The handling of input workspaces in :ref:`ReflectometryISISLoadAndProcess <algm-ReflectometryISISLoadAndProcess>` and related child algorithms has been reworked to ensure consistency. When ``GroupTOFWorkspaces=True``, Input TOF workspaces are now cached unmodified in a ``TOF`` workspace group. Processed workspaces are stored in ``TOF_processed`` group.

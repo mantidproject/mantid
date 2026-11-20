@@ -6,9 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "JobsViewUpdater.h"
-#include "GUI/Common/RunWorkspaceResolver.h"
+#include "Common/GroupHelper.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+
+#include <algorithm>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
@@ -76,11 +79,21 @@ MantidWidgets::Batch::Cell adjustedAngleCell(Row const &row, std::optional<int> 
   if (iVsQBinnedNames.empty() || iVsQNames.empty() || iVsLambdaNames.empty())
     return cell;
 
-  auto const &matrix =
-      findInputWorkspace(names.inputRunNumbers(), std::nullopt, {iVsQBinnedNames[0], iVsQNames[0], iVsLambdaNames[0]});
-  if (matrix && matrix->run().hasProperty("reflectometry_adjusted_theta"))
-    cell.setContentText(
-        valueToString(matrix->run().getPropertyAsSingleValue("reflectometry_adjusted_theta"), precision));
+  for (auto const &name : {iVsQBinnedNames[0], iVsQNames[0], iVsLambdaNames[0]}) {
+    auto &ads = Mantid::API::AnalysisDataService::Instance();
+    if (!ads.doesExist(name))
+      continue;
+    auto const members = getMembers(ads.retrieve(name));
+    auto const member = std::find_if(members.cbegin(), members.cend(), [](auto const &workspace) {
+      return workspace && workspace->run().hasProperty("reflectometry_adjusted_theta");
+    });
+    if (member != members.cend()) {
+      cell.setContentText(
+          valueToString((*member)->run().getPropertyAsSingleValue("reflectometry_adjusted_theta"), precision));
+      return cell;
+    }
+  }
+
   return cell;
 }
 

@@ -1,10 +1,7 @@
-set(COMMON_SRC_FILES Plotter.cpp PlotOptions.cpp PlotOptionsProvider.cpp Encoder.cpp Decoder.cpp
-                     RunWorkspaceResolver.cpp
-)
+set(COMMON_SRC_FILES Plotter.cpp PlotOptions.cpp PlotOptionsProvider.cpp Encoder.cpp Decoder.cpp)
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set(COMMON_INC_FILES
-    RunWorkspaceResolver.h
     InstrumentCategory.h
     IFileHandler.h
     IJobManager.h

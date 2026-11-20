@@ -241,6 +241,10 @@ void ReflectometryReductionOneAuto3::init() {
   declareProperty(std::make_unique<PropertyWithValue<bool>>("CorrectDetectors", true, Direction::Input),
                   "Moves detectors to twoTheta if ThetaIn or ThetaLogName is given");
 
+  declareProperty("PreserveInputWorkspace", true,
+                  "Preserve the input workspace during detector correction and bank masking. "
+                  "Disable only when the caller owns a disposable working copy.");
+
   // Detector position correction type
   const std::vector<std::string> correctionType{"VerticalShift", "RotateAroundSample"};
   auto correctionTypeValidator = std::make_shared<CompositeValidator>();
@@ -579,6 +583,8 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto3::correctDetectorPositions(Ma
   for (const auto &detector : detectorSet) {
     auto alg = createChildAlgorithm("SpecularReflectionPositionCorrect");
     alg->setProperty("InputWorkspace", corrected);
+    if (!static_cast<bool>(getProperty("PreserveInputWorkspace")))
+      alg->setProperty("OutputWorkspace", corrected);
     alg->setProperty("TwoTheta", twoTheta);
     alg->setProperty("DetectorCorrectionType", correctionType);
     alg->setProperty("DetectorComponentName", detector);
@@ -1147,6 +1153,7 @@ Workspace_sptr ReflectometryReductionOneAuto3::sumBanksForWorkspace(const std::s
   alg->initialize();
   alg->setProperty("InputWorkspace", inputWorkspace);
   alg->setProperty("ROIDetectorIDs", roiDetectorIDs);
+  alg->setProperty("PreserveInputWorkspace", static_cast<bool>(getProperty("PreserveInputWorkspace")));
   alg->setProperty("OutputWorkspace", outputWorkspaceName);
   alg->execute();
   Workspace_sptr outputWorkspace = alg->getProperty("OutputWorkspace");

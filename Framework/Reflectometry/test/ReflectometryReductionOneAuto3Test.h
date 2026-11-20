@@ -24,6 +24,7 @@
 #include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
 #include "MantidFrameworkTestHelpers/ReflectometryHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidHistogramData/Counts.h"
 #include "MantidHistogramData/Points.h"
@@ -155,6 +156,18 @@ public:
     compare_detectors_in_out(inter->componentInfo(), out->componentInfo(),
                              {"monitor1", "monitor2", "monitor3", "linear-detector"}, "point-detector",
                              {std::tan(theta * 2 * M_PI / 180)});
+  }
+
+  void test_detector_correction_can_modify_an_owned_input() {
+    auto inter = loadRun("INTER00013460.nxs");
+    auto const original = inter->getInstrument()->getComponentByName("point-detector")->getPos();
+    auto const alg = create_refl_algorithm(inter, 1.2, "4");
+    alg->setProperty("PreserveInputWorkspace", false);
+    alg->execute();
+    auto output = getMatrixOutput(alg, "OutputWorkspaceBinned");
+    auto const corrected = inter->getInstrument()->getComponentByName("point-detector")->getPos();
+    TS_ASSERT((corrected - original).norm() > 1e-6);
+    TS_ASSERT_EQUALS(corrected, output->getInstrument()->getComponentByName("point-detector")->getPos());
   }
 
   void test_correct_detector_position_rotation_POLREF() {
