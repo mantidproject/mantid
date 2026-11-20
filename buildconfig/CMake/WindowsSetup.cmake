@@ -31,10 +31,15 @@ add_definitions(-D_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING)
 # 2005
 set(CMAKE_CXX_FLAGS
     "${CMAKE_CXX_FLAGS} \
-  /MP /W3 /bigobj \
+  /W3 /bigobj \
   /wd4251 /wd4275 /wd4373 /wd4661 /EHsc \
   /experimental:external /external:W0 "
 )
+# /MP only helps MSBuild, which passes many sources to one cl call. Ninja runs one cl per source and schedules them
+# itself, and ccache can only cache single-source calls.
+if(CMAKE_GENERATOR MATCHES "Visual Studio")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+endif()
 # the warnings suppressed are:
 #
 # 4251 'identifier' : class 'type' needs to have dll-interface to be used by clients of class 'type2' Things from the

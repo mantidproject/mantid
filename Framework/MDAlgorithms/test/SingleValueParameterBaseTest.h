@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include <string>
+
 template <typename SingleValueParameter> class SingleValueParameterTests {
 public:
   void testGetName(std::string expectedValue) {

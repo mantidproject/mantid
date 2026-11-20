@@ -6,6 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include <string>
+#include <vector>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {

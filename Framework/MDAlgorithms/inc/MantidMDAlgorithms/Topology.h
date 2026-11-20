@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 
 #include "MantidMDAlgorithms/DllConfig.h"
+#include <string>
 #include <vector>
 
 namespace Mantid {

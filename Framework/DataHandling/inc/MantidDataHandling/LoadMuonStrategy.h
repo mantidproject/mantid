@@ -13,6 +13,7 @@
 #include "MantidKernel/Logger_fwd.h"
 
 #include <optional>
+#include <string>
 #include <vector>
 
 namespace Mantid {
