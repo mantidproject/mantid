@@ -82,7 +82,7 @@ Tells that this file contains parameters for 6 different banks, where a bank can
 
     INS   HTYPE   PNTR
 
-Specify histogram type used in obtaining the fitting paramters.
+Specify histogram type used in obtaining the fitting parameters.
 Here PNTR, which is ``P`` for powder data, ``N`` for neutron data, ``T`` for time-of-flight data, and the last letter is a status flag,
 ``R`` stands for 'read powder data'. Initially we may have a test in Mantid that checks if it is this type and if not tells the user that this is not supported.
 

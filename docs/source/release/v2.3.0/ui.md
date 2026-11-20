@@ -21,7 +21,7 @@ The MantidPlot ImageViewer, has been further enhanced in this release, to start 
 
 - It now shares the same colour maps as the SliceViewer
 - Direct, Indirect and elastic calculation of energy are all now supported
-- A bug that could cause a crash if the X range was sety incorretly has been fixed
+- A bug that could cause a crash if the X range was set incorrectly has been fixed
 
 ## Algorithm Selection
 

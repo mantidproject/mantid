@@ -55,7 +55,7 @@ New MD normalization framework allows visualization of diffuse scattering. The f
   - The way chopper speeds are handled in the POLDI-code has been adapted to the new chopper at the beamline.
   - New instrument definitions for 2014 have been added.
 
-## Noteable Bug Fixes
+## Notable Bug Fixes
 
 - ConnectedComponentAnalysis core framework fix for an edge case
 - LoadMultipleGsas bug [#11524](https://github.com/mantidproject/mantid/issues/11524) (Trac 10682)

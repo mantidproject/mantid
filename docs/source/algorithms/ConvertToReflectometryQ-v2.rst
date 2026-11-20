@@ -148,14 +148,14 @@ Before the ConvertToReflectometryQ algorithm is executed in the usage example ab
 .. figure:: /images/SignedThetaVSlam_plot.png
    :alt: plot of Signed theta vs lambda.
 
-Patch Plot with Dumped Vertexes
+Patch Plot with Dumped Vertices
 ###############################
 
-ConvertToReflectometryQ has the functionality to produce a table of vertexes before they are
-fitted to a normalised polygon. The plotting of these vertexes results in a patch plot that can be
+ConvertToReflectometryQ has the functionality to produce a table of vertices before they are
+fitted to a normalised polygon. The plotting of these vertices results in a patch plot that can be
 achieved by running the algorithm below.
 
-**Example - Patch Plot using the Dumped vertexes from QxQy Transformation**
+**Example - Patch Plot using the Dumped vertices from QxQy Transformation**
 
 .. code-block:: python
 
@@ -212,7 +212,7 @@ achieved by running the algorithm below.
 Patch plot for QxQy Transformation:
 
 .. figure:: /images/ConvertToReflectometryQ_PatchPlotQ.png
-   :alt: patch plot of dumped vertexes using Q transformation
+   :alt: patch plot of dumped vertices using Q transformation
 
 Patch plots from other transformations
 ######################################
@@ -224,14 +224,14 @@ Patch plots can also be produced using the other Transformations :math:`K_i, K_f
 
 
 .. figure:: /images/ConvertToReflectometryQ_PatchPlotK.PNG
-   :alt: patch plot of dumped vertexes using K transformation
+   :alt: patch plot of dumped vertices using K transformation
 
 
 **Patch plot for P Transformation:**
 
 
 .. figure:: /images/ConvertToReflectometryQ_PatchPlotP.PNG
-   :alt: patch plot of dumped vertexes using P transformation
+   :alt: patch plot of dumped vertices using P transformation
 
 .. categories::
 

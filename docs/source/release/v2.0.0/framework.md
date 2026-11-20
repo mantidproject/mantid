@@ -22,7 +22,7 @@ Some peculiarities of the data storage of events in ISIS nexus files have been a
 
 ## Signed Theta
 
-It's now possible to work with signed theta values. Instruments supporting a ReferenceFrame in their xml definiton and applying the signed_theta Instrument Parameter may work on the basis of signed theta. This had been an issue for our reflectometry users and is fixed in the latest release.
+It's now possible to work with signed theta values. Instruments supporting a ReferenceFrame in their xml definition and applying the signed_theta Instrument Parameter may work on the basis of signed theta. This had been an issue for our reflectometry users and is fixed in the latest release.
 
 ## Stability
 

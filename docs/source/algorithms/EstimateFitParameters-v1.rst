@@ -36,7 +36,7 @@ property (it has the `InOut` direction).
 
 If `OutputWorkspace` property is set then more than 1 parameter set can be output. The output workspace is
 a table workspace in which the first column contains the names of the parameters and the subsequent columns
-have the parameter sets with the smallest cost fnction values. Below is an example of such a workspace.
+have the parameter sets with the smallest cost function values. Below is an example of such a workspace.
 
 .. figure:: /images/EstimateFitParameters_output.png
 

@@ -86,7 +86,7 @@ Indexed mode
 
 Setting the `ConverterType` parameter to `Indexed` uses an alternative intermediate data format within `ConvertToMD` which may give significant performance boosts in certain cases.
 
-The performance benefit of this method is dependant on the number of events in the input dataset.
+The performance benefit of this method is dependent on the number of events in the input dataset.
 Once you have data files containing more than 100 million events and have at least 8 cores this method becomes worth enabling.
 For large files (>500 million events) performance scales well with the number of available CPU cores (i.e. using 32 cores will be notably faster than 8 cores).
 
