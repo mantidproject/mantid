@@ -61,10 +61,11 @@ std::shared_ptr<IObject> getLabFrameShape(const IObject &shape, const Kernel::Ma
     // asked for a rotated one. Unlike the MeshObject2D below this shape could be rotated, so the
     // missing definition is a defect to report rather than a frame to accept.
     if (csgShape->getShapeXML().empty()) {
-      throw std::invalid_argument("The sample shape ('" + shape.id() +
-                                  "') carries no XML definition, so it cannot be rotated into the lab frame. It was "
+      throw std::invalid_argument("The shape '" + shape.id() +
+                                  "' carries no XML definition, so it cannot be rotated into the lab frame. It was "
                                   "built directly from surfaces rather than parsed from a shape definition. Define "
-                                  "the sample with SetSample or CreateSampleShape to make it rotatable.");
+                                  "it from XML, for example with SetSample or a sample environment file, to make it "
+                                  "rotatable.");
     }
 
     // Rebase so the baked part becomes exactly goniometerR, preserving any rotation of the shape
@@ -84,8 +85,9 @@ std::shared_ptr<IObject> getLabFrameShape(const IObject &shape, const Kernel::Ma
   }
 
   // MeshObject2D, the flat plate, is the only shape in the tree with no rotation mechanism at all.
-  g_log.warning("The sample shape is of a type that cannot be rotated ('" + shape.id() +
-                "'), so it is taken to be defined in the lab frame already and is used unchanged. "
+  g_log.warning("The shape '" + shape.id() +
+                "' is of a type that cannot be rotated, so it is taken to be defined in the lab frame already and "
+                "is used unchanged. "
                 "The goniometer rotation on the run has not been applied to it.");
   return labShape;
 }
