@@ -7,10 +7,12 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
+#include "MantidGeometry/Instrument/BeamlineRef.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ComponentInfoBankHelpers.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/GridDetectorPixel.h"
+#include "MantidGeometry/Instrument/InstrumentMetadata.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
@@ -22,6 +24,7 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/StructuredDetector.h"
 #include "MantidKernel/EigenConversionHelpers.h"
+#include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -31,6 +34,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <optional>
 #include <queue>
 #include <utility>
 
@@ -72,6 +76,153 @@ size_t componentObjectSize(const IComponent *comp) {
   else
     result = sizeof(Component);
   return result;
+}
+
+using Shapes = std::vector<std::shared_ptr<const IObject>>;
+
+/// The side-by-side view position of a component, or none. ComponentInfo marks a missing one with EMPTY_DBL.
+std::optional<V2D> sideBySideViewPosition(ComponentInfo const &componentInfo, size_t const index) {
+  auto const position = componentInfo.sideBySideViewPosition(index);
+  if (position.X() == EMPTY_DBL()) {
+    return std::nullopt;
+  }
+  return position;
+}
+
+/// Sets the side-by-side view position of a component relative to its parent's, as the legacy tree holds it. A
+/// component without one of its own takes its parent's.
+void setSideBySideViewPosition(IComponent &component, ComponentInfo const &componentInfo, size_t const index) {
+  auto const position = sideBySideViewPosition(componentInfo, index);
+  if (!position) {
+    return;
+  }
+  auto const parentPosition = componentInfo.hasParent(index)
+                                  ? sideBySideViewPosition(componentInfo, componentInfo.parent(index))
+                                  : std::nullopt;
+  if (!parentPosition) {
+    component.setSideBySideViewPos(*position);
+  } else if (*position != *parentPosition) {
+    component.setSideBySideViewPos(*position - *parentPosition);
+  }
+}
+
+/// Fills a grid bank with its pixels, as InstrumentDefinitionParser does, from the bank's pixel-grid metadata.
+void initializeGridBank(GridDetector &bank, ComponentInfo const &componentInfo, Shapes const &shapes,
+                        size_t const index) {
+  auto const detectors = componentInfo.detectorsInSubtree(index);
+  if (detectors.empty()) {
+    throw std::invalid_argument("Instrument::fromBeamline: grid bank " + componentInfo.name(index) + " has no pixels");
+  }
+  // The bank only shares the pixel shape with its pixels
+  auto const pixelShape = std::const_pointer_cast<IObject>(shapes[detectors.front()]);
+  auto const grid = componentInfo.pixelGridComponent(index);
+  if (auto *const rectangular = dynamic_cast<RectangularDetector *>(&bank)) {
+    rectangular->initialize(pixelShape, grid.nX, grid.xStart, grid.xStep, grid.nY, grid.yStart, grid.yStep,
+                            grid.idStart, grid.idFillOrder[0] == 'y', grid.idStepByRow, grid.idStep);
+  } else {
+    bank.initialize(pixelShape, grid.nX, grid.xStart, grid.xStep, grid.nY, grid.yStart, grid.yStep, grid.nZ,
+                    grid.zStart, grid.zStep, grid.idStart,
+                    std::string(grid.idFillOrder.cbegin(), grid.idFillOrder.cend()), grid.idStepByRow, grid.idStep);
+  }
+}
+
+/// Gives the components a bank made for itself their side-by-side view positions. Any mismatch between the bank's
+/// children and the beamline's is left for the pairing pass to report.
+void setBankSideBySideViewPositions(ICompAssembly const &assembly, ComponentInfo const &componentInfo,
+                                    size_t const index) {
+  auto const &children = componentInfo.children(index);
+  if (static_cast<size_t>(assembly.nelements()) != children.size()) {
+    return;
+  }
+  for (size_t i = 0; i < children.size(); ++i) {
+    auto const child = assembly[static_cast<int>(i)];
+    setSideBySideViewPosition(*child, componentInfo, children[i]);
+    if (auto const childAssembly = std::dynamic_pointer_cast<ICompAssembly>(child)) {
+      setBankSideBySideViewPositions(*childAssembly, componentInfo, children[i]);
+    }
+  }
+}
+
+/// True if a component a bank made for itself is where the beamline puts it.
+bool samePlacement(IComponent const &component, ComponentInfo const &componentInfo, size_t const index) {
+  auto const expectedPosition = componentInfo.position(index);
+  auto const tolerance = 1e-9 * std::max(1.0, expectedPosition.norm());
+  if (component.getPos().distance(expectedPosition) > tolerance) {
+    return false;
+  }
+  // q and -q are the same rotation
+  auto const rotation = component.getRotation();
+  auto const expected = componentInfo.rotation(index);
+  return rotation == expected ||
+         rotation == Quat(-expected.real(), -expected.imagI(), -expected.imagJ(), -expected.imagK());
+}
+
+/// Adds the legacy components for the children of the component at `index` to `parent`, and so on down the tree.
+/// Banks make their own pixels.
+void addTreeChildren(ICompAssembly &parent, ComponentInfo const &componentInfo, DetectorInfo const &detectorInfo,
+                     Shapes const &shapes, size_t const index) {
+  for (auto const child : componentInfo.children(index)) {
+    auto const &name = componentInfo.name(child);
+    IComponent *component = nullptr;
+    ICompAssembly *assembly = nullptr;
+    GridDetector *gridBank = nullptr;
+    StructuredDetector *structuredBank = nullptr;
+    if (componentInfo.isDetector(child)) {
+      auto *const detector = new Detector(name, detectorInfo.detectorIDs()[child], nullptr);
+      detector->setShape(shapes[child]);
+      component = detector;
+    } else {
+      switch (componentInfo.componentType(child)) {
+      case Beamline::ComponentType::Unstructured:
+        component = assembly = new CompAssembly(name);
+        break;
+      case Beamline::ComponentType::OutlineComposite: {
+        auto *const outlined = new ObjCompAssembly(name);
+        outlined->setOutline(shapes[child]);
+        component = assembly = outlined;
+        break;
+      }
+      case Beamline::ComponentType::Rectangular:
+        component = gridBank = new RectangularDetector(name);
+        break;
+      case Beamline::ComponentType::Grid:
+        component = gridBank = new GridDetector(name);
+        break;
+      case Beamline::ComponentType::Structured:
+        component = structuredBank = new StructuredDetector(name);
+        break;
+      case Beamline::ComponentType::Generic:
+        if (shapes[child] && shapes[child]->hasValidShape()) {
+          component = new ObjComponent(name, shapes[child]);
+        } else {
+          component = new Component(name);
+        }
+        break;
+      case Beamline::ComponentType::Infinite:
+        component = new ObjComponent(name, shapes[child]);
+        break;
+      default:
+        throw std::invalid_argument("Instrument::fromBeamline: component " + name + " has an unexpected type");
+      }
+    }
+    component->setPos(componentInfo.relativePosition(child));
+    component->setRot(componentInfo.relativeRotation(child));
+    setSideBySideViewPosition(*component, componentInfo, child);
+    parent.add(component);
+    if (assembly) {
+      addTreeChildren(*assembly, componentInfo, detectorInfo, shapes, child);
+    } else if (gridBank) {
+      initializeGridBank(*gridBank, componentInfo, shapes, child);
+      setBankSideBySideViewPositions(*gridBank, componentInfo, child);
+    } else if (structuredBank) {
+      auto const &grid = componentInfo.structuredGridComponent(child);
+      auto const isZBeam = componentInfo.referenceFrame()->isVectorPointingAlongBeam(V3D(0, 0, 1));
+      structuredBank->initialize(grid.nX, grid.nY, std::vector<double>(grid.xVertices),
+                                 std::vector<double>(grid.yVertices), isZBeam, grid.idStart, grid.idFillByFirstY,
+                                 grid.idStepByRow, grid.idStep);
+      setBankSideBySideViewPositions(*structuredBank, componentInfo, child);
+    }
+  }
 }
 } // namespace
 
@@ -1514,6 +1665,125 @@ Instrument::makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo,
   ALLOW_DEPRECATED(compInfo->m_referenceFrame = getReferenceFrame());
   detInfo->m_referenceFrame = compInfo->m_referenceFrame;
   return {std::move(compInfo), std::move(detInfo)};
+}
+
+/** A base instrument tree made from Instrument 2.0. It takes the beamline as its cached base beamline rather than
+ * walking itself, and its components hold their indices in it.
+ * @param beamline :: The beamline, as BeamlineBuilder builds it
+ * @return The instrument
+ * @throws std::invalid_argument if the beamline holds parameters other than logfile parameters, which the legacy
+ * tree has no place for
+ */
+std::unique_ptr<Instrument> Instrument::fromBeamline(BeamlineRef const &beamline) {
+  auto instrument = treeFromBeamline(*beamline.componentInfo, *beamline.detectorInfo);
+  if (auto const &metadata = beamline.metadata) {
+    instrument->setValidFromDate(metadata->validFromDate());
+    instrument->setValidToDate(metadata->validToDate());
+    instrument->setFilename(metadata->filename());
+    instrument->setXmlText(metadata->xmlText());
+    instrument->setDefaultView(metadata->defaultView());
+    instrument->setDefaultViewAxis(metadata->defaultAxis());
+    if (metadata->hasPhysicalInstrument()) {
+      instrument->setPhysicalInstrument(
+          treeFromBeamline(metadata->physicalComponentInfo(), metadata->physicalDetectorInfo()));
+    }
+  }
+  // Last, since editing the tree drops the cache
+  std::lock_guard<std::mutex> const lock{instrument->m_beamlineMutex};
+  instrument->m_componentInfo = beamline.componentInfo;
+  instrument->m_detectorInfo = beamline.detectorInfo;
+  return instrument;
+}
+
+/// The legacy tree for a ComponentInfo and DetectorInfo, with each component holding its index.
+std::unique_ptr<Instrument> Instrument::treeFromBeamline(ComponentInfo const &componentInfo,
+                                                         DetectorInfo const &detectorInfo) {
+  if (componentInfo.sharedParameterInfo() && !componentInfo.sharedParameterInfo()->empty()) {
+    throw std::invalid_argument("Instrument::fromBeamline: a legacy instrument holds only logfile parameters");
+  }
+  for (size_t index = 0; index < componentInfo.size(); ++index) {
+    if (componentInfo.scaleFactor(index) != V3D(1, 1, 1)) {
+      throw std::invalid_argument("Instrument::fromBeamline: a legacy instrument cannot scale " +
+                                  componentInfo.name(index));
+    }
+  }
+  auto const root = componentInfo.root();
+  if (componentInfo.componentType(root) != Beamline::ComponentType::Unstructured) {
+    throw std::invalid_argument("Instrument::fromBeamline: the root of a legacy instrument is a plain assembly");
+  }
+  auto instrument = std::make_unique<Instrument>(componentInfo.name(root));
+  instrument->setPos(componentInfo.position(root));
+  instrument->setRot(componentInfo.rotation(root));
+  setSideBySideViewPosition(*instrument, componentInfo, root);
+  instrument->setReferenceFrame(std::make_shared<ReferenceFrame>(*componentInfo.referenceFrame()));
+  addTreeChildren(*instrument, componentInfo, detectorInfo, *componentInfo.m_shapes, root);
+
+  // Pair the tree with the beamline: record each component's index and mark the detectors. The banks made their own
+  // pixels, so this also checks that those match the beamline.
+  struct Pending {
+    IComponent const *component;
+    size_t index;
+    bool madeByBank;
+  };
+  std::vector<IComponent const *> components(componentInfo.size(), nullptr);
+  std::vector<Pending> pending{{instrument.get(), root, false}};
+  while (!pending.empty()) {
+    auto const [component, index, madeByBank] = pending.back();
+    pending.pop_back();
+    if (component->getName() != componentInfo.name(index)) {
+      throw std::invalid_argument("Instrument::fromBeamline: made " + component->getName() + " for component " +
+                                  componentInfo.name(index));
+    }
+    if (madeByBank && !samePlacement(*component, componentInfo, index)) {
+      throw std::invalid_argument("Instrument::fromBeamline: bank pixel " + component->getName() +
+                                  " is not where the beamline puts it");
+    }
+    components[index] = component;
+    if (auto const *const comp = dynamic_cast<Component const *>(component)) {
+      comp->m_index = index;
+    }
+    if (componentInfo.isDetector(index)) {
+      auto const *const detector = dynamic_cast<IDetector const *>(component);
+      if (!detector || detector->getID() != detectorInfo.detectorIDs()[index]) {
+        throw std::invalid_argument("Instrument::fromBeamline: made " + component->getName() +
+                                    " with the wrong detector ID");
+      }
+      if (detectorInfo.isMonitor(index)) {
+        instrument->markAsMonitorIncomplete(detector);
+      } else {
+        instrument->markAsDetectorIncomplete(detector);
+      }
+      continue;
+    }
+    std::vector<IComponent_const_sptr> legacyChildren;
+    if (auto const *const assembly = dynamic_cast<ICompAssembly const *>(component)) {
+      assembly->getChildren(legacyChildren, false);
+    }
+    auto const &children = componentInfo.children(index);
+    if (legacyChildren.size() != children.size()) {
+      throw std::invalid_argument("Instrument::fromBeamline: made " + std::to_string(legacyChildren.size()) +
+                                  " children for " + componentInfo.name(index) + ", which has " +
+                                  std::to_string(children.size()));
+    }
+    auto const componentType = componentInfo.componentType(index);
+    bool const childrenMadeByBank = madeByBank || componentType == Beamline::ComponentType::Rectangular ||
+                                    componentType == Beamline::ComponentType::Grid ||
+                                    componentType == Beamline::ComponentType::Structured;
+    for (size_t i = 0; i < children.size(); ++i) {
+      pending.push_back({legacyChildren[i].get(), children[i], childrenMadeByBank});
+    }
+  }
+  instrument->markAsDetectorFinalize();
+  if (componentInfo.hasSource()) {
+    instrument->markAsSource(components[componentInfo.source()]);
+  }
+  if (componentInfo.hasSample()) {
+    instrument->markAsSamplePos(components[componentInfo.sample()]);
+  }
+  for (auto const &[key, parameter] : componentInfo.logfileParameters()) {
+    instrument->m_logfileCache.insert_or_assign({key.second, components[key.first]}, parameter);
+  }
+  return instrument;
 }
 
 /** Return memory used by the instrument, in bytes.

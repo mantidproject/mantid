@@ -343,9 +343,11 @@ size_t InstrumentVisitor::registerObjComponentAssembly(const ObjCompAssembly &ob
 }
 
 void InstrumentVisitor::markAsSourceOrSample(ComponentID componentId, const size_t componentIndex) {
+  // One component may be both
   if (componentId == m_sampleId) {
     m_sampleIndex = componentIndex;
-  } else if (componentId == m_sourceId) {
+  }
+  if (componentId == m_sourceId) {
     m_sourceIndex = componentIndex;
   }
 }

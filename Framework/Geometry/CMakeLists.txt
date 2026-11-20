@@ -44,6 +44,7 @@ set(SRC_FILES
     src/Crystal/V3R.cpp
     src/IObjComponent.cpp
     src/Instrument.cpp
+    src/Instrument/BeamlineBuilder.cpp
     src/Instrument/CompAssembly.cpp
     src/Instrument/Component.cpp
     src/Instrument/ComponentHelper.cpp
@@ -191,6 +192,8 @@ set(INC_FILES
     inc/MantidGeometry/IDetector_fwd.h
     inc/MantidGeometry/IObjComponent.h
     inc/MantidGeometry/Instrument.h
+    inc/MantidGeometry/Instrument/BeamlineBuilder.h
+    inc/MantidGeometry/Instrument/BeamlineRef.h
     inc/MantidGeometry/Instrument/CompAssembly.h
     inc/MantidGeometry/Instrument/Component.h
     inc/MantidGeometry/Instrument/ComponentHelper.h
@@ -302,6 +305,7 @@ set(TEST_FILES
     AcompTest.h
     AlgebraTest.h
     BasicHKLFiltersTest.h
+    BeamlineBuilderTest.h
     BnIdTest.h
     BoundingBoxTest.h
     BraggScattererFactoryTest.h
