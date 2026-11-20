@@ -12,7 +12,11 @@ from mantid.api import AnalysisDataService, FileFinder
 from mantid import ConfigService
 
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
-from mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils import create_empty_table, run_create_workspace
+from mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils import (
+    FIRST_GOOD_DATA_TOLERANCE,
+    create_empty_table,
+    run_create_workspace,
+)
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqtinterfaces.Muon.GUI.Common.calculate_pair_and_group import run_pre_processing
 from mantidqtinterfaces.Muon.GUI.Common.utilities.load_utils import load_workspace_from_filename
@@ -551,7 +555,7 @@ class MuonContextTest(unittest.TestCase):
         self.context._run_rebin.assert_not_called()
         run_mock.assert_called_with({"PhaseTable": table, "InputWorkspace": name}, name)
         split_mock.assert_called_with(name)
-        crop_mock.assert_called_with(name, 0.0, 0.0)
+        crop_mock.assert_called_with(name, -FIRST_GOOD_DATA_TOLERANCE, 0.0)
         self.context._get_bin_width.assert_not_called()
         self.context._average_by_bin_widths.assert_not_called()
 
@@ -576,7 +580,7 @@ class MuonContextTest(unittest.TestCase):
         self.context._run_rebin.assert_called_with(name, True)
         run_mock.assert_called_with({"PhaseTable": table, "InputWorkspace": name}, name)
         split_mock.assert_called_with(name)
-        crop_mock.assert_called_with(name, 0.0, 0.0)
+        crop_mock.assert_called_with(name, -FIRST_GOOD_DATA_TOLERANCE, 0.0)
         self.context._get_bin_width.assert_called_once_with(name)
         self.context._average_by_bin_widths.assert_called_once_with(name, 0.1)
 
@@ -626,7 +630,7 @@ class MuonContextTest(unittest.TestCase):
         self.context._run_rebin.assert_called_with(name, True)
         run_mock.assert_called_with({"PhaseTable": table, "InputWorkspace": name}, name)
         split_mock.assert_called_with(name)
-        crop_mock.assert_called_with(name, 0.0, 0.0)
+        crop_mock.assert_called_with(name, -FIRST_GOOD_DATA_TOLERANCE, 0.0)
         self.context._get_bin_width.assert_called_once_with(name)
         self.context._average_by_bin_widths.assert_called_once_with(name, 0.1)
 

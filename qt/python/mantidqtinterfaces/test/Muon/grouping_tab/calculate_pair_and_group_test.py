@@ -10,9 +10,11 @@ from mantidqtinterfaces.Muon.GUI.Common.calculate_pair_and_group import (
     _get_MuonGroupingCounts_parameters,
     _get_MuonPairingAsymmetry_parameters,
     _get_EstimateMuonAsymmetryFromCounts_parameters,
+    _get_pre_processing_params,
 )
 from mantidqtinterfaces.Muon.GUI.Common.muon_group import MuonGroup
 from mantidqtinterfaces.Muon.GUI.Common.muon_pair import MuonPair
+from mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils import FIRST_GOOD_DATA_TOLERANCE
 
 
 class TestCalculateMuonGroupPair(unittest.TestCase):
@@ -50,6 +52,25 @@ class TestCalculateMuonGroupPair(unittest.TestCase):
                 "SpecifyGroupsManually": False,
             },
         )
+
+    def test_pre_processing_time_min_includes_bin_at_first_good_data_from_file(self):
+        context = mock.MagicMock()
+        context.gui_context = {"FirstGoodDataFromFile": True}
+        context.data_context.instrument = "EMU"
+        context.data_context.get_loaded_data_for_run.return_value = {"FirstGoodData": 0.084}
+
+        params = _get_pre_processing_params(context, [62260], False)
+
+        self.assertEqual(params["TimeMin"], 0.084 - FIRST_GOOD_DATA_TOLERANCE)
+
+    def test_pre_processing_time_min_includes_bin_at_user_first_good_data(self):
+        context = mock.MagicMock()
+        context.gui_context = {"FirstGoodDataFromFile": False, "FirstGoodData": 0.1}
+        context.data_context.instrument = "EMU"
+
+        params = _get_pre_processing_params(context, [62260], False)
+
+        self.assertEqual(params["TimeMin"], 0.1 - FIRST_GOOD_DATA_TOLERANCE)
 
 
 if __name__ == "__main__":
