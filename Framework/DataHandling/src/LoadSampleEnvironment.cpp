@@ -253,7 +253,7 @@ void LoadSampleEnvironment::loadEnvironmentFromSTL(const std::string &filename, 
 
   const OptionalBool mounting = getProperty("OnGoniometer");
   if (add) {
-    environment = std::make_unique<SampleEnvironment>(sample.getEnvironment());
+    environment = std::make_unique<SampleEnvironment>(sample.getEnvironment().ownFrame());
     environment->add(environmentMesh, onGoniometer(mounting, false));
   } else {
     auto can = std::make_shared<Container>(environmentMesh);
@@ -316,7 +316,7 @@ void LoadSampleEnvironment::loadEnvironmentFrom3MF([[maybe_unused]] const Matrix
   for (auto environmentMesh : environmentMeshes) {
     if (!environment) {
       if (add) {
-        environment = std::make_unique<SampleEnvironment>(sample.getEnvironment());
+        environment = std::make_unique<SampleEnvironment>(sample.getEnvironment().ownFrame());
         environment->add(environmentMesh, onGoniometer(mounting, false));
       } else {
         auto can = std::make_shared<Container>(environmentMesh);

@@ -9,6 +9,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/LabFrameSample.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataHandling/LoadBinaryStl.h"
@@ -76,6 +77,19 @@ public:
     const auto &environment = ws->sample().getEnvironment();
     TS_ASSERT(!environment.isOnGoniometer(0));
     TS_ASSERT(environment.isOnGoniometer(1));
+  }
+
+  void testAddingToALabFrameViewAddsToTheEnvironmentAsDefined() {
+    auto ws = loadPart(WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10), false, "Unset");
+    ws->mutableRun().mutableGoniometer().setR(Kernel::Matrix<double>(std::vector<double>{0, -1, 0, 1, 0, 0, 0, 0, 1}));
+    // as ws.setSample(ws.getLabFrameSample()) leaves it in Python
+    ws->mutableSample() = labFrameSample(*ws);
+
+    ws = loadPart(ws, true, "Unset");
+
+    const auto &environment = ws->sample().getEnvironment();
+    TS_ASSERT_EQUALS(environment.nelements(), 2);
+    TS_ASSERT_EQUALS(&environment.ownFrame(), &environment);
   }
 
   void testSetMaterial() {
@@ -186,19 +200,22 @@ private:
   /// A workspace whose environment is a cube loaded as the can, then a cube added to it.
   MatrixWorkspace_sptr loadCanThenPart(const std::string &canOnGoniometer, const std::string &partOnGoniometer) {
     MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
-    for (const auto &[add, onGoniometer] : {std::pair{false, canOnGoniometer}, std::pair{true, partOnGoniometer}}) {
-      LoadSampleEnvironment alg;
-      alg.initialize();
-      alg.setChild(true);
-      alg.setProperty("Filename", FileFinder::Instance().getFullPath("cubeBin.stl").string());
-      alg.setProperty("Add", add);
-      alg.setPropertyValue("OnGoniometer", onGoniometer);
-      alg.setProperty("InputWorkspace", ws);
-      alg.setPropertyValue("OutputWorkspace", "unused_for_child");
-      alg.execute();
-      ws = alg.getProperty("OutputWorkspace");
-    }
-    return ws;
+    return loadPart(loadPart(ws, false, canOnGoniometer), true, partOnGoniometer);
+  }
+
+  /// ws with a cube loaded into its environment, as the can or added to it.
+  MatrixWorkspace_sptr loadPart(const MatrixWorkspace_sptr &ws, const bool add, const std::string &onGoniometer) {
+    LoadSampleEnvironment alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.setProperty("Filename", FileFinder::Instance().getFullPath("cubeBin.stl").string());
+    alg.setProperty("Add", add);
+    alg.setPropertyValue("OnGoniometer", onGoniometer);
+    alg.setProperty("InputWorkspace", ws);
+    alg.setPropertyValue("OutputWorkspace", "unused_for_child");
+    alg.execute();
+    return alg.getProperty("OutputWorkspace");
   }
 
 #ifdef ENABLE_LIB3MF
