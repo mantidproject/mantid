@@ -113,6 +113,13 @@ void SaveSampleEnvironmentAndShape::exec() {
     if (!environmentValid) {
       throw std::invalid_argument("Environment Shape is not complete");
     }
+    for (size_t i = 0; i < numElements; ++i) {
+      if (environment.isOnGoniometer(i) != SampleEnvironment::onGoniometerByDefault(i)) {
+        g_log.warning("The file cannot record which environment parts are on the goniometer, so it reloads with "
+                      "only the container mounted. Set OnGoniometer in LoadSampleEnvironment to mount them again.");
+        break;
+      }
+    }
   }
   // get the scale to use
   auto scale = getPropertyValue("Scale");
