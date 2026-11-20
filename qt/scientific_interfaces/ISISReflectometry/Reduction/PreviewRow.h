@@ -46,7 +46,7 @@ public:
 
   Mantid::API::Workspace_sptr getLoadedWs() const noexcept;
   Mantid::API::Workspace_sptr getSummedWs() const noexcept;
-  std::vector<Mantid::API::Workspace_sptr> getReducedWss() const noexcept;
+  std::vector<Mantid::API::Workspace_sptr> const &getReducedWss() const noexcept;
   std::optional<ProcessingInstructions> getSelectedBanks() const noexcept;
   std::optional<ProcessingInstructions> getProcessingInstructions(ROIType regionType) const;
 

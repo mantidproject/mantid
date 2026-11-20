@@ -41,7 +41,7 @@ int PreviewRow::completedItems() const { return 1; }
 
 Mantid::API::Workspace_sptr PreviewRow::getLoadedWs() const noexcept { return m_loadedWs; }
 Mantid::API::Workspace_sptr PreviewRow::getSummedWs() const noexcept { return m_summedWs; }
-std::vector<Mantid::API::Workspace_sptr> PreviewRow::getReducedWss() const noexcept { return m_reducedWss; }
+std::vector<Mantid::API::Workspace_sptr> const &PreviewRow::getReducedWss() const noexcept { return m_reducedWss; }
 
 void PreviewRow::setLoadedWs(Mantid::API::Workspace_sptr ws) noexcept { m_loadedWs = std::move(ws); }
 void PreviewRow::setSummedWs(Mantid::API::Workspace_sptr ws) noexcept { m_summedWs = std::move(ws); }

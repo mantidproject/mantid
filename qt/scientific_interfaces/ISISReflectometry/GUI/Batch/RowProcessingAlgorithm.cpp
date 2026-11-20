@@ -383,9 +383,8 @@ void updateRowOnAlgorithmComplete(const IAlgorithm_sptr &algorithm, Item &item) 
     std::vector<std::string> wsNames = algorithm->getProperty("OutputWorkspacesBinned");
     wss.reserve(wsNames.size());
     auto const &ads = AnalysisDataService::Instance();
-    for (auto const &wsName : wsNames) {
-      wss.emplace_back(ads.retrieve(wsName));
-    }
+    std::transform(wsNames.cbegin(), wsNames.cend(), std::back_inserter(wss),
+                   [&ads](auto const &wsName) { return ads.retrieve(wsName); });
     row.setReducedWss(wss);
   } else {
     if (Workspace_sptr outputWs = algorithm->getProperty("OutputWorkspaceBinned")) {
