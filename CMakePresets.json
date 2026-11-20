@@ -191,7 +191,8 @@
         "conda"
       ],
       "cacheVariables": {
-        "USE_SANITIZER": "Address"
+        "USE_SANITIZER": "Address",
+        "SIMPLEAPI_STUBS_IN_ALL": "OFF"
       }
     },
     {
@@ -203,7 +204,8 @@
         "conda"
       ],
       "cacheVariables": {
-        "USE_SANITIZER": "Undefined"
+        "USE_SANITIZER": "Undefined",
+        "SIMPLEAPI_STUBS_IN_ALL": "OFF"
       }
     },
     {
@@ -215,7 +217,8 @@
         "conda"
       ],
       "cacheVariables": {
-        "USE_SANITIZER": "Thread"
+        "USE_SANITIZER": "Thread",
+        "SIMPLEAPI_STUBS_IN_ALL": "OFF"
       }
     },
     {

@@ -82,8 +82,10 @@ add_custom_target(Framework DEPENDS ${FRAMEWORK_LIBS})
 # Generate PythonInterface/mantid/simpleapi.pyi, which git ignores, with `ninja simpleapi_stubs`. It sits next to
 # simpleapi.py in the source tree because developer builds import mantid from there. It is not part of "all" by default
 # (see SIMPLEAPI_STUBS_IN_ALL) because regenerating it after every relink would add seconds to each build; CI presets
-# and conda package builds turn it on, so every CI build checks that the stubs can be generated. Where the MPIAlgorithms
-# plugin is built (Linux), the target also writes _simpleapi_mpi.pyi for its algorithms.
+# (except the sanitizer ones, where importing Mantid into an uninstrumented Python fails) and conda package builds turn
+# it on, so CI builds check that the stubs can be generated. Because the stub is in the source tree, build directories
+# sharing a checkout share (and overwrite) one stub. Where the MPIAlgorithms plugin is built (Linux), the target also
+# writes _simpleapi_mpi.pyi for its algorithms.
 option(SIMPLEAPI_STUBS_IN_ALL "Generate the mantid.simpleapi type stubs as part of the default build" OFF)
 set(_simpleapi_stub ${CMAKE_CURRENT_SOURCE_DIR}/PythonInterface/mantid/simpleapi.pyi)
 set(_simpleapi_stub_generator ${CMAKE_SOURCE_DIR}/tools/python_typing/generate_simpleapi_stubs.py)

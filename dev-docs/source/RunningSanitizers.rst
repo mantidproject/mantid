@@ -185,9 +185,7 @@ with instrumentation. To avoid this warning ensure that
 using GCC 8 onwards.
 
 The same applies to generating the ``mantid.simpleapi`` type stubs, which
-imports Mantid from Python: the ``simpleapi_stubs`` target, which is part of
-the default build when *SIMPLEAPI_STUBS_IN_ALL* is on (as in the CI presets),
-and the ``tools.python_typing.simpleapi_stubs`` CTest fixture that runs it
-before the Python typing tests. Set *ASAN_OPTIONS* as above before building or
-running the tests, or configure an address sanitizer build with
-``-DSIMPLEAPI_STUBS_IN_ALL=OFF``.
+imports Mantid from Python. The sanitizer presets in ``CMakePresets.json``
+leave the ``simpleapi_stubs`` target out of the default build, but the
+``tools.python_typing.simpleapi_stubs`` CTest fixture still runs it before the
+Python typing tests. Set *ASAN_OPTIONS* as above before running those tests.

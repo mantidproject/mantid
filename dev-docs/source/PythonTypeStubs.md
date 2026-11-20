@@ -56,11 +56,17 @@ part of the default build, because regenerating the stub after every relink
 would add seconds to each build; run it again when you want your editor to see
 changed algorithm signatures. Configure with `-DSIMPLEAPI_STUBS_IN_ALL=ON` to
 add it to the default build instead, as the CI presets in `CMakePresets.json`
-do. It is re-run only when a framework library,
+do (apart from the sanitizer presets). It is re-run only when a framework library,
 Python extension module, Python algorithm, the `mantid` package, or the
 generator has changed. It runs the generator with an empty Mantid user
 properties directory, so local settings such as `default.facility` do not end
 up in the stub. `ninja clean` deletes the stub.
+
+Because the stub is written into the source tree, build directories that share
+one checkout (for example a Release and a Debug build) share one stub: each
+overwrites the other's, and `ninja clean` in one deletes it for both. With
+`SIMPLEAPI_STUBS_IN_ALL` off, `ninja install` packages whatever stub is in the
+source tree, which may be stale or missing; run `ninja simpleapi_stubs` first.
 
 To run the generator directly instead, from the repository root in the
 configured build environment, with the build's `bin` directory on
@@ -121,8 +127,10 @@ ctest -R 'tools\.python_typing\.' --output-on-failure
 The tests cover generator behavior and an analyzer smoke check for the
 `ConvertUnits` signature that requires Pyright to reject an invalid
 `Target` value. The smoke check reads the generated stub, so CTest runs the
-`simpleapi_stubs` target first (a CTest fixture); this is quick when the stub
-is up to date. The PR workflow runs these tests as part of its `UnitTest`
+`simpleapi_stubs` target first (a CTest fixture). This is quick when the stub
+is up to date, but on an unbuilt or stale build directory it first builds
+every framework library and Python module the stub depends on, which can take
+a long time. The PR workflow runs these tests as part of its `UnitTest`
 selection.
 
 For an interactive fixture named `check_mantid_types.py` in the configured
