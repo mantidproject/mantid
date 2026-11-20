@@ -146,8 +146,8 @@ In your release note add an empty line and then on a new line add the following 
 
 .. code-block:: rest
 
-	.. image::  ../../images/filenameOfYourImage.png
-		    :align: center
+    .. image::  ../../images/filenameOfYourImage.png
+            :align: center
 
 
 Note that the recommended alignment is center and the align command is on the second line of the code block in alignment with the ``../`` at the start of the image link.
@@ -190,61 +190,61 @@ This is the basic directory structure that is available to you for release notes
 
   - Powder Diffraction (Sub-heading)
 
-	  + New features
-	  + Bugfixes
+    + New features
+    + Bugfixes
 
   - Engineering Diffraction (Sub-heading)
 
-	  + New features
-	  + Bugfixes
+    + New features
+    + Bugfixes
 
   - Single Crystal Diffraction (Sub-heading)
 
-	  + New features
-	  + Bugfixes
+    + New features
+    + Bugfixes
 
 * Direct Geometry (Main Heading)
 
   - General (Sub-heading)
 
-	  + New features
-	  + Bugfixes
+    + New features
+    + Bugfixes
 
   - CrystalField (Sub-heading)
 
-	  + New features
-	  + Bugfixes
+    + New features
+    + Bugfixes
 
   - MSlice (Sub-heading)
 
-	  + New features
-	  + Bugfixes
+    + New features
+    + Bugfixes
 
 * Framework (Main Heading)
 
   - Algorithms (Sub-heading)
 
-	  + New features
-	  + Bugfixes
-	  + Deprecated
-	  + Removed
+    + New features
+    + Bugfixes
+    + Deprecated
+    + Removed
 
   - Fit Functions (Sub-heading)
 
-	  + New features
-	  + Bugfixes
-	  + Deprecated
-	  + Removed
+    + New features
+    + Bugfixes
+    + Deprecated
+    + Removed
 
   - Data Objects (Sub-heading)
 
-	  + New features
-	  + Bugfixes
+    + New features
+    + Bugfixes
 
   - Python (Sub-heading)
 
-	  + New features
-	  + Bugfixes
+    + New features
+    + Bugfixes
 
 * Indirect Geometry (Main Heading)
 
@@ -253,8 +253,8 @@ This is the basic directory structure that is available to you for release notes
 
   - Algorithms (Sub-heading)
 
-	  + New features
-	  + Bugfixes
+    + New features
+    + Bugfixes
 
 * Inelastic (Main Heading)
 
@@ -263,8 +263,8 @@ This is the basic directory structure that is available to you for release notes
 
   - Algorithms (Sub-heading)
 
-          + New features
-          + Bugfixes
+    + New features
+    + Bugfixes
 
 * Mantid Workbench (Main Heading)
 
@@ -273,39 +273,39 @@ This is the basic directory structure that is available to you for release notes
 
   - InstrumentViewer (Sub-heading)
 
-	  + New features
-	  + Bugfixes
+    + New features
+    + Bugfixes
 
   - SliceViewer (Sub-heading)
 
-	  + New features
-	  + Bugfixes
+    + New features
+    + Bugfixes
 
 * Muon (Main Heading)
 
   - Frequency Domain Analysis (Sub-heading)
 
-	  + Bugfixes
+    + Bugfixes
 
   - Muon Analysis (Sub-heading)
 
-	  + Bugfixes
+    + Bugfixes
 
   - Muon and Frequency Domain Analysis (Sub-heading)
 
-	  + Bugfixes
+    + Bugfixes
 
   - ALC (Sub-heading)
 
-	  + Bugfixes
+    + Bugfixes
 
   - Elemental Analysis (Sub-heading)
 
-	  + Bugfixes
+    + Bugfixes
 
   - Algorithms (Sub-heading)
 
-	  + Bugfixes
+    + Bugfixes
 
 * Reflectometry (Main Heading)
 
