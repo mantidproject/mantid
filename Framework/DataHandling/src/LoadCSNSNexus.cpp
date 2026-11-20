@@ -166,7 +166,7 @@ std::vector<std::string> LoadCSNSNexus::getModules(const std::string &inst,
     data.push_back("module1");
   else if (inst == "GPPD") {
     for (const auto &moduleName : inputNames) {
-      if (moduleName.compare(0, 4, "bank") == 0)
+      if (moduleName.starts_with("bank"))
         data = getGPPDModules(moduleName);
       else
         data.push_back(moduleName);

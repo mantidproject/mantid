@@ -535,7 +535,7 @@ void LoadBBY2::loadInstrumentParameters(const Nexus::NXEntry &entry, uint64_t st
     double tmpDouble = 0.0f;
     uint64_t tmpTimestamp = 0;
     for (auto &x : allParams) {
-      if (x.first.find("log_") == 0) {
+      if (x.first.starts_with("log_")) {
         auto logTag = boost::algorithm::trim_copy(x.first.substr(4));
         auto line = x.second;
 

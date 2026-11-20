@@ -348,7 +348,7 @@ void CreateSimulationWorkspace::adjustInstrument(const std::string &filename) {
     return; // No tag, use IDF
 
   std::string value = updateDets->value<std::string>();
-  if (value.substr(0, 8) == "datafile") {
+  if (value.starts_with("datafile")) {
     auto updateInst = createChildAlgorithm("UpdateInstrumentFromFile", 0.75, 1.0);
     updateInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_outputWS);
     updateInst->setPropertyValue("Filename", filename);

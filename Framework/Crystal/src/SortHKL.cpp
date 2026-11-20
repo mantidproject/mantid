@@ -342,7 +342,7 @@ void SortHKL::insertStatisticsIntoTable(const ITableWorkspace_sptr &table, const
 
   std::string rowName = getProperty("RowName");
   double completeness = 0.0;
-  if (rowName.substr(0, 4) != "bank") {
+  if (!rowName.starts_with("bank")) {
     completeness = static_cast<double>(statistics.m_completeness);
   }
 

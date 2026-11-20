@@ -35,7 +35,7 @@ CompositeFunction_sptr createEmptyComposite() { return toComposite(createIFuncti
 std::vector<std::string> getFunctionNamesInString(std::string const &functionString) {
   std::vector<std::string> functionNames;
   for (auto const &str : splitStringBy(functionString, ",();"))
-    if (str.substr(0, 5) == "name=")
+    if (str.starts_with("name="))
       functionNames.emplace_back(str.substr(5));
   return functionNames;
 }

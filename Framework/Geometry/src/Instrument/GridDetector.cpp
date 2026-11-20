@@ -661,7 +661,7 @@ std::shared_ptr<const IComponent> GridDetector::getComponentByName(const std::st
 
   // check that the searched for name starts with the detector's
   // name as they are generated
-  if (cname.substr(0, MEMBER_NAME.length()) != MEMBER_NAME) {
+  if (!cname.starts_with(MEMBER_NAME)) {
     return std::shared_ptr<const IComponent>();
   } else {
     return CompAssembly::getComponentByName(cname, nlevels);

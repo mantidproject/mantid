@@ -31,7 +31,7 @@ using namespace Mantid::API;
 
 std::string removePrefix(std::string const &value, std::string const &prefix) {
   // Just return the original value if it doesn't contain the prefix
-  if (value.size() <= prefix.size() || value.substr(0, prefix.size()) != prefix)
+  if (value.size() <= prefix.size() || !value.starts_with(prefix))
     return value;
 
   return value.substr(prefix.size());
@@ -39,7 +39,7 @@ std::string removePrefix(std::string const &value, std::string const &prefix) {
 
 std::optional<std::string> suffixForWorkspaceGroupMember(std::string const &memberName, std::string const &groupName) {
   auto const prefix = groupName + "_";
-  if (memberName.size() <= prefix.size() || memberName.substr(0, prefix.size()) != prefix)
+  if (memberName.size() <= prefix.size() || !memberName.starts_with(prefix))
     return std::nullopt;
 
   return memberName.substr(prefix.size());

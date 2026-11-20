@@ -1284,7 +1284,7 @@ bool Instrument::validateComponentProperties(IComponent_const_sptr component) co
 
   // skip choppers, slits and supermirrors - HACK!
   const auto &name = component->getName();
-  if (name == "chopper-position" || name.substr(0, 4) == "slit" || name == "supermirror") {
+  if (name == "chopper-position" || name.starts_with("slit") || name == "supermirror") {
     return false;
   }
 

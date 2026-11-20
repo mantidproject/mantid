@@ -227,7 +227,7 @@ std::string LoadGSASInstrumentFile::getHistogramType(const vector<string> &lines
   // return its value.
   std::string lookFor = "INS   HTYPE";
   for (size_t i = 0; i < lines.size(); ++i) {
-    if (lines[i].substr(0, lookFor.size()) == lookFor) {
+    if (lines[i].starts_with(lookFor)) {
       if (lines[i].size() < lookFor.size() + 7) {
         // line too short
         return "HTYPE line too short";
@@ -247,7 +247,7 @@ size_t LoadGSASInstrumentFile::getNumberOfBanks(const vector<string> &lines) {
   // return its value.
   std::string lookFor = "INS   BANK";
   for (size_t i = 0; i < lines.size(); ++i) {
-    if (lines[i].substr(0, lookFor.size()) == lookFor) {
+    if (lines[i].starts_with(lookFor)) {
       if (lines[i].size() < lookFor.size() + 3) {
         // line too short
         return 0;
@@ -270,8 +270,8 @@ void LoadGSASInstrumentFile::scanBanks(const std::vector<std::string> &lines, st
   // to their order in the file.
   for (size_t i = 0; i < lines.size(); ++i) {
     string line = lines[i];
-    if (line.substr(0, 3) == "INS") { // Ignore all lines that don't begin with INS
-      if (line.contains("BNKPAR")) {  // We've found start of a new bank
+    if (line.starts_with("INS")) {   // Ignore all lines that don't begin with INS
+      if (line.contains("BNKPAR")) { // We've found start of a new bank
         bankStartIndex.emplace_back(i);
       }
     } // INS
@@ -337,7 +337,7 @@ size_t LoadGSASInstrumentFile::findINSPRCFLine(const std::vector<std::string> &l
                                                double &param2, double &param3, double &param4) {
   for (size_t i = lineIndex; i < lines.size(); ++i) {
     string line = lines[i];
-    if ((line.substr(0, 3) == "INS") && (line.substr(6, 4) == "PRCF")) {
+    if ((line.starts_with("INS")) && (line.substr(6, 4) == "PRCF")) {
       std::istringstream paramLine;
       paramLine.str(lines[i].substr(15));
       paramLine >> param1 >> param2 >> param3 >> param4;

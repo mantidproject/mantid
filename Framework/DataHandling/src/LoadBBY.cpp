@@ -95,7 +95,7 @@ int LoadBBY::confidence(Kernel::FileDescriptor &descriptor) const {
   for (const auto &subFile : subFiles) {
     auto len = subFile.length();
     if ((len > 4) && (subFile.find_first_of("\\/", 0, 2) == std::string::npos)) {
-      if ((subFile.rfind(".hdf") == len - 4) && (subFile.compare(0, 3, "BBY") == 0))
+      if ((subFile.rfind(".hdf") == len - 4) && (subFile.starts_with("BBY")))
         hdfFiles++;
       else if (subFile.rfind(".bin") == len - 4)
         binFiles++;
@@ -224,10 +224,10 @@ void LoadBBY::exec() {
   if (it != subFiles.cend()) {
     std::string title = *it;
 
-    if (title.rfind(".hdf") == title.length() - 4)
+    if (title.ends_with(".hdf"))
       title.resize(title.length() - 4);
 
-    if (title.rfind(".nx") == title.length() - 3)
+    if (title.ends_with(".nx"))
       title.resize(title.length() - 3);
 
     eventWS->setTitle(title);
@@ -473,7 +473,7 @@ void LoadBBY::loadInstrumentParameters(const Nexus::NXEntry &entry, std::map<std
     std::string tmpString;
     float tmpFloat = 0.0f;
     for (auto &x : allParams) {
-      if (x.first.find("log_") == 0) {
+      if (x.first.starts_with("log_")) {
         auto logTag = boost::algorithm::trim_copy(x.first.substr(4));
         auto line = x.second;
 
@@ -551,8 +551,8 @@ void LoadBBY::createInstrument(ANSTO::Tar::File &tarFile, InstrumentInfo &instru
 
   // extract log and hdf file
   const std::vector<std::string> &files = tarFile.files();
-  auto file_it = std::find_if(files.cbegin(), files.cend(),
-                              [](const std::string &file) { return file.rfind(".hdf") == file.length() - 4; });
+  auto file_it =
+      std::find_if(files.cbegin(), files.cend(), [](const std::string &file) { return file.ends_with(".hdf"); });
   if (file_it != files.end()) {
     tarFile.select(file_it->c_str());
     // extract hdf file into tmp file

@@ -114,7 +114,7 @@ std::string PointGroupFactoryImpl::pointGroupSymbolFromSpaceGroupSymbol(const st
 
   std::string noSpaces = boost::algorithm::erase_all_copy(noCentering, " ");
 
-  if (noSpaces.substr(0, 1) == "1" && noSpaces.size() > 2 && noSpaces.substr(noSpaces.size() - 1, 1) == "1") {
+  if (noSpaces.starts_with("1") && noSpaces.size() > 2 && noSpaces.substr(noSpaces.size() - 1, 1) == "1") {
     noSpaces = noSpaces.substr(1, noSpaces.size() - 2);
   }
 

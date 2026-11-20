@@ -211,7 +211,7 @@ public:
             *b = x;
           };
           sendFloatArray(bins);
-        } else if (command == "RTCB2" || (command.size() > 5 && command.substr(0, 5) == "RTCB_")) {
+        } else if (command == "RTCB2" || (command.size() > 5 && command.starts_with("RTCB_"))) {
           std::vector<float> bins(m_nMonitorBins + 1);
           const float dx = 10.0f;
           float x = 10000.0f;
