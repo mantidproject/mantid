@@ -355,7 +355,7 @@ public:
   }
 
   void test_row_is_updated_on_reduction_algorithm_complete() {
-    auto mockAlg = std::make_shared<StubbedReduction>();
+    auto mockAlg = std::make_shared<StubbedReduction>(false, false);
     const bool isHistogram = true;
     Mantid::API::MatrixWorkspace_sptr mockWs = WorkspaceCreationHelper::create1DWorkspaceRand(1, isHistogram);
     Mantid::API::Workspace_sptr output = mockWs;
@@ -370,7 +370,7 @@ public:
   }
 
   void test_preview_row_is_updated_with_workspace_group_on_reduction_algorithm_complete() {
-    auto mockAlg = std::make_shared<StubbedReduction>();
+    auto mockAlg = std::make_shared<StubbedReduction>(false, false);
     auto group = std::make_shared<Mantid::API::WorkspaceGroup>();
     group->addWorkspace(WorkspaceCreationHelper::create2DWorkspace(1, 1));
     Mantid::API::Workspace_sptr output = group;
@@ -380,6 +380,19 @@ public:
     Reduction::updateRowOnAlgorithmComplete(mockAlg, row);
 
     TS_ASSERT_EQUALS(row.getReducedWss()[0], group);
+  }
+
+  void test_preview_row_is_updated_with_split_workspace_group_on_reduction_algorithm_complete_when_slicing() {
+    auto mockAlg = std::make_shared<StubbedReduction>(true, false);
+    auto group = std::make_shared<Mantid::API::WorkspaceGroup>();
+    group->addWorkspace(WorkspaceCreationHelper::create2DWorkspace(1, 1));
+    Mantid::API::Workspace_sptr output = group;
+    mockAlg->addOutputWorkspace(output);
+    auto row = PreviewRow({});
+
+    Reduction::updateRowOnAlgorithmComplete(mockAlg, row);
+
+    TS_ASSERT_EQUALS(row.getReducedWss()[0], group->getItem(0));
   }
 
 private:
@@ -392,18 +405,21 @@ private:
 
   class StubbedReduction : public WorkspaceCreationHelper::StubAlgorithm {
   public:
-    StubbedReduction() {
+    StubbedReduction(bool sliced, bool useMulti) {
       this->setChild(true);
+      m_propName = "OutputWorkspaceBinned";
       auto prop = std::make_unique<Mantid::API::WorkspaceProperty<Mantid::API::Workspace>>(
           m_propName, "", Mantid::Kernel::Direction::Output);
       declareProperty(std::move(prop));
+      declareProperty("UsingMultiOutputs", useMulti);
+      declareProperty("SliceWorkspace", sliced);
     }
 
     void addOutputWorkspace(Mantid::API::Workspace_sptr &ws) {
-      this->getPointerToProperty("OutputWorkspaceBinned")->createTemporaryValue();
+      this->getPointerToProperty(m_propName)->createTemporaryValue();
       setProperty(m_propName, ws);
     }
-    const std::string m_propName = "OutputWorkspaceBinned";
+    std::string m_propName;
   };
 
   PreviewRow makePreviewRow(double theta = 0.1, const std::string &processingInstructions = "10-11",
