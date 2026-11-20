@@ -177,16 +177,12 @@ Beta Testing Begins
 * Initial changes:
 
   * For each file that needs changes, create a new branch (example name ``6.5_workbench_release_notes``) and work on changes to be merged into ``release-next``.
+  * Check that all the pull request links are present and correct.
 
 * Incoming release notes:
 
-  * As the release sprint goes on, new release note files will be created (existing outside of the 'Used' directories). The text from these will need to be copied into the main release note pages (``diffraction.rst``, ``mantidworkbench.rst`` etc.) and the file itself moved to it's corresponding 'Used' directory.
-  * It is best to wait until several of these have built up before making a new branch / pr.
-  * To help with finding the new release notes, use the `unused_release_note_finder.py script <https://github.com/mantidproject/mantid/blob/main/tools/ReleaseNotes/unused_release_note_finder.py>`__, which will print the location of release notes not within a 'Used' directory.
-
-    .. code-block:: bash
-
-      python unused_release_note_finder.py --release 6.5.0
+  * After amalgamation, any new changes merged into the release branch must have their release notes added directly to the correct release notes page by the author of the pull request.
+    The usual ``<pr-number>.rst`` convention used during normal development must not be used. New release notes must also be edited to integrate them with the existing content.
 
 * Images:
 

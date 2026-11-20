@@ -39,11 +39,11 @@ How to add a release note
 Creating a file with the release note
 -------------------------------------
 
-To add a new release note on your PR, you need to create a new ``.rst`` file and give it the name it in one of the following ways:
+During normal development, add a release note to your PR by creating a new ``.rst`` file and name it in one of the following ways:
 - Using the Pull Request (PR) number (preferred method)
-- Using the Issue number (to be used if multiple PRs stem from the same issue)
+- Using the issue number (to be used if multiple PRs stem from the same issue)
 
-A good way to memorise why the PR number is preferred over issue number the is to think about which number is closer to your changes: The PR number directly identifies your work, whilst the issue number is more indirect (someone looking for your changes will need to scavenge issue number -> PR number -> merged changes).
+A good way to memorise why the PR number is preferred over issue number is to think about which number is closer to your changes: The PR number directly identifies your work, whilst the issue number is more indirect (someone looking for your changes will need to scavenge issue number -> PR number -> merged changes).
 
 As an example, if the your PR number is ``1234`` then the release notes file you create should be called ``1234.rst``.
 
@@ -53,15 +53,19 @@ Where to create your file with the release note
 Release note files need to be created in the directory relating to the next release version e.g. ``v6.15.0``. Navigate to this directory and then navigate through the sub-directories until you reach a suitable sub heading. All notes need to be placed within a ``New_features``
 or ``Bugfixes`` directory. For example a Bugfix release note for Engineering Diffraction should sit within ``/Diffraction/Engineering/Bugfixes`` .
 
-Release notes should not be placed in any directory outside of ``New_features`` or ``Bugfixes`` e.g. do not place release notes in ``/Diffraction/Engineering``. You should also not save release notes in any directory titled ``Used`` as this is for notes that have already been collated into the release notes.
+During normal development, release notes should not be placed in any directory outside of ``New_features`` or ``Bugfixes`` e.g. do not place release notes in ``/Diffraction/Engineering``. You should also not save release notes in any directory titled ``Used`` as this is for notes that have already been collated into the release notes.
 The only exception to this is for Algorithms and Fit Functions in the Framework Directory that additionally have ``Deprecated`` and ``Removed``.
 
 If you are uncertain where your release note should be see the :ref:`Standard File Structure <ReleaseNoteFileStructure>`.
 
+**After code freeze and amalgamation:** Any new changes merged into the release branch (release-next) must have their release notes added directly to the main release notes page,
+rather than creating an individual ``<pr-number>.rst`` file. The pull request author is responsible for adding and editing the notes to integrate them with the existing content.
+Individual files are not permitted at this stage, as they will be unreferenced and rejected by a pre-commit hook.
+
 How to write a release note
 ---------------------------
 
-In the release note file,  Always start your release note with ``-`` so that it will be formatted as a bullet point in the collated list, e.g. ``- A new release note.``.
+When adding a release note to an individual ``.rst`` file, always start it with ``-`` so that it will be formatted as a bullet point in the collated list, e.g. ``- A new release note.``.
 Release notes are intended for our non-developer scientific users and should be direct, clear and concise.
 Your note should summarise your work to a non-developer audience without containing lengthy details of the implementation in the code base.
 
@@ -107,9 +111,12 @@ You can rephrase it as:
 
 Amending release notes
 ----------------------
-If you need to amend a release note from a previous Pull Request (PR) during sprint it is fine to do this as the automated script will update the release note. Provided developers use the naming conventions for files outlined below it should be easy to find the release note you wish to amend.
-If the release note you wish to amend is within a ``Used`` directory you will need to contact the Release Editor to discuss how to get the release note amended.
+During normal development, you can amend a release note from a previous pull request by editing its ``.rst`` file.
+The automated script will incorporate the changes when the release notes are next collated.
 
+After code freeze and amalgamation, any amendments must be made directly to the main release notes page rather than to individual files.
+
+If you are unsure about how to amend a release note, contact the Release Editor.
 
 Adding sub-headings
 -------------------
@@ -176,7 +183,9 @@ Reviewers are encouraged to review release notes as diligently as reviewing the 
 
 During release
 --------------
-During the release period the automated scripting is turned off and the Release Editor will manually amalgamate release notes as part of their role. This should have no impact on adding new release notes provided you continue to follow the conventions above and do not save any files in the ``Used`` directories.
+After code freeze and amalgamation, any new changes merged into the release branch (release-next) must have their release notes added directly to the main release notes page,
+rather than creating an individual ``<pr-number>.rst`` file. The pull request author is responsible for adding and editing the notes to integrate them with the existing content.
+Individual files are not permitted at this stage, as they will be unreferenced and rejected by a pre-commit hook.
 If you have any queries or concerns about release notes, particularly if you want to edit previous release notes, please contact the Release Editor.
 
 .. _ReleaseNoteFileStructure:
