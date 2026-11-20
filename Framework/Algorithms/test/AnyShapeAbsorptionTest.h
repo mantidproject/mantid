@@ -384,6 +384,25 @@ public:
         [this](const auto &r, bool baked) { return runPlateCorrection("anyshape_can_frames", r, baked, "Container"); });
   }
 
+  void test_the_sample_is_corrected_without_turning_an_environment_it_does_not_use() {
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 10);
+    ws->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+    SampleFrameEquivalence::setSample(*ws, SampleFrameEquivalence::rotationY(30.0), false);
+    // A can assembled from surfaces has no XML, so it cannot be turned
+    ws->mutableSample().setEnvironment(std::make_shared<Mantid::Geometry::SampleEnvironment>(
+        "kit", std::make_shared<Mantid::Geometry::Container>(
+                   Mantid::Geometry::ShapeFactory::createSphere(Mantid::Kernel::V3D(0, 0, 0), 0.05))));
+
+    Mantid::Algorithms::AnyShapeAbsorption alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", ws);
+    alg.setPropertyValue("OutputWorkspace", "anyshape_unused_can");
+    alg.setProperty("ElementSize", 2.0);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    AnalysisDataService::Instance().remove("anyshape_unused_can");
+  }
+
 private:
   /// Absorption-correct a plate sample held in the given frame and return the first attenuation
   /// factor. No cross sections are set, so the material comes from the shape the fixture attached.

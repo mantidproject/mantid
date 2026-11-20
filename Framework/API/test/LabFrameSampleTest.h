@@ -75,6 +75,23 @@ public:
     TS_ASSERT_DELTA(xWidth(sample.getEnvironment().getContainer()), 0.004, 1e-9);
   }
 
+  void test_an_identity_goniometer_shares_the_environment() {
+    ExperimentInfo expt = experiment(PLATE_XML);
+    addEnvironment(expt);
+    expt.mutableRun().mutableGoniometer().setR(Matrix<double>(3, 3, true));
+
+    TS_ASSERT_EQUALS(&labFrameSample(expt).getEnvironment(), &expt.sample().getEnvironment());
+  }
+
+  void test_a_lab_frame_view_is_rebuilt_when_the_goniometer_is_reset() {
+    ExperimentInfo expt = experiment(PLATE_XML);
+    addEnvironment(expt);
+    expt.mutableSample() = labFrameSample(expt);
+    expt.mutableRun().mutableGoniometer().setR(Matrix<double>(3, 3, true));
+
+    TS_ASSERT_DELTA(xWidth(labFrameSample(expt).getEnvironment().getContainer()), 0.04, 1e-9);
+  }
+
   void test_lab_frame_sample_keeps_everything_but_the_shape() {
     ExperimentInfo expt = experiment(PLATE_XML);
     expt.mutableSample().setName("plate");

@@ -362,16 +362,17 @@ void AbsorptionCorrection::constructSample(API::Sample &sample) {
   const std::string xmlstring = sampleXML();
   const std::string scatterFrom = getProperty("ScatterFrom");
   if (xmlstring.empty()) {
-    // Get the shape from the proper object, where the goniometer puts it beside the beam and detectors
-    m_labFrameSample = API::labFrameSample(*m_inputWS);
+    // Get the shape from the proper object, where the goniometer puts it beside the beam and detectors.
+    // The environment is turned only when it is the one scattering.
     if (scatterFrom == CALC_SAMPLE)
-      m_sampleObject = &m_labFrameSample.getShape();
+      m_labFrameObject = API::labFrameSampleShape(*m_inputWS);
     else if (scatterFrom == CALC_CONTAINER)
-      m_sampleObject = &(m_labFrameSample.getEnvironment().getContainer());
+      m_labFrameObject = API::labFrameSample(*m_inputWS).getEnvironment().getComponentPtr(0);
     else if (scatterFrom == CALC_ENVIRONMENT)
-      m_sampleObject = &(m_labFrameSample.getEnvironment().getComponent(1));
+      m_labFrameObject = API::labFrameSample(*m_inputWS).getEnvironment().getComponentPtr(1);
     else
       throw std::runtime_error("Somebody forgot to fill in an if/else tree");
+    m_sampleObject = m_labFrameObject.get();
 
     // Check there is one, and fail if not
     if (!m_sampleObject->hasValidShape()) {

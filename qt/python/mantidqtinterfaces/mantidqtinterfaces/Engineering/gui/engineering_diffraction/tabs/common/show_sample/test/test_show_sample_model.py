@@ -107,10 +107,8 @@ class TestShowSampleModel_PlotSampleDirections(unittest.TestCase):
         R = np.array([[2.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 2.0]])
         gonio.getR.return_value = R
 
-        sample = MagicMock()
         shape = MagicMock()
-        ws.getLabFrameSample.return_value = sample
-        sample.getShape.return_value = shape
+        ws.getLabFrameSampleShape.return_value = shape
         shape.getMesh.return_value = "mesh"
 
         # directions and arrow lengths
@@ -152,10 +150,8 @@ class TestShowSampleModel_PlotSampleDirections(unittest.TestCase):
         ws = MagicMock()
         mock_ads.retrieve.return_value = ws
 
-        sample = MagicMock()
         shape = MagicMock()
-        ws.getLabFrameSample.return_value = sample
-        sample.getShape.return_value = shape
+        ws.getLabFrameSampleShape.return_value = shape
         shape.getMesh.return_value = "mesh"
 
         rd = np.array([1.0, 0.0, 0.0])

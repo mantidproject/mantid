@@ -26,7 +26,11 @@ Sample labFrameSample(const ExperimentInfo &experiment) {
   Sample sample(experiment.sample());
   sample.setShape(labFrameSampleShape(experiment));
   if (sample.hasEnvironment()) {
-    sample.setEnvironment(sample.getEnvironment().inLabFrame(experiment.run().getGoniometer().getR()));
+    const auto &environment = sample.getEnvironment();
+    const auto &goniometerR = experiment.run().getGoniometer().getR();
+    // An own-frame environment is already where an identity goniometer puts it; a view may not be.
+    if (goniometerR != Kernel::Matrix<double>(3, 3, true) || &environment.ownFrame() != &environment)
+      sample.setEnvironment(environment.inLabFrame(goniometerR));
   }
   return sample;
 }

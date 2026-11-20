@@ -145,8 +145,6 @@ void MultipleScatteringCorrection::exec() {
   // Parse input properties and assign corresponding values to the member
   // variables
   parseInputs();
-  // The beam and detectors are in the lab frame, so the sample and container are taken from there.
-  m_labFrameSample = API::labFrameSample(*m_inputWS);
 
   std::string method = getProperty("Method");
   if (method == "SampleOnly") {
@@ -158,7 +156,7 @@ void MultipleScatteringCorrection::exec() {
     ws_sampleOnly->setDistribution(true); // The output of this is a distribution
     ws_sampleOnly->setYUnitLabel("Multiple Scattering Correction factor");
     //-- Fill the workspace with sample only correction factors
-    calculateSingleComponent(ws_sampleOnly, m_labFrameSample.getShape(), m_sampleElementSize);
+    calculateSingleComponent(ws_sampleOnly, *API::labFrameSampleShape(*m_inputWS), m_sampleElementSize);
     //-- Package output to workspace group
     const std::string outWSName = getProperty("OutputWorkspace");
     std::vector<std::string> names;
@@ -177,6 +175,8 @@ void MultipleScatteringCorrection::exec() {
     //   of the correction method.
     setProperty("OutputWorkspace", outWS);
   } else if (method == "SampleAndContainer") {
+    // The beam and detectors are in the lab frame, so the sample and container are taken from there.
+    m_labFrameSample = API::labFrameSample(*m_inputWS);
     //-- Setup output workspace
     // set the OutputWorkspace to a workspace group with two workspaces:
     //          ${OutputWorkspace}_containerOnly
