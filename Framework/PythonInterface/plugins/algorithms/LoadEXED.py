@@ -230,5 +230,5 @@ class LoadEXED(PythonAlgorithm):
         return tmp_lst
 
 
-# Register algorthm with Mantid.
+# Register algorithm with Mantid.
 AlgorithmFactory.subscribe(LoadEXED)
