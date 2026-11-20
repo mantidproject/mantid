@@ -1273,12 +1273,16 @@ class MantidFrameworkConfig:
         return self._dataDirs
 
     def __moveFile(self, src, dst):
-        if os.path.exists(src):
-            shutil.move(src, dst)
+        try:
+            os.replace(src, dst)
+        except FileNotFoundError:
+            pass
 
     def __copyFile(self, src, dst):
-        if os.path.exists(src):
+        try:
             shutil.copyfile(src, dst)
+        except FileNotFoundError:
+            pass
 
     saveDir = property(lambda self: self.__saveDir)
     testDir = property(lambda self: self.__testDir)
