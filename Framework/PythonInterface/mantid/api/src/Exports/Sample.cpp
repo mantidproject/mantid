@@ -16,6 +16,7 @@
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/return_internal_reference.hpp>
 
 using Mantid::API::Sample;
 using Mantid::Geometry::IObject;
@@ -39,14 +40,14 @@ void export_Sample() {
       .def("getName", &Sample::getName, return_value_policy<copy_const_reference>(), arg("self"),
            "Returns the string name of the sample")
       .def("getOrientedLattice", (const OrientedLattice &(Sample::*)() const) & Sample::getOrientedLattice, arg("self"),
-           return_value_policy<reference_existing_object>(), "Get the oriented lattice for this sample")
+           return_internal_reference<>(), "Get the oriented lattice for this sample")
       .def("hasOrientedLattice", &Sample::hasOrientedLattice, arg("self"),
            "Returns True if this sample has an oriented lattice, false "
            "otherwise")
       .def("clearOrientedLattice", &Sample::clearOrientedLattice, arg("self"),
            "Clears any attached lattice information")
-      .def("getCrystalStructure", &Sample::getCrystalStructure, arg("self"),
-           return_value_policy<reference_existing_object>(), "Get the crystal structure for this sample")
+      .def("getCrystalStructure", &Sample::getCrystalStructure, arg("self"), return_internal_reference<>(),
+           "Get the crystal structure for this sample")
       .def("hasCrystalStructure", &Sample::hasCrystalStructure, arg("self"),
            "Returns True if this sample has a crystal structure, false "
            "otherwise")
@@ -72,7 +73,7 @@ void export_Sample() {
       .def("hasEnvironment", &Sample::hasEnvironment, arg("self"),
            "Returns True if the sample has an environment defined")
       .def("hasShape", &Sample::hasShape, arg("self"), "Returns True if the sample has a shape defined")
-      .def("getEnvironment", &Sample::getEnvironment, return_value_policy<reference_existing_object>(), arg("self"),
+      .def("getEnvironment", &Sample::getEnvironment, return_internal_reference<>(), arg("self"),
            "Returns the sample environment")
       .def("setEnvironment", &Sample::setEnvironment, (arg("self"), arg("env")), "Set the sample environment")
       // -------------------------Operators

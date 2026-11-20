@@ -1,0 +1,1 @@
+- Workspaces now provide ``getLabFrameSample``, returning a copy of the :class:`~mantid.api.Sample` whose shape is the one ``getLabFrameSampleShape`` gives, so code that takes a whole sample can use it where the goniometer puts it. The environment, lattice and material are copied unchanged, and the workspace's own sample is left as it is.
