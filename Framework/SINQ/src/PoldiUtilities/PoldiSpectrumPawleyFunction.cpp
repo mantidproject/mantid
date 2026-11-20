@@ -17,13 +17,9 @@ PoldiSpectrumPawleyFunction::PoldiSpectrumPawleyFunction() : PoldiSpectrumDomain
 
 /// This function does nothing to prevent setting the workspace on the wrapped
 /// function (unit conversion will not work and is not needed).
-void PoldiSpectrumPawleyFunction::setMatrixWorkspace(std::shared_ptr<const MatrixWorkspace> workspace, size_t wi,
-                                                     double startX, double endX) {
-  UNUSED_ARG(workspace);
-  UNUSED_ARG(wi);
-  UNUSED_ARG(startX);
-  UNUSED_ARG(endX);
-}
+void PoldiSpectrumPawleyFunction::setMatrixWorkspace([[maybe_unused]] std::shared_ptr<const MatrixWorkspace> workspace,
+                                                     [[maybe_unused]] size_t wi, [[maybe_unused]] double startX,
+                                                     [[maybe_unused]] double endX) {}
 
 /// Implementation of function1DSpectrum that transforms PawleyFunction output.
 void PoldiSpectrumPawleyFunction::function1DSpectrum(const FunctionDomain1DSpectrum &domain,

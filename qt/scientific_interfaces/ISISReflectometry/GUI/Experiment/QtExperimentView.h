@@ -143,7 +143,7 @@ public:
 public slots:
   /// Adds another row to the per-angle options table
   void onRestoreDefaultsRequested();
-  void onSummationTypeChanged(int reductionTypeIndex);
+  void onSummationTypeChanged();
   void onNewLookupRowRequested();
   void onRemoveLookupRowRequested();
   void onSettingsChanged();

@@ -55,7 +55,7 @@ public:
 
   ~MockDetector() override = default;
 
-  void loadConfiguration(Instrument_const_sptr poldiInstrument) override { UNUSED_ARG(poldiInstrument); }
+  void loadConfiguration([[maybe_unused]] Instrument_const_sptr poldiInstrument) override {}
   GNU_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD0(efficiency, double());
   MOCK_METHOD1(twoTheta, double(int elementIndex));
@@ -72,9 +72,7 @@ class ConfiguredHeliumDetector : public PoldiHeliumDetector {
 public:
   ConfiguredHeliumDetector() : PoldiHeliumDetector() { loadConfiguration(Instrument_const_sptr()); }
 
-  void loadConfiguration(Instrument_const_sptr poldiInstrument) override {
-    UNUSED_ARG(poldiInstrument);
-
+  void loadConfiguration([[maybe_unused]] Instrument_const_sptr poldiInstrument) override {
     initializeFixedParameters(3000.0, static_cast<size_t>(400), 2.5, 0.88);
     initializeCalibratedParameters(Kernel::V2D(-931.47, -860.0), Conversions::degToRad(90.41));
   }
@@ -96,7 +94,7 @@ public:
 
   ~MockChopper() override = default;
 
-  void loadConfiguration(Instrument_const_sptr poldiInstrument) override { UNUSED_ARG(poldiInstrument); }
+  void loadConfiguration([[maybe_unused]] Instrument_const_sptr poldiInstrument) override {}
   GNU_DIAG_OFF_SUGGEST_OVERRIDE MOCK_METHOD0(rotationSpeed, double());
   MOCK_METHOD0(cycleTime, double());
   MOCK_METHOD0(zeroOffset, double());
@@ -117,10 +115,8 @@ class PoldiAbstractFakeInstrument : public Instrument {
 public:
   PoldiAbstractFakeInstrument() {}
 
-  std::shared_ptr<const IComponent> getComponentByName(const std::string &cname, int nlevels = 0) const override {
-    UNUSED_ARG(cname);
-    UNUSED_ARG(nlevels);
-
+  std::shared_ptr<const IComponent> getComponentByName([[maybe_unused]] const std::string &cname,
+                                                       [[maybe_unused]] int nlevels = 0) const override {
     return getComponentByNameFake();
   }
 

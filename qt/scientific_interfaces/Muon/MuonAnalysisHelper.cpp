@@ -30,6 +30,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/scope_exit.hpp>
 #include <stdexcept>
+#include <tuple>
 #include <utility>
 
 namespace {
@@ -380,8 +381,7 @@ void WidgetAutoSaver::endGroup() { m_settings.endGroup(); }
  */
 bool isNumber(const QString &qstring) {
   bool isNumber = false;
-  auto value = qstring.toDouble(&isNumber);
-  UNUSED_ARG(value);
+  std::ignore = qstring.toDouble(&isNumber);
   return isNumber;
 }
 

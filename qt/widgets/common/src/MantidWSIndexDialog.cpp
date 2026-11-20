@@ -1217,8 +1217,7 @@ IntervalList IntervalList::intersect(const IntervalList &a, const IntervalList &
 IntervalListValidator::IntervalListValidator(QObject *parent, IntervalList intervalList)
     : QValidator(parent), m_intervalList(std::move(intervalList)) {}
 
-QValidator::State IntervalListValidator::validate(QString &input, int &pos) const {
-  UNUSED_ARG(pos);
+QValidator::State IntervalListValidator::validate(QString &input, [[maybe_unused]] int &pos) const {
   if (IntervalList::isParsable(input, m_intervalList))
     return QValidator::Acceptable;
 

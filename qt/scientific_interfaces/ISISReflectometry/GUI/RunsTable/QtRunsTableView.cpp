@@ -41,7 +41,7 @@ QtRunsTableView::QtRunsTableView(std::vector<std::string> instruments)
     m_ui.instrumentSelector->addItem(QString::fromStdString(instrument));
 
   connect(m_ui.filterBox, SIGNAL(textChanged(QString const &)), this, SLOT(onFilterChanged(QString const &)));
-  connect(m_ui.instrumentSelector, SIGNAL(currentIndexChanged(int)), this, SLOT(onInstrumentChanged(int)));
+  connect(m_ui.instrumentSelector, SIGNAL(currentIndexChanged(int)), this, SLOT(onInstrumentChanged()));
 
   setInstrumentColumnsVisible(m_ui.instrumentSelector->currentText().toStdString());
 
@@ -79,8 +79,7 @@ void QtRunsTableView::mustSelectGroupOrRow() {
 
 void QtRunsTableView::onFilterChanged(QString const &filter) { m_notifyee->notifyFilterChanged(filter.toStdString()); }
 
-void QtRunsTableView::onInstrumentChanged(int index) {
-  UNUSED_ARG(index);
+void QtRunsTableView::onInstrumentChanged() {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
       Mantid::Kernel::FeatureType::Feature, {"ISIS Reflectometry", "RunsTable", "InstrumentChanged"}, false);
   m_notifyee->notifyChangeInstrumentRequested();
