@@ -350,6 +350,34 @@ public:
     TS_ASSERT_EQUALS(model.getNumberOfGroupMembers(), 1);
   }
 
+  void test_no_slice_names_when_not_sliced() {
+    PreviewModel model;
+    auto mockJobManager = MockJobManager();
+    auto ws = generateReducedWs(mockJobManager, model);
+
+    TS_ASSERT_EQUALS(model.getSliceDisplayNames(), std::vector<std::string>{});
+  }
+
+  void test_get_slice_display_names() {
+    PreviewModel model;
+    auto mockJobManager = MockJobManager();
+    auto ws = generateSlicedReducedWs(mockJobManager, model);
+
+    AnalysisDataService::Instance().addOrReplace("first_0_10", ws->getItem(0));
+    AnalysisDataService::Instance().addOrReplace("first_10_20", ws->getItem(1));
+    std::vector<std::string> const expectedNames{"_10", "_20"};
+    TS_ASSERT_EQUALS(model.getSliceDisplayNames(), expectedNames);
+  }
+
+  void test_out_of_range_slice_throws() {
+    PreviewModel model;
+    auto mockJobManager = MockJobManager();
+    auto ws = generateSlicedReducedWs(mockJobManager, model);
+
+    TS_ASSERT_THROWS_EQUALS(model.setSelectedSlice(2), std::out_of_range & e, std::string(e.what()),
+                            "Slice index is out of range.");
+  }
+
   void test_get_theta_from_workspace() {
     PreviewModel model;
     auto theta = 2.3;
@@ -404,6 +432,18 @@ private:
     auto wsReduceEffect = [&expectedWs](PreviewRow &row) { row.setReducedWss({expectedWs}); };
     ON_CALL(mockJobManager, startReduction(_)).WillByDefault(Invoke(wsReduceEffect));
     model.reduceAsync(mockJobManager);
+    return expectedWs;
+  }
+
+  WorkspaceGroup_sptr generateSlicedReducedWs(MockJobManager &mockJobManager, PreviewModel &model) {
+    auto expectedWsA = createWorkspace();
+    auto expectedWsB = createWorkspace();
+    auto wsReduceEffect = [&expectedWsA, &expectedWsB](PreviewRow &row) {
+      row.setReducedWss({expectedWsA, expectedWsB});
+    };
+    ON_CALL(mockJobManager, startReduction(_)).WillByDefault(Invoke(wsReduceEffect));
+    model.reduceAsync(mockJobManager);
+    auto expectedWs = createWorkspaceGroup({expectedWsA, expectedWsB});
     return expectedWs;
   }
 
