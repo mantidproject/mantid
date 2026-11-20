@@ -311,6 +311,14 @@ public:
                                               [this](const auto &r, bool baked) { return runOverPlate(r, baked); });
   }
 
+  void test_Only_Environment_Parts_On_The_Goniometer_Are_Turned() {
+    const auto rotation = SampleFrameEquivalence::rotationY(30.0);
+    const double unturned = runOverCan(SampleFrameEquivalence::unrotated(), true);
+
+    TS_ASSERT(std::abs(runOverCan(rotation, true) - unturned) > 1e-6);
+    TS_ASSERT_DELTA(runOverCan(rotation, false), unturned, 1e-9);
+  }
+
   void test_Workspace_With_Just_Sample_For_Direct() {
     using namespace Mantid::Geometry;
     namespace PhysicalConstants = Mantid::PhysicalConstants;
@@ -864,6 +872,25 @@ private:
     mcAbsorb->setProperty("InputWorkspace", testWS);
     mcAbsorb->execute();
     return getOutputWorkspace(mcAbsorb)->getSpectrum(0).y();
+  }
+
+  /// Scatter only in a can, on the goniometer or fixed, around a sphere at the origin, which looks
+  /// the same however it is turned. Seeded as runOverPlate.
+  double runOverCan(const Mantid::Kernel::Matrix<double> &rotation, const bool canOnGoniometer) {
+    using Mantid::Kernel::DeltaEMode;
+    TestWorkspaceDescriptor wsProps = {1, 2, false, Environment::CubeSampleOnly, DeltaEMode::Elastic, -1};
+    auto testWS = setUpWS(wsProps);
+    SampleFrameEquivalence::setSample(
+        *testWS, rotation, false, SampleFrameEquivalence::vanadium(),
+        "<sphere id=\"ball\"><centre x=\"0\" y=\"0\" z=\"0\"/><radius val=\"0.002\"/></sphere>");
+    SampleFrameEquivalence::addCan(*testWS, canOnGoniometer);
+    auto mcAbsorb = createAlgorithm();
+    mcAbsorb->setProperty("EventsPerPoint", 2000);
+    mcAbsorb->setProperty("SeedValue", 123456789);
+    mcAbsorb->setProperty("SimulateScatteringPointIn", "EnvironmentOnly");
+    mcAbsorb->setProperty("InputWorkspace", testWS);
+    mcAbsorb->execute();
+    return getOutputWorkspace(mcAbsorb)->getSpectrum(0).y().front();
   }
 
   Mantid::API::IAlgorithm_sptr createAlgorithm() {

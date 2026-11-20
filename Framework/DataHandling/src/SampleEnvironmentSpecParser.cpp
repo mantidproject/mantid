@@ -66,6 +66,17 @@ std::string ZDEGREES_TAG = "zdegrees";
 
 namespace {
 double DegreesToRadians(double angle) { return angle * M_PI / 180; }
+
+/// Whether a \<container\> or \<component\> turns with the sample when a goniometer is set.
+bool parseOnGoniometer(const Element *element, const bool defaultValue) {
+  const auto text = element->getAttribute("ongoniometer");
+  if (text.empty())
+    return defaultValue;
+  if (text != "true" && text != "false")
+    throw std::invalid_argument("SampleEnvironmentSpecParser - ongoniometer must be 'true' or 'false', not '" + text +
+                                "'.");
+  return text == "true";
+}
 } // namespace
 //------------------------------------------------------------------------------
 // Public methods
@@ -193,7 +204,8 @@ void SampleEnvironmentSpecParser::parseAndAddComponents(SampleEnvironmentSpec *s
     if (nodeName == CONTAINERS_TAG) {
       parseAndAddContainers(spec, childElement);
     } else if (nodeName == COMPONENT_TAG) {
-      spec->addComponent(parseComponent(childElement));
+      spec->addComponent(parseComponent(childElement),
+                         parseOnGoniometer(childElement, Geometry::SampleEnvironment::onGoniometerByDefault(1)));
     }
     node = nodeIter.nextNode();
   }
@@ -257,7 +269,8 @@ void SampleEnvironmentSpecParser::parseAndAddContainers(SampleEnvironmentSpec *s
   while (node) {
     auto *childElement = static_cast<Element *>(node);
     if (childElement->nodeName() == CONTAINER_TAG) {
-      spec->addContainer(parseContainer(childElement));
+      spec->addContainer(parseContainer(childElement),
+                         parseOnGoniometer(childElement, Geometry::SampleEnvironment::onGoniometerByDefault(0)));
     }
     node = nodeIter.nextNode();
   }

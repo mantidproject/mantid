@@ -11,7 +11,7 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from typing import Sequence
 from mantid.kernel import logger
 from mantidqt.plotting import sample_shape
-from mantidqt.utils.lab_frame_sample import lab_frame_sample
+from mantidqt.utils.lab_frame_sample import lab_frame_sample_shape
 from Engineering.common.texture_sample_viewer import get_scaled_intrinsic_sample_directions_in_lab_frame, get_xml_mesh, is_valid_mesh
 from matplotlib.figure import Figure
 
@@ -58,7 +58,7 @@ class ShowSampleModel(object):
             scat_centre = np.zeros(3)
 
         rotation_matrix = ws.getRun().getGoniometer().getR() if fix_axes_to_sample else np.eye(3)
-        sample_mesh = lab_frame_sample(ws).getShape().getMesh()
+        sample_mesh = lab_frame_sample_shape(ws).getMesh()
         rd, nd, td, arrow_lens = get_scaled_intrinsic_sample_directions_in_lab_frame(
             ax_transform, rotation_matrix, sample_mesh, scale=1.2, scat_centre=scat_centre
         )

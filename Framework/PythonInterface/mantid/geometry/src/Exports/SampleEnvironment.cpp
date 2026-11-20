@@ -25,5 +25,7 @@ void export_SampleEnvironment() {
       .def("getComponent", &SampleEnvironment::getComponent, (args("self", "index")),
            "Returns the requested IObject. Index 0 is considered the container", return_internal_reference<>())
       .def("nelements", &SampleEnvironment::nelements, (args("self")),
-           "Returns the number of elements the environment is composed of.");
+           "Returns the number of elements the environment is composed of.")
+      .def("isOnGoniometer", &SampleEnvironment::isOnGoniometer, (args("self", "index")),
+           "Whether the element turns with the sample when a goniometer is set. Index 0 is the container");
 }

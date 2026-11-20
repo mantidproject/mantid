@@ -201,14 +201,25 @@ class ExperimentInfoTest(unittest.TestCase):
         ws.run().getGoniometer().setR(np.array([[0.0, -1.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, 1.0]]))
         return ws
 
-    def _assert_upright(self, shape):
-        self.assertAlmostEqual(shape.getBoundingBox().width().Y(), 0.04, places=6)
+    def _assert_laid_down(self, shape):
+        self.assertAlmostEqual(shape.getBoundingBox().width().X(), 0.04, places=6)
 
-    def test_a_sample_in_an_environment_is_left_as_defined(self):
+    def test_a_sample_in_an_environment_turns_with_its_container(self):
         ws = self._ws_with_a_sample_in_a_can()
 
-        self._assert_upright(ws.getLabFrameSampleShape())
-        self._assert_upright(ws.getLabFrameSample().getShape())
+        self._assert_laid_down(ws.getLabFrameSampleShape())
+        lab_sample = ws.getLabFrameSample()
+        self._assert_laid_down(lab_sample.getShape())
+        self._assert_laid_down(lab_sample.getEnvironment().getContainer().getShape())
+
+    def test_by_default_only_the_container_is_on_the_goniometer(self):
+        self.assertTrue(self._ws_with_a_sample_in_a_can().sample().getEnvironment().isOnGoniometer(0))
+
+    def test_a_lab_frame_sample_set_back_on_the_workspace_is_turned_only_once(self):
+        ws = self._ws_with_a_sample_in_a_can()
+        ws.setSample(ws.getLabFrameSample())
+
+        self._assert_laid_down(ws.getLabFrameSample().getEnvironment().getContainer().getShape())
 
     def _get_holding_parent(self, parent, accessor):
         """Checks the reference rather than reading through it: freed memory often still holds the old values."""

@@ -2184,13 +2184,11 @@ DiscusMultipleScatteringCorrection::findMatchingComponent(const ComponentWorkspa
 void DiscusMultipleScatteringCorrection::prepareSampleBeamGeometry(const API::MatrixWorkspace_sptr &inputWS) {
   // The beam profile below is built from this lab-frame sample too: an unspecified beam is sized
   // from the sample's bounding box, so the unrotated one would illuminate the wrong region.
-  auto labFrameSample = API::labFrameSample(*inputWS);
-  m_sampleShape = labFrameSample.getShapePtr();
-  try {
-    m_env = &inputWS->sample().getEnvironment();
-  } catch (std::runtime_error &) {
-    // swallow this as no defined environment from getEnvironment
-  }
+  // Tracks are traced through this environment, and prepareStructureFactors keys components by
+  // address, so both must use the same one.
+  m_labFrameSample = API::labFrameSample(*inputWS);
+  m_sampleShape = m_labFrameSample.getShapePtr();
+  m_env = m_labFrameSample.hasEnvironment() ? &m_labFrameSample.getEnvironment() : nullptr;
   // generate the bounding box before the multithreaded section
   m_activeRegion = m_sampleShape->getBoundingBox();
   if (m_env) {
@@ -2199,7 +2197,7 @@ void DiscusMultipleScatteringCorrection::prepareSampleBeamGeometry(const API::Ma
   }
   m_instrument = inputWS->getInstrument();
   auto const &compInfo = inputWS->componentInfo();
-  m_beamProfile = BeamProfileFactory::createBeamProfile(compInfo, labFrameSample);
+  m_beamProfile = BeamProfileFactory::createBeamProfile(compInfo, m_labFrameSample);
   m_refframe = compInfo.referenceFrame();
   m_sourcePos = compInfo.sourcePosition();
 }

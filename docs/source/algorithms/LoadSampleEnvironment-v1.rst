@@ -11,6 +11,8 @@ Description
 
 Loads an environment into the sample of a workspace, either replacing the current environment, or adding to it. The newly added Environment can be translated by a vector, and rotated by an angle along each axis applied in order X,Y,Z, rotation applies before translation. You may also set a material for the environment to be loaded, this follows the same inputs as :ref:`algm-SetSampleMaterial`.
 
+``OnGoniometer`` says whether the loaded parts turn with the sample when the workspace has a goniometer rotation. Left unset, only the container turns: the first part loaded when ``Add`` is not set. A value applies to every part loaded in the call; see :ref:`SampleEnvironment_goniometer`.
+
 The following types of input file are supported:
 
 * ``*.stl`` stereolithography `https://en.wikipedia.org/wiki/STL_(file_format) <https://en.wikipedia.org/wiki/STL_(file_format)>`_

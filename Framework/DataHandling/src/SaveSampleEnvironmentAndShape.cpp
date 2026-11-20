@@ -16,6 +16,7 @@
 #include "MantidGeometry/Instrument/Container.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/MeshObject.h"
+#include "MantidGeometry/Objects/ShapeRotation.h"
 
 #include <filesystem>
 #include <memory>
@@ -73,8 +74,11 @@ void SaveSampleEnvironmentAndShape::exec() {
   size_t numTriangles = 0;
   size_t numVertices = 0;
 
-  // Get the shape of the sample
-  const auto &sampleShape = toMeshObject(inputWS->sample().getShape());
+  // Get the shape of the sample, as defined like the environment, so that loading the file turns it by
+  // the goniometer once rather than twice.
+  const auto ownFrameSample =
+      Geometry::getLabFrameShape(inputWS->sample().getShape(), Kernel::Matrix<double>(3, 3, true));
+  const auto &sampleShape = toMeshObject(*ownFrameSample);
   if (!sampleShape.hasValidShape()) {
     throw std::invalid_argument("Sample Shape is not complete");
   }
@@ -85,8 +89,8 @@ void SaveSampleEnvironmentAndShape::exec() {
   std::vector<const MeshObject *> environmentPieces;
 
   if (inputWS->sample().hasEnvironment()) {
-    // get the environment
-    auto environment = inputWS->sample().getEnvironment();
+    // get the environment, as defined even if a lab-frame view of it reached the workspace
+    const auto &environment = inputWS->sample().getEnvironment().ownFrame();
 
     auto numElements = environment.nelements();
     environmentPieces.reserve(numElements);
@@ -109,6 +113,13 @@ void SaveSampleEnvironmentAndShape::exec() {
     if (!environmentValid) {
       throw std::invalid_argument("Environment Shape is not complete");
     }
+    for (size_t i = 0; i < numElements; ++i) {
+      if (environment.isOnGoniometer(i) != SampleEnvironment::onGoniometerByDefault(i)) {
+        g_log.warning("The file cannot record which environment parts are on the goniometer, so it reloads with "
+                      "only the container mounted. Set OnGoniometer in LoadSampleEnvironment to mount them again.");
+        break;
+      }
+    }
   }
   // get the scale to use
   auto scale = getPropertyValue("Scale");
@@ -129,7 +140,7 @@ void SaveSampleEnvironmentAndShape::exec() {
   } else {
 #ifdef ENABLE_LIB3MF
     Mantid3MFFileIO Mesh3MF;
-    auto samplePtr = MeshObject_const_sptr(&sampleShape);
+    auto samplePtr = std::dynamic_pointer_cast<const MeshObject>(ownFrameSample);
     Mesh3MF.writeMeshObjects(environmentPieces, samplePtr, scaleType);
     Mesh3MF.saveFile(filename);
 #else

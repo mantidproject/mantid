@@ -216,6 +216,34 @@ The translation tag has an attribute vector which is a comma separated list of x
 The rotation tag has available attributes xdegrees, ydegrees, zdegrees which all take a rotation specified
 in degrees.
 
+.. _SampleEnvironment_goniometer:
+
+Goniometer Rotation
+-------------------
+
+An environment is always defined, and stored, as it sits with the goniometer at zero. When a workspace
+has a goniometer rotation, for example from :ref:`algm-SetGoniometer`, the corrections that use the
+environment turn the parts mounted on the goniometer with the sample, and leave the rest where they are.
+The rotation is never written into the environment itself, so the same definition serves every run.
+
+By default only the container is mounted, since it holds the sample. Any :xml:`container` or :xml:`component`
+can say otherwise with an ``ongoniometer`` attribute of ``true`` or ``false``:
+
+.. code-block:: xml
+
+    <components>
+      <component id="collimator" material="cadmium" ongoniometer="false">
+        <!-- fixed to the instrument, so it does not turn with the sample -->
+      </component>
+      <component id="anvil" material="diamond" ongoniometer="true">
+        <!-- part of a pressure cell, which turns as a whole -->
+      </component>
+    </components>
+
+Every part of a pressure cell, for example, turns with the cell and should be marked ``ongoniometer="true"``,
+while a collimator or heat shield fixed to the instrument keeps the default. :ref:`algm-LoadSampleEnvironment`
+has an ``OnGoniometer`` property for the same purpose, and a :xml:`fullspecification` 3MF file uses the defaults.
+
 XML Definition File - 3MF Definition
 -----------------------------------------
 

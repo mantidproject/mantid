@@ -22,10 +22,17 @@ class Track;
 /**
   Defines a single instance of a SampleEnvironment. It houses a single can
   along with the other components specified by a SampleEnvironmentSpec.
+
+  Components are kept as defined, with the goniometer at zero, and never carry a goniometer
+  rotation. Each one records whether it is mounted on the goniometer, so turns with the sample.
 */
 class MANTID_GEOMETRY_DLL SampleEnvironment {
 public:
-  SampleEnvironment(std::string name, const Container_const_sptr &getContainer);
+  /// Whether a part turns with the sample unless it says otherwise: only the container, index 0, which holds it.
+  static constexpr bool onGoniometerByDefault(const size_t index) { return index == 0; }
+
+  SampleEnvironment(std::string name, const Container_const_sptr &getContainer,
+                    bool containerOnGoniometer = onGoniometerByDefault(0));
 
   /// @return The name of kit
   inline const std::string &name() const { return m_name; }
@@ -48,18 +55,29 @@ public:
    */
   const IObject &getComponent(const size_t index) const;
   const IObject_const_sptr getComponentPtr(const size_t index) const;
+  /// Whether the component turns with the sample when a goniometer is set. Index 0 is the container.
+  bool isOnGoniometer(const size_t index) const { return m_onGoniometer.at(index); }
 
   Geometry::BoundingBox boundingBox() const;
 
   bool isValid(const Kernel::V3D &point) const;
   int interceptSurfaces(Track &track) const;
 
-  void add(const IObject_const_sptr &component);
+  void add(const IObject_const_sptr &component, bool onGoniometer = onGoniometerByDefault(1));
+
+  /// A view of this environment as the goniometer places it: mounted components turned by
+  /// goniometerR, fixed ones shared. Always built from the own-frame original, so turning a view
+  /// again starts afresh rather than adding to the turn.
+  std::shared_ptr<SampleEnvironment> inLabFrame(const Kernel::Matrix<double> &goniometerR) const;
+  /// The environment as defined: this one, or the original a lab-frame view was made from.
+  const SampleEnvironment &ownFrame() const { return m_ownFrame ? *m_ownFrame : *this; }
 
 private:
   std::string m_name;
   // Element zero is always assumed to be the can
   std::vector<IObject_const_sptr> m_components;
+  std::vector<bool> m_onGoniometer;                    ///< Parallel to m_components
+  std::shared_ptr<const SampleEnvironment> m_ownFrame; ///< Set only on a view made by inLabFrame
 };
 
 // Typedef a unique_ptr

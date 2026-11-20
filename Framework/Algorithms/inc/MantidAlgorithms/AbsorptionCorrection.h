@@ -98,15 +98,15 @@ protected:
    */
   virtual void initialiseCachedDistances() = 0;
 
-  API::MatrixWorkspace_sptr m_inputWS;         ///< A pointer to the input workspace
-  const Geometry::IObject *m_sampleObject;     ///< Local cache of sample object.
-  Geometry::IObject_sptr m_labFrameShape;      ///< Owns the lab-frame shape m_sampleObject points at, if any
-  Kernel::V3D m_beamDirection;                 ///< The direction of the beam.
-  std::vector<double> m_L1s,                   ///< Cached L1 distances
-      m_elementVolumes;                        ///< Cached element volumes
-  std::vector<Kernel::V3D> m_elementPositions; ///< Cached element positions
-  size_t m_numVolumeElements;                  ///< The number of volume elements
-  double m_sampleVolume;                       ///< The total volume of the sample
+  API::MatrixWorkspace_sptr m_inputWS;           ///< A pointer to the input workspace
+  const Geometry::IObject *m_sampleObject;       ///< Local cache of sample object.
+  Geometry::IObject_const_sptr m_labFrameObject; ///< Owns the lab-frame object m_sampleObject points at, if any
+  Kernel::V3D m_beamDirection;                   ///< The direction of the beam.
+  std::vector<double> m_L1s,                     ///< Cached L1 distances
+      m_elementVolumes;                          ///< Cached element volumes
+  std::vector<Kernel::V3D> m_elementPositions;   ///< Cached element positions
+  size_t m_numVolumeElements;                    ///< The number of volume elements
+  double m_sampleVolume;                         ///< The total volume of the sample
 
 private:
   /// Initialisation code

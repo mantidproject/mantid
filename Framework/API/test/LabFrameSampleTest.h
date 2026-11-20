@@ -51,11 +51,45 @@ public:
     TS_ASSERT_DELTA(xWidth(*labFrameSampleShape(expt)), 0.004, 1e-9);
   }
 
-  void test_sample_in_an_environment_is_used_as_defined() {
+  void test_sample_turns_with_the_mounted_parts_of_its_environment() {
     ExperimentInfo expt = experiment(PLATE_XML);
     addEnvironment(expt);
-    TS_ASSERT_EQUALS(labFrameSampleShape(expt), expt.sample().getShapePtr());
-    TS_ASSERT_DELTA(xWidth(*labFrameSampleShape(expt)), 0.04, 1e-9);
+
+    const auto sample = labFrameSample(expt);
+
+    TS_ASSERT_DELTA(xWidth(sample.getShape()), 0.004, 1e-9);
+    TS_ASSERT_DELTA(xWidth(sample.getEnvironment().getContainer()), 0.004, 1e-9);
+    TS_ASSERT_EQUALS(sample.getEnvironment().getComponentPtr(1), expt.sample().getEnvironment().getComponentPtr(1));
+    // and the workspace's own environment is untouched
+    TS_ASSERT_DELTA(xWidth(expt.sample().getEnvironment().getContainer()), 0.04, 1e-9);
+  }
+
+  void test_a_baked_sample_and_its_stored_can_both_end_up_in_the_lab_frame() {
+    // as CopySample and a 3MF file leave them: the sample already turned, the can as defined
+    ExperimentInfo expt = experiment(ShapeFactory().addGoniometerTag(QUARTER_TURN_ABOUT_Y, PLATE_XML));
+    addEnvironment(expt);
+
+    const auto sample = labFrameSample(expt);
+
+    TS_ASSERT_DELTA(xWidth(sample.getShape()), 0.004, 1e-9);
+    TS_ASSERT_DELTA(xWidth(sample.getEnvironment().getContainer()), 0.004, 1e-9);
+  }
+
+  void test_an_identity_goniometer_shares_the_environment() {
+    ExperimentInfo expt = experiment(PLATE_XML);
+    addEnvironment(expt);
+    expt.mutableRun().mutableGoniometer().setR(Matrix<double>(3, 3, true));
+
+    TS_ASSERT_EQUALS(&labFrameSample(expt).getEnvironment(), &expt.sample().getEnvironment());
+  }
+
+  void test_a_lab_frame_view_is_rebuilt_when_the_goniometer_is_reset() {
+    ExperimentInfo expt = experiment(PLATE_XML);
+    addEnvironment(expt);
+    expt.mutableSample() = labFrameSample(expt);
+    expt.mutableRun().mutableGoniometer().setR(Matrix<double>(3, 3, true));
+
+    TS_ASSERT_DELTA(xWidth(labFrameSample(expt).getEnvironment().getContainer()), 0.04, 1e-9);
   }
 
   void test_lab_frame_sample_keeps_everything_but_the_shape() {
@@ -75,9 +109,11 @@ private:
     return expt;
   }
 
+  /// A plate-shaped can, so a turn shows, and a fixed component.
   void addEnvironment(ExperimentInfo &expt) {
-    auto can = std::make_shared<Container>(
-        ShapeFactory().createShape(ComponentCreationHelper::sphereXML(0.05, V3D(0, 0, 0), "can")));
-    expt.mutableSample().setEnvironment(std::make_unique<SampleEnvironment>("kit", can));
+    auto kit =
+        std::make_unique<SampleEnvironment>("kit", std::make_shared<Container>(ShapeFactory().createShape(PLATE_XML)));
+    kit->add(ShapeFactory().createShape(ComponentCreationHelper::sphereXML(0.05, V3D(0, 0, 0), "shield")));
+    expt.mutableSample().setEnvironment(std::move(kit));
   }
 };

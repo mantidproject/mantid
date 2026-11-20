@@ -8,7 +8,7 @@
 import unittest
 from unittest.mock import MagicMock
 
-from mantidqt.utils.lab_frame_sample import lab_frame_sample
+from mantidqt.utils.lab_frame_sample import lab_frame_sample, lab_frame_sample_shape
 
 
 class LabFrameSampleTest(unittest.TestCase):
@@ -17,6 +17,12 @@ class LabFrameSampleTest(unittest.TestCase):
         workspace.getLabFrameSample.side_effect = ValueError("no XML definition")
 
         self.assertIs(lab_frame_sample(workspace), workspace.sample())
+
+    def test_falls_back_to_the_shape_as_defined_when_it_cannot_be_turned(self):
+        workspace = MagicMock()
+        workspace.getLabFrameSampleShape.side_effect = ValueError("no XML definition")
+
+        self.assertIs(lab_frame_sample_shape(workspace), workspace.sample().getShape())
 
 
 if __name__ == "__main__":

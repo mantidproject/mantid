@@ -41,6 +41,8 @@ public:
 
   const IObject &getShape() const { return *m_shape; }
   const IObject_sptr getShapePtr() const { return m_shape; }
+  /// This container around another shape - the same can turned, say - keeping its sample-shape definitions.
+  std::shared_ptr<Container> withShape(IObject_sptr shape) const;
 
   bool isValid(const Kernel::V3D &p) const override { return m_shape->isValid(p); }
   bool isOnSide(const Kernel::V3D &p) const override { return m_shape->isOnSide(p); }
@@ -62,6 +64,7 @@ public:
   }
   double volume() const override { return m_shape->volume(); }
   const BoundingBox &getBoundingBox() const override { return m_shape->getBoundingBox(); }
+  const Kernel::Matrix<double> &getAppliedRotation() const override { return m_shape->getAppliedRotation(); }
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin,
                       double &zmin) const override {
     m_shape->getBoundingBox(xmax, ymax, zmax, xmin, ymin, zmin);
