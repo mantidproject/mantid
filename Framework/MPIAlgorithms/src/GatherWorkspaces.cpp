@@ -14,6 +14,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidMPIAlgorithms/Chunking.h"
+#include "MantidMPIAlgorithms/MPILifetime.h"
 #include "MantidMPIAlgorithms/MPISerialization.h"
 #include <algorithm>
 #include <cmath>
@@ -37,15 +38,10 @@ using namespace DataObjects;
 DECLARE_ALGORITHM(GatherWorkspaces)
 
 void GatherWorkspaces::init() {
-#ifdef MPI_BUILD
-  if (mpi::communicator().rank())
-    declareProperty(
-        std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, PropertyMode::Optional));
-  else
-#endif
-    declareProperty(
-        std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, PropertyMode::Mandatory),
-        "The InputWorkspace to be gathered. Input workspace is optional, except for the root process.");
+  // Whether the input is required depends on the MPI rank, so it is checked in validateInputs rather than here. This
+  // keeps MPI from being initialized just to create the algorithm, e.g. for its documentation or the simpleapi stubs.
+  declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input, PropertyMode::Optional),
+                  "The InputWorkspace to be gathered. Input workspace is optional, except for the root process.");
 
   declareProperty(
       std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output, PropertyMode::Optional),
@@ -70,8 +66,24 @@ void GatherWorkspaces::init() {
                   "(fastest but uses most memory). A positive value specifies exact number of spectra per chunk.");
 }
 
+std::map<std::string, std::string> GatherWorkspaces::validateInputs() {
+  std::map<std::string, std::string> issues;
+#ifdef MPI_BUILD
+  ensureMPIInitialized();
+  const int rank = mpi::communicator().rank();
+#else
+  const int rank = 0;
+#endif
+  const MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
+  // cppcheck-suppress knownConditionTrueFalse ; rank is always 0 when not built with MPI
+  if (rank == 0 && !inputWorkspace)
+    issues["InputWorkspace"] = "An InputWorkspace is required on the root process";
+  return issues;
+}
+
 void GatherWorkspaces::exec() {
 #ifdef MPI_BUILD
+  ensureMPIInitialized();
   // Every process in an MPI job must hit this next line or everything hangs!
   mpi::communicator world;
 

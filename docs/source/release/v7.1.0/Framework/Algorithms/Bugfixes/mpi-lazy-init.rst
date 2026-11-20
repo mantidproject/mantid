@@ -1,0 +1,1 @@
+- In MPI builds, importing Mantid no longer starts MPI. It is now started on first run of :ref:`algm-BroadcastWorkspace` or :ref:`algm-GatherWorkspaces` if it was not already initialized (e.g. ``mpi4py`` was imported first). Mantid leaves it to be shut down by whoever started it.
