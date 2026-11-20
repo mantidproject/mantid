@@ -186,7 +186,12 @@ class Pearl(AbstractInst):
         return self._inst_settings.tt_mode
 
     def _spline_vanadium_ws(self, focused_vanadium_spectra):
-        focused_vanadium_spectra = pearl_algs.strip_bragg_peaks(focused_vanadium_spectra)
+        focused_vanadium_spectra = pearl_algs.strip_bragg_peaks(
+            focused_vanadium_spectra,
+            self._inst_settings.vanadium_strip_peak_fwhm,
+            self._inst_settings.vanadium_strip_peak_tolerance,
+            self._inst_settings.vanadium_strip_peak_repeat,
+        )
         splined_list = common.spline_workspaces(
             focused_vanadium_spectra=focused_vanadium_spectra, num_splines=self._inst_settings.spline_coefficient
         )
