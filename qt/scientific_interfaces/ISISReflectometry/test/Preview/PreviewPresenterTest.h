@@ -762,6 +762,27 @@ public:
     presenter.notifyReductionCompleted();
   }
 
+  void test_slices_are_assigned_when_reduction_completed() {
+    auto mockView = makeView();
+    auto mockModel = makeModel();
+    auto mockLinePlot = std::make_unique<MockPlotPresenter>();
+    auto lineLabel = std::string("line_label");
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument();
+    auto expectedSlices = std::vector<std::string>{"_1", "_2"};
+
+    EXPECT_CALL(*mockModel, getSelectedReducedWs()).Times(1).WillOnce(Return(ws));
+    EXPECT_CALL(*mockModel, getSliceDisplayNames()).Times(1).WillOnce(Return(expectedSlices));
+    EXPECT_CALL(*mockLinePlot, setSpectrum(ws, 0)).Times(1);
+    EXPECT_CALL(*mockLinePlot, plot()).Times(1);
+    EXPECT_CALL(*mockView, setSlices(expectedSlices)).Times(1);
+
+    auto presenter =
+        PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), makeJobManager(), makePreviewDockedWidgets(),
+                                  makeRegionSelector(), std::move(mockLinePlot)));
+
+    presenter.notifyReductionCompleted();
+  }
+
   void test_all_group_member_line_plots_are_displayed_when_reduction_completed() {
     auto mockView = makeView();
     auto mockModel = makeModel();
