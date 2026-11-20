@@ -77,7 +77,7 @@ Usage
 
    import math
    import os
-   # priting procedure
+   # printing procedure
    def print_10_detectors(instr_type,ws):
        ''' print first 10 detectors from the instrument of given workspace '''
         # get first 10 detectors using detector ID

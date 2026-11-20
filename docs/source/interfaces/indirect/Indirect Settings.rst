@@ -20,7 +20,7 @@ OK
   This will apply the changes made to the interface and then exits the settings window.
 
 Cancel
-  This disregards any changes which have not been applyed and exits the window.
+  This disregards any changes which have not been applied and exits the window.
 
 
 General

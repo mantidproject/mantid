@@ -15,7 +15,7 @@ This release sees many new algorithms added or improved to extend the functional
 including:-
 
 - Superplot, a new widget that facilitates over-plotting and data comparison for a large number of workspaces.
-- The ablity to plot CSGObjects as Sample shapes and merge shapes for greater complexity.
+- The ability to plot CSGObjects as Sample shapes and merge shapes for greater complexity.
 - In MSlice you can now enable powder (Bragg) peaks on cut plots.
 - Maxent Dual Plotting for Frequency Domain Analysis allowing raw and reconstructed data to be plotted together along with the frequency domain data.
 - A new widget and workspace plugin, the Workspace Calculator. This allows users to quickly perform binary operations on selected workspace pairs, optionally with scaling.

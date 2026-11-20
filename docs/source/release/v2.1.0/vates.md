@@ -37,12 +37,12 @@ Left-click and drag a rectangle to zoom into a region.
 
 ## Vates Simple Interface
 
-Most of the work conducted on the Vates Simple Interface during his iteration has revolved around improving stability and preventing misuse. There have been a small number of improvents to the overall layout and design.
+Most of the work conducted on the Vates Simple Interface during his iteration has revolved around improving stability and preventing misuse. There have been a small number of improvements to the overall layout and design.
 
 ### Improvements
 
 1. Colour controls are built into the default GUI view
-1. Can dynamically rebin either to a histogrammed/image representation or a full event based repesentation visually
+1. Can dynamically rebin either to a histogrammed/image representation or a full event based representation visually
 1. Progress reporting includes time taken to construct visualisation dataset
 
 ![VSI](../../images/2_1_release/VSI.webp)

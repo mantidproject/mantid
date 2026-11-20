@@ -47,7 +47,7 @@ Usage
 .. code-block:: python
 
     # WISH single crystal
-    # demonstration of linkedUBs algorithm on D10 Ruby (cyle 18/1)
+    # demonstration of linkedUBs algorithm on D10 Ruby (cycle 18/1)
 
     from mantid.simpleapi import *
 

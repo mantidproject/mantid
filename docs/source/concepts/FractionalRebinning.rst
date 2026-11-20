@@ -30,7 +30,7 @@ and it performs a coordinate transformation (from scattering angle theta to mome
 
 The fractional rebinning is not unique to this technique, as it could be applied even if there was no coordinate transformation
 (this is what Rebin2D does). However, while in Rebin2D the input and output grid lines are parallel to each other (no coordinate transformation),
-the input and output grid lines for *NormalisedPolygon* are **not** parallel, resulting in parallelpiped output bins.
+the input and output grid lines for *NormalisedPolygon* are **not** parallel, resulting in parallelepiped output bins.
 The algorithm constructs the polygon using the boundaries of the input bin and transforming that polygon
 into the output coordinates. In the output coordinates, we look for the intersections
 between the transformed input bin and the output bin:
@@ -57,7 +57,7 @@ weights with intersecting input areas:
 
 The output data will be a workspace with type: **RebinnedOutput**, which means that
 it is a **Workspace2D** with the information of the weigthts on the bins.
-To see why this is needed, consider the case where another rebin is perfomed after the
+To see why this is needed, consider the case where another rebin is performed after the
 previous rebinning. This time the output bin sits on a larger grid:
 
 .. figure:: /images/RebinnedOutputStep2.png
@@ -80,7 +80,7 @@ and normal Rebinning lies in the storage of the fractional weights relative to t
 
 **RebinnedOutput** workspaces have the fractional weight resulting from previous rebins stored
 for each input bin. When :ref:`algm-Rebin2D` is called on RebinnedOutput workspaces, the argument
-*UseFractionalArea* is always automatically turned on, to ensure the weight fractions are always propagated accross
+*UseFractionalArea* is always automatically turned on, to ensure the weight fractions are always propagated across
 several rebins and that the best possible signal and error estimates are achieved.
 
 When :ref:`algm-Rebin2D` is called on a **Workspace2D** workspace, by default the argument
@@ -140,7 +140,7 @@ sum of the counts in the bins within the Integration range:
 .. math::
    I = \left. \sum_i Y_i \right.
 
-In the case of **RebinnedOutput**, we take into the accout the fractional area weights :math:`F_i`:
+In the case of **RebinnedOutput**, we take into the account the fractional area weights :math:`F_i`:
 
 .. math::
    I = \left. \sum_i Y_i F_i \middle/ \left(\frac{1}{n} \sum_i F_i \right) \right.

@@ -172,7 +172,7 @@ Dataset-Specific Metadata
 -------------------------
 
 Some metadata is specific to each dataset in the output file. There are one of these datasets per workspace given in the ``WorkspaceList``. A ``WorkspaceGroup``
-has a dataset in the output file for each of its child workspaces. In ``History`` mode, these are aquired from the workspace history and the sample logs if
+has a dataset in the output file for each of its child workspaces. In ``History`` mode, these are acquired from the workspace history and the sample logs if
 available. In ``Manual`` mode, these metadata can be provided via a JSON string to the ``DatasetSpecificMetadata`` property.
 
 Metadata Fields

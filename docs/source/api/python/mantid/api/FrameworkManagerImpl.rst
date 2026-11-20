@@ -11,7 +11,7 @@ The framework manager is the main class through which user code will
 interact with the Mantid framework. It is the center piece of the
 application programming interface.
 
-The main purpose of the frameworkManager is to simplfy the interaction
+The main purpose of the frameworkManager is to simplify the interaction
 with the various internal services of the Mantid framework. Of course
 this does not prevent you from accessing those services directly should
 you so wish.

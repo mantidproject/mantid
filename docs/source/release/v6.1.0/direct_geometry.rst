@@ -33,7 +33,7 @@ MSlice
 New Features
 ############
 
-- Implemented floating/ontop window behaviour.
+- Implemented floating/on top window behaviour.
 - Added a 'close all' command for plots in the command line interface.
 - Added a button for deleting a line in the settings of a 1D plot.
 - Added a wrapper for the commands necessary for adding a workspace via the command line interface.

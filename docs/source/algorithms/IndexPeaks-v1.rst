@@ -14,7 +14,7 @@ the sample, this algorithm will use UB inverse to index the peaks. If
 there are peaks from multiple runs in the workspace, the stored
 :ref:`UB matrix <Lattice>` will be used to get an initial indexing for
 the peaks from each individual run. Subsequently, a temporary
-:ref:`UB matrix <Lattice>` will be optimzed for the peaks from each
+:ref:`UB matrix <Lattice>` will be optimized for the peaks from each
 individual run, and used to index the peaks from that run. In this way,
 a consistent indexing of the peaks from multiple runs will be obtained,
 which indexes the largest number of peaks, although one

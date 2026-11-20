@@ -6,7 +6,7 @@ FABADA
 FABADA is a fitting algorithm for Bayesian data analysis, the theory of which is
 detailed here: https://doi.org/10.1088/1742-6596/325/1/012006
 
-This documentation covers details of it's implementation in Mantid.
+This documentation covers details of its implementation in Mantid.
 
 Important Notes
 ---------------
@@ -14,8 +14,8 @@ Important Notes
 Currently in order to use FABADA the cost function must be set to Least Squares.
 
 The values for ChainLength and MaxIterations should be set to relatively high
-values where :math:`MaxIterations > 2 * ChainLength` (e.g. MaxIterations = 20^6
-and ChainLength = 10^6).
+values where :math:`MaxIterations > 2 * ChainLength` (e.g. MaxIterations = 2000000
+and ChainLength = 1000000).
 
 Currently the starting values used for each parameter are required to be a
 fairly good estimate of the actual value, in the event that a parameter is not
@@ -37,8 +37,32 @@ ConvergenceCriteria
   The threshold variation in the cost function due to the change in a parameter
   under which it is assumed that the parameter has reached convergence.
 
+InnactiveConvergenceCriterion
+  Number of inactive regenerations after which a parameter is considered to be
+  converged (default 5).
+
 JumpAcceptanceRate
   The desired percentage of acceptance for new parameters (typically 0.666)
+
+SimAnnealingApplied
+  Whether the minimization should be run with Simulated Annealing (default
+  false).
+
+MaximumTemperature
+  Simulated Annealing maximum temperature (default 10).
+
+NumRefrigerationSteps
+  Simulated Annealing number of temperature changes (default 5).
+
+SimAnnealingIterations
+  Number of iterations for the Simulated Annealing (default 10000).
+
+Overexploration
+  Set to true if temperatures below 1 are desired for overexploration. This is
+  useful to find the exact minimum (default false).
+
+NumberBinsPDF
+  Number of bins used for the output PDFs (default 20).
 
 FABADA Specific Outputs
 -----------------------
@@ -77,8 +101,8 @@ Usage
   ws_data = Load(Filename='irs26176_graphite002_red.nxs')
   ws_res = Load(Filename='irs26173_graphite002_res.nxs')
 
-  function_str = 'composite=Convolution,FixResolution=tue,NumDeriv=false;name=Resolution,Workspace=ws_res,WorkspaceIndex=0;(composite=CompositeFunction,NumDeriv=true;name=Lorentzian,Amplitude=1,PeakCentre=0.01,FWHM=0.5;name=Lorentzian,Amplitude=1,PeakCentre=0.01,FWHM=0.5)'
-  minimizer_str = "FABADA,Chain Length=1000000,Steps between values=10,Convergence Criteria=0.01,PDF=pdf,Chains=chain,Converged chain=conv,Cost Function Table=CostFunction,Parameter Erros =Errors"
+  function_str = 'composite=Convolution,FixResolution=true,NumDeriv=false;name=Resolution,Workspace=ws_res,WorkspaceIndex=0;(composite=CompositeFunction,NumDeriv=true;name=Lorentzian,Amplitude=1,PeakCentre=0.01,FWHM=0.5;name=Lorentzian,Amplitude=1,PeakCentre=0.01,FWHM=0.5)'
+  minimizer_str = "FABADA,ChainLength=1000000,StepsBetweenValues=10,ConvergenceCriteria=0.01,PDF=pdf,Chains=chain,ConvergedChain=conv,CostFunctionTable=CostFunction,Parameters=Errors"
 
   Fit(Function = function_str,InputWorkspace=ws_data,WorkspaceIndex=3,StartX=-0.25,EndX=0.25,CreateOutput=True,Output = 'result',OutputCompositeMembers=True,MaxIterations=2000000, Minimizer=minimizer_str)
 

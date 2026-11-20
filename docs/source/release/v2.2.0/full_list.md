@@ -41,7 +41,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 | [#6302](https://github.com/mantidproject/mantid/issues/6302) (Trac 5456) | LiveData: Create an ISIS Histogram Listener                                                               |
 | [#6304](https://github.com/mantidproject/mantid/issues/6304) (Trac 5458) | Extend System Tests for ISIS Reflectometry                                                                |
 | [#6315](https://github.com/mantidproject/mantid/issues/6315) (Trac 5469) | Cannot view 4D datasets in ParaView                                                                       |
-| [#6318](https://github.com/mantidproject/mantid/issues/6318) (Trac 5472) | [C2E] - Interface cant load inst def file on startup on Win7 build                                        |
+| [#6318](https://github.com/mantidproject/mantid/issues/6318) (Trac 5472) | [C2E] - Interface can't load inst def file on startup on Win7 build                                       |
 | [#6326](https://github.com/mantidproject/mantid/issues/6326) (Trac 5480) | [C2E] - Crash When Starting Interface                                                                     |
 | [#6378](https://github.com/mantidproject/mantid/issues/6378) (Trac 5532) | Stitch1D Adding Two MDWorkspaces                                                                          |
 | [#6407](https://github.com/mantidproject/mantid/issues/6407) (Trac 5561) | Duplicates in MantidPlot Workspaces List                                                                  |
@@ -204,7 +204,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 | [#6401](https://github.com/mantidproject/mantid/issues/6401) (Trac 5555) | Add a new PEARL instrument definition file to Mantid                                                      |
 | [#6402](https://github.com/mantidproject/mantid/issues/6402) (Trac 5556) | Build mantid-mpi package as a tarball                                                                     |
 | [#6403](https://github.com/mantidproject/mantid/issues/6403) (Trac 5557) | MantidPlot workspace widget doesn't display correctly workspace groups                                    |
-| [#6405](https://github.com/mantidproject/mantid/issues/6405) (Trac 5559) | ConvToMD NoQ convertor do not calculate number of ws dimensions properly                                  |
+| [#6405](https://github.com/mantidproject/mantid/issues/6405) (Trac 5559) | ConvToMD NoQ converter do not calculate number of ws dimensions properly                                  |
 | [#6406](https://github.com/mantidproject/mantid/issues/6406) (Trac 5560) | Add methods to store histogram bin boundaries within a run object                                         |
 | [#6408](https://github.com/mantidproject/mantid/issues/6408) (Trac 5562) | Boolean time series properties are not saved                                                              |
 | [#6409](https://github.com/mantidproject/mantid/issues/6409) (Trac 5563) | [IDA] ConvFit - Fixing Parameters Causes Crash                                                            |
@@ -252,7 +252,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 | [#6514](https://github.com/mantidproject/mantid/issues/6514) (Trac 5668) | Add TofConverter interface                                                                                |
 | [#6518](https://github.com/mantidproject/mantid/issues/6518) (Trac 5672) | Add option to IndexPeaks to round or not round the Miller indices.                                        |
 | [#6527](https://github.com/mantidproject/mantid/issues/6527) (Trac 5681) | unit test for LoadSassenaParams                                                                           |
-| [#6528](https://github.com/mantidproject/mantid/issues/6528) (Trac 5682) | Reinstate Old ConvertToMDEvents code untill the apoling performance of ConvertToMD code fixedof           |
+| [#6528](https://github.com/mantidproject/mantid/issues/6528) (Trac 5682) | Reinstate Old ConvertToMDEvents code until the apoling performance of ConvertToMD code fixedof            |
 | [#6529](https://github.com/mantidproject/mantid/issues/6529) (Trac 5683) | Move IDomainCreator to API and create factory                                                             |
 | [#6530](https://github.com/mantidproject/mantid/issues/6530) (Trac 5684) | Extend IDF Logfile syntax                                                                                 |
 | [#6533](https://github.com/mantidproject/mantid/issues/6533) (Trac 5687) | Build test for MDWSDescription                                                                            |
@@ -280,7 +280,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 | [#6076](https://github.com/mantidproject/mantid/issues/6076) (Trac 5230) | More user friendly error when trying to start too many MonitorLiveData                                    |
 | [#6099](https://github.com/mantidproject/mantid/issues/6099) (Trac 5253) | ConvertToMDEvents coplanar viewing axes                                                                   |
 | [#6106](https://github.com/mantidproject/mantid/issues/6106) (Trac 5260) | Windows Folder Shortcuts                                                                                  |
-| [#6108](https://github.com/mantidproject/mantid/issues/6108) (Trac 5262) | OS X: Spash screen does not display date/time/version                                                     |
+| [#6108](https://github.com/mantidproject/mantid/issues/6108) (Trac 5262) | OS X: Splash screen does not display date/time/version                                                    |
 | [#6119](https://github.com/mantidproject/mantid/issues/6119) (Trac 5273) | Mantid Plot Launchable from Applications Folder                                                           |
 | [#6122](https://github.com/mantidproject/mantid/issues/6122) (Trac 5276) | Peak radius spinbox has a maximum value of 99                                                             |
 | [#6126](https://github.com/mantidproject/mantid/issues/6126) (Trac 5280) | Check Windows Is Closed BEFORE Install                                                                    |

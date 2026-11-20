@@ -478,7 +478,7 @@ GSAS-II Refinement
 ------------------
 
 This tab calls GSAS-II python interface (path to GSAS-II supplied by the user in the interface settings).
-Currently only Pawley refinements are supported and the lattice parameters in the ``.cif`` phase file can be overidden.
+Currently only Pawley refinements are supported and the lattice parameters in the ``.cif`` phase file can be overridden.
 
 Parameters
 ^^^^^^^^^^

@@ -12,7 +12,7 @@ class: screenshot
 width: 500px
 align: right
 ---
-Scattering of Triphylite on TOPAZ in reciprocal space. Two PeaksWorkspaces have been overlayed. Peak positions (as cross-hairs) from {ref}`FindPeaksMD <algm-FindPeaksMD>` and spherical zone for peak Integration (spheres) from {ref}`IntegratePeaksMD <algm-IntegratePeaksMD>` are overlayed in the VatesSimpleInterface
+Scattering of Triphylite on TOPAZ in reciprocal space. Two PeaksWorkspaces have been overlaid. Peak positions (as cross-hairs) from {ref}`FindPeaksMD <algm-FindPeaksMD>` and spherical zone for peak Integration (spheres) from {ref}`IntegratePeaksMD <algm-IntegratePeaksMD>` are overlaid in the VatesSimpleInterface
 ```
 
 ## Release 2.4, Released: 1 February 2013

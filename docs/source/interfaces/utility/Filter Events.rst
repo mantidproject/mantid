@@ -115,7 +115,7 @@ functionality:
 | Group Output     | Option to group all the output workspaces.               |
 | Workspace        |                                                          |
 +------------------+----------------------------------------------------------+
-| Split Sample     | If selected, all sample logs will be splitted by the     |
+| Split Sample     | If selected, all sample logs will be split by the        |
 | Log              | event splitters. It is not recommended for fast event    |
 |                  | log splitters.                                           |
 +------------------+----------------------------------------------------------+

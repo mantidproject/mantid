@@ -53,7 +53,7 @@ A composite function containing a Back2BackExponential with a LinearBackground. 
 
 #### Visualization of Structure Factors from Molecular Dynamics Simulations
 
-- The ability to visualize the intermediate structure factors I(Q,t) derived from molecular dynamics simulation trajectories has been implemented via the new {ref}`LoadSassena <algm-LoadSassena>` algorithm. [Sassena](http://www.sassena.org/) is a highly scalable parallelized software for calculating neutron and xray scattering intensities from all-atomic molecular dynamics simulations. The user may load the Sassena ouput (an HDF5 file) resulting in a groupworkspace. Each workspace member holds a different structure factor.The algorithm {ref}`SassenaFFT <algm-SassenaFFT>` performs the fourier transform using the groupworkspace as input. The user can enter the simulation temperature to apply the detail balance condition (see the {ref}`SassenaFFT <algm-SassenaFFT>` wiki page for details).
+- The ability to visualize the intermediate structure factors I(Q,t) derived from molecular dynamics simulation trajectories has been implemented via the new {ref}`LoadSassena <algm-LoadSassena>` algorithm. [Sassena](http://www.sassena.org/) is a highly scalable parallelized software for calculating neutron and xray scattering intensities from all-atomic molecular dynamics simulations. The user may load the Sassena output (an HDF5 file) resulting in a groupworkspace. Each workspace member holds a different structure factor.The algorithm {ref}`SassenaFFT <algm-SassenaFFT>` performs the fourier transform using the groupworkspace as input. The user can enter the simulation temperature to apply the detail balance condition (see the {ref}`SassenaFFT <algm-SassenaFFT>` wiki page for details).
 
 Here’s a snapshot of a Mantid Session showing the intermediate and final structure factors after using {ref}`LoadSassena <algm-LoadSassena>` and {ref}`SassenaFFT <algm-SassenaFFT>` on a Sassena output file. The simulated system corresponds to a [NAMD](http://www.ks.uiuc.edu/Research/namd) simulation of a concentrated solution of Li+Cl- in water at room temperature. [Pymol](http://www.pymol.org/) was used to render a snapshot of the system.
 
@@ -99,7 +99,7 @@ Intermediate and final structure factors from a simulation of a concentrated sol
 - {ref}`DetermineChunking <algm-DetermineChunking>` now supports a wider variety of file types.
 - {ref}`FilterByLogValue <algm-FilterByLogValue>` now supports integer based log values.
 - {ref}`FilterByXValue <algm-FilterByXValue>` Filters the events in an event workspace according to a minimum and/or maximum value of X.
-- {ref}`FilterEvents <algm-FilterEvents>` is the erly implementation of a more powerfull and flexible filtering framework for event workspaces.
+- {ref}`FilterEvents <algm-FilterEvents>` is the early implementation of a more powerful and flexible filtering framework for event workspaces.
 - {ref}`LoadSassena <algm-LoadSassena>` and {ref}`SassenaFFT <algm-SassenaFFT>` enable the loading and the Fourier Transform of intermediate structure factors computed by Sassena from molecular dynamics simulation trajectories.
 - {ref}`ResampleX <algm-ResampleX>` algorithm which allows for specifying the number of bins, and calculates the binning parameters for rebinning.
 - {ref}`SaveAscii <algm-SaveAscii>` now has the option to exclude the header information.

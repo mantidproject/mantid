@@ -58,6 +58,6 @@ alt: Plot2DAxes
 ---
 ```
 
-- More control is availavle of the axis labelling for 2D plots for the top and right axis. Thei is controled in the Preferences Dialog, under 2D Plots->Axes
+- More control is available of the axis labelling for 2D plots for the top and right axis. This is controlled in the Preferences Dialog, under 2D Plots->Axes
 - The location of windows is now correctly remembered when saving a project
 - Hidden algorithm categories are now saved correctly

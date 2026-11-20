@@ -21,7 +21,7 @@ As a result, there is a significantly smaller memory usage and the processing is
 
 Current limitations compared to ``AlignAndFocusPowderFromFiles``
 
-- does not support copping data
+- does not support cropping data
 - does not support removing prompt pulse
 
 Child algorithms used are

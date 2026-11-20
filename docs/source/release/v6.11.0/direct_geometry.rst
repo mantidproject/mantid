@@ -13,11 +13,11 @@ New features
   If all crystal analyzers have the same energy, a single ``efixed`` is written into ``NXSPE_info->fixed_energy`` as before,
   while if detectors have different analyzer energies, an array of the energies is written into the ``NXSPE_info->fixed_energy`` field of the ``.nxspe`` file.
   Also for Indirect instruments, no ``fermi`` field is added to the ``instrument`` folder.
-  The algorithm has also been modified so if ``Ei`` is provided as the propery value it always overrides the values retrieved from the workspace.
+  The algorithm has also been modified so if ``Ei`` is provided as the property value it always overrides the values retrieved from the workspace.
 
 Bugfixes
 ############
-- :ref:`ALFView <ALFView-ref>` no longer crashs when moving the cursor over the Instrument View while loading data.
+- :ref:`ALFView <ALFView-ref>` no longer crashes when moving the cursor over the Instrument View while loading data.
 - :ref:`ALFView <ALFView-ref>` no longer crashes when closing the interface while it is loading data.
 - :ref:`PyChop` no longer uses random phase values on Merlin when instrument scientist mode disabled.
 - Fix for incorrect incident energies for ``MERLIN`` in :ref:`PyChop` when not in instrument scientist mode.

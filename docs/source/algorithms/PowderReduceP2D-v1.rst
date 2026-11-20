@@ -14,7 +14,7 @@ Input
 
 This algorithm can be used for one run of sample data. For correction and background reduction
 additional measurements of Vanadium(``VanaData``) and an empty can(``EmptyData``) can be specified
-but are not necessary. If an empty measurement is specified, it is substracted from the sample
+but are not necessary. If an empty measurement is specified, it is subtracted from the sample
 measurement. If a Vanadium measurement is specified, the sample measurement is divided by the
 vanadium measurement. If either or both are not specified these steps are skipped. It is highly
 recommended to specify both. Additionally, an empty vanadium measurement can be supplied.

@@ -77,7 +77,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 | [#4254](https://github.com/mantidproject/mantid/issues/4254) (Trac 3407) | Memory Leak: when python algorithms fail                                                                                          |
 | [#6263](https://github.com/mantidproject/mantid/issues/6263) (Trac 5417) | DAE Miscommunication                                                                                                              |
 | [#6628](https://github.com/mantidproject/mantid/issues/6628) (Trac 5782) | Unit tests needed for CopyInstrumentParameters Algorithm                                                                          |
-| [#6976](https://github.com/mantidproject/mantid/issues/6976) (Trac 6130) | Gropuing file obtained from instrument window can not be read by LoadDetectorsGroupingFile algorithm                              |
+| [#6976](https://github.com/mantidproject/mantid/issues/6976) (Trac 6130) | Grouping file obtained from instrument window can not be read by LoadDetectorsGroupingFile algorithm                              |
 | [#7006](https://github.com/mantidproject/mantid/issues/7006) (Trac 6160) | Masking Controls on InstrumentView                                                                                                |
 | [#7022](https://github.com/mantidproject/mantid/issues/7022) (Trac 6176) | Script repository uploads from Mantid                                                                                             |
 | [#7058](https://github.com/mantidproject/mantid/issues/7058) (Trac 6212) | Inst View: Move grouping functions to Mask tab                                                                                    |
@@ -146,7 +146,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 | [#6625](https://github.com/mantidproject/mantid/issues/6625) (Trac 5779) | Fix some error in thermal neutron TOF peak profile and add wiki page                                                              |
 | [#6643](https://github.com/mantidproject/mantid/issues/6643) (Trac 5797) | Write unit test for Apply Calibration                                                                                             |
 | [#6660](https://github.com/mantidproject/mantid/issues/6660) (Trac 5814) | Generalise system test validation to work with MD workspaces                                                                      |
-| [#6731](https://github.com/mantidproject/mantid/issues/6731) (Trac 5885) | Inconsistant pathnames in Workspace History                                                                                       |
+| [#6731](https://github.com/mantidproject/mantid/issues/6731) (Trac 5885) | Inconsistent pathnames in Workspace History                                                                                       |
 | [#6737](https://github.com/mantidproject/mantid/issues/6737) (Trac 5891) | Fix reduction_application.py standalone running                                                                                   |
 | [#6844](https://github.com/mantidproject/mantid/issues/6844) (Trac 5998) | warning displayed when searching archive for valid file                                                                           |
 | [#6863](https://github.com/mantidproject/mantid/issues/6863) (Trac 6017) | Enhance peak fitting in FitPowderDiffPeaks                                                                                        |
@@ -159,14 +159,14 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 | [#7191](https://github.com/mantidproject/mantid/issues/7191) (Trac 6345) | Various changes for building on Mac                                                                                               |
 | [#7212](https://github.com/mantidproject/mantid/issues/7212) (Trac 6366) | Migrate EQSANS reduction to workflow algorithms                                                                                   |
 | [#7238](https://github.com/mantidproject/mantid/issues/7238) (Trac 6392) | Review Rebinning Controls on Slice Viewer                                                                                         |
-| [#7242](https://github.com/mantidproject/mantid/issues/7242) (Trac 6396) | Make GUI for SCD reduction, with key capabilties from IsawEV                                                                      |
+| [#7242](https://github.com/mantidproject/mantid/issues/7242) (Trac 6396) | Make GUI for SCD reduction, with key capabilities from IsawEV                                                                     |
 | [#7269](https://github.com/mantidproject/mantid/issues/7269) (Trac 6424) | More work on the run_start property                                                                                               |
 | [#7281](https://github.com/mantidproject/mantid/issues/7281) (Trac 6435) | Improve Wiki Documentation of Muon Analysis Interface                                                                             |
 | [#7295](https://github.com/mantidproject/mantid/issues/7295) (Trac 6449) | Investigate the reason for the MDEventWorkspaceTestPerformance.test_splitting_performance_single_threaded performance degradation |
 | [#7300](https://github.com/mantidproject/mantid/issues/7300) (Trac 6454) | script window: Code Folding does not do anything                                                                                  |
 | [#7301](https://github.com/mantidproject/mantid/issues/7301) (Trac 6455) | Expose DetectorGroup::getNameSeparator to Python                                                                                  |
 | [#7311](https://github.com/mantidproject/mantid/issues/7311) (Trac 6465) | Move libgit2 library outside of the mantid repository                                                                             |
-| [#7324](https://github.com/mantidproject/mantid/issues/7324) (Trac 6478) | Mantiplot: Add text tool makes the data disply toolbar appear - why?                                                              |
+| [#7324](https://github.com/mantidproject/mantid/issues/7324) (Trac 6478) | Mantiplot: Add text tool makes the data display toolbar appear - why?                                                             |
 | [#7328](https://github.com/mantidproject/mantid/issues/7328) (Trac 6482) | Minor suggestions: PeaksWorkspace plot overlay for non-integrated workspaces                                                      |
 | [#7345](https://github.com/mantidproject/mantid/issues/7345) (Trac 6499) | Better File selection for UpdateInstrumentFromFile                                                                                |
 | [#7360](https://github.com/mantidproject/mantid/issues/7360) (Trac 6514) | Rework Glyphs                                                                                                                     |
@@ -214,7 +214,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 | [#7492](https://github.com/mantidproject/mantid/issues/7492) (Trac 6646) | WikiMaker: Change ugly type of WorkspaceProperty\<TableWorkspace>                                                                 |
 | [#7499](https://github.com/mantidproject/mantid/issues/7499) (Trac 6653) | Create some high-level git macros to support our new workflow                                                                     |
 | [#7501](https://github.com/mantidproject/mantid/issues/7501) (Trac 6655) | SaveGSS fails when there is a dot in the path other than before the extension                                                     |
-| [#7502](https://github.com/mantidproject/mantid/issues/7502) (Trac 6656) | Investigate and fix the problem with absoulute normalization for ISIS inelastic instriments                                       |
+| [#7502](https://github.com/mantidproject/mantid/issues/7502) (Trac 6656) | Investigate and fix the problem with absolute normalization for ISIS inelastic instriments                                        |
 | [#7503](https://github.com/mantidproject/mantid/issues/7503) (Trac 6657) | DirectInelaticSNSTest (system test) does not handle periods in save directories correctly                                         |
 | [#7505](https://github.com/mantidproject/mantid/issues/7505) (Trac 6659) | Wikimaker Workspaceproperty Links                                                                                                 |
 | [#7508](https://github.com/mantidproject/mantid/issues/7508) (Trac 6662) | MedianDetectorTest fails in certain conditions                                                                                    |
@@ -290,7 +290,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 | [#7724](https://github.com/mantidproject/mantid/issues/7724) (Trac 6878) | Add links for main help pages                                                                                                     |
 | [#7726](https://github.com/mantidproject/mantid/issues/7726) (Trac 6880) | HelpWindow flashes up on shutdown if it hasn't been started                                                                       |
 | [#7727](https://github.com/mantidproject/mantid/issues/7727) (Trac 6881) | Add option for "save" in mask tab of instrument view                                                                              |
-| [#7728](https://github.com/mantidproject/mantid/issues/7728) (Trac 6882) | Export Label unit classe to Python                                                                                                |
+| [#7728](https://github.com/mantidproject/mantid/issues/7728) (Trac 6882) | Export Label unit class to Python                                                                                                 |
 | [#7731](https://github.com/mantidproject/mantid/issues/7731) (Trac 6885) | TIB range not working in DGSReduction                                                                                             |
 | [#7738](https://github.com/mantidproject/mantid/issues/7738) (Trac 6892) | LoadEventNexus: Add option to not load logs.                                                                                      |
 | [#7747](https://github.com/mantidproject/mantid/issues/7747) (Trac 6901) | Improve Usability of SCD GUI (MantidEV)                                                                                           |
@@ -336,7 +336,7 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 | [#7439](https://github.com/mantidproject/mantid/issues/7439) (Trac 6593) | small refactoring of FFT                                                                                                          |
 | [#7443](https://github.com/mantidproject/mantid/issues/7443) (Trac 6597) | reconciliate header in ExtractFFTSpectrum with wiki page for the algorithm                                                        |
 | [#7520](https://github.com/mantidproject/mantid/issues/7520) (Trac 6674) | Make loadMask algorithm generating warnings about masked detectors on debug level rather then warning                             |
-| [#7534](https://github.com/mantidproject/mantid/issues/7534) (Trac 6688) | Remove test in SystemTests.ReduceOneSCD_Run.ReduceOneSCD_Run so sytem test works on Window7 at isis                               |
+| [#7534](https://github.com/mantidproject/mantid/issues/7534) (Trac 6688) | Remove test in SystemTests.ReduceOneSCD_Run.ReduceOneSCD_Run so system test works on Window7 at isis                              |
 | [#7558](https://github.com/mantidproject/mantid/issues/7558) (Trac 6712) | [IDA] Apply Corr - Not Running                                                                                                    |
 | [#7577](https://github.com/mantidproject/mantid/issues/7577) (Trac 6731) | Remove Doxygen error in RefinePowderInstrumentParameters2                                                                         |
 | [#7665](https://github.com/mantidproject/mantid/issues/7665) (Trac 6819) | Add Sassena file extensions to Load                                                                                               |

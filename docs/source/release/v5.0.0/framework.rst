@@ -14,7 +14,7 @@ New Features
 - On Windows, search in the start menu for "Workbench", "Plot" to open Mantid, previously only
   "Mantid" worked.
 
-Imporovements
+Improvements
 #############
 
 

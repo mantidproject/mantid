@@ -274,7 +274,7 @@ while a gap of :math:`\sqrt{2}` is practically indistinguishable with error belo
 
    plot_optimised_interp(sigma_max=np.sqrt(2))
 
-For TOSCA :math:`\sigma = a f^2 + b f + c` where :math:`a, b, c$ = $10^{-7}, 0.005, 2.5`. For an energy range of 32 cm\ :sup:`-1` to 4100 cm\ :sup:`-1` sigma ranges from 2.66 to 24.68, which could covered by 5 Gaussians separated by width factor 2 or 9 Gaussians seperated by width factor :math:`\sqrt{2}`.
+For TOSCA :math:`\sigma = a f^2 + b f + c` where :math:`a, b, c$ = $10^{-7}, 0.005, 2.5`. For an energy range of 32 cm\ :sup:`-1` to 4100 cm\ :sup:`-1` sigma ranges from 2.66 to 24.68, which could covered by 5 Gaussians separated by width factor 2 or 9 Gaussians separated by width factor :math:`\sqrt{2}`.
 This could present a significant cost saving compared to full evaluation of ~4000 convolution kernels (one per convolution bin).
 
 We can build on this by performing convolution of the full spectrum with each of the sampled kernels, and then interpolate *between the spectra* using the predetermined mixing weights. The convolution is performed efficiently using FFTs, and relatively little memory is required to hold this limited number of spectra and interpolate between them.
