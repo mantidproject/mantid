@@ -13,7 +13,9 @@
 
 #include <algorithm>
 #include <ostream>
+#include <ranges>
 #include <stdexcept>
+#include <tuple>
 #include <vector>
 
 #include <gsl/gsl_errno.h>
@@ -97,19 +99,7 @@ void CubicSpline::setupInput(int const n) const {
     g_log.warning() << "Spline x parameters are not in ascending order. Values "
                        "will be sorted.\n";
 
-    using point = std::pair<double, double>;
-    std::vector<point> pairs;
-    pairs.reserve(n);
-    for (int i = 0; i < n; ++i) {
-      pairs.emplace_back(x[i], y[i]);
-    }
-
-    std::sort(pairs.begin(), pairs.end(), [](const point &xy1, const point &xy2) { return xy1.first < xy2.first; });
-
-    for (int i = 0; i < n; ++i) {
-      x[i] = pairs[i].first;
-      y[i] = pairs[i].second;
-    }
+    std::ranges::sort(std::views::zip(x, y), {}, [](const auto &xy) { return std::get<0>(xy); });
   }
 
   // initialize the spline
