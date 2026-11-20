@@ -112,6 +112,10 @@ add_dependencies(
   PythonReflHelpersModule
 )
 
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+  add_subdirectory(tbbmalloc)
+endif()
+
 # Clear any leftover bin/$(Configuration)/mantid/ folder, from when PythonInterface was being copied over. The last
 # semicolon is there to have an iteration with an empty string which makes the last check just bin/mantid for
 # non-Windows builds
