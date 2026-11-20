@@ -1,0 +1,2 @@
+- The IPTS number is now optional in :ref:`HFIRPowderReduction <algm-HFIRPowderReduction>`. When only run numbers are given, the IPTS of each run is looked up automatically.
+- The ``.dat`` file saved by :ref:`HFIRPowderReduction <algm-HFIRPowderReduction>` now separates its columns with spaces instead of commas and no longer starts with header lines.

@@ -63,6 +63,7 @@ from mantid.simpleapi import (
     AddSampleLog,
     MaskDetectors,
 )
+import functools
 import h5py
 import numpy as np
 import os
@@ -79,6 +80,16 @@ MIDAS_PIXELS_PER_TUBE = 512
 MIDAS_MASKED_END_PIXELS = 40
 # Facility short names of the supported instruments, used in data file names and paths
 INSTRUMENT_SHORT_NAMES = {"MIDAS": "HB2A", "WAND^2": "HB2C"}
+
+
+@functools.lru_cache(maxsize=32)
+def _findRunFiles(shortName, runNumbers):
+    """Return the files of runNumbers (a tuple) on the instrument shortName, located by FileFinder.
+
+    The algorithm dialog validates the inputs whenever any property changes, so the results are
+    cached to avoid repeating the archive search.  A failed search raises and is not cached.
+    """
+    return tuple(FileFinder.findRuns(",".join(f"{shortName}_{run}" for run in runNumbers), [".nxs.h5"], True))
 
 
 class HFIRPowderReduction(DataProcessorAlgorithm):
@@ -694,7 +705,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         ipts = self.getProperty(f"{data_type}IPTS").value
         if ipts != Property.EMPTY_INT:
             return [f"/HFIR/{shortName}/IPTS-{ipts}/nexus/{shortName}_{run}.nxs.h5" for run in run_numbers]
-        return FileFinder.findRuns(",".join(f"{shortName}_{run}" for run in run_numbers), [".nxs.h5"], True)
+        return list(_findRunFiles(shortName, tuple(run_numbers)))
 
     def _runFiles(self, data_type):
         """Return the files to load for data_type: <data_type>Filename if set, else the run number files."""
@@ -884,12 +895,17 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             if self.getProperty("SampleDiameter").value == Property.EMPTY_DBL:
                 issues["SampleDiameter"] = "SampleDiameter is required when DoAttenuationCorrection is True"
 
-        # Check metadata consistency for multiple sample runs
-        try:
-            files = self._runFiles("Sample")
-        except RuntimeError:
-            files = []  # a missing run is reported when the data is loaded
+        # Report run numbers that cannot be found here, so the dialog shows them instead of PyExec failing
+        for field in allFields:
+            if f"{field}RunNumbers" in issues:
+                continue
+            try:
+                self._runNumberFiles(field)
+            except RuntimeError as e:
+                issues[f"{field}RunNumbers"] = f"Could not find the {field} run files: {e}"
 
+        # Check metadata consistency for multiple sample runs
+        files = self._runFiles("Sample") if "SampleRunNumbers" not in issues else []
         if len(files) > 1:
             self._checkMetadataConsistency(files, "Sample")
 

@@ -26,7 +26,7 @@ from mantid.simpleapi import (
 )
 from mantid.api import AlgorithmManager, ExperimentInfo, MatrixWorkspace, WorkspaceGroup
 from mantid.kernel import Logger, Property
-from plugins.algorithms.WorkflowAlgorithms.HFIRPowderReduction import HFIRPowderReduction as _HFIRPowderReduction
+from plugins.algorithms.WorkflowAlgorithms.HFIRPowderReduction import HFIRPowderReduction as _HFIRPowderReduction, _findRunFiles
 import h5py
 import os
 import numpy as np
@@ -35,6 +35,12 @@ import shutil
 from unittest.mock import patch
 
 _MODULE = "plugins.algorithms.WorkflowAlgorithms.HFIRPowderReduction"
+
+
+def _patchFileFinder():
+    """Patch FileFinder, clearing the run file cache so that no earlier lookup is reused."""
+    _findRunFiles.cache_clear()
+    return patch(f"{_MODULE}.FileFinder")
 
 
 def _findRunsInIPTS(ipts):
@@ -119,7 +125,7 @@ class LoadInputErrorMessages(unittest.TestCase):
         found = {"Sample": 456, "Vanadium": 457, "VanadiumBackground": 458, "SampleBackground": 459}
         kwargs = {f"{field}RunNumbers": [run] for field, run in found.items()}
         algo = _create_algo(Instrument="WAND^2", **kwargs)
-        with patch(f"{_MODULE}.FileFinder") as finder:
+        with _patchFileFinder() as finder:
             finder.findRuns.side_effect = _findRunsInIPTS(1234)
             issues = algo.validateInputs()
         for field in found:
@@ -1016,13 +1022,13 @@ class OutputWorkspaceNameTests(unittest.TestCase):
 
     def test_ipts_looked_up_from_run_numbers(self):
         algo = _create_algo(Instrument="WAND^2", SampleRunNumbers=[5, 6, 7])
-        with patch(f"{_MODULE}.FileFinder") as finder:
+        with _patchFileFinder() as finder:
             finder.findRuns.side_effect = _findRunsInIPTS(1234)
             self.assertEqual(algo._defaultOutputWorkspaceName(), "IPTS1234_Run5-7")
 
     def test_not_populated_when_ipts_lookup_fails(self):
         algo = _create_algo(Instrument="WAND^2", SampleRunNumbers=[456])
-        with patch(f"{_MODULE}.FileFinder") as finder:
+        with _patchFileFinder() as finder:
             finder.findRuns.side_effect = RuntimeError("not found")
             self.assertEqual(algo._defaultOutputWorkspaceName(), "")
 
@@ -1052,14 +1058,14 @@ class RunFileLookupTests(unittest.TestCase):
 
     def test_files_built_from_ipts(self):
         algo = _create_algo(Instrument="MIDAS", SampleIPTS=99, SampleRunNumbers=[7, 8])
-        with patch(f"{_MODULE}.FileFinder") as finder:
+        with _patchFileFinder() as finder:
             files = algo._runFiles("Sample")
             finder.findRuns.assert_not_called()
         self.assertEqual(files, ["/HFIR/HB2A/IPTS-99/nexus/HB2A_7.nxs.h5", "/HFIR/HB2A/IPTS-99/nexus/HB2A_8.nxs.h5"])
 
     def test_files_looked_up_without_ipts(self):
         algo = _create_algo(Instrument="WAND^2", VanadiumRunNumbers=[5, 6])
-        with patch(f"{_MODULE}.FileFinder") as finder:
+        with _patchFileFinder() as finder:
             finder.findRuns.side_effect = _findRunsInIPTS(1234)
             files = algo._runFiles("Vanadium")
             finder.findRuns.assert_called_once_with("HB2C_5,HB2C_6", [".nxs.h5"], True)
@@ -1067,14 +1073,50 @@ class RunFileLookupTests(unittest.TestCase):
 
     def test_lookup_failure_raises(self):
         algo = _create_algo(Instrument="WAND^2", SampleRunNumbers=[456])
-        with patch(f"{_MODULE}.FileFinder") as finder:
+        with _patchFileFinder() as finder:
             finder.findRuns.side_effect = RuntimeError("not found")
             with self.assertRaisesRegex(RuntimeError, "not found"):
                 algo._runFiles("Sample")
 
+    def test_lookup_is_cached(self):
+        # the dialog validates on every property change, so repeated lookups must not search the archive again
+        algo = _create_algo(Instrument="WAND^2", SampleRunNumbers=[5, 6])
+        with _patchFileFinder() as finder:
+            finder.findRuns.side_effect = _findRunsInIPTS(1234)
+            first = algo._runFiles("Sample")
+            second = algo._runFiles("Sample")
+            finder.findRuns.assert_called_once()
+        self.assertEqual(first, second)
+
+    def test_lookup_failure_is_not_cached(self):
+        algo = _create_algo(Instrument="WAND^2", SampleRunNumbers=[456])
+        with _patchFileFinder() as finder:
+            finder.findRuns.side_effect = [RuntimeError("not found"), ["/HFIR/HB2C/IPTS-1234/nexus/HB2C_456.nxs.h5"]]
+            with self.assertRaises(RuntimeError):
+                algo._runFiles("Sample")
+            self.assertEqual(algo._runFiles("Sample"), ["/HFIR/HB2C/IPTS-1234/nexus/HB2C_456.nxs.h5"])
+
     def test_no_files_without_run_numbers(self):
         algo = _create_algo(Instrument="WAND^2")
         self.assertEqual(algo._runFiles("SampleBackground"), [])
+
+    def test_lookup_failure_reported_by_validate_inputs(self):
+        # the dialog only runs PyExec once validateInputs passes, so a missing run must be reported there
+        for field in ("Sample", "Vanadium", "VanadiumBackground", "SampleBackground"):
+            with self.subTest(field=field):
+                algo = _create_algo(Instrument="WAND^2", Wavelength=1.5, VanadiumDiameter=0.5, **{f"{field}RunNumbers": [456]})
+                with _patchFileFinder() as finder:
+                    finder.findRuns.side_effect = RuntimeError("not found")
+                    issues = algo.validateInputs()
+                self.assertIn(f"{field}RunNumbers", issues)
+                self.assertIn("not found", issues[f"{field}RunNumbers"])
+
+    def test_found_runs_not_reported_by_validate_inputs(self):
+        algo = _create_algo(Instrument="WAND^2", Wavelength=1.5, VanadiumDiameter=0.5, SampleRunNumbers=[456])
+        with _patchFileFinder() as finder:
+            finder.findRuns.side_effect = _findRunsInIPTS(1234)
+            issues = algo.validateInputs()
+        self.assertNotIn("SampleRunNumbers", issues)
 
 
 class MetadataConsistencyTests(unittest.TestCase):
