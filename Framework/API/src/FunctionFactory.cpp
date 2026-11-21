@@ -142,7 +142,7 @@ IFunction_sptr FunctionFactoryImpl::createSimple(const Expression &expr,
       IFunction::Attribute att = fun->getAttribute(parName);
       att.fromString(parValue);
       fun->setAttribute(parName, att);
-    } else if (parName.size() >= 10 && parName.starts_with("constraint")) {
+    } else if (parName.starts_with("constraint")) {
       // or it can be a list of constraints
       addConstraints(fun, (*term)[1].bracketsRemoved());
     } else if (parName == "ties") {
@@ -240,7 +240,7 @@ FunctionFactoryImpl::createComposite(const Expression &expr,
         continue;
     } else {
       std::string parName = currentTerm[0].name();
-      if (parName.size() >= 10 && parName.starts_with("constraint")) {
+      if (parName.starts_with("constraint")) {
         addConstraints(cfun, currentTerm[1].bracketsRemoved());
         continue;
       } else if (parName == "ties") {

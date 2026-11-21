@@ -143,12 +143,7 @@ MANTID_KERNEL_DLL std::string toUpper(const std::string &input) {
 
 /** Checks if string ends with a suffix
  */
-MANTID_KERNEL_DLL bool endsWith(std::string const &str, std::string const &suffix) {
-  if (str.size() >= suffix.size()) {
-    return str.ends_with(suffix);
-  }
-  return false;
-}
+MANTID_KERNEL_DLL bool endsWith(std::string const &str, std::string const &suffix) { return str.ends_with(suffix); }
 
 //------------------------------------------------------------------------------------------------
 /**

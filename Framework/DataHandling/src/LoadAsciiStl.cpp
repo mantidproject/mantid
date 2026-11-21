@@ -19,7 +19,7 @@ bool LoadAsciiStl::isAsciiSTL(const std::string &filename) {
   std::string line;
   getline(file, line);
   boost::trim(line);
-  return (line.size() >= 5 && line.starts_with("solid"));
+  return line.starts_with("solid");
 }
 
 std::unique_ptr<Geometry::MeshObject> LoadAsciiStl::readShape() {
@@ -102,10 +102,10 @@ bool LoadAsciiStl::readSTLLine(std::ifstream &file, std::string const &type) {
   m_lineNumber++;
   if (getline(file, line)) {
     boost::trim(line);
-    if (line.size() < type.size() || !line.starts_with(type)) {
+    if (!line.starts_with(type)) {
       // Before throwing, check for endsolid statment
       const std::string type2 = "endsolid";
-      if (line.size() < type2.size() || !line.starts_with(type2)) {
+      if (!line.starts_with(type2)) {
         throw Kernel::Exception::ParseError("Expected STL line begining with " + type + " or " + type2, m_filename,
                                             m_lineNumber);
       } else {
