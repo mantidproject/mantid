@@ -345,7 +345,7 @@ API::IFunction_sptr CrystalFieldMultiSpectrum::buildSpectrum(int nre, const Doub
   const size_t nRequiredPeaks = IFunction::getAttribute("NPeaks").asInt();
   const bool fixAllPeaks = getAttribute("FixAllPeaks").asBool();
 
-  if (!bkgdShape.empty() && !bkgdShape.starts_with("name=") && bkgdShape.front() != '(') {
+  if (!bkgdShape.empty() && !bkgdShape.starts_with("name=") && !bkgdShape.starts_with("(")) {
     bkgdShape = "name=" + bkgdShape;
   }
 

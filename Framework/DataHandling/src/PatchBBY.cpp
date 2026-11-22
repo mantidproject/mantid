@@ -147,12 +147,10 @@ void PatchBBY::exec() {
   // open file (and select hisotry file if it exists)
   const std::vector<std::string> &files = tarFile.files();
   for (auto itr = files.begin(); itr != files.end(); ++itr) {
-    auto len = itr->length();
-
-    if ((len > 4) && (itr->find_first_of("\\/", 0, 2) == std::string::npos)) {
-      if ((itr->starts_with("BBY")) && (itr->rfind(".hdf") == len - 4))
+    if ((itr->length() > 4) && (itr->find_first_of("\\/", 0, 2) == std::string::npos)) {
+      if (itr->starts_with("BBY") && itr->ends_with(".hdf"))
         hdfFiles++;
-      else if (itr->rfind(".bin") == len - 4)
+      else if (itr->ends_with(".bin"))
         binFiles++;
       else if (*itr == HistoryStr) {
         if (std::distance(itr, files.end()) != 1)

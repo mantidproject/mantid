@@ -1291,11 +1291,10 @@ int LoadEMUTar::confidence(Kernel::FileDescriptor &descriptor) const {
   size_t binFiles = 0;
   const std::vector<std::string> &subFiles = file.files();
   for (const auto &subFile : subFiles) {
-    auto len = subFile.length();
-    if ((len > 4) && (subFile.find_first_of("\\/", 0, 2) == std::string::npos)) {
-      if ((subFile.rfind(".hdf") == len - 4) && (subFile.starts_with("EMU")))
+    if ((subFile.length() > 4) && (subFile.find_first_of("\\/", 0, 2) == std::string::npos)) {
+      if (subFile.ends_with(".hdf") && subFile.starts_with("EMU"))
         hdfFiles++;
-      else if (subFile.rfind(".bin") == len - 4)
+      else if (subFile.ends_with(".bin"))
         binFiles++;
     }
   }

@@ -921,7 +921,7 @@ API::IFunction_sptr CrystalFieldFunction::buildSpectrum(int nre, const DoubleFor
   auto spectrum = new CompositeFunction;
 
   if (addBackground && !bkgdShape.empty()) {
-    if (!bkgdShape.starts_with("name=") && bkgdShape.front() != '(') {
+    if (!bkgdShape.starts_with("name=") && !bkgdShape.starts_with("(")) {
       bkgdShape = "name=" + bkgdShape;
     }
     auto background = API::FunctionFactory::Instance().createInitialized(bkgdShape);

@@ -93,11 +93,10 @@ int LoadBBY::confidence(Kernel::FileDescriptor &descriptor) const {
   size_t binFiles = 0;
   const std::vector<std::string> &subFiles = file.files();
   for (const auto &subFile : subFiles) {
-    auto len = subFile.length();
-    if ((len > 4) && (subFile.find_first_of("\\/", 0, 2) == std::string::npos)) {
-      if ((subFile.rfind(".hdf") == len - 4) && (subFile.starts_with("BBY")))
+    if ((subFile.length() > 4) && (subFile.find_first_of("\\/", 0, 2) == std::string::npos)) {
+      if (subFile.ends_with(".hdf") && subFile.starts_with("BBY"))
         hdfFiles++;
-      else if (subFile.rfind(".bin") == len - 4)
+      else if (subFile.ends_with(".bin"))
         binFiles++;
     }
   }
@@ -219,8 +218,8 @@ void LoadBBY::exec() {
 
   // set title
   const std::vector<std::string> &subFiles = tarFile.files();
-  const auto it = std::find_if(subFiles.cbegin(), subFiles.cend(),
-                               [](const auto &subFile) { return subFile.compare(0, 3, "BBY") == 0; });
+  const auto it =
+      std::find_if(subFiles.cbegin(), subFiles.cend(), [](const auto &subFile) { return subFile.starts_with("BBY"); });
   if (it != subFiles.cend()) {
     std::string title = *it;
 
@@ -716,8 +715,8 @@ void LoadBBY::loadEvents(API::Progress &prog, const char *progMsg, ANSTO::Tar::F
   // select bin file
   int64_t fileSize = 0;
   const std::vector<std::string> &files = tarFile.files();
-  const auto found = std::find_if(files.cbegin(), files.cend(),
-                                  [](const auto &file) { return file.rfind(".bin") == file.length() - 4; });
+  const auto found =
+      std::find_if(files.cbegin(), files.cend(), [](const auto &file) { return file.ends_with(".bin"); });
   if (found != files.cend()) {
     tarFile.select(found->c_str());
     fileSize = tarFile.selected_size();
