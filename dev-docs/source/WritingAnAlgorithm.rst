@@ -359,5 +359,5 @@ Python type stubs
 -----------------
 
 The ``mantid.simpleapi`` type stub that editors and type checkers use for algorithm signatures is generated from the registered algorithms and their properties.
-Packages always regenerate it, so your pull request does not need to update it, but you can regenerate the committed copy to check your algorithm's signature.
-See :ref:`Python type stubs <PythonTypeStubs>` for how to regenerate and check it.
+It is a build output that is not committed, so your pull request does not need to update it, but you can generate it with ``ninja simpleapi_stubs`` to check your algorithm's signature.
+See :ref:`Python type stubs <PythonTypeStubs>` for how to generate and check it.

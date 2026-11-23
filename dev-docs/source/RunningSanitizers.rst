@@ -183,3 +183,9 @@ This can appear when running Python tests, as the executable is not build
 with instrumentation. To avoid this warning ensure that
 *verify_asan_link_order=0* is set in your environment and that you are
 using GCC 8 onwards.
+
+The same applies to generating the ``mantid.simpleapi`` type stubs, which
+imports Mantid from Python. The sanitizer presets in ``CMakePresets.json``
+leave the ``simpleapi_stubs`` target out of the default build, but the
+``tools.python_typing.simpleapi_stubs`` CTest fixture still runs it before the
+Python typing tests. Set *ASAN_OPTIONS* as above before running those tests.

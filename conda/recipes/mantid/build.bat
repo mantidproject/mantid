@@ -18,16 +18,15 @@ cmake ^
     -DENABLE_WORKBENCH=OFF ^
     -DWORKBENCH_SITE_PACKAGES=%SP_DIR% ^
     -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF ^
-    -DSIMPLEAPI_STUBS_ARGS=--no-format ^
+    -DSIMPLEAPI_STUBS_IN_ALL=ON ^
     -DCMAKE_INSTALL_PREFIX=%LIBRARY_PREFIX% ^
     -DCMAKE_INSTALL_LIBDIR=%LIBRARY_LIB% ^
     -DCMAKE_PREFIX_PATH=%LIBRARY_PREFIX% ^
     ..
 
 if errorlevel 1 exit 1
+:: also generates the type stubs (SIMPLEAPI_STUBS_IN_ALL), which install then copies with the mantid package
 cmake --build . --config Release
-:: regenerate the type stubs from this build before install copies the mantid package
-cmake --build . --config Release --target simpleapi_stubs
 if errorlevel 1 exit 1
 cmake --build . --config Release --target install
 if errorlevel 1 exit 1
