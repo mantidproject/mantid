@@ -18,5 +18,5 @@ void export_DetectorInfoPythonIterator() {
   // Export to Python
   class_<DetectorInfoPythonIterator>("DetectorInfoPythonIterator", no_init)
       .def("__iter__", objects::identity_function())
-      .def("next", &DetectorInfoPythonIterator::next);
+      .def("__next__", &DetectorInfoPythonIterator::next);
 }
