@@ -3,6 +3,12 @@ schema_version: 1
 context:
   # Version is injected via an environment variable
   version: ${{ env.get('MANTID_VERSION', default='0.0.0') }}
+  # Version prefix of the mantiddocs package this workbench can use. mantiddocs is only built for
+  # full releases (x.y.z) and nightlies (x.y.YYYYMMDD.HHMM).
+  # - nightly (8-digit date patch): match the exact nightly, x.y.YYYYMMDD.HHMM
+  # - release/tweak/rc: match x.y.z, dropping any rc suffix on the patch so release
+  #   candidates accept the final docs (e.g. 6.16.1rc1 -> 6.16.1, 6.16.0.1rc2 -> 6.16.0)
+  docs_version_prefix: ${{ (version | split('.'))[:4] | join('.') if ((version | split('.'))[2] | length) >= 8 else (version | split('.'))[:2] | join('.') ~ '.' ~ ((version | split('.'))[2] | split('rc'))[0] }}
 
 package:
   name: mantidworkbench
@@ -51,7 +57,9 @@ requirements:
     - qtconsole-base ${{ qtconsole }}
   run_constraints:
     - mslice ${{ mslice }}
-    - mantiddocs == ${{ version }}
+    # pin_compatible can't be used here: it resolves against the host environment and
+    # mantiddocs isn't a host dependency. Pin on a prefix of the version instead (see context).
+    - mantiddocs ${{ docs_version_prefix }}.*
   ignore_run_exports:
     from_package:
       - ${{ compiler('cxx') }}
