@@ -478,11 +478,14 @@ class RunTabPresenter(PresenterCommon):
 
     def _get_current_file_information(self):
         # We shouldn't have to do this hack, but it solves the problem of trying to load in
-        # file information before we need it when the user adds details to a row entry
+        # file information before we need it when the user adds details to a row entry.
+        # The first row whose file can be found is used. Each lookup searches for the file and opens it,
+        # so looking up every row made long batch files slow to load and edit.
         file_info = None
         for row in self._table_model.get_non_empty_rows():
             try:
                 file_info = row.file_information
+                break
             except (ValueError, RuntimeError, OSError):
                 pass
 

@@ -115,6 +115,25 @@ class SANSFileInformationTest(unittest.TestCase):
         # Two identical file informations should be equal even if they are different objects
         self.assertEqual(file_information, file_information_2)
 
+    def test_file_informations_are_eq_after_one_has_looked_up_its_instrument_files(self):
+        factory = SANSFileInformationFactory()
+        file_information = factory.create_sans_file_information("SANS2D00022024")
+        file_information_2 = factory.create_sans_file_information("SANS2D00022024")
+
+        # Loading a user file looks these up and keeps them on the object
+        self.assertIsNotNone(file_information.get_idf_file_path())
+        self.assertIsNotNone(file_information.get_ipf_file_path())
+
+        self.assertEqual(file_information, file_information_2)
+        self.assertEqual(file_information_2, file_information)
+
+    def test_file_informations_for_different_files_are_not_eq(self):
+        factory = SANSFileInformationFactory()
+        file_information = factory.create_sans_file_information("SANS2D00022024")
+        file_information_2 = factory.create_sans_file_information("SANS2D00022048")
+
+        self.assertNotEqual(file_information, file_information_2)
+
     def test_that_can_extract_information_for_added_histogram_data_and_nexus_format(self):
         # Arrange
         # The file is a single period, histogram-based and added
