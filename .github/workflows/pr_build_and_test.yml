@@ -223,26 +223,6 @@ jobs:
       # print a sorted list of all shell environment variables
       #
 
-      # A cancelled or timed out job can leave processes behind (pixi, python, test executables)
-      # that keep files in the workspace open. Windows will not delete an open file, so the
-      # checkout's git clean, clean-builder or pixi then fail or wait. Only processes whose
-      # executable lives under this runner's workspace or temp directory are stopped, so other
-      # runners on the same host are not touched. This must run before checkout.
-      - name: Stop stray processes from earlier jobs
-        if: ${{ runner.os == 'Windows' }}
-        shell: powershell
-        run: |
-          $roots = @($env:GITHUB_WORKSPACE, $env:RUNNER_TEMP) | Where-Object { $_ } |
-            ForEach-Object { [System.IO.Path]::GetFullPath($_).TrimEnd('\') + '\' }
-          $stray = Get-Process | Where-Object {
-            $path = $_.Path
-            $path -and ($roots | Where-Object { $path.StartsWith($_, [System.StringComparison]::OrdinalIgnoreCase) })
-          }
-          foreach ($proc in $stray) {
-            Write-Host "Stopping $($proc.Id) $($proc.Path)"
-            Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
-          }
-
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # Needed to fetch the tags for versioningit
@@ -288,11 +268,11 @@ jobs:
           } >> "$GITHUB_ENV"
 
       - name: Install pixi environment
-        uses: ./.github/actions/install-pixi-env
         if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
-        # backstop only: the action stops a hung attempt itself, after 10 minutes without output,
-        # and allows two attempts of up to 30 minutes each
-        timeout-minutes: 65
+        # fails a stuck install promptly instead of at the job timeout
+        timeout-minutes: 30
+        run: |
+          pixi install --frozen -v
 
       - name: Build code
         if: ${{ needs.check-filters.outputs.code_changes == 'true' }}
@@ -476,11 +456,11 @@ jobs:
           ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/clean-builder ${GITHUB_WORKSPACE} ${CLEAN_ARGS}
 
       - name: Install pixi environment
-        uses: ./.github/actions/install-pixi-env
         if: ${{ needs.check-filters.outputs.user_docs == 'true' }}
-        # backstop only: the action stops a hung attempt itself, after 10 minutes without output,
-        # and allows two attempts of up to 30 minutes each
-        timeout-minutes: 65
+        # fails a stuck install promptly instead of at the job timeout
+        timeout-minutes: 30
+        run: |
+          pixi install --frozen -v
 
       - name: Build code and user docs
         if: ${{ needs.check-filters.outputs.user_docs == 'true' }}
