@@ -13,7 +13,6 @@
 #include "MantidQtWidgets/Common/FittingMode.h"
 #include "MantidQtWidgets/Common/Message.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
-#include "MantidPythonInterface/core/VersionCompat.h"
 #include "frameobject.h"
 
 #if defined(__GNUC__) && !defined(__clang__)
@@ -540,9 +539,9 @@ public:
 %MethodCode
     try {
       auto f = sipCpp->getFittingFunction();
-      sipRes = FROM_CSTRING(f->asString().c_str());
+      sipRes = PyUnicode_FromString(f->asString().c_str());
     } catch (std::out_of_range&) {
-      sipRes = FROM_CSTRING("");
+      sipRes = PyUnicode_FromString("");
     }
 %End
     int sizeOfFunctionsGroup() const;
@@ -585,16 +584,16 @@ public:
     SIP_PYOBJECT defaultPeakType();
 %MethodCode
     auto f = sipCpp->defaultPeakType();
-    sipRes = FROM_CSTRING(f.c_str());
+    sipRes = PyUnicode_FromString(f.c_str());
 %End
     void setDefaultPeakType(SIP_PYOBJECT);
 %MethodCode
-    sipCpp->setDefaultPeakType(TO_CSTRING(a0));
+    sipCpp->setDefaultPeakType(PyUnicode_AsUTF8(a0));
 %End
 SIP_PYOBJECT defaultBackgroundType();
 %MethodCode
     auto f = sipCpp->defaultBackgroundType();
-    sipRes = FROM_CSTRING(f.c_str());
+    sipRes = PyUnicode_FromString(f.c_str());
 %End
     QStringList registeredPeaks() const;
     QStringList registeredBackgrounds() const;
@@ -618,18 +617,18 @@ SIP_PYOBJECT defaultBackgroundType();
     SIP_PYOBJECT workspaceName() const;
 %MethodCode
     auto f = sipCpp->workspaceName();
-    sipRes = FROM_CSTRING(f.c_str());
+    sipRes = PyUnicode_FromString(f.c_str());
 %End
 
     SIP_PYOBJECT outputName() const;
 %MethodCode
     auto f = sipCpp->outputName();
-    sipRes = FROM_CSTRING(f.c_str());
+    sipRes = PyUnicode_FromString(f.c_str());
 %End
 
     void setOutputName(SIP_PYOBJECT);
 %MethodCode
-    sipCpp->setOutputName(TO_CSTRING(a0));
+    sipCpp->setOutputName(PyUnicode_AsUTF8(a0));
 %End
 
     void setPeakToolOn(bool on);

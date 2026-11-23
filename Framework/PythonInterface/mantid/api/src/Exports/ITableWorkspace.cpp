@@ -19,7 +19,6 @@
 #include "MantidPythonInterface/core/GetPointer.h"
 #include "MantidPythonInterface/core/NDArray.h"
 #include "MantidPythonInterface/core/Policies/VectorToNumpy.h"
-#include "MantidPythonInterface/core/VersionCompat.h"
 
 #include <boost/preprocessor/list/for_each.hpp>
 #include <boost/preprocessor/tuple/to_list.hpp>
@@ -47,15 +46,6 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(ITableWorkspace)
 
 namespace {
-
-// Numpy PyArray_IsIntegerScalar is broken for Python 3 for numpy < 1.11
-#define TO_LONG PyLong_AsLong
-#define STR_CHECK PyUnicode_Check
-#if NPY_API_VERSION < 0x0000000a //(1.11)
-#define IS_ARRAY_INTEGER(obj) (PyLong_Check(obj) || PyArray_IsScalar((obj), Integer))
-#else
-#define IS_ARRAY_INTEGER PyArray_IsIntegerScalar
-#endif
 
 /// Boost macro for "looping" over builtin types
 #define BUILTIN_TYPES BOOST_PP_TUPLE_TO_LIST(8, (double, std::string, int, size_t, uint32_t, int64_t, float, uint64_t))
@@ -123,8 +113,8 @@ void setValue(const Column_sptr &column, const int row, const object &value) {
 
   // Special case: Boost has issues with NumPy ints, so use Python API instead
   // to check this first
-  if (typeID.hash_code() == typeid(int).hash_code() && IS_ARRAY_INTEGER(value.ptr())) {
-    column->cell<int>(row) = static_cast<int>(TO_LONG(value.ptr()));
+  if (typeID.hash_code() == typeid(int).hash_code() && PyArray_IsIntegerScalar(value.ptr())) {
+    column->cell<int>(row) = static_cast<int>(PyLong_AsLong(value.ptr()));
     return;
   }
 
@@ -210,7 +200,7 @@ bool addReadOnlyColumn(ITableWorkspace &self, const std::string &type, const std
 int getPlotType(ITableWorkspace &self, const object &column) {
   // Find the column
   Mantid::API::Column_const_sptr colptr;
-  if (STR_CHECK(column.ptr())) {
+  if (PyUnicode_Check(column.ptr())) {
     colptr = self.getColumn(extract<std::string>(column)());
   } else {
     colptr = self.getColumn(extract<int>(column)());
@@ -230,7 +220,7 @@ int getPlotType(ITableWorkspace &self, const object &column) {
 void setPlotType(ITableWorkspace &self, const object &column, int ptype, int linkedCol = -1) {
   // Find the column
   Mantid::API::Column_sptr colptr;
-  if (STR_CHECK(column.ptr())) {
+  if (PyUnicode_Check(column.ptr())) {
     colptr = self.getColumn(extract<std::string>(column)());
   } else {
     colptr = self.getColumn(extract<int>(column)());
@@ -260,7 +250,7 @@ GNU_DIAG_ON("unused-local-typedef")
 int getLinkedYCol(ITableWorkspace &self, const object &column) {
   // Find the column
   Mantid::API::Column_const_sptr colptr;
-  if (STR_CHECK(column.ptr())) {
+  if (PyUnicode_Check(column.ptr())) {
     colptr = self.getColumn(extract<std::string>(column)());
   } else {
     colptr = self.getColumn(extract<int>(column)());
@@ -278,7 +268,7 @@ int getLinkedYCol(ITableWorkspace &self, const object &column) {
 void setLinkedYCol(ITableWorkspace &self, const object &errColumn, const int dataColomn) {
   // Find the column
   Mantid::API::Column_sptr colptr;
-  if (STR_CHECK(errColumn.ptr())) {
+  if (PyUnicode_Check(errColumn.ptr())) {
     colptr = self.getColumn(extract<std::string>(errColumn)());
   } else {
     colptr = self.getColumn(extract<int>(errColumn)());
@@ -296,7 +286,7 @@ void setLinkedYCol(ITableWorkspace &self, const object &errColumn, const int dat
 PyObject *column(const ITableWorkspace &self, const object &value) {
   // Find the column and row
   Mantid::API::Column_const_sptr column;
-  if (STR_CHECK(value.ptr())) {
+  if (PyUnicode_Check(value.ptr())) {
     column = self.getColumn(extract<std::string>(value)());
   } else {
     column = self.getColumn(extract<int>(value)());
@@ -404,7 +394,7 @@ const std::unordered_map<size_t, std::tuple<int, std::function<void(void *, Mant
  */
 PyObject *columnArray(const ITableWorkspace &self, const object &value) {
   Mantid::API::Column_const_sptr column;
-  if (STR_CHECK(value.ptr())) {
+  if (PyUnicode_Check(value.ptr())) {
     column = self.getColumn(extract<std::string>(value)());
   } else {
     column = self.getColumn(extract<size_t>(value)());
@@ -593,7 +583,7 @@ void addRowFromSequence(ITableWorkspace &self, const object &rowItems) {
  */
 void getCellLoc(ITableWorkspace &self, const object &col_or_row, const int row_or_col, Column_sptr &column,
                 int &rowIndex) {
-  if (STR_CHECK(col_or_row.ptr())) {
+  if (PyUnicode_Check(col_or_row.ptr())) {
     column = self.getColumn(extract<std::string>(col_or_row)());
     rowIndex = row_or_col;
   } else {
@@ -648,7 +638,7 @@ void setCell(ITableWorkspace &self, const object &col_or_row, const int row_or_c
 bool isColumnReadOnly(ITableWorkspace &self, const object &column) {
   // Find the column
   Mantid::API::Column_const_sptr colptr;
-  if (STR_CHECK(column.ptr())) {
+  if (PyUnicode_Check(column.ptr())) {
     colptr = self.getColumn(extract<std::string>(column)());
   } else {
     colptr = self.getColumn(extract<int>(column)());
@@ -665,7 +655,7 @@ bool isColumnReadOnly(ITableWorkspace &self, const object &column) {
 void setColumnReadOnly(ITableWorkspace &self, const object &column, const bool readOnly) {
   // Find the column
   Mantid::API::Column_sptr colptr;
-  if (STR_CHECK(column.ptr())) {
+  if (PyUnicode_Check(column.ptr())) {
     colptr = self.getColumn(extract<std::string>(column)());
   } else {
     colptr = self.getColumn(extract<int>(column)());

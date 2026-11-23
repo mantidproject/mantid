@@ -33,9 +33,6 @@ public:
   static PropertyWithValueFactoryTest *createSuite() { return new PropertyWithValueFactoryTest(); }
   static void destroySuite(PropertyWithValueFactoryTest *suite) { delete suite; }
 
-#define FROM_INT PyLong_FromLong
-#define FROM_CSTRING PyUnicode_FromString
-
 #define CREATE_PROPERTY_TEST_BODY(CType, PythonCall)                                                                   \
                                                                                                                        \
   {                                                                                                                    \
@@ -46,14 +43,16 @@ public:
     checkPropertyValue<CType>(std::move(valueProp), pyvalue);                                                          \
   }
 
-  void test_builtin_type_creates_int_type_property_without_error() { testCreateSingleValueProperty<int>(FROM_INT(10)); }
+  void test_builtin_type_creates_int_type_property_without_error() {
+    testCreateSingleValueProperty<int>(PyLong_FromLong(10));
+  }
 
   void test_builtin_type_creates_double_type_property_without_error() {
     testCreateSingleValueProperty<double>(PyFloat_FromDouble(50.123));
   }
 
   void test_builtin_type_creates_string_type_property_without_error() {
-    testCreateSingleValueProperty<std::string>(FROM_CSTRING("unit"));
+    testCreateSingleValueProperty<std::string>(PyUnicode_FromString("unit"));
   }
 
   void test_builtin_type_create_double_array_from_tuple_type_property() {
