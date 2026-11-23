@@ -46,6 +46,10 @@ Bugfixes
 Algorithms
 ----------
 
+New features
+############
+.. amalgamate:: Muon/Algorithms/New_features
+
 Bugfixes
 ############
 .. amalgamate:: Muon/Algorithms/Bugfixes

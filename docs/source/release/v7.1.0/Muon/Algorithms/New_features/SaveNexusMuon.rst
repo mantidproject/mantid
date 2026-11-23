@@ -1,0 +1,1 @@
+- New algorithm :ref:`SaveNexusMuon <algm-SaveNexusMuon>` saves a single-period muon workspace to a Muon NeXus file. The file can be loaded with :ref:`Load <algm-Load>` and opened in the Muon Analysis and Frequency Domain Analysis interfaces, keeping the counts, time zero, first good data, dead times, detector grouping and sample logs.

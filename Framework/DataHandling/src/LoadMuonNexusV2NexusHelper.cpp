@@ -28,29 +28,6 @@ template <typename type> std::string convertVectorToString(const std::vector<typ
 
 namespace Mantid::DataHandling {
 
-namespace NeXusEntry {
-const std::string GOODFRAMES{"good_frames"};
-const std::string DETECTOR{"instrument/detector_1"};
-const std::string PERIOD{"periods"};
-const std::string ORIENTATON{"instrument/detector_1/orientation"};
-const std::string RESOLUTION{"resolution"};
-const std::string GROUPING{"grouping"};
-const std::string DEADTIME{"dead_time"};
-const std::string COUNTS{"counts"};
-const std::string FIRSTGOODBIN{"first_good_bin"};
-const std::string LASTGOODBIN{"last_good_bin"};
-const std::string TIMEZERO{"time_zero"};
-const std::string SAMPLE{"sample"};
-const std::string TEMPERATURE{"temperature"};
-const std::string MAGNETICFIELD{"magnetic_field"};
-const std::string SEQUENCES{"sequences"};
-const std::string TYPE{"type"};
-const std::string REQUESTED{"frames_requested"};
-const std::string RAWFRAMES{"raw_frames"};
-const std::string PERIODOUTPUT{"output"};
-const std::string PERIODCOUNTS{"total_counts"};
-} // namespace NeXusEntry
-
 using namespace Kernel;
 using namespace API;
 using namespace Nexus;

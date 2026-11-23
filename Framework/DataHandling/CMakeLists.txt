@@ -182,6 +182,7 @@ set(SRC_FILES
     src/SaveNexus.cpp
     src/SaveNexusESS.cpp
     src/SaveNexusGeometry.cpp
+    src/SaveNexusMuon.cpp
     src/SaveNexusProcessed.cpp
     src/SaveNexusProcessedHelper.cpp
     src/SaveOpenGenieAscii.cpp
@@ -402,6 +403,7 @@ set(INC_FILES
     inc/MantidDataHandling/SaveNexus.h
     inc/MantidDataHandling/SaveNexusESS.h
     inc/MantidDataHandling/SaveNexusGeometry.h
+    inc/MantidDataHandling/SaveNexusMuon.h
     inc/MantidDataHandling/SaveNexusProcessed.h
     inc/MantidDataHandling/SaveNexusProcessedHelper.h
     inc/MantidDataHandling/SaveOpenGenieAscii.h
@@ -613,6 +615,7 @@ set(TEST_FILES
     SaveNXcanSASTest.h
     SaveNexusESSTest.h
     SaveNexusGeometryTest.h
+    SaveNexusMuonTest.h
     SaveNexusProcessedTest.h
     SaveNexusTest.h
     SaveOpenGenieAsciiTest.h
