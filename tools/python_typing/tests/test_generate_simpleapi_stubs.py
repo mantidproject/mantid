@@ -234,11 +234,7 @@ class GenerateSimpleAPIStubsTest(unittest.TestCase):
             with tempfile.TemporaryDirectory() as temporary_directory:
                 output = Path(temporary_directory) / "simpleapi.pyi"
                 argv = ["generate_simpleapi_stubs.py", name, "--output", str(output)]
-                with (
-                    patch.dict(sys.modules, modules),
-                    patch.object(generator, "_format_with_ruff", side_effect=lambda contents: contents),
-                    patch.object(sys, "argv", argv),
-                ):
+                with patch.dict(sys.modules, modules), patch.object(sys, "argv", argv):
                     self.assertEqual(generator.main(), 0)
                 return output.read_text()
 
@@ -366,12 +362,8 @@ class GenerateSimpleAPIStubsTest(unittest.TestCase):
     def _run_main(self, modules, *arguments):
         with tempfile.TemporaryDirectory() as temporary_directory:
             output = Path(temporary_directory) / "out.pyi"
-            argv = ["generate_simpleapi_stubs.py", *arguments, "--no-format", "--output", str(output)]
-            with (
-                patch.dict(sys.modules, modules),
-                patch.object(generator, "_format_with_ruff", side_effect=AssertionError("--no-format still formatted")),
-                patch.object(sys, "argv", argv),
-            ):
+            argv = ["generate_simpleapi_stubs.py", *arguments, "--output", str(output)]
+            with patch.dict(sys.modules, modules), patch.object(sys, "argv", argv):
                 self.assertEqual(generator.main(), 0)
             return output.read_text()
 
@@ -413,29 +405,6 @@ class GenerateSimpleAPIStubsTest(unittest.TestCase):
         with patch.dict(sys.modules, modules), patch.object(sys, "argv", ["generate_simpleapi_stubs.py", "--mpi-only"]):
             with self.assertRaises(SystemExit), contextlib.redirect_stderr(io.StringIO()):
                 generator.main()
-
-    def test_check_detects_stale_stub(self):
-        with tempfile.TemporaryDirectory() as temporary_directory, patch.dict(sys.modules, _mantid_modules()):
-            output = Path(temporary_directory) / "simpleapi.pyi"
-            argv = ["generate_simpleapi_stubs.py", "ConvertUnits", "--output", str(output)]
-            with patch.object(generator, "_format_with_ruff", side_effect=lambda contents: contents), patch.object(sys, "argv", argv):
-                self.assertEqual(generator.main(), 0)
-
-            with (
-                patch.object(generator, "_format_with_ruff", side_effect=lambda contents: contents),
-                patch.object(sys, "argv", [*argv, "--check"]),
-            ):
-                self.assertEqual(generator.main(), 0)
-
-            output.write_text("stale stub\n")
-            error_output = io.StringIO()
-            with (
-                patch.object(generator, "_format_with_ruff", side_effect=lambda contents: contents),
-                patch.object(sys, "argv", [*argv, "--check"]),
-                contextlib.redirect_stderr(error_output),
-            ):
-                self.assertEqual(generator.main(), 1)
-            self.assertIn("Stubs are stale", error_output.getvalue())
 
     def test_fit_signature_and_return_cover_inout_properties(self):
         fit = _FittingAlgorithm(

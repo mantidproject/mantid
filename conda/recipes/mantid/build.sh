@@ -21,11 +21,10 @@ cmake \
   -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF \
   -DUSE_PYTHON_DYNAMIC_LIB=OFF \
   -DMPI_BUILD=ON \
-  -DSIMPLEAPI_STUBS_ARGS=--no-format \
+  -DSIMPLEAPI_STUBS_IN_ALL=ON \
   -GNinja \
   ../
 
+# also generates the type stubs (SIMPLEAPI_STUBS_IN_ALL), which install then copies with the mantid package
 cmake --build .
-# regenerate the type stubs from this build before install copies the mantid package
-cmake --build . --target simpleapi_stubs
 cmake --build . --target install
