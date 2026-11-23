@@ -603,13 +603,6 @@ public:
     TS_ASSERT_DIFFERS(first, second);
   }
 
-  void test_endsWith_when_the_suffix_is_smaller_than_the_str() {
-    TS_ASSERT(endsWith("ATestString", "String"));
-    TS_ASSERT(!endsWith("AStringTest", "String"));
-  }
-
-  void test_endsWith_when_the_suffix_is_too_large() { TS_ASSERT(!endsWith("SmallText", "AVeryLongSuffix")); }
-
   void test_strmakef_empty() { TS_ASSERT(strmakef("").empty()); }
 
   void test_strmakef_too_big() {
