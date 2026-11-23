@@ -38,6 +38,8 @@ namespace Algorithms {
     <LI> IncludePartialBins - If true then partial bins from the beginning and
    end of the input range are also included in the integration (default
    false)</LI>
+    <LI> RangeUnit - The unit of the integration limits (default is the X unit of
+   the input workspace)</LI>
     </UL>
  */
 class MANTID_ALGORITHMS_DLL Integration final : public API::Algorithm {
