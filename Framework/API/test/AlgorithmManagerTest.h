@@ -10,7 +10,9 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MultiThreaded.h"
 #include <Poco/ActiveResult.h>
@@ -95,6 +97,16 @@ public:
   void cancel() override { isRunningFlag = false; }
 };
 
+class AlgThrowsInExec : public Algorithm {
+public:
+  void init() override {}
+  void exec() override { throw std::runtime_error("AlgThrowsInExec failed"); }
+  const std::string name() const override { return "AlgThrowsInExec"; }
+  int version() const override { return (1); }
+  const std::string category() const override { return ("Cat1"); }
+  const std::string summary() const override { return "Test summary"; }
+};
+
 class BlockingRunnable final : public Poco::Runnable {
 public:
   BlockingRunnable(std::latch &started, std::latch &release) : m_started(started), m_release(release) {}
@@ -112,6 +124,7 @@ private:
 DECLARE_ALGORITHM(AlgTest)
 DECLARE_ALGORITHM(AlgRunsForever)
 DECLARE_ALGORITHM(AlgTestSecond)
+DECLARE_ALGORITHM(AlgThrowsInExec)
 
 class AlgorithmManagerTest : public CxxTest::TestSuite {
 public:
@@ -286,5 +299,98 @@ public:
     AlgorithmManager::Instance().clear();
   }
 
+  void test_finished_algorithms_removed_when_managed_algorithm_finishes() {
+    auto &mgr = AlgorithmManager::Instance();
+    mgr.clear();
+    // create() itself prunes finished algorithms, so create the algorithm to run first
+    auto alg = mgr.create("AlgTest");
+    auto finished = createFinishedAlgorithm();
+    TS_ASSERT_EQUALS(mgr.size(), 2);
+
+    alg->execute();
+
+    // The just-executed algorithm is kept until its garbage-collection delay expires
+    TS_ASSERT_EQUALS(mgr.size(), 1);
+    TS_ASSERT(mgr.getAlgorithm(alg->getAlgorithmID()));
+    TS_ASSERT(!mgr.getAlgorithm(finished->getAlgorithmID()));
+    mgr.clear();
+  }
+
+  void test_finished_algorithms_removed_when_managed_algorithm_fails() {
+    auto &mgr = AlgorithmManager::Instance();
+    mgr.clear();
+    auto alg = mgr.create("AlgThrowsInExec");
+    auto finished = createFinishedAlgorithm();
+    TS_ASSERT_EQUALS(mgr.size(), 2);
+
+    alg->setRethrows(true);
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
+
+    TS_ASSERT_EQUALS(mgr.size(), 1);
+    TS_ASSERT(mgr.getAlgorithm(alg->getAlgorithmID()));
+    TS_ASSERT(!mgr.getAlgorithm(finished->getAlgorithmID()));
+    mgr.clear();
+  }
+
+  void test_finished_algorithms_removed_when_ADS_cleared() {
+    auto &mgr = AlgorithmManager::Instance();
+    mgr.clear();
+    createFinishedAlgorithm();
+    TS_ASSERT_EQUALS(mgr.size(), 1);
+
+    AnalysisDataService::Instance().clear();
+
+    TS_ASSERT_EQUALS(mgr.size(), 0);
+  }
+
+  void test_finished_algorithms_removed_when_workspace_deleted_from_ADS() {
+    auto &mgr = AlgorithmManager::Instance();
+    auto &ads = AnalysisDataService::Instance();
+    ads.addOrReplace("AlgorithmManagerTest_ws", std::make_shared<WorkspaceTester>());
+    mgr.clear();
+    createFinishedAlgorithm();
+    TS_ASSERT_EQUALS(mgr.size(), 1);
+
+    ads.remove("AlgorithmManagerTest_ws");
+
+    TS_ASSERT_EQUALS(mgr.size(), 0);
+  }
+
+  void test_recently_finished_algorithm_not_removed_when_workspace_deleted_from_ADS() {
+    auto &mgr = AlgorithmManager::Instance();
+    auto &ads = AnalysisDataService::Instance();
+    ads.addOrReplace("AlgorithmManagerTest_ws", std::make_shared<WorkspaceTester>());
+    mgr.clear();
+    auto alg = mgr.create("AlgTest");
+    alg->execute();
+
+    ads.remove("AlgorithmManagerTest_ws");
+
+    // The algorithm is kept until its garbage-collection delay expires
+    TS_ASSERT_EQUALS(mgr.size(), 1);
+    TS_ASSERT(mgr.getAlgorithm(alg->getAlgorithmID()));
+    mgr.clear();
+  }
+
+  void test_running_algorithms_not_removed_when_ADS_cleared() {
+    auto &mgr = AlgorithmManager::Instance();
+    mgr.clear();
+    mgr.create("AlgRunsForever");
+
+    AnalysisDataService::Instance().clear();
+
+    TS_ASSERT_EQUALS(mgr.size(), 1);
+    mgr.cancelAll();
+    mgr.clear();
+  }
+
   int m_notificationValue;
+
+private:
+  /// Creates a managed algorithm that reports as finished and is ready for garbage collection
+  IAlgorithm_sptr createFinishedAlgorithm() {
+    auto alg = AlgorithmManager::Instance().create("AlgRunsForever");
+    std::dynamic_pointer_cast<AlgRunsForever>(alg)->setIsRunningTo(false);
+    return alg;
+  }
 };

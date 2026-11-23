@@ -545,7 +545,14 @@ bool Algorithm::executeInternal() {
   // Register clean up tasks that should happen regardless of the route
   // out of the algorithm. These tasks will get run after this method
   // finishes.
-  RunOnFinish onFinish([this]() { this->clearWorkspaceCaches(); });
+  RunOnFinish onFinish([this]() {
+    this->clearWorkspaceCaches();
+    // Prune other finished managed algorithms. This algorithm is not removed here as its
+    // garbage-collection time is set into the future when it finishes.
+    if (!isChild()) {
+      AlgorithmManager::Instance().removeFinishedAlgorithms();
+    }
+  });
 
   notificationCenter().postNotification(new StartedNotification(this));
   Mantid::Types::Core::DateAndTime startTime;
