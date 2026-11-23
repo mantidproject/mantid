@@ -178,6 +178,8 @@ class RunBilbyReduction:
     def run_bilby_reduction(self):
         # Read input csv file and define / create a folder for the output data
         csv_files_to_reduce_list = mantid_api.FileFinder.getFullPath(self.current_reduction_settings[0]["csv_file_name"])
+        if csv_files_to_reduce_list == "":
+            raise ValueError(f"Could not find file: {self.current_reduction_settings[0]['csv_file_name']}")
         reduced_files_path = self.setup_save_out_path(csv_files_to_reduce_list)
 
         # Wavelength binning
