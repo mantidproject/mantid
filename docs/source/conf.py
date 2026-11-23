@@ -62,6 +62,7 @@ extensions = [
     "mantiddoc.directives.summary",
     "mantiddoc.autodoc",
     "mantiddoc.doctest",
+    "mantiddoc.release_notes",
     # myst_parser enables markdown support
     "myst_parser",
 ]

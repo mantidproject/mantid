@@ -4,6 +4,8 @@
 Release Notes
 =============
 
+.. The mantiddoc.release_notes extension sorts this toctree newest first for the navigation sidebar
+
 .. toctree::
    :maxdepth: 1
    :hidden:
