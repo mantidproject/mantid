@@ -1,0 +1,1 @@
+- The release notes in the navigation sidebar of the documentation are now listed newest first, matching the order on the :ref:`release notes <release_notes>` page.
