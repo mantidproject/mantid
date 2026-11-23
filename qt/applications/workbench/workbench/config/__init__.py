@@ -95,6 +95,15 @@ SAVE_STATE_VERSION = 2
 
 # 'Singleton' instance
 QSettings.setDefaultFormat(QSettings.IniFormat)
+
+
+def configure_qsettings_dir():
+    """Redirect QSettings IniFormat UserScope storage when MANTID_QSETTINGS_DIR is set."""
+    if qsettings_dir := os.environ.get("MANTID_QSETTINGS_DIR"):
+        QSettings.setPath(QSettings.IniFormat, QSettings.UserScope, qsettings_dir)
+
+
+configure_qsettings_dir()
 CONF = UserConfig(ORGANIZATION, APPNAME, defaults=DEFAULTS)
 
 

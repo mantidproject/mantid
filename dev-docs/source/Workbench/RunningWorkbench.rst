@@ -31,3 +31,10 @@ For a developer environment you might also want to specify the ``PYTHONPATH`` wh
 .. code-block:: sh
 
   PYTHONPATH=/path/to/build/bin/<config> workbench --single-process
+
+Overriding the Qt Settings Directory
+####################################
+
+By default, Workbench stores Qt ``QSettings`` INI files under ``~/.config`` (or ``$XDG_CONFIG_HOME``) on Linux/macOS and ``FOLDERID_RoamingAppData`` (``%APPDATA%``) on Windows. Because Qt ignores the ``APPDATA`` environment variable on Windows, Workbench also honours ``MANTID_QSETTINGS_DIR``, passing it to ``QSettings.setPath(QSettings.IniFormat, QSettings.UserScope, ...)``.
+
+This variable is primarily used by the test suite to avoid modifying developer settings, and can also be set manually to test with a clean or sample configuration. Because it sets the Qt base directory, Workbench reads and writes ``<MANTID_QSETTINGS_DIR>/mantidproject/mantidworkbench.ini`` (and ``QtProject.conf``).

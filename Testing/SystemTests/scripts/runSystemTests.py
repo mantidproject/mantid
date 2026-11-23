@@ -8,6 +8,7 @@
 import argparse
 import os
 import sys
+import tempfile
 import time
 from multiprocessing import Process, Array, Manager, Value, Condition
 
@@ -140,6 +141,12 @@ def main():
     # Set the Qt version to use during the system tests
     os.environ["QT_API"] = options.qt_api
 
+    with tempfile.TemporaryDirectory() as qsettings_dir:
+        os.environ["MANTID_QSETTINGS_DIR"] = qsettings_dir
+        _run_system_tests(options)
+
+
+def _run_system_tests(options):
     # import the system testing framework
     sys.path.append(options.frameworkLoc)
     import systemtesting

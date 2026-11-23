@@ -8,14 +8,14 @@ import os
 import subprocess
 import systemtesting
 
-from tempfile import NamedTemporaryFile
+from tempfile import NamedTemporaryFile, TemporaryDirectory
 
 TEST_MESSAGE = "Hello Mantid!"
 SUBPROCESS_TIMEOUT_SECS = 300
 
 
-def start_and_wait_for_completion(args_list):
-    process = subprocess.Popen(args_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+def start_and_wait_for_completion(args_list, env=None):
+    process = subprocess.Popen(args_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
     exitcode = process.wait(timeout=SUBPROCESS_TIMEOUT_SECS)
     return exitcode, process.stderr.read().decode()
 
@@ -49,7 +49,9 @@ class WorkbenchStartupTest(systemtesting.MantidSystemTest):
     def runTest(self):
         arg_list = ["python", "-m", "workbench", "--execute", self._test_script, "--quit"]
 
-        exitcode, stderr = start_and_wait_for_completion(arg_list)
+        with TemporaryDirectory() as qsettings_dir:
+            env = os.environ | {"MANTID_QSETTINGS_DIR": qsettings_dir}
+            exitcode, stderr = start_and_wait_for_completion(arg_list, env=env)
         # Check for no warnings or errors on startup
         error_warning_lines = [line for line in stderr.split("\n") if "[Error]" in line or "[Warning]" in line]
         self.assertEqual([], error_warning_lines, f"stderr was warning / error output: {error_warning_lines}")

@@ -120,7 +120,6 @@ fi
 
 if [[ $ENABLE_SYSTEM_TESTS == true ]]; then
     rm -fr $userconfig_dir
-    rm -f $workbench_ini
 
     # Turn off any auto updating on startup
     mkdir -p $userconfig_dir
