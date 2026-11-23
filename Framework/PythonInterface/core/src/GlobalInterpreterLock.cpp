@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
-#include "MantidPythonInterface/core/VersionCompat.h"
 
 namespace Mantid::PythonInterface {
 
@@ -17,14 +16,7 @@ namespace Mantid::PythonInterface {
  * Check if the current thread has the lock
  * @return True if the current thread holds the GIL, false otherwise
  */
-bool GlobalInterpreterLock::locked() {
-#if defined(IS_PY3K)
-  return (PyGILState_Check() == 1);
-#else
-  PyThreadState const *ts = _PyThreadState_Current;
-  return (ts && ts == PyGILState_GetThisThreadState());
-#endif
-}
+bool GlobalInterpreterLock::locked() { return (PyGILState_Check() == 1); }
 
 /**
  * @return A handle to the Python threadstate before the acquire() call.

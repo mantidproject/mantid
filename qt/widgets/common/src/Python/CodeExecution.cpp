@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/Python/CodeExecution.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
-#include "MantidPythonInterface/core/VersionCompat.h"
 #include "MantidQtWidgets/Common/ScriptEditor.h"
 #include <QHash>
 #include <QString>
@@ -80,14 +79,14 @@ PyObject *CodeExecution::execute(const QString &codeStr, const QString &filename
   }
 
   if (!m_editor) {
-    return PyEval_EvalCode(CODE_OBJECT(compiledCode), globals, globals);
+    return PyEval_EvalCode(compiledCode, globals, globals);
   }
 
   ScriptEditorDetails editor_details{m_editor, lineOffset};
   const auto coFileObject = ((PyCodeObject *)compiledCode)->co_filename;
   const auto posIter = EDITOR_LOOKUP.insert(coFileObject, editor_details);
   PyEval_SetTrace((Py_tracefunc)&traceLineNumber, nullptr);
-  const auto result = PyEval_EvalCode(CODE_OBJECT(compiledCode), globals, globals);
+  const auto result = PyEval_EvalCode(compiledCode, globals, globals);
   PyEval_SetTrace(nullptr, nullptr);
   EDITOR_LOOKUP.erase(posIter);
   return result;
