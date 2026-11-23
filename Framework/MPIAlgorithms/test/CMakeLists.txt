@@ -55,8 +55,9 @@ if(MPIEXEC_EXECUTABLE)
 
 endif()
 
-# MPI tests start their own MPI runtime, so keep other tests from running alongside them
+# MPI tests start their own MPI runtime, so keep other tests from running alongside them. They finish in a couple of
+# seconds, but MPI startup can hang on some hosts, so fail quickly rather than waiting for the default timeout.
 list(APPEND _mpi_tests MPIAlgorithmsTest_BroadcastWorkspaceTest MPIAlgorithmsTest_GatherWorkspacesTest
      MPILifetimeTest_MPILifetimeTest
 )
-set_tests_properties(${_mpi_tests} PROPERTIES RUN_SERIAL TRUE)
+set_tests_properties(${_mpi_tests} PROPERTIES RUN_SERIAL TRUE TIMEOUT 10)
