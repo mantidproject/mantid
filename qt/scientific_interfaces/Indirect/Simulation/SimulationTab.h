@@ -46,7 +46,7 @@ public:
   virtual void restoreSettings(const API::FileFinderSettings &settings) = 0;
 
 private:
-  virtual void setLoadHistory(bool doLoadHistory) { UNUSED_ARG(doLoadHistory); }
+  virtual void setLoadHistory([[maybe_unused]] bool doLoadHistory) {}
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

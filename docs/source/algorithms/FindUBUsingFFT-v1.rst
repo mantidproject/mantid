@@ -14,7 +14,7 @@ algorithm will attempt to find a :ref:`UB matrix <Lattice>`, corresponding
 to the Niggli reduced cell, that fits the data. The algorithm projects the
 peaks on many possible direction vectors and calculates a Fast Fourier Transform
 of the projections to identify regular patterns in the collection of
-peaks. Based on the calcuated FFTs, a list of directions corresponding
+peaks. Based on the calculated FFTs, a list of directions corresponding
 to possible real space unit cell edge vectors is formed. The directions
 and lengths of the vectors in this list are optimized (using a least
 squares approach) to index the maximum number of peaks, after which the

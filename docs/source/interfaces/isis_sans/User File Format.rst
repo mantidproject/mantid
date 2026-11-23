@@ -541,7 +541,7 @@ Syntax
     SET CENTRE/HAB x y
     SET SCALES s a b c d
 
-Note x and y are in units of mm. For LOQ instrument, the origin is at te bottom left corner of the main detector.
+Note x and y are in units of mm. For LOQ instrument, the origin is at the bottom left corner of the main detector.
 
 Qualifiers
 ^^^^^^^^^^
@@ -630,7 +630,7 @@ Parameters
 **"m"**
     The monitor to apply a shift to.
 **roi_mask.xml**
-    A mask file which is used to define a region of interst.
+    A mask file which is used to define a region of interest.
 **mask.xml**
     A mask file which is used to exclude detectors from the region of interest.
 
@@ -686,9 +686,9 @@ Qualifiers
 ^^^^^^^^^^
 
 **/ON**
-    Turns the QResolution calcuation on for the reduction. Note that if not specified OFF is assumed.
+    Turns the QResolution calculation on for the reduction. Note that if not specified OFF is assumed.
 **/OFF**
-    Turns the QResolution calcuation explicitly off for the reduction.
+    Turns the QResolution calculation explicitly off for the reduction.
 **/DELTAR**
     Specifies the virtual ring width on the detector
 **/LCOLLIM**

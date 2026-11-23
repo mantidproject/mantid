@@ -30,6 +30,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/scope_exit.hpp>
 #include <stdexcept>
+#include <tuple>
 #include <utility>
 
 namespace {
@@ -380,8 +381,7 @@ void WidgetAutoSaver::endGroup() { m_settings.endGroup(); }
  */
 bool isNumber(const QString &qstring) {
   bool isNumber = false;
-  auto value = qstring.toDouble(&isNumber);
-  UNUSED_ARG(value);
+  std::ignore = qstring.toDouble(&isNumber);
   return isNumber;
 }
 
@@ -1091,9 +1091,9 @@ QMap<int, QColor> getWorkspaceColors(const std::vector<Workspace_sptr> &workspac
     if (const auto group = std::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
       for (size_t i = 0; i < group->size(); ++i) {
         const auto &wsInGroup = group->getItem(i);
-        if (wsInGroup->getName().find("_Parameters") != std::string::npos) {
+        if (wsInGroup->getName().contains("_Parameters")) {
           params = getKeysFromTable(std::dynamic_pointer_cast<ITableWorkspace>(wsInGroup));
-        } else if (wsInGroup->getName().find("_Workspace") != std::string::npos) {
+        } else if (wsInGroup->getName().contains("_Workspace")) {
           ++nRuns;
         }
       }

@@ -62,26 +62,16 @@ public:
 
   virtual void updateFitFunctionList() const {};
 
-  virtual void addWorkspace(const std::string &workspaceName, const std::string &paramType, const int &spectrum_index) {
-    UNUSED_ARG(workspaceName);
-    UNUSED_ARG(paramType);
-    UNUSED_ARG(spectrum_index);
+  virtual void addWorkspace([[maybe_unused]] const std::string &workspaceName,
+                            [[maybe_unused]] const std::string &paramType, [[maybe_unused]] const int &spectrum_index) {
   }
 
-  virtual void setResolution(const std::string &resName, const std::string &wsName,
-                             const FunctionModelSpectra &spectra) {
-    UNUSED_ARG(resName);
-    UNUSED_ARG(wsName);
-    UNUSED_ARG(spectra);
-  }
+  virtual void setResolution([[maybe_unused]] const std::string &resName, [[maybe_unused]] const std::string &wsName,
+                             [[maybe_unused]] const FunctionModelSpectra &spectra) {}
 
-  virtual void setActiveSpectra(std::vector<std::size_t> const &activeParameterSpectra, std::size_t parameterIndex,
-                                WorkspaceID dataIndex, bool single = true) {
-    UNUSED_ARG(activeParameterSpectra);
-    UNUSED_ARG(parameterIndex);
-    UNUSED_ARG(dataIndex);
-    UNUSED_ARG(single);
-  };
+  virtual void setActiveSpectra([[maybe_unused]] std::vector<std::size_t> const &activeParameterSpectra,
+                                [[maybe_unused]] std::size_t parameterIndex, [[maybe_unused]] WorkspaceID dataIndex,
+                                [[maybe_unused]] bool single = true) {};
 
   std::string tabName() const override;
   std::vector<std::string> getWorkspaceNames() const;

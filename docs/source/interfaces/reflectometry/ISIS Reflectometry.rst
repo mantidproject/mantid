@@ -631,7 +631,7 @@ this investigation. This will:
 If the investigation has not started yet, the results list will initially be
 empty. However, polling will begin and runs will be found and processed as soon
 as they become available. Note that there may be a slight delay in the run
-finishing and its file becoming availble on the archive.
+finishing and its file becoming available on the archive.
 
 Invalid/excluded runs
 =====================
@@ -802,7 +802,7 @@ Experiment and Instrument Settings Tabs
   *The experiment Settings tab*
 
 The **Experiment Settings** and **Instrument Settings** tabs can be used to
-specify options for the reduction and post-processing releting to a specific
+specify options for the reduction and post-processing relating to a specific
 experiment. The Experiment settings are variables that are mostly set by the
 user, whereas the **Instrument Settings** are variables relating to the
 instrument used to perform the reduction. Both are populated with default
@@ -856,7 +856,7 @@ single run/workspace or a number of runs/workspaces that will be summed before
 processing. Specific spectra of interest can be specified for the input runs
 and separate spectra, if required, can be specified for the transmission runs -
 if the latter are not specified then the ``ROI`` will also be used for
-the transmission runs. If both a First and Second tranmission input is
+the transmission runs. If both a First and Second transmission input is
 specified, then they will be stitched using the options specified.
 
 When polarization corrections are enabled, the **Input SpinState Order** field can be used to specify the
@@ -996,6 +996,15 @@ for a description of the supported formats.
 |                               | ``Additional columns`` option to request             |
 |                               | Lambda, dLambda, Theta and dTheta columns for        |
 |                               | non-stitched datasets.                               |
+|                               | Each dataset in the file is given the model          |
+|                               | description entered in the ``Model`` column of the   |
+|                               | search results table on the Runs tab for its run. A  |
+|                               | dataset made from several runs, such as a summed row |
+|                               | or a stitched group, is only given a model if all of |
+|                               | its runs have the same model. To                     |
+|                               | use the same model for every dataset instead, enter  |
+|                               | it in the ``Model Description`` box, which overrides |
+|                               | the search results table.                            |
 +-------------------------------+------------------------------------------------------+
 | Automatic Save                | Automatically save the main output workspace for     |
 |                               | groups in the runs table. Note that the stitched     |

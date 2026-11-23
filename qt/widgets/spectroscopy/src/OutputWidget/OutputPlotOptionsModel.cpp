@@ -46,9 +46,7 @@ std::string getIndicesRange(std::string const &str) {
   }
 }
 
-std::string rearrangeIndicesSubString(std::string const &str) {
-  return str.find("-") != std::string::npos ? getIndicesRange(str) : str;
-}
+std::string rearrangeIndicesSubString(std::string const &str) { return str.contains("-") ? getIndicesRange(str) : str; }
 
 // Swaps the two numbers in a spectra range if they go from large to small
 std::string rearrangeIndicesRangeStrings(std::string const &str) {

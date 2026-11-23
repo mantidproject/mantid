@@ -64,9 +64,7 @@ int LoadGSS::confidence(Kernel::FileDescriptor &descriptor) const {
     if (str.empty() || str[0] == '#' || str.compare(0, 8, "Monitor:") == 0) {
       continue;
     }
-    if (str.compare(0, 4, "BANK") == 0 &&
-        (str.find("RALF") != std::string::npos || str.find("SLOG") != std::string::npos) &&
-        (str.find("FXYE") != std::string::npos)) {
+    if (str.compare(0, 4, "BANK") == 0 && (str.contains("RALF") || str.contains("SLOG")) && (str.contains("FXYE"))) {
       return 80;
     }
   }

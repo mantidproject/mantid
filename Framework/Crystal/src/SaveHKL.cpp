@@ -247,7 +247,7 @@ void SaveHKL::exec() {
         std::string line;
         getline(infile, line);
         std::stringstream ss(line);
-        if (line.find("Bank") == std::string::npos) {
+        if (!line.contains("Bank")) {
           double time0, spectra0;
           ss >> time0 >> spectra0;
           time[a].emplace_back(time0);

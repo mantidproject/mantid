@@ -82,7 +82,7 @@ std::string cleanse_comments(const std::string &l) {
 void cleanse_whitespace(std::string &l) { l.erase(std::remove_if(l.begin(), l.end(), isspace), l.end()); }
 
 /// Returns true if `l` contains the limits array.
-bool contains_limits(const std::string &l) { return l.find("_limits") != std::string::npos; }
+bool contains_limits(const std::string &l) { return l.contains("_limits"); }
 
 /// Converts the IDL array in `l` to std::vector.
 std::vector<double> extract_values(const std::string &l) {

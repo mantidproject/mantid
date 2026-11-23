@@ -184,7 +184,7 @@ void LoadFITS::loadHeader(const std::string &filePath, FITSInfo &header) {
   // NAXISi (where i = 1..NAXIS, e.g. NAXIS2 for two axis).
   try {
     std::string tmpBitPix = header.headerKeys[m_headerBitDepthKey];
-    if (boost::contains(tmpBitPix, "-")) {
+    if (tmpBitPix.contains("-")) {
       boost::erase_all(tmpBitPix, "-");
       header.isFloat = true;
     } else {
@@ -986,7 +986,7 @@ bool LoadFITS::isInstrOtherThanIMAT(const FITSInfo &hdr) {
   // Images taken with Starlight camera contain this header entry:
   // INSTRUME='Starlight Xpress CCD'
   auto it = hdr.headerKeys.find("INSTRUME");
-  if (hdr.headerKeys.end() != it && boost::contains(it->second, "Starlight")) {
+  if (hdr.headerKeys.end() != it && it->second.contains("Starlight")) {
     // For now, do nothing, just tell
     // Cameras used for HiFi and EMU are in principle only used
     // occasionally for calibration

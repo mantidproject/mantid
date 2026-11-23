@@ -1,0 +1,2 @@
+- In the :ref:`Python script editor <WorkbenchScriptWindow>` limit the progress marker updates to a maximum of 20 redraws per second to prevent workbench becoming unresponsive during script running.
+- Revert back to the default Python interpreters default thread switch interval (5ms), this improves the user interface responsiveness during running tasks.

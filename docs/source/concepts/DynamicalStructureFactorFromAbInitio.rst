@@ -19,7 +19,7 @@ In order to better understand experimental outputs, one can compare with results
 .. image:: ../images/dft_phonon_scheme.png
     :align: center
 
-The usual workfow for calculating phonon spectra within DFT is presented in the figure above. First, one defines an
+The usual workflow for calculating phonon spectra within DFT is presented in the figure above. First, one defines an
 initial guess for the structure of interest.
 The initial guess should be as close as possible to an experimental structure, and is usually derived from elastic X-ray and/or neutron scattering measurements.
 Then the structure parameters are locally optimised within DFT, finding the nearest structure that minimises the DFT energy.

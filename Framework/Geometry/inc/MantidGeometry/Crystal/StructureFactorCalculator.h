@@ -37,7 +37,9 @@ public:
   virtual std::vector<double> getFsSquared(const std::vector<Kernel::V3D> &hkls) const;
 
 protected:
-  virtual void crystalStructureSetHook(const CrystalStructure &crystalStructure);
+  /// Called from StructureFactorCalculator::setCrystalStructure() so that implementations can perform additional
+  /// actions that involve the crystal structure.
+  virtual void crystalStructureSetHook(const CrystalStructure &crystalStructure) = 0;
 };
 
 using StructureFactorCalculator_sptr = std::shared_ptr<StructureFactorCalculator>;

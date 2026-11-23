@@ -1303,7 +1303,7 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
     // are resolvable without consulting the legacy instrument tree: "detID:<id>" through
     // DetectorInfo, and a full path through ComponentInfo::indexOfFullName().
     size_t compIndex = Geometry::ComponentInfo::invalidIndex;
-    if (comp_name.find("detID:") != std::string::npos) {
+    if (comp_name.contains("detID:")) {
       const auto detID = static_cast<detid_t>(std::stoi(comp_name.substr(6)));
       try {
         // Detectors occupy the leading component indices, so a detector index is also its

@@ -13,7 +13,7 @@ What are Workspaces?
 
 Workspaces store data that :py:obj:`algorithms <mantid.api.Algorithm>` operate on. Workspaces are usually stored in-memory. An algorithm can manipulate a workspace in-place or create a new one as an output.
 
-Workspace is as loose term that encompases a range of possible data structures. All forms of Workspace provide some common information:
+Workspace is as loose term that encompasses a range of possible data structures. All forms of Workspace provide some common information:
 
 - The type identifier (id) of the workspace (see below), unique to every type of workspace
 - The name of the workspace, unique to every instance of a workspace even those of the same type

@@ -251,7 +251,7 @@ void LoadFullprofResolution::loadFile(const string &filename, vector<string> &li
  */
 int LoadFullprofResolution::getProfNumber(const vector<string> &lines) {
   // Assume the NPROF number is on the second line
-  if (lines[1].find("NPROF") != string::npos) {
+  if (lines[1].contains("NPROF")) {
     // Split line to get the NPROF number
     size_t nStart = lines[1].find("NPROF");
     size_t nEq = lines[1].find('=', nStart);
@@ -283,7 +283,7 @@ void LoadFullprofResolution::scanBanks(const vector<string> &lines, const bool u
   int bankid = 0;
   for (size_t i = 0; i < lines.size(); ++i) {
     string line = lines[i];
-    if (line.find("Bank") != string::npos) {
+    if (line.contains("Bank")) {
       // A new line found
       if (startindex >= 0) {
         // Previous line is in a bank range.  Then finish the previous bank
@@ -369,7 +369,7 @@ void LoadFullprofResolution::parseResolutionStrings(map<string, double> &paramma
       continue;
 
     // skip NPROF line, which is processed by getProfNumber
-    if (line.find("NPROF") != string::npos)
+    if (line.contains("NPROF"))
       continue;
 
     // Parse
@@ -551,7 +551,7 @@ void LoadFullprofResolution::parseBankLine(string line, double &cwl, int &bankid
   cwl = -1.0;
   bankid = -1;
 
-  if (infostr.find("CWL") != string::npos) {
+  if (infostr.contains("CWL")) {
     // There is CWL
     v.clear();
     iter_split(v, infostr, boost::algorithm::first_finder("CWL"));

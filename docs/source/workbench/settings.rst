@@ -30,7 +30,7 @@ General
 - Editor: These settings toggle the auto-completion and dark theme display in the script editor.
 - Main Font: Edit the font type and size used for all of Workbench, except for the script editor and messages box.
 - Additional Window Behavior: This setting controls the behavior of additional windows in Workbench.
-  When it is set to ontop, additional windows such as plot will be kept ontop of the workbench main window.
+  When it is set to on top, additional windows such as plot will be kept on top of the workbench main window.
   For further details of this setting, such as OS specific behavior, see :ref:`Window Behavior <WorkbenchWindowBehavior>`.
 - Layouts: You can save and load layouts from this area. Save layout will save the current
   arrangement of widgets in the main window that can be loaded using load layout.

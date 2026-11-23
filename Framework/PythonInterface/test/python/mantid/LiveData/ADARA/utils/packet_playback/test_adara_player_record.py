@@ -253,7 +253,7 @@ class Test_Player_record(unittest.TestCase):
                 with (
                     patch("socket.socket", return_value=mock_source_socket),
                     patch("select.select", side_effect=select_with_data),
-                    patch.object(Packet, "from_socket", side_effect=socket.timeout("Read timeout")),
+                    patch.object(Packet, "from_socket", side_effect=TimeoutError("Read timeout")),
                     patch("packet_player._logger") as mock_logger,
                 ):
                     player.record(output_path, mock_client_socket)

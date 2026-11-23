@@ -1031,10 +1031,7 @@ void AlgorithmDialog::addAlgorithmObserver(Mantid::API::AlgorithmObserver *obser
  *
  * @param alg Completed algorithm (unused)
  */
-void AlgorithmDialog::finishHandle(const IAlgorithm *alg) {
-  UNUSED_ARG(alg);
-  emit algCompletedSignal();
-}
+void AlgorithmDialog::finishHandle([[maybe_unused]] const IAlgorithm *alg) { emit algCompletedSignal(); }
 
 /**Handle error signal of algorithm started while staying open.
  * emits another signal to marshal the call to the main ui thread
@@ -1042,9 +1039,7 @@ void AlgorithmDialog::finishHandle(const IAlgorithm *alg) {
  * @param alg Completed algorithm (unused)
  * @param what the error message (unused)
  */
-void AlgorithmDialog::errorHandle(const IAlgorithm *alg, const std::string &what) {
-  UNUSED_ARG(alg);
-  UNUSED_ARG(what);
+void AlgorithmDialog::errorHandle([[maybe_unused]] const IAlgorithm *alg, [[maybe_unused]] const std::string &what) {
   emit algCompletedSignal();
 }
 

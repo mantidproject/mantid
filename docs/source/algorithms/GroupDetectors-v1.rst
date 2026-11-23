@@ -151,14 +151,14 @@ Output
   ...
   Number of detectors is 1
 
-Example 2: specifying detctor IDs
-#################################
+Example 2: specifying detector IDs
+##################################
 
 .. testcode:: ExDet
 
   # Create a workspace filled with a constant value = 0.3
   ws=CreateSampleWorkspace()
-  # Group detectots using a list of detctor IDs
+  # Group detectors using a list of detector IDs
   group_index = GroupDetectors(ws,DetectorList=[100,102,104],Version=1)
 
   # The specified spectra are grouped and saved into the same workspace.
@@ -215,7 +215,7 @@ Example 3: specifying workspace indices
 
   # Create a workspace filled with a constant value = 0.3
   ws=CreateSampleWorkspace()
-  # Group detectots using a list of workspace indices
+  # Group detectors using a list of workspace indices
   group_index = GroupDetectors(ws,WorkspaceIndexList=[0,2,4],Version=1)
 
   # The specified spectra are grouped and saved into the same workspace.

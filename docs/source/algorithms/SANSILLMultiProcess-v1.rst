@@ -37,7 +37,7 @@ Notes
 * The algorithm will cache the reduced calibration measurements (empty beams, dark currents, empty containers, etc.) in the ADS. This is to ensure that subsequent runs with the same calibrants run faster. However, if a critical parameter is changed, such as the normalisation option, those workspaces must be manually cleared before processing again.
 * The sample runs for different distances must be filled in order; that is, if there is only one distance is present, they must be filled in D1, if only 2, then D1 and D2, and so on.
 * The transmission runs for different wavelengths must be filled in order; that is, if there is only one wavelength, they must be filled in W1, if 2, then W1 and W2.
-* See the section in :ref:`SANSILLReduction <algm-SANSILLReduction-v2>` regarding the blank samples and transmission replicae.
+* See the section in :ref:`SANSILLReduction <algm-SANSILLReduction-v2>` regarding the blank samples and transmission replicas.
 
 Workflow
 --------

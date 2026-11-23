@@ -307,7 +307,7 @@ void Parser::split() {
 
   // If the directory contains an instance of a comma, then the string is
   // a comma separated list of single *full* file names to load.
-  if (std::string::npos != m_dirString.find(','))
+  if (m_dirString.contains(','))
     throw std::runtime_error("Unable to parse.");
 
   // Slice off the directory and extension.

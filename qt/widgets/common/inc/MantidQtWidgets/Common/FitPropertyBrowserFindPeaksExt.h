@@ -25,10 +25,7 @@ signals:
   void algCompletedSignal();
 
 protected:
-  void finishHandle(const Mantid::API::IAlgorithm *alg) override {
-    UNUSED_ARG(alg);
-    emit algCompletedSignal();
-  }
+  void finishHandle([[maybe_unused]] const Mantid::API::IAlgorithm *alg) override { emit algCompletedSignal(); }
 };
 
 class EXPORT_OPT_MANTIDQT_COMMON FindPeakStrategyGeneric {

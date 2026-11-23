@@ -323,8 +323,7 @@ void BatchAlgorithmRunner::handleBatchComplete(const Poco::AutoPtr<BatchComplete
   }
 }
 
-void BatchAlgorithmRunner::handleBatchCancelled(const Poco::AutoPtr<BatchCancelledNotification> &pNf) {
-  UNUSED_ARG(pNf);
+void BatchAlgorithmRunner::handleBatchCancelled([[maybe_unused]] const Poco::AutoPtr<BatchCancelledNotification> &pNf) {
   // Notify UI elements
   emit batchCancelled();
 }

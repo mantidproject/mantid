@@ -36,7 +36,7 @@ A - Using ISIS Data
     ConvertUnits(InputWorkspace=inputData, OutputWorkspace="aligned-withoutpulse", Target="dSpacing")
     # Focus the data
     DiffractionFocussing(InputWorkspace="aligned-withoutpulse",OutputWorkspace="focussed-withoutpulse",GroupingFileName=cal_file)
-    # Subract the processed data with and without pulse from eachother
+    # Subtract the processed data with and without pulse from each other
     Minus(LHSWorkspace="focussed-withpulse", RHSWorkspace="focussed-withoutpulse", OutputWorkspace="difference")
 
     # Now plot a focussed spectrum with and without prompt peak removal so that you can see the difference
@@ -54,7 +54,7 @@ A - Using ISIS Data
     Load(Filename=inputData+".RAW",OutputWorkspace=inputData,Cache="If Slow")
 
     # First do the analysis without prompt pulse removal so that we can compare the difference
-    # Align the detectors (incoporates unit conversion to d-Spacing)
+    # Align the detectors (incorporates unit conversion to d-Spacing)
     cal_file = "hrpd_new_072_01_corr.cal"
     ApplyDiffCal(InstrumentWorkspace=inputData, CalibrationFile=cal_file)
     ConvertUnits(InputWorkspace=inputData, OutputWorkspace="aligned-withpulse", Target="dSpacing")
@@ -67,12 +67,12 @@ A - Using ISIS Data
       max = 20040 + (i*20000)
       MaskBins(InputWorkspace=inputData,OutputWorkspace=inputData,XMin=min,XMax=max)
 
-    # Align the detectors (on the data with the pulse removed incoporates unit conversion to d-Spacing)
+    # Align the detectors (on the data with the pulse removed incorporates unit conversion to d-Spacing)
     ApplyDiffCal(InstrumentWorkspace=inputData, CalibrationFile=cal_file)
     ConvertUnits(InputWorkspace=inputData, OutputWorkspace="aligned-withoutpulse", Target="dSpacing")
     # Focus the data
     DiffractionFocussing(InputWorkspace="aligned-withoutpulse",OutputWorkspace="focussed-withoutpulse",GroupingFileName=cal_file)
-    # Subract the processed data with and without pulse from eachother
+    # Subtract the processed data with and without pulse from each other
     Subtract(LHSWorkspace="focussed-withpulse", RHSWorkspace="focussed-withoutpulse", OutputWorkspace="difference")
 
     # Now plot a focussed spectrum with and without prompt peak removal so that you can see the difference

@@ -692,7 +692,6 @@ mtd_add_qt_library(
 generate_mantid_export_header(
   MantidQtWidgetsCommonQt${MANTID_QT_VERSION}
   TRUE
-  GENERATE_UNUSED_ARG
   BASE_NAME
   MANTIDQT_COMMON
   EXPORT_MACRO_NAME

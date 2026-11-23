@@ -1512,10 +1512,8 @@ void FunctionTreeView::setBooleanAttribute(std::string const &attrName, bool val
  * @param attrName :: Attribute name
  * @param value :: New value
  */
-void FunctionTreeView::setVectorAttribute(std::string const &attrName, std::vector<double> &value) {
-  UNUSED_ARG(attrName);
-  UNUSED_ARG(value);
-}
+void FunctionTreeView::setVectorAttribute([[maybe_unused]] std::string const &attrName,
+                                          [[maybe_unused]] std::vector<double> &value) {}
 /**
  * Get a value of a parameter
  * @param parameterName :: Parameter name

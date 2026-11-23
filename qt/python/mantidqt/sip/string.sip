@@ -8,11 +8,7 @@
 %End
 
 %ConvertFromTypeCode
-#if PY_VERSION_HEX >= 0x03000000
     return PyUnicode_FromString(sipCpp->c_str());
-#else
-    return PyString_FromString(sipCpp->c_str());
-#endif
 %End
 
 %ConvertToTypeCode

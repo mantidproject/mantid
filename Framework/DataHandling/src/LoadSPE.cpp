@@ -55,7 +55,7 @@ int LoadSPE::confidence(Kernel::FileDescriptor &descriptor) const {
 
   // Next line should be comment line: "### Phi Grid" or "### Q Grid"
   std::getline(file, fileline);
-  if (fileline.find("Phi Grid") != std::string::npos || fileline.find("Q Grid") != std::string::npos) {
+  if (fileline.contains("Phi Grid") || fileline.contains("Q Grid")) {
     return 80;
   } else
     return 0;

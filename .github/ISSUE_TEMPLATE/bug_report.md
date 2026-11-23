@@ -39,7 +39,7 @@ For example
 
 - OS: [e.g. Windows, RHEL 7, Ubuntu, macOS]
 - OS Version:
-- Mantid Version [e.g. 6.0.0]
+- Mantid Version [e.g. 7.0.0]
 
 **Additional context**
 

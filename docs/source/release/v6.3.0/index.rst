@@ -16,7 +16,7 @@ Summary
 
 We are proud to announce version 6.3.0 of Mantid.
 
-Much of this version provides improvements for users, building on exisiting algorithms and GUIs.
+Much of this version provides improvements for users, building on existing algorithms and GUIs.
 Plotting has also seen a number of updates and users will benefit from improved documentation too.
 
 In addition to many improvements we are delighted to announce some new features including:

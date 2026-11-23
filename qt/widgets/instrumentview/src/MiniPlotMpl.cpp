@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/MiniPlotMpl.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
-#include "MantidPythonInterface/core/VersionCompat.h"
 #include "MantidQtWidgets/InstrumentView/PeakMarker2D.h"
 #include "MantidQtWidgets/MplCpp/FigureCanvasQt.h"
 
@@ -38,7 +37,7 @@ QPushButton *createHomeButton() {
   using MantidQt::Widgets::Common::Python::Object;
 
   auto mpl(NewRef(PyImport_ImportModule("matplotlib")));
-  QDir dataPath(TO_CSTRING(Object(mpl.attr("get_data_path")()).ptr()));
+  QDir dataPath(PyUnicode_AsUTF8(Object(mpl.attr("get_data_path")()).ptr()));
   dataPath.cd("images");
   QIcon icon(dataPath.absoluteFilePath("home.png"));
   auto iconSize(icon.availableSizes().front());

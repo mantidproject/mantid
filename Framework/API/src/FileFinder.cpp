@@ -29,7 +29,7 @@
 namespace {
 Mantid::Kernel::Logger g_log("FileFinder");
 
-bool containsWildCard(const std::string &ext) { return std::string::npos != ext.find('*'); }
+bool containsWildCard(const std::string &ext) { return ext.contains('*'); }
 
 std::string toUpper(const std::string &src) {
   std::string out(src);
@@ -160,7 +160,7 @@ std::filesystem::path FileFinderImpl::getFullPath(const std::string &filename, c
  *  @return the suffix, if there was one
  */
 std::string FileFinderImpl::extractAllowedSuffix(std::string &userString) const {
-  if (userString.find(ALLOWED_SUFFIX) == std::string::npos) {
+  if (!userString.contains(ALLOWED_SUFFIX)) {
     // short cut processing as normally there is no suffix
     return "";
   }
@@ -378,7 +378,7 @@ bool shouldUseArchiveForFacility(const std::string &archiveOpt, const std::strin
     return true;
   if (archiveOpt == "on")
     return facilityName == toLower(Mantid::Kernel::ConfigService::Instance().getString("default.facility"));
-  return archiveOpt.find(facilityName) != std::string::npos;
+  return archiveOpt.contains(facilityName);
 }
 } // namespace
 
@@ -486,8 +486,8 @@ std::string FileFinderImpl::validateRuns(const std::string &searchText) const {
  * @return true if the token should be reported as a malformed run range.
  */
 bool FileFinderImpl::isMalformedRange(const std::string &token) const {
-  if (token.find('/') != std::string::npos || token.find('\\') != std::string::npos ||
-      token.find(ALLOWED_SUFFIX) != std::string::npos || std::filesystem::path(token).has_extension())
+  if (token.contains('/') || token.contains('\\') || token.contains(ALLOWED_SUFFIX) ||
+      std::filesystem::path(token).has_extension())
     return false;
 
   const Kernel::StringTokenizer parts(token, "-",

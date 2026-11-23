@@ -98,7 +98,7 @@ class Test_Player_play(unittest.TestCase):
         mock_client_socket = MagicMock(spec=socket.socket)
 
         with (
-            patch.object(ClientHelloPacket, "from_socket", side_effect=socket.timeout("Timeout")),
+            patch.object(ClientHelloPacket, "from_socket", side_effect=TimeoutError("Timeout")),
         ):
             # Should raise socket.timeout
             with self.assertRaises(socket.timeout):

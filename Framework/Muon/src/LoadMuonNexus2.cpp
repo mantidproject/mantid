@@ -149,7 +149,7 @@ private:
       }
       return logv;
     } else if (vinfo.type == Mantid::LegacyNexus::NXnumtype::FLOAT64) {
-      if (logName.find("running") != std::string::npos || logName.find("period ") != std::string::npos) {
+      if (logName.contains("running") || logName.contains("period ")) {
         auto logv = new Mantid::Kernel::TimeSeriesProperty<bool>(logName);
         Mantid::LegacyNexus::NXDouble value(*this, "value");
         value.openLocal();

@@ -30,6 +30,7 @@
 #include <QShortcut>
 #include <QTextStream>
 #include <QThread>
+#include <QTimer>
 
 // Qscintilla
 #include <Qsci/qsciapis.h>
@@ -87,8 +88,9 @@ ScriptEditor::ScriptEditor(const QString &lexerName, const QFont &font, QWidget 
  */
 ScriptEditor::ScriptEditor(QWidget *parent, QsciLexer *codelexer, QString settingsGroup)
     : QsciScintilla(parent), m_filename(""), m_progressArrowKey(markerDefine(QsciScintilla::RightArrow)),
-      m_currentExecLine(0), m_completer(nullptr), m_previousKey(0), m_findDialog(new FindReplaceDialog(this)),
-      m_settingsGroup(std::move(settingsGroup)) {
+      m_currentExecLine(0), m_last_currentExecLine(0), m_completer(nullptr), m_previousKey(0),
+      m_findDialog(new FindReplaceDialog(this)), m_settingsGroup(std::move(settingsGroup)),
+      m_progress_marker_timer(new QTimer(this)), m_progress_marker_error(0), m_last_progress_marker_error(0) {
 // Older versions of QScintilla still use just CR as the line ending, which is
 // pre-OSX.
 // New versions just use unix-style for everything but Windows.
@@ -113,6 +115,8 @@ ScriptEditor::ScriptEditor(QWidget *parent, QsciLexer *codelexer, QString settin
   setFocusPolicy(Qt::StrongFocus);
   emit undoAvailable(isUndoAvailable());
   emit redoAvailable(isRedoAvailable());
+
+  connect(m_progress_marker_timer.get(), &QTimer::timeout, this, &ScriptEditor::showUpdatedProgressMarker);
 }
 
 /**
@@ -367,45 +371,62 @@ void ScriptEditor::setMarkerState(bool enabled) {
   }
 }
 
-/**
- * Update the arrow marker to point to the correct line and colour it
- * depending on the error state. If the call is from a thread other than the
- * application thread then the call is reperformed on that thread
- * @param lineno :: The line to place the marker at. A negative number will
- * clear all markers
- * @param error :: If true, the marker will turn red
- */
-void ScriptEditor::updateProgressMarkerFromThread(int lineno, bool error) {
-  if (QThread::currentThread() != QApplication::instance()->thread()) {
-    QMetaObject::invokeMethod(this, "updateProgressMarker", Qt::AutoConnection, Q_ARG(int, lineno), Q_ARG(bool, error));
+void ScriptEditor::runProgressMarkerTimer(bool enable) {
+  if (enable) {
+    m_progress_marker_timer->start(50);
   } else {
-    updateProgressMarker(lineno, error);
+    m_progress_marker_timer->stop();
+    showUpdatedProgressMarker();
   }
 }
 
 /**
- * Update the arrow marker to point to the correct line and colour it
- * depending on the error state
+ * Update the arrow marker to point to the correct line and colour it depending on the error state. Can be safely called
+ * from a thread, as the Qt actions are triggered in the main thread by a QTimer.
+ * @param lineno :: The line to place the marker at. A negative number will clear all markers
+ * @param error :: If true, the marker will turn red
+ */
+void ScriptEditor::updateProgressMarkerFromThread(int lineno, bool error) {
+  m_currentExecLine = lineno;
+  m_progress_marker_error = error;
+}
+
+/**
+ * Update the arrow marker to point to the correct line and colour it depending on the error state. Must be called in
+ * the main thread.
  * @param lineno :: The line to place the marker at. A negative number will
  * clear all markers
  * @param error :: If true, the marker will turn red
  */
 void ScriptEditor::updateProgressMarker(int lineno, bool error) {
-
   m_currentExecLine = lineno;
-  if (error) {
+  m_progress_marker_error = error;
+  showUpdatedProgressMarker();
+}
+
+/**
+ * Show the updated progress marker. Call from the QTimer while the script is running.
+ */
+void ScriptEditor::showUpdatedProgressMarker() {
+  if (m_currentExecLine == m_last_currentExecLine && m_progress_marker_error == m_last_progress_marker_error) {
+    return;
+  }
+  m_last_currentExecLine = m_currentExecLine;
+  m_last_progress_marker_error = m_progress_marker_error;
+
+  if (m_last_progress_marker_error) {
     setMarkerBackgroundColor(g_error_colour, m_progressArrowKey);
   } else {
     setMarkerBackgroundColor(g_success_colour, m_progressArrowKey);
   }
   markerDeleteAll();
   // Check the lineno actually exists, -1 means delete
-  if (lineno <= 0 || lineno > this->lines())
+  if (m_currentExecLine <= 0 || m_currentExecLine > this->lines())
     return;
 
-  ensureLineVisible(lineno);
+  ensureLineVisible(m_last_currentExecLine);
   markerAdd(m_currentExecLine - 1, m_progressArrowKey);
-  progressMade(lineno);
+  progressMade(m_last_currentExecLine);
 }
 
 /// Mark the progress arrow as an error

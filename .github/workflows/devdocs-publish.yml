@@ -31,16 +31,11 @@ jobs:
         with:
           filters: .github/filters.yaml
 
-      - name: Read pixi version
-        id: pixi-version
-        run: echo "version=$(tr -d '[:space:]' < .pixi-version)" >> "$GITHUB_OUTPUT"
-
       - name: Setup pixi
         if: steps.changes.outputs.devsite == 'true'
-        uses: prefix-dev/setup-pixi@9936258fee697aff89b3fed6ca1f80a382ef694e # v0.11.3
+        uses: ./.github/actions/setup-pixi
         with:
-          pixi-version: v${{ steps.pixi-version.outputs.version }}
-          frozen: true
+          run-install: true
 
       - name: Build dev-docs
         if: steps.changes.outputs.devsite == 'true'

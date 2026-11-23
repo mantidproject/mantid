@@ -18,7 +18,6 @@
 
 // PythonInterpreter and QApplicationHolder imports
 #include "MantidPythonInterface/core/NDArray.h"
-#include "MantidPythonInterface/core/VersionCompat.h"
 #include <QApplication>
 
 using namespace Mantid::DataObjects;

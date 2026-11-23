@@ -267,7 +267,7 @@ class Test_Packet(unittest.TestCase):
         """Test socket timeout handling."""
         mock_socket = Mock()
         # Simulate socket timeout
-        mock_socket.recv.side_effect = socket.timeout("Socket operation timed out")
+        mock_socket.recv.side_effect = TimeoutError("Socket operation timed out")
 
         with self.assertRaises(socket.timeout):
             Packet.from_socket(mock_socket)

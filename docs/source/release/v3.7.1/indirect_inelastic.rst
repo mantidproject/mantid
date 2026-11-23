@@ -28,7 +28,7 @@ Diffraction
 ###########
 
 - OSIRIS Diffraction DiffOnly interface and the :ref:`OSIRISDiffractionReduction <algm-OSIRISDiffractionReduction>` algorithm now support the use of multiple
-  contianer runs. Additional validation also ensures you have the same number of sample/vanadium/container runs.
+  container runs. Additional validation also ensures you have the same number of sample/vanadium/container runs.
 
 
 Vesuvio
@@ -51,7 +51,7 @@ Vesuvio
 
 - Added a fit function to fit a multivariate Gaussian profile (:ref:`MultivariateGaussianComptonProfile <func-MultivariateGaussianComptonProfile>`)
 
-- Added :ref:`VesuvioThickness <algm-VesuvioThickness>` algorithm to calclulate the sample density
+- Added :ref:`VesuvioThickness <algm-VesuvioThickness>` algorithm to calculate the sample density
 
 
 Improvements

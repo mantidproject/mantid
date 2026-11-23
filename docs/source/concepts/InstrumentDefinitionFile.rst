@@ -487,7 +487,7 @@ an example of how to do it:
         ypixels="200" ystart="-0.200" ystep="+0.002" >
     </type>
 
-    <!-- Pixel for Detectors. Shape defined to be a (0.001m)^2 square in XY-plane with tickness 0.0001m -->
+    <!-- Pixel for Detectors. Shape defined to be a (0.001m)^2 square in XY-plane with thickness 0.0001m -->
     <type is="detector" name="pixel">
       <cuboid id="pixel-shape">
         <left-front-bottom-point y="-0.001" x="-0.001" z="0.0"/>

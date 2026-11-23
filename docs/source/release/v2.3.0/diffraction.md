@@ -24,4 +24,4 @@ These release notes were migrated from the retired Mantid wiki (archive.mantidpr
 - SXD IDF incorrect on a few banks, and now corrected.
 - TOPAZ and NOMAD IDFs updated and improved
 - Fix SmoothNeighbours to better determine what sort of processing to perform.
-- Update IntegratePeakTimeSlices to better detal with weaker and edge peaks
+- Update IntegratePeakTimeSlices to better deal with weaker and edge peaks

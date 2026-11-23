@@ -12,7 +12,7 @@ Description
 Input
 #####
 
-This algorithm can be used to create a powder pattern 2d (".p2d") output file as useable for
+This algorithm can be used to create a powder pattern 2d (".p2d") output file as usable for
 multidimensional Rietveld refinements.
 The input for this algorithm needs to be a 2D workspace containing information about dSpacing and
 dSpacingPerpendicular. A 2D workspace can be created using the :ref:`Bin2DPowderDiffraction

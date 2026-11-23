@@ -8,7 +8,6 @@
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidPythonInterface/core/NDArray.h"
-#include "MantidPythonInterface/core/VersionCompat.h"
 #include "cxxtest/GlobalFixture.h"
 #include <boost/algorithm/string/trim.hpp>
 

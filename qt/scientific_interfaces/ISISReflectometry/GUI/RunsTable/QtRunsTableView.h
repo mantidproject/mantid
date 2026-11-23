@@ -54,7 +54,7 @@ private slots:
   void onCutPressed(bool);
   void onPastePressed(bool);
   void onFilterChanged(QString const &);
-  void onInstrumentChanged(int index);
+  void onInstrumentChanged();
   void onPlotSelectedPressed(bool);
   void onPlotSelectedStitchedOutputPressed(bool);
   void onFillDownPressed(bool);

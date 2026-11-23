@@ -115,7 +115,7 @@ void QuasiPresenter::handlePlotClicked() {
     std::vector<std::size_t> spectraIndices = {};
     for (auto i = 0u; i < numSpectra; ++i) {
       auto const axisLabel = Mantid::Kernel::Strings::toLower(resultWorkspace->getAxis(1)->label(i));
-      if (axisLabel.find(paramName) == std::string::npos) {
+      if (!axisLabel.contains(paramName)) {
         continue;
       }
       if (programName != "Lorentzians") {

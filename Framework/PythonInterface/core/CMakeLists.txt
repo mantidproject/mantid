@@ -44,7 +44,6 @@ set(INC_FILES
     inc/MantidPythonInterface/core/StlExportDefinitions.h
     inc/MantidPythonInterface/core/TypedValidatorExporter.h
     inc/MantidPythonInterface/core/UninstallTrace.h
-    inc/MantidPythonInterface/core/VersionCompat.h
     inc/MantidPythonInterface/core/WrapperHelpers.h
     inc/MantidPythonInterface/core/WrapPython.h
     inc/MantidPythonInterface/core/Converters/CArrayToNDArray.h

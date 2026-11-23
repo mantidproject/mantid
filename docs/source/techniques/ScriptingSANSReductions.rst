@@ -110,7 +110,7 @@ TransmissionSample
 
 .. code-block :: python
 
-    TransmissionSample(sample, direct, relaod=True, period_t, period_d)
+    TransmissionSample(sample, direct, reload=True, period_t, period_d)
 
 Specifies the runs that will be used to calculate the transmission fraction for the sample run.
 ``sample`` contains transmission monitor counts data for the sample when the sample is present,

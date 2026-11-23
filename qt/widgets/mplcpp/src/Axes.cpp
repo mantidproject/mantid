@@ -9,7 +9,6 @@
 #include "MantidPythonInterface/core/Converters/VectorToNDArray.h"
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
 #include "MantidPythonInterface/core/ErrorHandling.h"
-#include "MantidPythonInterface/core/VersionCompat.h"
 
 namespace MantidQt::Widgets::MplCpp {
 
@@ -26,7 +25,7 @@ namespace {
  * @param pystr A Python string object. This is not checked
  * @return A new QString
  */
-QString toQString(const Python::Object &pystr) { return QString::fromLatin1(TO_CSTRING(pystr.ptr())); }
+QString toQString(const Python::Object &pystr) { return QString::fromLatin1(PyUnicode_AsUTF8(pystr.ptr())); }
 
 /**
  * Retrieve axes limits from an axes object as C++ tuple

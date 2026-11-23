@@ -1671,6 +1671,26 @@ public:
     TS_ASSERT_DELTA(zmin, -3.0, 0.0001);
   }
 
+  void testGetBoundingBoxForTiltedHollowCylinder() {
+    // A tilted axis defeats the rule-based box, so this one comes from the shape's geometry, which used to
+    // leave hollow cylinders out and fall back to a 200 m box.
+    const std::string xml = "<hollow-cylinder id=\"can\">"
+                            "<centre-of-bottom-base x=\"0\" y=\"-0.02\" z=\"0\"/>"
+                            "<axis x=\"0\" y=\"1\" z=\"0\"/>"
+                            "<height val=\"0.04\"/>"
+                            "<inner-radius val=\"0.005\"/>"
+                            "<outer-radius val=\"0.006\"/>"
+                            "</hollow-cylinder>"
+                            "<rotate-all x=\"0\" y=\"0\" z=\"30\"/>";
+    const auto width = ShapeFactory().createShape(xml)->getBoundingBox().width();
+
+    // The axis turns to (-sin 30, cos 30, 0). Each extent is the axis's projection plus the outer rim's.
+    const double sin30 = 0.5, cos30 = std::sqrt(3.0) / 2;
+    TS_ASSERT_DELTA(width.X(), 0.04 * sin30 + 2 * 0.006 * cos30, 1e-6);
+    TS_ASSERT_DELTA(width.Y(), 0.04 * cos30 + 2 * 0.006 * sin30, 1e-6);
+    TS_ASSERT_DELTA(width.Z(), 2 * 0.006, 1e-6);
+  }
+
   void testGetBoundingBoxForCone() {
     // the XML axis points from the base to the tip, so the cone lies below its tip
     const auto cone = createCone();
@@ -1919,29 +1939,29 @@ private:
 
     using SCompT = std::pair<int, std::string>;
     std::vector<SCompT> SurfLine;
-    if (desired.find("60001") != std::string::npos)
+    if (desired.contains("60001"))
       SurfLine.emplace_back(SCompT(60001, "px -1"));
-    if (desired.find("60002") != std::string::npos)
+    if (desired.contains("60002"))
       SurfLine.emplace_back(SCompT(60002, "px 1"));
-    if (desired.find("60003") != std::string::npos)
+    if (desired.contains("60003"))
       SurfLine.emplace_back(SCompT(60003, "py -2"));
-    if (desired.find("60004") != std::string::npos)
+    if (desired.contains("60004"))
       SurfLine.emplace_back(SCompT(60004, "py 2"));
-    if (desired.find("60005") != std::string::npos)
+    if (desired.contains("60005"))
       SurfLine.emplace_back(SCompT(60005, "pz -3"));
-    if (desired.find("60006") != std::string::npos)
+    if (desired.contains("60006"))
       SurfLine.emplace_back(SCompT(60006, "pz 3"));
 
-    if (desired.find("80001") != std::string::npos)
+    if (desired.contains("80001"))
       SurfLine.emplace_back(SCompT(80001, "px 4.5"));
-    if (desired.find("80002") != std::string::npos)
+    if (desired.contains("80002"))
       SurfLine.emplace_back(SCompT(80002, "px 6.5"));
 
-    if (desired.find("71") != std::string::npos)
+    if (desired.contains("71"))
       SurfLine.emplace_back(SCompT(71, "so 0.8"));
-    if (desired.find("72") != std::string::npos)
+    if (desired.contains("72"))
       SurfLine.emplace_back(SCompT(72, "s -0.7 0 0 0.3"));
-    if (desired.find("73") != std::string::npos)
+    if (desired.contains("73"))
       SurfLine.emplace_back(SCompT(73, "s 0.6 0 0 0.4"));
 
     // Note that the testObject now manages the "new Plane"

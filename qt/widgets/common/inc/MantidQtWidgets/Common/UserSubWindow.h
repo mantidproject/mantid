@@ -103,10 +103,10 @@ protected:
   virtual void initLocalPython() {}
 
   /// To be overridden in order to connect a signal between two interfaces
-  virtual void otherUserSubWindowCreated(QPointer<UserSubWindow> window) { UNUSED_ARG(window); }
+  virtual void otherUserSubWindowCreated([[maybe_unused]] QPointer<UserSubWindow> window) {}
 
   /// To be overridden in order to connect a signal between two interfaces
-  virtual void otherUserSubWindowCreated(QList<QPointer<UserSubWindow>> &windows) { UNUSED_ARG(windows); }
+  virtual void otherUserSubWindowCreated([[maybe_unused]] QList<QPointer<UserSubWindow>> &windows) {}
 
   /// Raise a dialog box giving some information
   void showInformationBox(const QString &message) const;

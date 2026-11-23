@@ -69,7 +69,7 @@ public:
       alg.execute();
     } catch (std::exception &e) {
       std::string errorMsg = e.what();
-      TS_ASSERT(errorMsg.find(expectedErrorMsg) != std::string::npos);
+      TS_ASSERT(errorMsg.contains(expectedErrorMsg));
     }
   }
 };

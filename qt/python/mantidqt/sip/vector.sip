@@ -148,7 +148,7 @@ template<TYPE>
 
 %ConvertFromTypeCode
   return vectorToPythonList(*sipCpp, [](int item) -> PyObject* {
-    return FROM_LONG(item);
+    return PyLong_FromLong(item);
   });
 %End
 
@@ -158,11 +158,11 @@ template<TYPE>
     return isIterable(sipPy) || sipPy == Py_None;
   } else {
     auto cppValue = pythonListToVector<int>(sipPy, [&](PyObject* pyItem) -> std::optional<int> {
-      if (!INT_CHECK(pyItem)) {
+      if (!PyLong_Check(pyItem)) {
         PyErr_Format(PyExc_TypeError, "object in iterable is not an int");
         return std::nullopt;
       } else {
-        return static_cast<int>(TO_LONG(pyItem));
+        return static_cast<int>(PyLong_AsLong(pyItem));
       }
     });
     return transferToSip(cppValue, sipCppPtr, sipIsErr, sipGetState(sipTransferObj));
@@ -183,7 +183,7 @@ template<TYPE>
 
 %ConvertFromTypeCode
   return vectorToPythonList(*sipCpp, [](unsigned int item) -> PyObject* {
-    return FROM_LONG(item);
+    return PyLong_FromLong(item);
   });
 %End
 
@@ -193,11 +193,11 @@ template<TYPE>
     return isIterable(sipPy) || sipPy == Py_None;
   } else {
     auto cppValue = pythonListToVector<unsigned int>(sipPy, [&](PyObject* pyItem) -> std::optional<unsigned int> {
-      if (!INT_CHECK(pyItem)) {
+      if (!PyLong_Check(pyItem)) {
         PyErr_Format(PyExc_TypeError, "object in iterable is not an int");
         return std::nullopt;
       } else {
-        return static_cast<unsigned int>(TO_LONG(pyItem));
+        return static_cast<unsigned int>(PyLong_AsLong(pyItem));
       }
     });
     return transferToSip(cppValue, sipCppPtr, sipIsErr, sipGetState(sipTransferObj));

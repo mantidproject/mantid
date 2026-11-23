@@ -628,7 +628,7 @@ void FilterEvents::createOutputWorkspaces() {
   bool descriptiveNames = getProperty("DescriptiveOutputNames");
   bool splitByTime = true;
   if (descriptiveNames) {
-    if (m_hasInfoWS && infomap[0].find("Log") != std::string::npos) {
+    if (m_hasInfoWS && infomap[0].contains("Log")) {
       splitByTime = false;
     }
   }

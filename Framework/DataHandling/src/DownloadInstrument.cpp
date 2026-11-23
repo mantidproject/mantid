@@ -91,7 +91,7 @@ void DownloadInstrument::exec() {
     fileMap = processRepository();
   } catch (Mantid::Kernel::Exception::InternetError &ex) {
     std::string errorText(ex.what());
-    if (errorText.find("rate limit") != std::string::npos) {
+    if (errorText.contains("rate limit")) {
       g_log.information() << "Instrument Definition Update: " << errorText << '\n';
     } else {
       // log the failure at Notice Level

@@ -55,7 +55,7 @@ Improvements
 
 - :ref:`PowderILLDetectorScan <algm-PowderILLDetectorScan>` is corrected when treating multiple scans merged
 - The :ref:`D7YIGPositionCalibration <algm-D7YIGPositionCalibration>` now can do the YIG Bragg peak fitting individually or simultaneously, or not at all and provide feedback on the initial guess quality
-- :ref:`PDCalibration <algm-PDCalibration>` now intitialises A,B and S of BackToBackExponential if correpsonding coeficients are in the instrument parameter.xml file.
+- :ref:`PDCalibration <algm-PDCalibration>` now initialises A,B and S of BackToBackExponential if corresponding coefficients are in the instrument parameter.xml file.
 - PaalmanPingsMonteCarloAbsorption can now make use of predefined sample and container geometries
 
 Bugfixes

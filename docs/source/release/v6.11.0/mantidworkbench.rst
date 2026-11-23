@@ -24,7 +24,7 @@ Bugfixes
 - The standalone Mantid package is now correctly launching on Linux, with special attention to IDAaaS.
 - Code editor no longer crashes when parsing malformed XML code.
 - Right-clicking on a 3D plot to change the colour bar scale no longer triggers the zoom tool.
-- Dragging arbitary text onto a plot now displays a warning indicating that the workspace name is invalid, rather than causing a crash.
+- Dragging arbitrary text onto a plot now displays a warning indicating that the workspace name is invalid, rather than causing a crash.
 - Creating a script from a workspace's history, where that history includes algorithms using ``StoreInADS=False``, should now create a functioning script.
 - Editing the y-axis of plots generated in a python script within Workbench no longer causes an error.
 - Editing plot settings no longer reorders the legend entries.

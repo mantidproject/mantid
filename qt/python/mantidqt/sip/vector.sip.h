@@ -4,7 +4,6 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidPythonInterface/core/VersionCompat.h"
 #include <memory>
 #include <optional>
 #include <string>
@@ -108,8 +107,8 @@ template <typename T> std::optional<T> asOptional(int *sipIsErr, T *sipCppPtr) {
 inline std::optional<std::string> pythonStringToStdString(PyObject *pyString) {
   if (PyBytes_Check(pyString)) {
     return std::string(PyBytes_AsString(pyString));
-  } else if (STR_CHECK(pyString)) {
-    return std::string(TO_CSTRING(pyString));
+  } else if (PyUnicode_Check(pyString)) {
+    return std::string(PyUnicode_AsUTF8(pyString));
   } else {
     return std::nullopt;
   }
@@ -120,6 +119,6 @@ PyObject *stdStringToPythonString(std::string const &cppString) {
     return utf8String;
   } else {
     PyErr_Clear();
-    return FROM_CSTRING(cppString.c_str());
+    return PyUnicode_FromString(cppString.c_str());
   }
 }

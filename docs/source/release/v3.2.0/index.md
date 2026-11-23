@@ -12,7 +12,7 @@ class: screenshot
 width: 500px
 align: right
 ---
-The new Mantid website and documentation portal. This version of Mantid comes with several improvements to the documentation included tested usage example for many algortihms.
+The new Mantid website and documentation portal. This version of Mantid comes with several improvements to the documentation included tested usage example for many algorithms.
 ```
 
 ## Release 3.2, Due for Release: 11th July 2014

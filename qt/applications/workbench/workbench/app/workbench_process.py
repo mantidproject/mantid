@@ -9,7 +9,6 @@ import argparse
 import atexit
 import os
 import sys
-from sys import setswitchinterval
 from functools import partial
 
 from mantid.api import FrameworkManagerImpl
@@ -33,7 +32,6 @@ register_resources()
 from workbench.identity import APPNAME, ORG_DOMAIN, ORGANIZATION  # noqa: E402
 
 # Constants
-SYSCHECK_INTERVAL = 50
 ORIGINAL_SYS_EXIT = sys.exit
 ORIGINAL_STDERR = sys.stderr
 STACKTRACE_FILE = "workbench_stacktrace.txt"
@@ -241,9 +239,6 @@ def initialise_qapp_and_launch_workbench(command_line_options):
             command_line_options.script = None
 
     app = initialize()
-    # the default sys check interval leads to long lags
-    # when request scripts to be aborted
-    setswitchinterval(SYSCHECK_INTERVAL)
 
     create_and_launch_workbench(app, command_line_options)
 

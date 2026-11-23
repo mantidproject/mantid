@@ -310,7 +310,7 @@ void GroupDetectors2::getGroups(const API::MatrixWorkspace_const_sptr &workspace
       // check if XML file and if yes assume it is a XML grouping file
       std::string filenameCopy(filename);
       std::transform(filenameCopy.begin(), filenameCopy.end(), filenameCopy.begin(), tolower);
-      if ((filenameCopy.find(".xml")) != std::string::npos) {
+      if (filenameCopy.contains(".xml")) {
         processXMLFile(filename, workspace, unUsedSpec);
       } else {
         // the format of this input file format is described in
