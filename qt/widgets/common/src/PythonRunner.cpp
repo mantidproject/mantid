@@ -55,7 +55,10 @@ QString PythonRunner::runPythonCode(const QString &code, bool no_output) {
   emit runAsPythonScript(code_to_run, true);
 
   // Now get the output
-  tmp_file.open();
+  if (!tmp_file.open()) {
+    g_log.warning() << "Could not read the output of Python code from " << qPrintable(tmp_file.fileName()) << "\n";
+    return QString();
+  }
   QTextStream stream(&tmp_file);
   tmpstring.clear();
 
