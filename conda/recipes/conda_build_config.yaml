@@ -124,7 +124,7 @@ plotly:
   - '>=5.0.0'
 
 pyqt6:
-  - '>=6.11,<7'
+  - '>=6.12,<7'
 
 pyqt6_sip:
   - '>=13.6,<14'
@@ -142,7 +142,7 @@ pyyaml:
 
 # Pins qt to a specific version to avoid gui rendering problems in certain versions
 qt6_main:
-  - '6.11.*'
+  - '6.12.*'
 
 # 5.4.2 crashes the jupyter console. 5.5.0 raises a TypeError when using tab completion.
 qtconsole:

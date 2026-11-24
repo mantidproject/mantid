@@ -87,9 +87,9 @@ rattler-index = ">=0.31.5,<1.0"
 
 [dependencies]
 cmake = ">=4.2,<5"
-pyqt6 = ">=6.11,<7"
+pyqt6 = ">=6.12,<7"
 pyqt6-sip = ">=13.6,<14"
-qt6-main = "6.11.*"
+qt6-main = "6.12.*"
 qscintilla2 = ">=2.14.1"
 qtconsole-base = ">5.5.0"
 ccache = ">=4.11.3,<5"
