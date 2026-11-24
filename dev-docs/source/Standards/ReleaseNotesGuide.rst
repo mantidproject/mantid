@@ -40,6 +40,7 @@ Creating a file with the release note
 -------------------------------------
 
 During normal development, add a release note to your PR by creating a new ``.rst`` file and name it in one of the following ways:
+
 - Using the Pull Request (PR) number (preferred method)
 - Using the issue number (to be used if multiple PRs stem from the same issue)
 
