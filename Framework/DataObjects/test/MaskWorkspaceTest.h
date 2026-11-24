@@ -41,8 +41,8 @@ public:
   void test_constructure_using_instrument() {
     int pixels = 10;
 
-    Mantid::Geometry::Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, pixels);
-    inst->setName("MaskWorkspaceTest_Instrument");
+    Mantid::Geometry::Instrument_sptr inst =
+        ComponentCreationHelper::createTestInstrumentRectangular2(1, pixels, 0.008, "MaskWorkspaceTest_Instrument");
 
     Mantid::DataObjects::MaskWorkspace maskWS(inst, false);
     TS_ASSERT_EQUALS(maskWS.getNumberMasked(), 0);
@@ -88,8 +88,8 @@ public:
     int pixels = 10;
     int maskpixels = 25;
 
-    Mantid::Geometry::Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, pixels);
-    inst->setName("MaskWorkspaceTest_Instrument");
+    Mantid::Geometry::Instrument_sptr inst =
+        ComponentCreationHelper::createTestInstrumentRectangular2(1, pixels, 0.008, "MaskWorkspaceTest_Instrument");
 
     Mantid::DataObjects::MaskWorkspace maskWS(inst, false);
     for (int i = 0; i < maskpixels; i++)
@@ -122,8 +122,8 @@ public:
     int pixels = 10;
     int maskpixels = 25;
 
-    Mantid::Geometry::Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, pixels);
-    inst->setName("MaskWorkspaceTest_Instrument");
+    Mantid::Geometry::Instrument_sptr inst =
+        ComponentCreationHelper::createTestInstrumentRectangular2(1, pixels, 0.008, "MaskWorkspaceTest_Instrument");
 
     Mantid::DataObjects::MaskWorkspace maskWS(inst, false);
     for (int i = 0; i < maskpixels; i++)
@@ -186,8 +186,8 @@ public:
   void test_detector_flags_cleared_at_construction() {
     int pixels = 10;
 
-    Mantid::Geometry::Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, pixels);
-    inst->setName("MaskWorkspaceTest_Instrument");
+    Mantid::Geometry::Instrument_sptr inst =
+        ComponentCreationHelper::createTestInstrumentRectangular2(1, pixels, 0.008, "MaskWorkspaceTest_Instrument");
 
     // Use the ExperimentInfo API to create complete DetectorInfo prior to workspace creation.
     Mantid::API::ExperimentInfo experiment;
@@ -214,8 +214,8 @@ public:
   void test_isConsistentWithDetectorMasks() {
     int pixels = 10;
 
-    Mantid::Geometry::Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, pixels);
-    inst->setName("MaskWorkspaceTest_Instrument");
+    Mantid::Geometry::Instrument_sptr inst =
+        ComponentCreationHelper::createTestInstrumentRectangular2(1, pixels, 0.008, "MaskWorkspaceTest_Instrument");
 
     // Use the ExperimentInfo API to create a complete DetectorInfo prior to workspace creation.
     // With respect to the intended application of these methods, it's important to test using a DetectorInfo
@@ -245,8 +245,8 @@ public:
   void test_combineFromDetectorMasks() {
     int pixels = 10;
 
-    Mantid::Geometry::Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, pixels);
-    inst->setName("MaskWorkspaceTest_Instrument");
+    Mantid::Geometry::Instrument_sptr inst =
+        ComponentCreationHelper::createTestInstrumentRectangular2(1, pixels, 0.008, "MaskWorkspaceTest_Instrument");
 
     // Use the ExperimentInfo API to create a complete DetectorInfo prior to workspace creation.
     // With respect to the intended application of these methods, it's important to test using a DetectorInfo
@@ -274,8 +274,8 @@ public:
   void test_combineToDetectorMasks() {
     int pixels = 10;
 
-    Mantid::Geometry::Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, pixels);
-    inst->setName("MaskWorkspaceTest_Instrument");
+    Mantid::Geometry::Instrument_sptr inst =
+        ComponentCreationHelper::createTestInstrumentRectangular2(1, pixels, 0.008, "MaskWorkspaceTest_Instrument");
 
     // Use the ExperimentInfo API to create a complete DetectorInfo prior to workspace creation.
     // With respect to the intended application of these methods, it's important to test using a DetectorInfo
@@ -303,8 +303,8 @@ public:
   void test_maskConsistencyWithNoInstrument() {
     int pixels = 10;
 
-    Mantid::Geometry::Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, pixels);
-    inst->setName("MaskWorkspaceTest_Instrument");
+    Mantid::Geometry::Instrument_sptr inst =
+        ComponentCreationHelper::createTestInstrumentRectangular2(1, pixels, 0.008, "MaskWorkspaceTest_Instrument");
 
     // Use the ExperimentInfo API to create a complete DetectorInfo prior to workspace creation.
     // With respect to the intended application of these methods, it's important to test using a DetectorInfo

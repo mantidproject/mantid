@@ -105,8 +105,7 @@ private:
   // ----- members ----- //
   // ------------------- //
   PeaksWorkspace_sptr make_pws() {
-    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(2, 10);
-    inst->setName("TestInstrument");
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(2, 10, 0.008, "TestInstrument");
 
     auto pw = std::make_shared<PeaksWorkspace>();
     pw->setInstrument(inst);

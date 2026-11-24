@@ -26,6 +26,7 @@
 #include "MantidGeometry/Instrument/StructuredDetector.h"
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Interpolation.h"
@@ -308,6 +309,107 @@ public:
     TS_ASSERT_EQUALS(componentInfo.name(5), "structured");
     TS_ASSERT_EQUALS(componentInfo.structuredGridComponent(5).idStart, 4);
     TS_ASSERT_EQUALS(componentInfo.structuredGridComponent(5).xVertices, structuredGrid.xVertices);
+  }
+
+  void test_grid_banks_make_the_pixels_grid_detectors_make() {
+    // Legacy banks, initialized as InstrumentDefinitionParser does
+    auto const legacy = std::make_shared<Instrument>("banks");
+    auto const pixelShape = ComponentCreationHelper::createCuboid(0.01);
+    auto *const rectangular = new RectangularDetector("rectangular");
+    rectangular->setPos(V3D(0, 0, 2));
+    rectangular->setRot(Quat(30, V3D(0, 1, 0)));
+    legacy->add(rectangular);
+    rectangular->initialize(pixelShape, 3, -0.1, 0.05, 2, 0.2, 0.04, 100, true, 10, 2);
+    auto *const grid = new GridDetector("grid");
+    grid->setPos(V3D(1, 0, 2));
+    legacy->add(grid);
+    grid->initialize(pixelShape, 2, -1.0, 1.0, 3, -1.5, 1.0, 2, -1.0, 1.0, 1000, "zxy", 7, 1);
+    for (auto const *bank : std::initializer_list<ICompAssembly const *>{rectangular, grid}) {
+      std::vector<IComponent_const_sptr> children;
+      bank->getChildren(children, true);
+      for (auto const &child : children) {
+        if (auto const detector = std::dynamic_pointer_cast<IDetector const>(child)) {
+          legacy->markAsDetectorIncomplete(detector.get());
+        }
+      }
+    }
+    legacy->markAsDetectorFinalize();
+    auto const expected = walk(legacy);
+
+    BeamlineBuilder builder;
+    auto const root = builder.addAssembly(BeamlineBuilder::noParent, "banks");
+    Mantid::Beamline::PixelGridComponent rectangularGrid;
+    rectangularGrid.nX = 3;
+    rectangularGrid.xStart = -0.1;
+    rectangularGrid.xStep = 0.05;
+    rectangularGrid.nY = 2;
+    rectangularGrid.yStart = 0.2;
+    rectangularGrid.yStep = 0.04;
+    rectangularGrid.idStart = 100;
+    rectangularGrid.idFillOrder = {'y', 'x', 'z'};
+    rectangularGrid.idStepByRow = 10;
+    rectangularGrid.idStep = 2;
+    builder.addRectangularBank(root, "rectangular", V3D(0, 0, 2), Quat(30, V3D(0, 1, 0)), rectangularGrid, pixelShape);
+    Mantid::Beamline::PixelGridComponent gridGrid;
+    gridGrid.nX = 2;
+    gridGrid.xStart = -1.0;
+    gridGrid.xStep = 1.0;
+    gridGrid.nY = 3;
+    gridGrid.yStart = -1.5;
+    gridGrid.yStep = 1.0;
+    gridGrid.nZ = 2;
+    gridGrid.zStart = -1.0;
+    gridGrid.zStep = 1.0;
+    gridGrid.idStart = 1000;
+    gridGrid.idFillOrder = {'z', 'x', 'y'};
+    gridGrid.idStepByRow = 7;
+    gridGrid.idStep = 1;
+    builder.addGridBank(root, "grid", V3D(1, 0, 2), Quat(), gridGrid, pixelShape);
+    auto const built = builder.build();
+    assertSameBeamline(built, expected);
+    for (auto const &name : {"rectangular", "grid"}) {
+      auto const index = built.componentInfo->indexOfAny(name);
+      TS_ASSERT_EQUALS(built.componentInfo->pixelGridComponent(index).minDetectorID,
+                       expected.componentInfo->pixelGridComponent(index).minDetectorID);
+      TS_ASSERT_EQUALS(built.componentInfo->pixelGridComponent(index).maxDetectorID,
+                       expected.componentInfo->pixelGridComponent(index).maxDetectorID);
+    }
+    // And the tree made from them makes the same banks again
+    assertSameBeamline(walk(Instrument::fromBeamline(built)), expected);
+  }
+
+  void test_grid_banks_need_pixels_and_a_fill_order() {
+    BeamlineBuilder builder;
+    auto const root = builder.addAssembly(BeamlineBuilder::noParent, "root");
+    auto const pixelShape = ComponentCreationHelper::createCuboid(0.01);
+    Mantid::Beamline::PixelGridComponent pixelGrid;
+    TS_ASSERT_THROWS(builder.addRectangularBank(root, "empty", V3D(), Quat(), pixelGrid, pixelShape),
+                     std::invalid_argument const &);
+    pixelGrid.nX = 1;
+    pixelGrid.nY = 1;
+    pixelGrid.idFillOrder = {'x', 'y', 'w'};
+    TS_ASSERT_THROWS(builder.addGridBank(root, "bad order", V3D(), Quat(), pixelGrid, pixelShape),
+                     std::invalid_argument const &);
+    pixelGrid.idFillOrder = {'x', 'y', 'z'};
+    pixelGrid.nZ = 1;
+    TS_ASSERT_THROWS(builder.addRectangularBank(root, "layered", V3D(), Quat(), pixelGrid, pixelShape),
+                     std::invalid_argument const &);
+  }
+
+  void test_a_tree_keeps_whether_a_component_was_given_a_shape() {
+    BeamlineBuilder builder;
+    auto const root = builder.addAssembly(BeamlineBuilder::noParent, "root");
+    builder.addComponent(root, "plain");
+    builder.addObjComponent(root, "empty shape", V3D(), Quat(), std::make_shared<CSGObject>());
+    builder.addObjComponent(root, "no shape", V3D(), Quat(), nullptr);
+    builder.addOutlineAssembly(root, "no outline", V3D(), Quat(), nullptr);
+    builder.addAssembly(root, "assembly");
+    auto const instrument = Instrument::fromBeamline(builder.build());
+    TS_ASSERT_EQUALS(instrument->getComponentByName("plain")->type(), "LogicalComponent");
+    TS_ASSERT_EQUALS(instrument->getComponentByName("empty shape")->type(), "PhysicalComponent");
+    TS_ASSERT_EQUALS(instrument->getComponentByName("no shape")->type(), "PhysicalComponent");
+    TS_ASSERT_EQUALS(instrument->getComponentByName("no outline")->type(), "ObjCompAssembly");
+    TS_ASSERT_EQUALS(instrument->getComponentByName("assembly")->type(), "CompAssembly");
   }
 
   void test_banks_must_hold_their_grid_of_pixels() {

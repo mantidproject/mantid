@@ -193,8 +193,8 @@ public:
     using Mantid::Kernel::ConfigService;
 
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
-    auto testInst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
-    testInst->setName(m_instName);
+    auto testInst = ComponentCreationHelper::createTestInstrumentCylindrical(
+        1, Mantid::Kernel::V3D(0.0, 0.0, -10.), Mantid::Kernel::V3D(), 0.004, 0.0002, m_instName);
     inputWS->setInstrument(testInst);
 
     // Algorithm uses instrument directories as a search location, alter this
@@ -224,8 +224,8 @@ public:
     using Mantid::Kernel::ConfigService;
 
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
-    auto testInst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
-    testInst->setName(m_instName);
+    auto testInst = ComponentCreationHelper::createTestInstrumentCylindrical(
+        1, Mantid::Kernel::V3D(0.0, 0.0, -10.), Mantid::Kernel::V3D(), 0.004, 0.0002, m_instName);
     inputWS->setInstrument(testInst);
 
     // Algorithm uses instrument directories as a search location, alter this
@@ -260,8 +260,8 @@ public:
     using Mantid::Kernel::ConfigService;
 
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
-    auto testInst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
-    testInst->setName(m_instName);
+    auto testInst = ComponentCreationHelper::createTestInstrumentCylindrical(
+        1, Mantid::Kernel::V3D(0.0, 0.0, -10.), Mantid::Kernel::V3D(), 0.004, 0.0002, m_instName);
     inputWS->setInstrument(testInst);
 
     // Algorithm uses instrument directories as a search location, alter this
@@ -369,8 +369,8 @@ public:
     using Mantid::Kernel::ConfigService;
 
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
-    auto testInst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
-    testInst->setName(m_instName);
+    auto testInst = ComponentCreationHelper::createTestInstrumentCylindrical(
+        1, Mantid::Kernel::V3D(0.0, 0.0, -10.), Mantid::Kernel::V3D(), 0.004, 0.0002, m_instName);
     inputWS->setInstrument(testInst);
     inputWS->mutableRun().mutableGoniometer().setR(ninetyAboutZ());
 
@@ -412,8 +412,8 @@ public:
     using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
 
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
-    auto testInst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
-    testInst->setName(m_instName);
+    auto testInst = ComponentCreationHelper::createTestInstrumentCylindrical(
+        1, Mantid::Kernel::V3D(0.0, 0.0, -10.), Mantid::Kernel::V3D(), 0.004, 0.0002, m_instName);
     inputWS->setInstrument(testInst);
     // The mesh is only at risk of being rotated in place when there is a rotation to apply.
     inputWS->mutableRun().mutableGoniometer().setR(ninetyAboutZ());
@@ -1036,8 +1036,8 @@ public:
     using Mantid::Kernel::PropertyManager;
     using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
-    auto testInst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
-    testInst->setName(m_instName);
+    auto testInst = ComponentCreationHelper::createTestInstrumentCylindrical(
+        1, Mantid::Kernel::V3D(0.0, 0.0, -10.), Mantid::Kernel::V3D(), 0.004, 0.0002, m_instName);
     inputWS->setInstrument(testInst);
 
     auto alg = createAlgorithm(inputWS);
@@ -1128,8 +1128,8 @@ public:
     using StringProperty = Mantid::Kernel::PropertyWithValue<std::string>;
 
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
-    auto testInst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
-    testInst->setName(m_instName);
+    auto testInst = ComponentCreationHelper::createTestInstrumentCylindrical(
+        1, Mantid::Kernel::V3D(0.0, 0.0, -10.), Mantid::Kernel::V3D(), 0.004, 0.0002, m_instName);
     inputWS->setInstrument(testInst);
 
     // Algorithm uses instrument directories as a search location, alter this
@@ -1151,8 +1151,8 @@ public:
     using Mantid::Kernel::ConfigService;
 
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
-    auto testInst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
-    testInst->setName(m_instName);
+    auto testInst = ComponentCreationHelper::createTestInstrumentCylindrical(
+        1, Mantid::Kernel::V3D(0.0, 0.0, -10.), Mantid::Kernel::V3D(), 0.004, 0.0002, m_instName);
     inputWS->setInstrument(testInst);
 
     // Algorithm uses instrument directories as a search location, alter this
@@ -1172,8 +1172,8 @@ public:
     using Mantid::Kernel::ConfigService;
 
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
-    auto testInst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
-    testInst->setName(m_instName);
+    auto testInst = ComponentCreationHelper::createTestInstrumentCylindrical(
+        1, Mantid::Kernel::V3D(0.0, 0.0, -10.), Mantid::Kernel::V3D(), 0.004, 0.0002, m_instName);
     inputWS->setInstrument(testInst);
 
     auto alg = createAlgorithm(inputWS);

@@ -490,11 +490,8 @@ public:
 
   void test_setQSampleFrameVirtualDetectorWithQLab() {
     constexpr auto radius = 10.;
-    auto sphereInst = ComponentCreationHelper::createTestInstrumentRectangular(5, 100);
-    auto extendedSpaceObj = ComponentCreationHelper::createSphere(10., V3D(0, 0, 0));
-    auto extendedSpace = std::make_unique<ObjComponent>("extended-detector-space", extendedSpaceObj, sphereInst.get());
-    extendedSpace->setPos(V3D(0.0, 0.0, 0.0));
-    sphereInst->add(extendedSpace.release());
+    auto sphereInst = ComponentCreationHelper::createTestInstrumentRectangularWithExtendedDetectorSpace(
+        5, 100, ComponentCreationHelper::createSphere(10., V3D(0, 0, 0)));
     ALLOW_DEPRECATED(const auto refFrame = sphereInst->getReferenceFrame());
     const auto refBeamDir = refFrame->vecPointingAlongBeam();
 
@@ -561,11 +558,8 @@ public:
   }
 
   void test_setQSampleFrameVirtualDetectorWithScatteringAngle() {
-    auto sphereInst = ComponentCreationHelper::createTestInstrumentRectangular(5, 100);
-    auto extendedSpaceObj = ComponentCreationHelper::createSphere(10., V3D(0, 0, 0));
-    auto extendedSpace = std::make_unique<ObjComponent>("extended-detector-space", extendedSpaceObj, sphereInst.get());
-    extendedSpace->setPos(V3D(0.0, 0.0, 0.0));
-    sphereInst->add(extendedSpace.release());
+    auto sphereInst = ComponentCreationHelper::createTestInstrumentRectangularWithExtendedDetectorSpace(
+        5, 100, ComponentCreationHelper::createSphere(10., V3D(0, 0, 0)));
 
     // test with & without extended detector space
     // extended space is a sphere, so all points should fall radius*detector

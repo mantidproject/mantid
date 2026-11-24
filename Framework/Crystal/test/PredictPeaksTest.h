@@ -61,14 +61,10 @@ public:
 
     // Make the fake input workspace
     MatrixWorkspace_sptr inWS = WorkspaceCreationHelper::create2DWorkspace(10000, 1);
-    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(1, 100);
-
-    if (addExtendedDetectorDefinition) {
-      auto extendedSpaceObj = ComponentCreationHelper::createCuboid(5., 5., 5.);
-      auto extendedSpace = new ObjComponent("extended-detector-space", extendedSpaceObj, inst.get());
-      extendedSpace->setPos(V3D(0.0, 0.0, 0.0));
-      inst->add(extendedSpace);
-    }
+    Instrument_sptr inst = addExtendedDetectorDefinition
+                               ? ComponentCreationHelper::createTestInstrumentRectangularWithExtendedDetectorSpace(
+                                     1, 100, ComponentCreationHelper::createCuboid(5., 5., 5.))
+                               : ComponentCreationHelper::createTestInstrumentRectangular(1, 100);
 
     inWS->setInstrument(inst);
 

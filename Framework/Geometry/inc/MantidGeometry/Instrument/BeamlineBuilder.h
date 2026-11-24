@@ -62,6 +62,15 @@ public:
   /// nY detectors.
   Node addGridBank(Node const parent, std::string name, Kernel::V3D const &position, Kernel::Quat const &rotation,
                    Beamline::PixelGridComponent pixelGrid);
+  /// A rectangular bank holding the pixels RectangularDetector::initialize makes from pixelGrid, all of pixelShape:
+  /// columns and pixels named, placed and numbered as GridDetector does. nZ must be 0. The grid's minimum and
+  /// maximum detector IDs are filled in. Returns the bank.
+  Node addRectangularBank(Node const parent, std::string name, Kernel::V3D const &position,
+                          Kernel::Quat const &rotation, Beamline::PixelGridComponent pixelGrid,
+                          std::shared_ptr<const IObject> const &pixelShape);
+  /// A 3D grid bank holding the pixels GridDetector::initialize makes from pixelGrid, as addRectangularBank does.
+  Node addGridBank(Node const parent, std::string name, Kernel::V3D const &position, Kernel::Quat const &rotation,
+                   Beamline::PixelGridComponent pixelGrid, std::shared_ptr<const IObject> const &pixelShape);
   /// A structured bank. Its pixels are added under it as for any assembly: nX columns, each of nY detectors.
   Node addStructuredBank(Node const parent, std::string name, Kernel::V3D const &position, Kernel::Quat const &rotation,
                          Beamline::StructuredGridComponent structuredGrid);
@@ -125,6 +134,7 @@ private:
   Node add(NodeRecord record);
   void checkNode(Node const node) const;
   bool isPixelGrid(Node const node, int const columns, int const pixels) const;
+  void addGridPixels(Node const bank, std::shared_ptr<const IObject> const &pixelShape);
   void checkBanks() const;
 
   std::vector<NodeRecord> m_nodes;

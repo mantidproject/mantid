@@ -174,7 +174,8 @@ void addTreeChildren(ICompAssembly &parent, ComponentInfo const &componentInfo, 
     } else {
       switch (componentInfo.componentType(child)) {
       case Beamline::ComponentType::Unstructured:
-        component = assembly = new CompAssembly(name);
+        // An outline assembly keeps the outline it was given, even none
+        component = assembly = shapes[child] ? new CompAssembly(name) : new ObjCompAssembly(name);
         break;
       case Beamline::ComponentType::OutlineComposite: {
         auto *const outlined = new ObjCompAssembly(name);
@@ -192,10 +193,11 @@ void addTreeChildren(ICompAssembly &parent, ComponentInfo const &componentInfo, 
         component = structuredBank = new StructuredDetector(name);
         break;
       case Beamline::ComponentType::Generic:
-        if (shapes[child] && shapes[child]->hasValidShape()) {
-          component = new ObjComponent(name, shapes[child]);
-        } else {
+        // Only a component made without a shape holds noShape()
+        if (shapes[child] == ComponentInfo::noShape()) {
           component = new Component(name);
+        } else {
+          component = new ObjComponent(name, shapes[child]);
         }
         break;
       case Beamline::ComponentType::Infinite:

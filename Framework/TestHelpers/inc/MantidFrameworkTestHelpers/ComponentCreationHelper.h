@@ -170,9 +170,10 @@ createCylInstrumentWithVerticalOffsetsSpecified(size_t nTubes, const std::vector
 
 /** create instrument with cylindrical detectors located in specific angular
  * positions */
-Mantid::Geometry::Instrument_sptr createCylInstrumentWithDetInGivenPositions(const std::vector<double> &L2,
-                                                                             const std::vector<double> &polar,
-                                                                             const std::vector<double> &azim);
+Mantid::Geometry::Instrument_sptr
+createCylInstrumentWithDetInGivenPositions(const std::vector<double> &L2, const std::vector<double> &polar,
+                                           const std::vector<double> &azim,
+                                           const std::string &instrumentName = "processed");
 /**
  * Create an test instrument with n panels of 9 cylindrical detectors, a source
  * and a sample position.
@@ -187,11 +188,10 @@ Mantid::Geometry::Instrument_sptr createCylInstrumentWithDetInGivenPositions(con
  * @param cylHeight :: height of each detector
  * @return Created instrument
  */
-Mantid::Geometry::Instrument_sptr
-createTestInstrumentCylindrical(int num_banks,
-                                const Mantid::Kernel::V3D &sourcePos = Mantid::Kernel::V3D(0.0, 0.0, -10.),
-                                const Mantid::Kernel::V3D &samplePos = Mantid::Kernel::V3D(),
-                                const double cylRadius = 0.004, const double cylHeight = 0.0002);
+Mantid::Geometry::Instrument_sptr createTestInstrumentCylindrical(
+    int num_banks, const Mantid::Kernel::V3D &sourcePos = Mantid::Kernel::V3D(0.0, 0.0, -10.),
+    const Mantid::Kernel::V3D &samplePos = Mantid::Kernel::V3D(), const double cylRadius = 0.004,
+    const double cylHeight = 0.0002, const std::string &instrumentName = "basic");
 
 void addRectangularBank(Mantid::Geometry::Instrument &testInstrument, int idStart, int pixels, double pixelSpacing,
                         const std::string &bankName, const Mantid::Kernel::V3D &bankPos,
@@ -206,7 +206,13 @@ Mantid::Geometry::Instrument_sptr createTestInstrumentRectangular(int num_banks,
                                                                   const std::string &instrumentName = "basic_rect");
 
 Mantid::Geometry::Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels,
-                                                                   double pixelSpacing = 0.008);
+                                                                   double pixelSpacing = 0.008,
+                                                                   const std::string &instrumentName = "basic_rect");
+
+/// createTestInstrumentRectangular, plus an "extended-detector-space" component of the given shape at the origin,
+/// for predicting peaks that miss the detectors.
+Mantid::Geometry::Instrument_sptr createTestInstrumentRectangularWithExtendedDetectorSpace(
+    int num_banks, int pixels, std::shared_ptr<const Mantid::Geometry::IObject> extendedSpace);
 
 Mantid::Geometry::Instrument_sptr createTestUnnamedRectangular2(int num_banks, int pixels, double pixelSpacing = 0.008);
 

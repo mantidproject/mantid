@@ -15,6 +15,7 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
@@ -248,6 +249,12 @@ void ComponentInfo::setRotation(const size_t componentIndex, const Kernel::Quat 
 }
 
 const IObject &ComponentInfo::shape(const size_t componentIndex) const { return *(*m_shapes)[componentIndex]; }
+
+/// One shared object, so that a component made without a shape can be told from one given an empty shape.
+std::shared_ptr<const IObject> const &ComponentInfo::noShape() {
+  static std::shared_ptr<const IObject> const empty = std::make_shared<const CSGObject>();
+  return empty;
+}
 
 /**
  * Build a map from each unique shape to the list of component indices that share it.

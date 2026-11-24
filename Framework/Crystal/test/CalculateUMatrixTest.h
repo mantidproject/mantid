@@ -117,8 +117,8 @@ public:
   }
 
   void test_fail() {
-    Mantid::Geometry::Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
-    inst->setName("SillyInstrument");
+    Mantid::Geometry::Instrument_sptr inst =
+        ComponentCreationHelper::createTestInstrumentRectangular2(1, 10, 0.008, "SillyInstrument");
     PeaksWorkspace_sptr pw(new PeaksWorkspace);
     pw->setInstrument(inst);
     std::string val = "value";
@@ -222,8 +222,7 @@ private:
       phi.at(i) = ph(Hpeaks[i], Kpeaks[i], Lpeaks[i]);
     }
 
-    auto inst = ComponentCreationHelper::createCylInstrumentWithDetInGivenPositions(L2, theta, phi);
-    inst->setName("SillyInstrument");
+    auto inst = ComponentCreationHelper::createCylInstrumentWithDetInGivenPositions(L2, theta, phi, "SillyInstrument");
     IPeaksWorkspace_sptr pw;
     if (leanElastic) {
       pw = LeanElasticPeaksWorkspace_sptr(new LeanElasticPeaksWorkspace);
