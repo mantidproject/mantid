@@ -11,7 +11,7 @@ import os.path
 
 
 DIRS = config["datasearch.directories"].split(";")
-data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(DIRS[0]))), "Data", "UnitTest")
+data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(DIRS[0]))), "Data", "SystemTest")
 wsfile = os.path.join(
     os.path.dirname(os.path.dirname(os.path.dirname(DIRS[0]))), "Data", "SystemTest", "WISH", "input", "18_1", "WISH00040503.raw"
 )
