@@ -1,0 +1,1 @@
+- ``SampleEnvironment`` now raises ``std::out_of_range`` when a component index is equal to or greater than the number of components, rather than accessing beyond the component list.

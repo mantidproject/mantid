@@ -17,6 +17,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include <memory>
+#include <stdexcept>
 
 using Mantid::Geometry::SampleEnvironment;
 
@@ -46,6 +47,21 @@ public:
     TS_ASSERT_EQUALS(4, kit->nelements());
     TS_ASSERT_EQUALS(kit->name(), "TestKit");
     TS_ASSERT_EQUALS(kit->containerID(), "8mm");
+  }
+
+  void test_GetComponent_AcceptsValidIndex() {
+    auto kit = createTestKit();
+    TS_ASSERT_EQUALS(&kit->getComponent(0), kit->getComponentPtr(0).get());
+  }
+
+  void test_GetComponent_ThrowsForIndexAtOrBeyondSize() {
+    auto kit = createTestKit();
+    const auto firstInvalidIndex = kit->nelements();
+
+    TS_ASSERT_THROWS(kit->getComponent(firstInvalidIndex), const std::out_of_range &);
+    TS_ASSERT_THROWS(kit->getComponentPtr(firstInvalidIndex), const std::out_of_range &);
+    TS_ASSERT_THROWS(kit->getComponent(firstInvalidIndex + 1), const std::out_of_range &);
+    TS_ASSERT_THROWS(kit->getComponentPtr(firstInvalidIndex + 1), const std::out_of_range &);
   }
 
   void test_IsValid_Tests_All_Components() {
