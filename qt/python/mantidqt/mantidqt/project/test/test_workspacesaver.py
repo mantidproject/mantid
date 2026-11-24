@@ -9,19 +9,24 @@
 
 import unittest
 
+import numpy
+
 from os import listdir
 from os.path import isdir
 from shutil import rmtree
 import tempfile
 
 from mantid.api import AnalysisDataService as ADS, IMDEventWorkspace
-from mantid.dataobjects import MDHistoWorkspace, MaskWorkspace  # noqa: F401
+from mantid.dataobjects import GroupingWorkspace, MDHistoWorkspace, MaskWorkspace  # noqa: F401
 from mantidqt.project import workspacesaver
+from mantidqt.project.workspaceloader import WorkspaceLoader
 from unittest import mock
 from mantid.simpleapi import LoadMask, MaskDetectors, ExtractMask  # noqa: F401
 from mantid.simpleapi import (
+    CreateGroupingWorkspace,
     CreateSampleWorkspace,
     CreateMDHistoWorkspace,
+    LoadEmptyInstrument,
     LoadMD,
     GroupWorkspaces,
 )
@@ -103,6 +108,37 @@ class WorkspaceSaverTest(unittest.TestCase):
             'Couldn\'t save workspace in project: "group2" because SaveNexusProcessed-v1: '
             "NeXus files do not support nested groups of groups"
         )
+
+    def test_saving_grouping_workspace(self):
+        LoadEmptyInstrument(InstrumentName="ENGINX", OutputWorkspace="enginx_instr")
+        CreateGroupingWorkspace(InputWorkspace="enginx_instr", CustomGroupingString="1,2,3+4", OutputWorkspace="group")
+        ws_saver = workspacesaver.WorkspaceSaver(self.working_directory)
+
+        ws_saver.save_workspaces(["group"])
+
+        self.assertEqual(["group"], ws_saver.get_output_list())
+        self.assertTrue("group.nxs" in listdir(self.working_directory))
+
+    def test_grouping_workspace_round_trips_through_project_save_and_load(self):
+        LoadEmptyInstrument(InstrumentName="ENGINX", OutputWorkspace="enginx_instr")
+        original = CreateGroupingWorkspace(
+            InputWorkspace="enginx_instr", CustomGroupingString="1,2,3+4", OutputWorkspace="group"
+        ).OutputWorkspace
+        original_groups = original.extractY().copy()
+        original_group_of_det_3 = original.getValue(3)
+        original_group_of_det_4 = original.getValue(4)
+        workspacesaver.WorkspaceSaver(self.working_directory).save_workspaces(["group"])
+        ADS.clear()
+
+        WorkspaceLoader.load_workspaces(self.working_directory, ["group"])
+
+        loaded = ADS.retrieve("group")
+        self.assertTrue(isinstance(loaded, GroupingWorkspace))
+        self.assertEqual(original.getNumberHistograms(), loaded.getNumberHistograms())
+        numpy.testing.assert_array_equal(original_groups, loaded.extractY())
+        self.assertEqual(original_group_of_det_3, loaded.getValue(3))
+        self.assertEqual(original_group_of_det_4, loaded.getValue(4))
+        self.assertEqual(loaded.getValue(3), loaded.getValue(4))
 
     def _load_MDWorkspace_and_test_it(self, save_name):
         filename = self.working_directory + "/" + save_name + ".nxs"
