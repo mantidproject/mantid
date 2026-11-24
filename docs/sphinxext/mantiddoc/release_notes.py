@@ -25,13 +25,13 @@ VERSION_DIR_RE = re.compile(r"^v(\d+)\.(\d+)\.(\d+)$")
 GLOB_ENTRY_RE = re.compile(r"^(?P<indent>[ \t]+)\*/index[ \t]*$", re.MULTILINE)
 
 
-def find_release_versions(release_dir: Path) -> list[str]:
+def find_release_versions(release_dir: Path, source_suffixes=(".rst", ".md")) -> list[str]:
     """Names of the ``vX.Y.Z`` directories below ``release_dir`` that contain an index page, newest first."""
     versions = []
-    for index in release_dir.glob("*/index.rst"):
-        match = VERSION_DIR_RE.match(index.parent.name)
-        if match:
-            versions.append((tuple(int(part) for part in match.groups()), index.parent.name))
+    for directory in release_dir.iterdir():
+        match = VERSION_DIR_RE.match(directory.name)
+        if match and any((directory / f"index{suffix}").is_file() for suffix in source_suffixes):
+            versions.append((tuple(int(part) for part in match.groups()), directory.name))
     return [name for _, name in sorted(versions, reverse=True)]
 
 
@@ -47,7 +47,7 @@ def order_release_toctree(source: str, versions: list[str]) -> str:
 def _on_source_read(app, docname, source):
     if docname != RELEASE_INDEX_DOCNAME:
         return
-    versions = find_release_versions(Path(app.srcdir) / "release")
+    versions = find_release_versions(Path(app.srcdir) / "release", tuple(app.config.source_suffix))
     ordered = order_release_toctree(source[0], versions)
     if ordered == source[0]:
         logger.warning(f"Could not order the release notes toctree in {docname}: no '*/index' entry or no releases found")

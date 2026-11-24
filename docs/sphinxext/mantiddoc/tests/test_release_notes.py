@@ -38,6 +38,16 @@ class FindReleaseVersionsTest(unittest.TestCase):
 
             self.assertEqual(["v7.0.0", "v6.16.1", "v6.10.0", "v6.9.1", "v6.2.0", "v3.13.0"], find_release_versions(release_dir))
 
+    def test_index_pages_in_markdown_are_found(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            release_dir = Path(tmp)
+            (release_dir / "v3.5.1").mkdir()
+            (release_dir / "v3.5.1" / "index.md").touch()
+            (release_dir / "v7.0.0").mkdir()
+            (release_dir / "v7.0.0" / "index.rst").touch()
+
+            self.assertEqual(["v7.0.0", "v3.5.1"], find_release_versions(release_dir))
+
     def test_directories_that_are_not_releases_are_ignored(self):
         with tempfile.TemporaryDirectory() as tmp:
             release_dir = Path(tmp)
