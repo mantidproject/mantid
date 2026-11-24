@@ -30,6 +30,7 @@
 #include <numeric>
 #include <optional>
 #include <set>
+#include <sstream>
 
 namespace Mantid::DataHandling {
 
@@ -46,6 +47,7 @@ const std::string FILENAME{"Filename"};
 const std::string TIME_ZERO{"TimeZero"};
 const std::string TIME_ZERO_CORRECTED{"TimeZeroCorrected"};
 const std::string FIRST_GOOD_DATA{"FirstGoodData"};
+const std::string FIRST_GOOD_DATA_RELATIVE{"FirstGoodDataRelativeToTimeZero"};
 const std::string MAIN_FIELD_DIRECTION{"MainFieldDirection"};
 const std::string DEAD_TIME_TABLE{"DeadTimeTable"};
 const std::string GROUPING_TABLE{"DetectorGroupingTable"};
@@ -210,9 +212,14 @@ void SaveNexusMuon::init() {
   declareProperty(Prop::TIME_ZERO_CORRECTED, true,
                   "Whether TimeZero has already been subtracted from the time axis of the workspace, as Load does "
                   "when CorrectTime is set. If so, TimeZero is added back before saving.");
-  declareProperty(Prop::FIRST_GOOD_DATA, EMPTY_DBL(),
-                  "First good data in microseconds, measured from the start of the raw time axis, as given by the "
-                  "FirstGoodData output of Load. If not set, it is taken from the FirstGoodData log.");
+  declareProperty(
+      Prop::FIRST_GOOD_DATA, EMPTY_DBL(),
+      "First good data in microseconds, which must not be before time zero. FirstGoodDataRelativeToTimeZero "
+      "sets whether it is measured from time zero or from the start of the raw time axis. If not set, it "
+      "is taken from the FirstGoodData log.");
+  declareProperty(Prop::FIRST_GOOD_DATA_RELATIVE, true,
+                  "Whether FirstGoodData is measured from time zero, as shown in Muon Analysis, rather than from the "
+                  "start of the raw time axis, as given by the FirstGoodData output of Load.");
   const std::vector<std::string> fieldOptions{"", "Longitudinal", "Transverse"};
   declareProperty(Prop::MAIN_FIELD_DIRECTION, "", std::make_shared<StringListValidator>(fieldOptions),
                   "The main field direction. If not set, it is taken from the main_field_direction log. If neither "
@@ -337,10 +344,25 @@ void SaveNexusMuon::validateWorkspace(const MatrixWorkspace &ws, std::map<std::s
   const double firstGoodData = absoluteFirstGoodData(ws);
   if (isEmpty(firstGoodData)) {
     issues[Prop::FIRST_GOOD_DATA] = "FirstGoodData must be set, as the workspace has no FirstGoodData log.";
-  } else if (firstGoodData < 0 || firstGoodData > lastTime) {
-    issues[Prop::FIRST_GOOD_DATA] = "FirstGoodData, measured from the start of the raw time axis, must lie between 0 "
-                                    "and the end of the time axis. Check that TimeZero and TimeZeroCorrected match "
-                                    "how the data was loaded.";
+    return;
+  }
+  const bool fromProperty = !isEmpty(static_cast<double>(getProperty(Prop::FIRST_GOOD_DATA)));
+  const std::string source = fromProperty ? "FirstGoodData" : "The FirstGoodData log";
+  const std::string check = fromProperty ? "Check FirstGoodDataRelativeToTimeZero." : "Check TimeZeroCorrected.";
+  std::ostringstream message;
+  if (firstGoodData < timeZero) {
+    message << source << " gives a first good data of " << firstGoodData
+            << " microseconds from the start of the raw time axis, which is before TimeZero (" << timeZero << "). "
+            << check;
+  } else if (firstGoodData < 0) {
+    message << "TimeZero and FirstGoodData must not be before the start of the raw time axis.";
+  } else if (firstGoodData > lastTime) {
+    message << source << " gives a first good data of " << firstGoodData
+            << " microseconds from the start of the raw time axis, which is after the end of the time axis ("
+            << lastTime << "). " << check;
+  }
+  if (!message.str().empty()) {
+    issues[Prop::FIRST_GOOD_DATA] = message.str();
   }
 }
 
@@ -394,9 +416,11 @@ void SaveNexusMuon::validateGroupingTable(const MatrixWorkspace &ws, std::map<st
 
 /// First good data measured from the start of the raw time axis, or EMPTY_DBL if it is not available
 double SaveNexusMuon::absoluteFirstGoodData(const MatrixWorkspace &ws) const {
+  const double timeZero = getProperty(Prop::TIME_ZERO);
   const double property = getProperty(Prop::FIRST_GOOD_DATA);
   if (!isEmpty(property)) {
-    return property;
+    const bool relative = getProperty(Prop::FIRST_GOOD_DATA_RELATIVE);
+    return property + (relative ? timeZero : 0.0);
   }
   const auto &run = ws.run();
   if (!run.hasProperty("FirstGoodData")) {
@@ -404,7 +428,6 @@ double SaveNexusMuon::absoluteFirstGoodData(const MatrixWorkspace &ws) const {
   }
   // The FirstGoodData log is relative to time zero when the time axis has been corrected
   const bool corrected = getProperty(Prop::TIME_ZERO_CORRECTED);
-  const double timeZero = getProperty(Prop::TIME_ZERO);
   return run.getPropertyAsSingleValue("FirstGoodData") + (corrected ? timeZero : 0.0);
 }
 

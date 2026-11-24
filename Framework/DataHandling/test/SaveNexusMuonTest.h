@@ -167,6 +167,7 @@ public:
     const auto original = loadRun(INPUT_FILE, "original");
     auto alg = createSaver(original);
     alg->setProperty("FirstGoodData", 0.48);
+    alg->setProperty("FirstGoodDataRelativeToTimeZero", false);
     alg->setProperty("MainFieldDirection", "Transverse");
     alg->setProperty("DeadTimeTable", deadTimeTable({{1, 0.01}, {96, 0.02}}));
     alg->setProperty("DetectorGroupingTable", groupingTable({{1, 2, 3}, {4, 5}}));
@@ -246,11 +247,39 @@ public:
     assertIssue(*alg, "InputWorkspace", "sample_temp");
   }
 
-  void test_negative_first_good_data_is_rejected() {
+  void test_first_good_data_relative_to_time_zero() {
+    // By default FirstGoodData is relative to time zero, as shown in Muon Analysis
     const auto original = loadRun(INPUT_FILE, "original");
     auto alg = createSaver(original);
-    alg->setProperty("FirstGoodData", -0.1);
-    assertIssue(*alg, "FirstGoodData", "between 0");
+    alg->setProperty("FirstGoodData", 0.224);
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    const auto saved = loadRun(m_filename, "saved");
+
+    TS_ASSERT_DELTA(saved.firstGoodData, 0.224 + original.timeZero, 1e-6);
+    TS_ASSERT_DELTA(saved.workspace->run().getPropertyAsSingleValue("FirstGoodData"), 0.224, 1e-6);
+  }
+
+  void test_absolute_first_good_data_before_time_zero_is_rejected() {
+    // Time zero is 0.16, so an absolute first good data of 0.1 is before it
+    const auto original = loadRun(INPUT_FILE, "original");
+    auto alg = createSaver(original);
+    alg->setProperty("FirstGoodData", 0.1);
+    alg->setProperty("FirstGoodDataRelativeToTimeZero", false);
+    assertIssue(*alg, "FirstGoodData", "before TimeZero");
+  }
+
+  void test_relative_first_good_data_before_time_zero_is_rejected() {
+    const auto original = loadRun(INPUT_FILE, "original");
+    auto alg = createSaver(original);
+    alg->setProperty("FirstGoodData", -0.05);
+    assertIssue(*alg, "FirstGoodData", "before TimeZero");
+  }
+
+  void test_first_good_data_log_before_time_zero_is_rejected() {
+    const auto original = loadRun(INPUT_FILE, "original");
+    original.workspace->mutableRun().addProperty("FirstGoodData", -0.05, true);
+    auto alg = createSaver(original);
+    assertIssue(*alg, "FirstGoodData", "before TimeZero");
   }
 
   void test_dead_time_for_unknown_spectrum_is_rejected() {

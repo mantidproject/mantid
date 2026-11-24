@@ -25,10 +25,14 @@ By default :ref:`Load <algm-Load>` subtracts time zero from the time axis (``Cor
 which is the default, ``TimeZero`` is added back to the time axis and to the ``FirstGoodData`` log before saving. If
 the workspace was loaded with ``CorrectTime=False``, set ``TimeZeroCorrected`` to false.
 
-``FirstGoodData`` can also be given directly, measured from the start of the raw time axis, as returned by the
-``FirstGoodData`` output of :ref:`Load <algm-Load>`. The file stores first and last good data as bin numbers, in
-units of the resolution, which is the width of the first time bin. The values saved are rounded to the nearest whole
-bin.
+``FirstGoodData`` can also be given directly. By default it is measured from time zero, as shown in the Muon Analysis
+interface. To give it from the start of the raw time axis instead, as returned by the ``FirstGoodData`` output of
+:ref:`Load <algm-Load>`, set ``FirstGoodDataRelativeToTimeZero`` to false. For example, if time zero is 0.213
+microseconds and first good data is 0.107 microseconds after it, give ``FirstGoodData=0.107``, or
+``FirstGoodData=0.32`` with ``FirstGoodDataRelativeToTimeZero=False``. First good data before time zero is rejected.
+
+The file stores first and last good data as bin numbers, in units of the resolution, which is the width of the first
+time bin. The values saved are rounded to the nearest whole bin.
 
 What is saved
 #############
