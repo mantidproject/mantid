@@ -26,13 +26,26 @@ from mantid.simpleapi import (
 )
 from mantid.api import AlgorithmManager, ExperimentInfo, MatrixWorkspace, WorkspaceGroup
 from mantid.kernel import Logger, Property
-from plugins.algorithms.WorkflowAlgorithms.HFIRPowderReduction import HFIRPowderReduction as _HFIRPowderReduction
+from plugins.algorithms.WorkflowAlgorithms.HFIRPowderReduction import HFIRPowderReduction as _HFIRPowderReduction, _findRunFiles
 import h5py
 import os
 import numpy as np
 import tempfile
 import shutil
 from unittest.mock import patch
+
+_MODULE = "plugins.algorithms.WorkflowAlgorithms.HFIRPowderReduction"
+
+
+def _patchFileFinder():
+    """Patch FileFinder, clearing the run file cache so that no earlier lookup is reused."""
+    _findRunFiles.cache_clear()
+    return patch(f"{_MODULE}.FileFinder")
+
+
+def _findRunsInIPTS(ipts):
+    """A FileFinder.findRuns stand-in that finds every run of a comma separated hint in the given IPTS."""
+    return lambda hint, *args: [f"/HFIR/HB2C/IPTS-{ipts}/nexus/{run}.nxs.h5" for run in hint.split(",")]
 
 
 def _create_algo(**kwargs):
@@ -54,7 +67,9 @@ class LoadInputErrorMessages(unittest.TestCase):
         # Check the error message
         error_msg = str(cm.exception)
         self.assertIn("SampleFilename", error_msg)
-        self.assertIn("Too many fields filled: Must specify either SampleFilename or SampleIPTS AND SampleRunNumbers", error_msg)
+        self.assertIn(
+            "Too many fields filled: Must specify either SampleFilename or SampleRunNumbers (with optional SampleIPTS)", error_msg
+        )
 
     def test_validate_sample_inputs_missing_fields(self):
         # Test that not providing any sample inputs raises a RuntimeError
@@ -64,7 +79,7 @@ class LoadInputErrorMessages(unittest.TestCase):
         # Check the error message
         error_msg = str(cm.exception)
         self.assertIn("SampleFilename", error_msg)
-        self.assertIn("Missing required field: Must specify either SampleFilename or SampleIPTS AND SampleRunNumbers", error_msg)
+        self.assertIn("Missing required field: Must specify either SampleFilename or SampleRunNumbers", error_msg)
 
     def test_validate_optional_fields_too_many(self):
         # Test each optional field (Vanadium, VanadiumBackground, SampleBackground)
@@ -86,33 +101,36 @@ class LoadInputErrorMessages(unittest.TestCase):
             # Check the error message
             error_msg = str(cm.exception)
             self.assertIn(f"{field}Filename", error_msg)
-            self.assertIn(f"Too many fields filled: Must specify either {field}Filename or {field}IPTS AND {field}RunNumbers", error_msg)
+            self.assertIn(
+                f"Too many fields filled: Must specify either {field}Filename or {field}RunNumbers (with optional {field}IPTS)", error_msg
+            )
 
-    def test_validate_missing_ipts_or_runnumbers(self):
-        # Test each optional field (Vanadium, VanadiumBackground, SampleBackground)
+    def test_validate_missing_runnumbers(self):
         all_fields = ["Sample", "Vanadium", "VanadiumBackground", "SampleBackground"]
 
         for field in all_fields:
-            # Test that missing IPTS or RunNumbers when the other is filled out for optional fields raises a RuntimeError
+            # Test that an IPTS without RunNumbers raises a RuntimeError
             kwargs = {f"{field}IPTS": 123, "Instrument": "WAND^2"}
-
-            with self.assertRaises(RuntimeError) as cm:
-                res = HFIRPowderReduction(**kwargs)
-
-            # Check the error message
-            error_msg = str(cm.exception)
-            self.assertIn(f"{field}RunNumbers", error_msg)
-            self.assertIn(f"{field}RunNumbers must be provided if {field}IPTS is provided", error_msg)
-
-            kwargs = {f"{field}RunNumbers": [456], "Instrument": "WAND^2"}
 
             with self.assertRaises(RuntimeError) as cm:
                 res = HFIRPowderReduction(**kwargs)  # noqa: F841
 
             # Check the error message
             error_msg = str(cm.exception)
-            self.assertIn(f"{field}IPTS", error_msg)
-            self.assertIn(f"{field}IPTS must be provided if {field}RunNumbers is provided", error_msg)
+            self.assertIn(f"{field}RunNumbers", error_msg)
+            self.assertIn(f"{field}RunNumbers must be provided if {field}IPTS is provided", error_msg)
+
+    def test_validate_runnumbers_without_ipts_looks_up_ipts(self):
+        # The IPTS is optional: run numbers alone are valid when the runs can be found
+        found = {"Sample": 456, "Vanadium": 457, "VanadiumBackground": 458, "SampleBackground": 459}
+        kwargs = {f"{field}RunNumbers": [run] for field, run in found.items()}
+        algo = _create_algo(Instrument="WAND^2", **kwargs)
+        with _patchFileFinder() as finder:
+            finder.findRuns.side_effect = _findRunsInIPTS(1234)
+            issues = algo.validateInputs()
+        for field in found:
+            self.assertNotIn(f"{field}IPTS", issues)
+            self.assertNotIn(f"{field}RunNumbers", issues)
 
     def test_valid_sample_input_combinations(self):
         # Test filename only - should not raise
@@ -997,9 +1015,22 @@ class OutputWorkspaceNameTests(unittest.TestCase):
         algo = _create_algo()
         self.assertEqual(algo._defaultOutputWorkspaceName(), "")
 
-    def test_not_populated_without_ipts(self):
+    def test_not_populated_without_ipts_or_instrument(self):
+        # without the instrument the IPTS cannot be looked up from the run numbers
         algo = _create_algo(SampleRunNumbers=[456])
         self.assertEqual(algo._defaultOutputWorkspaceName(), "")
+
+    def test_ipts_looked_up_from_run_numbers(self):
+        algo = _create_algo(Instrument="WAND^2", SampleRunNumbers=[5, 6, 7])
+        with _patchFileFinder() as finder:
+            finder.findRuns.side_effect = _findRunsInIPTS(1234)
+            self.assertEqual(algo._defaultOutputWorkspaceName(), "IPTS1234_Run5-7")
+
+    def test_not_populated_when_ipts_lookup_fails(self):
+        algo = _create_algo(Instrument="WAND^2", SampleRunNumbers=[456])
+        with _patchFileFinder() as finder:
+            finder.findRuns.side_effect = RuntimeError("not found")
+            self.assertEqual(algo._defaultOutputWorkspaceName(), "")
 
     def test_ipts_and_runs_taken_from_filenames(self):
         # files in the standard HFIR layout carry the IPTS and run numbers in their paths
@@ -1020,6 +1051,72 @@ class OutputWorkspaceNameTests(unittest.TestCase):
         algo = _create_algo()
         files = ["/HFIR/HB2C/IPTS-1234/nexus/HB2C_5.nxs.h5", "/HFIR/HB2C/IPTS-5678/nexus/HB2C_6.nxs.h5"]
         self.assertEqual(algo._iptsAndRunNumbersFromFilenames(files), (None, []))
+
+
+class RunFileLookupTests(unittest.TestCase):
+    """Run files are built from the IPTS when it is given, and looked up from the run numbers otherwise."""
+
+    def test_files_built_from_ipts(self):
+        algo = _create_algo(Instrument="MIDAS", SampleIPTS=99, SampleRunNumbers=[7, 8])
+        with _patchFileFinder() as finder:
+            files = algo._runFiles("Sample")
+            finder.findRuns.assert_not_called()
+        self.assertEqual(files, ["/HFIR/HB2A/IPTS-99/nexus/HB2A_7.nxs.h5", "/HFIR/HB2A/IPTS-99/nexus/HB2A_8.nxs.h5"])
+
+    def test_files_looked_up_without_ipts(self):
+        algo = _create_algo(Instrument="WAND^2", VanadiumRunNumbers=[5, 6])
+        with _patchFileFinder() as finder:
+            finder.findRuns.side_effect = _findRunsInIPTS(1234)
+            files = algo._runFiles("Vanadium")
+            finder.findRuns.assert_called_once_with("HB2C_5,HB2C_6", [".nxs.h5"], True)
+        self.assertEqual(files, ["/HFIR/HB2C/IPTS-1234/nexus/HB2C_5.nxs.h5", "/HFIR/HB2C/IPTS-1234/nexus/HB2C_6.nxs.h5"])
+
+    def test_lookup_failure_raises(self):
+        algo = _create_algo(Instrument="WAND^2", SampleRunNumbers=[456])
+        with _patchFileFinder() as finder:
+            finder.findRuns.side_effect = RuntimeError("not found")
+            with self.assertRaisesRegex(RuntimeError, "not found"):
+                algo._runFiles("Sample")
+
+    def test_lookup_is_cached(self):
+        # the dialog validates on every property change, so repeated lookups must not search the archive again
+        algo = _create_algo(Instrument="WAND^2", SampleRunNumbers=[5, 6])
+        with _patchFileFinder() as finder:
+            finder.findRuns.side_effect = _findRunsInIPTS(1234)
+            first = algo._runFiles("Sample")
+            second = algo._runFiles("Sample")
+            finder.findRuns.assert_called_once()
+        self.assertEqual(first, second)
+
+    def test_lookup_failure_is_not_cached(self):
+        algo = _create_algo(Instrument="WAND^2", SampleRunNumbers=[456])
+        with _patchFileFinder() as finder:
+            finder.findRuns.side_effect = [RuntimeError("not found"), ["/HFIR/HB2C/IPTS-1234/nexus/HB2C_456.nxs.h5"]]
+            with self.assertRaises(RuntimeError):
+                algo._runFiles("Sample")
+            self.assertEqual(algo._runFiles("Sample"), ["/HFIR/HB2C/IPTS-1234/nexus/HB2C_456.nxs.h5"])
+
+    def test_no_files_without_run_numbers(self):
+        algo = _create_algo(Instrument="WAND^2")
+        self.assertEqual(algo._runFiles("SampleBackground"), [])
+
+    def test_lookup_failure_reported_by_validate_inputs(self):
+        # the dialog only runs PyExec once validateInputs passes, so a missing run must be reported there
+        for field in ("Sample", "Vanadium", "VanadiumBackground", "SampleBackground"):
+            with self.subTest(field=field):
+                algo = _create_algo(Instrument="WAND^2", Wavelength=1.5, VanadiumDiameter=0.5, **{f"{field}RunNumbers": [456]})
+                with _patchFileFinder() as finder:
+                    finder.findRuns.side_effect = RuntimeError("not found")
+                    issues = algo.validateInputs()
+                self.assertIn(f"{field}RunNumbers", issues)
+                self.assertIn("not found", issues[f"{field}RunNumbers"])
+
+    def test_found_runs_not_reported_by_validate_inputs(self):
+        algo = _create_algo(Instrument="WAND^2", Wavelength=1.5, VanadiumDiameter=0.5, SampleRunNumbers=[456])
+        with _patchFileFinder() as finder:
+            finder.findRuns.side_effect = _findRunsInIPTS(1234)
+            issues = algo.validateInputs()
+        self.assertNotIn("SampleRunNumbers", issues)
 
 
 class MetadataConsistencyTests(unittest.TestCase):
@@ -1791,6 +1888,17 @@ class ReductionExecutionTests(unittest.TestCase):
 
         # Check that the output file was created
         self.assertTrue(os.path.isfile(output_file_name))
+
+        # The file holds space separated X Y E columns with no header lines
+        with open(output_file_name) as f:
+            lines = f.read().splitlines()
+        self.assertGreater(len(lines), 0)
+        self.assertFalse(lines[0].startswith("#"))
+        self.assertNotIn(",", "".join(lines))
+        for line in lines:
+            if line.strip():
+                self.assertEqual(len(line.split(" ")), 3)
+                [float(value) for value in line.split(" ")]
 
         # Load the output file and check it contains a workspace
         output_ws = Load(output_file_name)
