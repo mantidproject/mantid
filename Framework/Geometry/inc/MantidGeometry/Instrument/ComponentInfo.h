@@ -272,6 +272,7 @@ public:
   /// rather than keeping a parallel copy that would silently diverge.
   const std::shared_ptr<ParameterInfo> &sharedParameterInfo() const { return m_parameterInfo; }
 
+  friend class BeamlineBuilder;
   friend class Instrument;
 };
 

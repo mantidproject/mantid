@@ -8,6 +8,7 @@
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/BeamlineBuilder.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -270,24 +271,17 @@ void EditInstrumentGeometry::exec() {
   }
 
   // Create a new instrument from scratch.
-  auto instrument = std::make_shared<Geometry::Instrument>(instrumentName);
+  Geometry::BeamlineBuilder builder;
+  auto const root = builder.addAssembly(Geometry::BeamlineBuilder::noParent, instrumentName);
 
   // Set up source and sample information
-  Geometry::Component *samplepos = new Geometry::Component("Sample", instrument.get());
-  instrument->add(samplepos);
-  instrument->markAsSamplePos(samplepos);
-  samplepos->setPos(0.0, 0.0, 0.0);
-
-  Geometry::ObjComponent *source = new Geometry::ObjComponent("Source", instrument.get());
-  instrument->add(source);
-  instrument->markAsSource(source);
-  source->setPos(0.0, 0.0, -1.0 * l1);
+  builder.setSample(builder.addComponent(root, "Sample", Kernel::V3D(0.0, 0.0, 0.0)));
+  builder.setSource(builder.addObjComponent(root, "Source", Kernel::V3D(0.0, 0.0, -1.0 * l1), Kernel::Quat(), nullptr));
 
   // Make a new bank, to add detectors to.
   // Adding detectors to a bank, rather than directly to the root, allows this instrument
   // to be successfully saved and reloaded by `NexusGeometrySave` and `NexusGeometryParser`.
-  // (Instrument will take ownership of the pointer.)
-  Geometry::CompAssembly *bank = new CompAssembly("Bank_1");
+  auto const bank = builder.addAssembly(root, "Bank_1");
 
   // Add/copy detector information
   for (size_t i = 0; i < workspace->getNumberHistograms(); i++) {
@@ -298,8 +292,6 @@ void EditInstrumentGeometry::exec() {
       newdetid = storDetIDs[i];
     else
       newdetid = detid_t(i) + 100;
-    Geometry::Detector *detector = new Geometry::Detector("det", newdetid, samplepos);
-
     // Set up new detector parameters related to new instrument
     double l2 = storL2s[i];
     double tth = stor2Thetas[i];
@@ -307,7 +299,6 @@ void EditInstrumentGeometry::exec() {
 
     Kernel::V3D pos;
     pos.spherical(l2, tth, phi);
-    detector->setPos(pos);
 
     // Add new detector to spectrum and instrument
     auto &spectrum = workspace->getSpectrum(i);
@@ -317,15 +308,11 @@ void EditInstrumentGeometry::exec() {
 
     spectrum.clearDetectorIDs();
     spectrum.addDetectorID(newdetid);
-    bank->add(detector);
-    instrument->markAsDetector(detector);
+    builder.addDetector(bank, "det", newdetid, pos, Kernel::Quat(), nullptr);
   } // ENDFOR workspace index
 
-  // Add the bank to the instrument
-  instrument->add(bank);
-
   // Add the instrument to the workspace
-  workspace->setInstrument(instrument);
+  workspace->setInstrument(Geometry::Instrument::fromBeamline(builder.build()));
 }
 
 } // namespace Mantid::Algorithms

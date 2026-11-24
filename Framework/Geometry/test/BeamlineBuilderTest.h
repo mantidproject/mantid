@@ -28,6 +28,7 @@
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/IObject.h"
+#include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Interpolation.h"
 
@@ -376,6 +377,37 @@ public:
     }
     // And the tree made from them makes the same banks again
     assertSameBeamline(walk(Instrument::fromBeamline(built)), expected);
+  }
+
+  void test_copies_of_every_component_rebuild_the_instrument() {
+    for (auto const &legacy :
+         {makeLegacyInstrument(Placement()), makeBankInstrument(),
+          ComponentCreationHelper::createInstrumentWithPSDTubes(3, 4),
+          ComponentCreationHelper::createSimpleInstrumentWithRotation(
+              V3D(0, 0, -10), V3D(), V3D(0, 0, 3), Quat(10, V3D(0, 1, 0)), Quat(20, V3D(1, 0, 0)))}) {
+      auto const original = walk(legacy);
+      auto const &componentInfo = *original.componentInfo;
+      auto const root = componentInfo.root();
+      BeamlineBuilder builder;
+      auto const copyRoot = builder.addAssembly(BeamlineBuilder::noParent, componentInfo.name(root),
+                                                componentInfo.position(root), componentInfo.rotation(root));
+      auto const sideBySide = componentInfo.sideBySideViewPosition(root);
+      if (sideBySide.X() != Mantid::EMPTY_DBL()) {
+        builder.setSideBySideViewPosition(copyRoot, sideBySide);
+      }
+      std::map<size_t, Node> copies;
+      for (auto const child : componentInfo.children(root)) {
+        copies[child] = builder.addCopy(copyRoot, componentInfo, *original.detectorInfo, child);
+      }
+      if (componentInfo.hasSource()) {
+        builder.setSource(copies.at(componentInfo.source()));
+      }
+      if (componentInfo.hasSample()) {
+        builder.setSample(copies.at(componentInfo.sample()));
+      }
+      builder.setReferenceFrame(componentInfo.referenceFrame());
+      assertSameBeamline(builder.build(), original);
+    }
   }
 
   void test_grid_banks_need_pixels_and_a_fill_order() {

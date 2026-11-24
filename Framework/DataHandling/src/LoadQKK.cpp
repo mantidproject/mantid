@@ -12,6 +12,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/BeamlineBuilder.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
@@ -99,25 +100,18 @@ void LoadQKK::exec() {
 
   // Create a new instrument and set its name
   std::string instrumentname = "QUOKKA";
-  Geometry::Instrument_sptr instrument(new Geometry::Instrument(instrumentname));
+  Geometry::BeamlineBuilder builder;
+  auto const instrumentRoot = builder.addAssembly(Geometry::BeamlineBuilder::noParent, instrumentname);
 
   // Add dummy source and samplepos to instrument
 
-  // Create an instrument component wich will represent the sample position.
-  Geometry::Component *samplepos = new Geometry::Component("Sample", instrument.get());
-  instrument->add(samplepos);
-  instrument->markAsSamplePos(samplepos);
-  // Put the sample in the centre of the coordinate system
-  samplepos->setPos(0.0, 0.0, 0.0);
-
-  // Create a component to represent the source
-  Geometry::ObjComponent *source = new Geometry::ObjComponent("Source", instrument.get());
-  instrument->add(source);
-  instrument->markAsSource(source);
+  // Create an instrument component which will represent the sample position, in the centre of the coordinate system.
+  builder.setSample(builder.addComponent(instrumentRoot, "Sample", Kernel::V3D(0.0, 0.0, 0.0)));
 
   // Read in the L1 value and place the source at (0,0,-L1)
   double l1 = static_cast<double>(entry.getFloat("instrument/parameters/L1"));
-  source->setPos(0.0, 0.0, -1.0 * l1);
+  builder.setSource(
+      builder.addObjComponent(instrumentRoot, "Source", Kernel::V3D(0.0, 0.0, -1.0 * l1), Kernel::Quat(), nullptr));
 
   // Create a component for the detector.
 
@@ -139,8 +133,6 @@ void LoadQKK::exec() {
   // Set the depth of a pixel to a very small number
   std::string pixel_depth_str = "0.00001";
 
-  // Create a RectangularDetector which represents a rectangular array of pixels
-  Geometry::RectangularDetector *bank = new Geometry::RectangularDetector("bank", instrument.get());
   // Define shape of a pixel as an XML string. See
   // docs/source/concepts/HowToDefineGeometricShape.rst for details
   std::string detXML = "<cuboid id=\"pixel\">"
@@ -159,14 +151,22 @@ void LoadQKK::exec() {
                        "</cuboid>";
   // Create a shape object which will be shared by all pixels.
   auto shape = Geometry::ShapeFactory().createShape(detXML);
-  // Initialise the detector specifying the sizes.
-  bank->initialize(shape, int(nx), 0, pixel_width, int(ny), 0, pixel_height, 1, true, int(nx));
-  for (int i = 0; i < static_cast<int>(ny); ++i)
-    for (int j = 0; j < static_cast<int>(nx); ++j) {
-      instrument->markAsDetector(bank->getAtXY(j, i).get());
-    }
-  // Position the detector so the z axis goes through its centre
-  bank->setPos(-width / 2, -height / 2, 0);
+  // A rectangular array of pixels, positioned so the z axis goes through its centre. IDs start at 1 and fill along y
+  // first.
+  Beamline::PixelGridComponent pixelGrid;
+  pixelGrid.nX = int(nx);
+  pixelGrid.xStart = 0;
+  pixelGrid.xStep = pixel_width;
+  pixelGrid.nY = int(ny);
+  pixelGrid.yStart = 0;
+  pixelGrid.yStep = pixel_height;
+  pixelGrid.idStart = 1;
+  pixelGrid.idFillOrder = {'y', 'x', 'z'};
+  pixelGrid.idStepByRow = int(nx);
+  pixelGrid.idStep = 1;
+  builder.addRectangularBank(instrumentRoot, "bank", Kernel::V3D(-width / 2, -height / 2, 0), Kernel::Quat(), pixelGrid,
+                             shape);
+  Geometry::Instrument_sptr const instrument = Geometry::Instrument::fromBeamline(builder.build());
 
   // Create a workspace with nHist spectra and a single y bin.
   auto outputWorkspace =

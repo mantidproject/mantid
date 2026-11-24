@@ -11,6 +11,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/BeamlineBuilder.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -59,26 +60,21 @@ SparseWorkspace::SparseWorkspace(const API::MatrixWorkspace &modelWS, const size
   initialize(numSpectra, h);
 
   // Build a quite standard and somewhat complete instrument.
-  auto instrument = std::make_shared<Geometry::Instrument>("MC_simulation_instrument");
+  Geometry::BeamlineBuilder builder;
+  auto const root = builder.addAssembly(Geometry::BeamlineBuilder::noParent, "MC_simulation_instrument");
   const auto refFrame = modelWS.getReferenceFrame();
 
-  instrument->setReferenceFrame(std::make_shared<Geometry::ReferenceFrame>(*refFrame));
+  builder.setReferenceFrame(std::make_shared<Geometry::ReferenceFrame>(*refFrame));
   // The sparse instrument is build around origin.
   constexpr Kernel::V3D samplePos{0.0, 0.0, 0.0};
-  auto sample = std::make_unique<Geometry::Component>("sample", instrument.get());
-  sample->setPos(samplePos);
-  instrument->add(sample.get());
-  instrument->markAsSamplePos(sample.release());
+  builder.setSample(builder.addComponent(root, "sample", samplePos));
   // Add source behind the sample.
   const Kernel::V3D sourcePos = [&]() {
     Kernel::V3D p;
     p[refFrame->pointingAlongBeam()] = -2.0 * R;
     return p;
   }();
-  auto source = std::make_unique<Geometry::ObjComponent>("source", nullptr, instrument.get());
-  source->setPos(sourcePos);
-  instrument->add(source.get());
-  instrument->markAsSource(source.release());
+  builder.setSource(builder.addObjComponent(root, "source", sourcePos, Kernel::Quat(), nullptr));
 
   auto detShape = makeCubeShape();
   for (size_t col = 0; col < columns; ++col) {
@@ -89,7 +85,6 @@ SparseWorkspace::SparseWorkspace(const API::MatrixWorkspace &modelWS, const size
       const auto detID = static_cast<int>(index);
       std::ostringstream detName;
       detName << "det-" << detID;
-      auto det = std::make_unique<Geometry::Detector>(detName.str(), detID, detShape, instrument.get());
       const Kernel::V3D pos = [&]() {
         Kernel::V3D p;
         p[refFrame->pointingHorizontal()] = R * std::sin(lon) * std::cos(lat);
@@ -97,13 +92,11 @@ SparseWorkspace::SparseWorkspace(const API::MatrixWorkspace &modelWS, const size
         p[refFrame->pointingAlongBeam()] = R * std::cos(lon) * std::cos(lat);
         return p;
       }();
-      det->setPos(pos);
       getSpectrum(index).setDetectorID(detID);
-      instrument->add(det.get());
-      instrument->markAsDetector(det.release());
+      builder.addDetector(root, detName.str(), detID, pos, Kernel::Quat(), detShape);
     }
   }
-  setInstrument(instrument);
+  setInstrument(Geometry::Instrument::fromBeamline(builder.build()));
 
   // Copy things needed for the simulation from the model workspace.
   auto &componentInfo = mutableComponentInfo();

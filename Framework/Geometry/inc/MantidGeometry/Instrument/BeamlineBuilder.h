@@ -26,6 +26,8 @@
 
 namespace Mantid {
 namespace Geometry {
+class ComponentInfo;
+class DetectorInfo;
 class IObject;
 class InstrumentMetadata;
 class Parameter;
@@ -85,6 +87,12 @@ public:
                    Kernel::Quat const &rotation, std::shared_ptr<const IObject> shape, bool const isMonitor = false);
 
   /// The source. As in the legacy instrument, only the first source set is kept; later ones are warned about.
+  /// A copy of the component at `index` of an existing beamline, and of everything under it, added under `parent`.
+  /// Each copied component keeps its position, rotation and side-by-side view position relative to its own parent,
+  /// as a cloned legacy component does. Returns the copy.
+  Node addCopy(Node const parent, ComponentInfo const &componentInfo, DetectorInfo const &detectorInfo,
+               size_t const index);
+
   void setSource(Node const node);
   /// The sample. As in the legacy instrument, only the first sample set is kept; later ones are warned about.
   void setSample(Node const node);

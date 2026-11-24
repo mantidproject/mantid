@@ -12,6 +12,7 @@
 #include "MantidGeometry/Instrument/ParameterInfo.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/EigenConversionHelpers.h"
+#include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 
@@ -364,6 +365,66 @@ BeamlineBuilder::Node BeamlineBuilder::addDetector(Node const parent, std::strin
   record.shape = std::move(shape);
   record.id = id;
   return add(std::move(record));
+}
+
+BeamlineBuilder::Node BeamlineBuilder::addCopy(Node const parent, ComponentInfo const &componentInfo,
+                                               DetectorInfo const &detectorInfo, size_t const index) {
+  auto const &name = componentInfo.name(index);
+  auto const hasParent = componentInfo.hasParent(index);
+  auto const position = hasParent ? componentInfo.relativePosition(index) : componentInfo.position(index);
+  auto const rotation = hasParent ? componentInfo.relativeRotation(index) : componentInfo.rotation(index);
+  auto const &shape = (*componentInfo.m_shapes)[index];
+  Node node;
+  if (componentInfo.isDetector(index)) {
+    node = addDetector(parent, name, detectorInfo.detectorIDs()[index], position, rotation, shape,
+                       detectorInfo.isMonitor(index));
+  } else {
+    switch (componentInfo.componentType(index)) {
+    case Beamline::ComponentType::Unstructured:
+      // An outline assembly without an outline holds no shape at all
+      node = shape ? addAssembly(parent, name, position, rotation)
+                   : addOutlineAssembly(parent, name, position, rotation, nullptr);
+      break;
+    case Beamline::ComponentType::OutlineComposite:
+      node = addOutlineAssembly(parent, name, position, rotation, shape);
+      break;
+    case Beamline::ComponentType::Rectangular:
+      node = addRectangularBank(parent, name, position, rotation, componentInfo.pixelGridComponent(index));
+      break;
+    case Beamline::ComponentType::Grid:
+      node = addGridBank(parent, name, position, rotation, componentInfo.pixelGridComponent(index));
+      break;
+    case Beamline::ComponentType::Structured:
+      node = addStructuredBank(parent, name, position, rotation, componentInfo.structuredGridComponent(index));
+      break;
+    case Beamline::ComponentType::Generic:
+      node = shape == ComponentInfo::noShape() ? addComponent(parent, name, position, rotation)
+                                               : addObjComponent(parent, name, position, rotation, shape);
+      break;
+    case Beamline::ComponentType::Infinite:
+      node = addObjComponent(parent, name, position, rotation, shape);
+      break;
+    default:
+      throw std::invalid_argument("BeamlineBuilder: cannot copy " + name + ", which has an unexpected type");
+    }
+  }
+  // Side-by-side view positions are held absolute; a component holds its own relative to its parent's, and one equal
+  // to its parent's is taken to be inherited
+  auto const sideBySide = componentInfo.sideBySideViewPosition(index);
+  if (sideBySide.X() != EMPTY_DBL()) {
+    auto const parentSideBySide =
+        hasParent ? componentInfo.sideBySideViewPosition(componentInfo.parent(index)) : V2D(EMPTY_DBL(), EMPTY_DBL());
+    if (parentSideBySide.X() == EMPTY_DBL()) {
+      setSideBySideViewPosition(node, sideBySide);
+    } else if (sideBySide != parentSideBySide) {
+      setSideBySideViewPosition(node, sideBySide - parentSideBySide);
+    }
+  }
+  setScaleFactor(node, componentInfo.scaleFactor(index));
+  for (auto const child : componentInfo.children(index)) {
+    addCopy(node, componentInfo, detectorInfo, child);
+  }
+  return node;
 }
 
 BeamlineBuilder::Node BeamlineBuilder::add(NodeRecord record) {
