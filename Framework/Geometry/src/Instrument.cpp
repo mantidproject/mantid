@@ -175,7 +175,8 @@ void addTreeChildren(ICompAssembly &parent, ComponentInfo const &componentInfo, 
       switch (componentInfo.componentType(child)) {
       case Beamline::ComponentType::Unstructured:
         // An outline assembly keeps the outline it was given, even none
-        component = assembly = shapes[child] ? new CompAssembly(name) : new ObjCompAssembly(name);
+        component = assembly =
+            shapes[child] ? static_cast<ICompAssembly *>(new CompAssembly(name)) : new ObjCompAssembly(name);
         break;
       case Beamline::ComponentType::OutlineComposite: {
         auto *const outlined = new ObjCompAssembly(name);

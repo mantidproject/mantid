@@ -8,7 +8,10 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/BeamlineBuilder.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/InstrumentMetadata.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 
 using namespace Mantid;
@@ -20,8 +23,9 @@ namespace InstrumentCreationHelper {
 
 void addFullInstrumentToWorkspace(MatrixWorkspace &workspace, bool includeMonitors, bool startYNegative,
                                   const std::string &instrumentName) {
-  auto instrument = std::make_shared<Instrument>(instrumentName);
-  instrument->setReferenceFrame(std::make_shared<ReferenceFrame>(Y, Z, Right, ""));
+  BeamlineBuilder builder;
+  auto const root = builder.addAssembly(BeamlineBuilder::noParent, instrumentName);
+  builder.setReferenceFrame(std::make_shared<ReferenceFrame>(Y, Z, Right, ""));
 
   const double pixelRadius(0.05);
   auto pixelShape =
@@ -35,53 +39,38 @@ void addFullInstrumentToWorkspace(MatrixWorkspace &workspace, bool includeMonito
   for (int i = 0; i < ndets; ++i) {
     std::ostringstream lexer;
     lexer << "pixel-" << i << ")";
-    Detector *physicalPixel =
-        new Detector(lexer.str(), workspace.getAxis(1)->spectraNo(i), pixelShape, instrument.get());
     int ycount(i);
     if (startYNegative)
       ycount -= 1;
     const double ypos = ycount * 2.0 * pixelRadius;
-    physicalPixel->setPos(0.0, ypos, detZPos);
-    instrument->add(physicalPixel);
-    instrument->markAsDetector(physicalPixel);
-    instrument->setXmlText("Fake XML");
-    workspace.getSpectrum(i).setDetectorID(physicalPixel->getID());
+    const detid_t id = workspace.getAxis(1)->spectraNo(i);
+    builder.addDetector(root, lexer.str(), id, V3D(0.0, ypos, detZPos), Quat(), pixelShape);
+    workspace.getSpectrum(i).setDetectorID(id);
+  }
+  if (ndets > 0) {
+    // Only the XML text differs from a new instrument's defaults
+    builder.setMetadata(std::make_shared<InstrumentMetadata>(Types::Core::DateAndTime(), Types::Core::DateAndTime(), "",
+                                                             "Fake XML", "3D", "Z+"));
   }
 
   // Monitors last
   if (includeMonitors) // These occupy the last 2 spectra
   {
-    Detector *monitor1 = new Detector("mon1", workspace.getAxis(1)->spectraNo(ndets), IObject_sptr(), instrument.get());
-    monitor1->setPos(0.0, 0.0, -9.0);
-    instrument->add(monitor1);
-    instrument->markAsMonitor(monitor1);
+    const detid_t monitorId = workspace.getAxis(1)->spectraNo(ndets);
+    builder.addDetector(root, "mon1", monitorId, V3D(0.0, 0.0, -9.0), Quat(), nullptr, /*isMonitor*/ true);
     workspace.getSpectrum(ndets).setDetectorID(ndets + 1);
-
-    Detector *monitor2 =
-        new Detector("mon2", workspace.getAxis(1)->spectraNo(ndets) + 1, IObject_sptr(), instrument.get());
-    monitor2->setPos(0.0, 0.0, -2.0);
-    instrument->add(monitor2);
-    instrument->markAsMonitor(monitor2);
+    builder.addDetector(root, "mon2", monitorId + 1, V3D(0.0, 0.0, -2.0), Quat(), nullptr, /*isMonitor*/ true);
     workspace.getSpectrum(ndets + 1).setDetectorID(ndets + 2);
   }
 
-  // Define a source and sample position
   // Define a source component
-  ObjComponent *source =
-      new ObjComponent("moderator", ComponentCreationHelper::createSphere(0.1, V3D(0, 0, 0), "1"), instrument.get());
-  source->setPos(V3D(0.0, 0.0, -20.0));
-  instrument->add(source);
-  instrument->markAsSource(source);
-
+  builder.setSource(builder.addObjComponent(root, "moderator", V3D(0.0, 0.0, -20.0), Quat(),
+                                            ComponentCreationHelper::createSphere(0.1, V3D(0, 0, 0), "1")));
   // Define a sample position
-  Component *sample = new Component("samplePos", instrument.get());
-  instrument->setPos(0.0, 0.0, 0.0);
-  instrument->add(sample);
-  instrument->markAsSamplePos(sample);
+  builder.setSample(builder.addComponent(root, "samplePos"));
   // chopper position
-  Component *chop_pos = new Component("chopper-position", Kernel::V3D(0, 0, -10), instrument.get());
-  instrument->add(chop_pos);
-  workspace.setInstrument(instrument);
+  builder.addComponent(root, "chopper-position", V3D(0, 0, -10));
+  workspace.setInstrument(Instrument::fromBeamline(builder.build()));
 }
 
 void addInstrumentWithGeographicalDetectorsToWorkspace(Mantid::API::MatrixWorkspace &workspace, const int nlat,
@@ -90,14 +79,14 @@ void addInstrumentWithGeographicalDetectorsToWorkspace(Mantid::API::MatrixWorksp
   V3D samplePosition(0., 0., 0.);
   V3D sourcePosition(0., 0., -14.);
 
-  Instrument_sptr instrument = std::make_shared<Instrument>(instrumentName);
-  instrument->setReferenceFrame(
-      std::make_shared<ReferenceFrame>(Mantid::Geometry::Y, Mantid::Geometry::Z, Right, "0,0,0"));
+  BeamlineBuilder builder;
+  auto const root = builder.addAssembly(BeamlineBuilder::noParent, instrumentName);
+  builder.setReferenceFrame(std::make_shared<ReferenceFrame>(Mantid::Geometry::Y, Mantid::Geometry::Z, Right, "0,0,0"));
 
-  InstrumentCreationHelper::addSource(instrument, sourcePosition, "source");
-  InstrumentCreationHelper::addSample(instrument, samplePosition, "sample");
+  InstrumentCreationHelper::addSource(builder, root, sourcePosition, "source");
+  InstrumentCreationHelper::addSample(builder, root, samplePosition, "sample");
 
-  auto compAss = new ObjCompAssembly("detector-stage");
+  auto const stage = builder.addOutlineAssembly(root, "detector-stage", V3D(), Quat(), nullptr);
   // set up detectors with even spacing in latitude and longitude (to match geographical angles
   // approach used in the spatial interpolation\sparse instrument functionality)
   int i = 0;
@@ -116,14 +105,13 @@ void addInstrumentWithGeographicalDetectorsToWorkspace(Mantid::API::MatrixWorksp
       detPos[2] = ct * cos(longrad);
       detPos[0] = ct * sin(longrad);
 
-      InstrumentCreationHelper::addDetector(instrument, detPos, i, buffer.str(), compAss);
+      InstrumentCreationHelper::addDetector(builder, stage, detPos, i, buffer.str());
       // Link it to the workspace
       workspace.getSpectrum(i).addDetectorID(i);
       i++;
     }
   }
-  instrument->add(compAss);
-  workspace.setInstrument(instrument);
+  workspace.setInstrument(Instrument::fromBeamline(builder.build()));
 }
 
 /** Adds a component to an instrument
@@ -199,5 +187,28 @@ void addDetector(Mantid::Geometry::Instrument_sptr &instrument, const Mantid::Ke
   } else {
     instrument->add(detector);
   }
+}
+
+Node addComponent(BeamlineBuilder &builder, Node const parent, const V3D &position, const std::string &name) {
+  return builder.addComponent(parent, name, position);
+}
+
+void addSample(BeamlineBuilder &builder, Node const parent, const V3D &position, const std::string &name) {
+  builder.setSample(addComponent(builder, parent, position, name));
+}
+
+void addSource(BeamlineBuilder &builder, Node const parent, const V3D &position, const std::string &name) {
+  builder.setSource(addComponent(builder, parent, position, name));
+}
+
+void addMonitor(BeamlineBuilder &builder, Node const parent, const V3D &position, const int ID,
+                const std::string &name) {
+  builder.addDetector(parent, name, ID, position, Quat(), nullptr, /*isMonitor*/ true);
+}
+
+void addDetector(BeamlineBuilder &builder, Node const parent, const V3D &position, const int ID,
+                 const std::string &name) {
+  // Where 0.01 is half detector width etc.
+  builder.addDetector(parent, name, ID, position, Quat(), ComponentCreationHelper::createCuboid(0.01, 0.02, 0.03));
 }
 } // namespace InstrumentCreationHelper
