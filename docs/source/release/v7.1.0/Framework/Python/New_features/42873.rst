@@ -1,0 +1,1 @@
+- Upgraded Python to 3.14. See the `Python 3.14 release notes <https://docs.python.org/3/whatsnew/3.14.html>`__ for more details.
