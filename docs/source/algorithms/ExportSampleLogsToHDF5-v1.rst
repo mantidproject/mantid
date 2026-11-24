@@ -33,7 +33,7 @@ Usage
 
    # The following is needed as strings read from h5py are formatted differently between Python 2 and 3
    run_number_output = "Run number (read from file): {}"
-   format_run_number = lambda run_number: run_number_output.format(run_number.tostring().decode())
+   format_run_number = lambda run_number: run_number_output.format(run_number.tobytes().decode())
 
    input_ws = Load(Filename="ENGINX00213855.nxs")
 
