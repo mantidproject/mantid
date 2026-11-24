@@ -65,10 +65,15 @@ function(mtd_add_sip_module)
 
   # Suppress Warnings about sip bindings have PyObject -> PyFunc casts which is a valid pattern GCC8 onwards detects GCC
   # 8 onwards needs to disable functional casting at the Python interface
+  #
+  # Newer sip (seen with 6.17) lets the PyQt plugin replace the release function body of QObject subclasses with a
+  # thread-aware delete but still declares the unused sipState parameter, producing -Wunused-parameter in the generated
+  # code.
   target_compile_options(
     ${PARSED_TARGET_NAME}
     PRIVATE
       $<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,8.0>>:-Wno-cast-function-type>
+      $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wno-unused-parameter>
   )
   target_include_directories(${PARSED_TARGET_NAME} PRIVATE ${PARSED_INCLUDE_DIRS})
   target_include_directories(${PARSED_TARGET_NAME} SYSTEM PRIVATE ${PARSED_SYSTEM_INCLUDE_DIRS} ${Python_INCLUDE_DIRS})
