@@ -664,6 +664,7 @@ Instrument_sptr createFacingRectangularBanks(std::string const &instrumentName, 
  * @param num_banks: number of rectangular banks to create
  * @param pixels : number of pixels in each direction.
  * @param pixelSpacing : padding between pixels
+ * @param instrumentName : the name of the new instrument
  */
 Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels, double pixelSpacing,
                                                  const std::string &instrumentName) {

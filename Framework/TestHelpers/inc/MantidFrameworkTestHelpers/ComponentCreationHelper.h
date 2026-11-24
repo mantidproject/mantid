@@ -186,6 +186,7 @@ createCylInstrumentWithDetInGivenPositions(const std::vector<double> &L2, const 
  * @param samplePos :: Position of the sample component.
  * @param cylRadius :: radius of each detector
  * @param cylHeight :: height of each detector
+ * @param instrumentName :: the name of the new instrument
  * @return Created instrument
  */
 Mantid::Geometry::Instrument_sptr createTestInstrumentCylindrical(
