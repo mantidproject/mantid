@@ -40,13 +40,13 @@ Output:
 
     Wavelength : 6.6580023372
     Absorption Xsection : 0.0129590747
-    Coherent Xsection : 5.5510000000
+    Coherent Xsection : 5.5500000000
     Incoherent Xsection : 0.0010000000
-    Total scattering Xsection : 5.5520000000
+    Total scattering Xsection : 5.5510000000
     Number density : 0.0050139807
     Thickness : 0.1000000000
-    Transmission (abs+scatt) : 0.9972136294
-    Total scattering : 0.0027798910
+    Transmission (abs+scatt) : 0.9972141294
+    Total scattering : 0.0027793910
 
 **Example - Running IndirectTransmission with a specified number density and thickness.**
 
@@ -65,13 +65,13 @@ Output:
 
     Wavelength : 6.6580023372
     Absorption Xsection : 0.0129590747
-    Coherent Xsection : 5.5510000000
+    Coherent Xsection : 5.5500000000
     Incoherent Xsection : 0.0010000000
-    Total scattering Xsection : 5.5520000000
+    Total scattering Xsection : 5.5510000000
     Number density : 0.5000000000
     Thickness : 0.3000000000
-    Transmission (abs+scatt) : 0.4339856278
-    Total scattering : 0.5651699440
+    Transmission (abs+scatt) : 0.4340507305
+    Total scattering : 0.5651047146
 
 .. categories::
 
