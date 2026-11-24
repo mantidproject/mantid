@@ -39,6 +39,10 @@ class PlotModelFitPanePresenter(PlotFitPanePresenter):
         x_offset = abs(x_upper - x_lower) * margin
         return [x_lower - x_offset, x_upper + x_offset]
 
+    def _should_force_autoscale(self, plotted_workspaces: list) -> bool:
+        # Each X/Y parameter pair has its own units, so the previous y-limits never apply
+        return True
+
     def handle_rebin_options_changed(self):
         # there is no way to rebin the data -> do nothing
         return
