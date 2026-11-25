@@ -65,8 +65,6 @@ class EXPORT_OPT_MANTIDQT_COMMON FileFinderWidget : public API::MantidWidget {
   Q_PROPERTY(bool extsAsSingleOption READ extsAsSingleOption WRITE extsAsSingleOption)
   Q_PROPERTY(LiveButtonOpts liveButton READ liveButtonState WRITE liveButtonState)
   Q_PROPERTY(QString instrumentOverride READ getInstrumentOverride WRITE setInstrumentOverride)
-  Q_ENUMS(ButtonOpts)
-  Q_ENUMS(LiveButtonOpts)
 
 public:
   /// options for bringing up the load file dialog
@@ -75,6 +73,7 @@ public:
     Icon, ///< use an icon
     None  ///< disable the load file dialog
   };
+  Q_ENUM(ButtonOpts)
   /// Flags for workspace entries
   enum {
     NO_ENTRY_NUM = -1, ///< error in the entry number setting
@@ -85,6 +84,7 @@ public:
     Hide, ///< Don't use the live button
     Show, ///< Display the live button
   };
+  Q_ENUM(LiveButtonOpts)
 
   /// Default constructor
   FileFinderWidget(QWidget *parent = nullptr);
