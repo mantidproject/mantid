@@ -7,7 +7,6 @@ The project provides tools for processing materials-science data from neutron sc
 - Install pixi and activate the environment specified in `pixi.toml`:
   - `pixi shell`
   - or `eval $(pixi shell-hook)` for non-interactive use
-- Dependencies are tracked from a conda metapackage in `conda/recipes/mantid-developer`.
 
 # Development workflow
 

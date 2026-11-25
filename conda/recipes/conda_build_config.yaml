@@ -1,3 +1,5 @@
+# Pins of packages that are also in pixi.toml (the development environment) must match it.
+# tools/dependencies/check_pixi_build_config_pins.py checks this in pre-commit.
 c_compiler:
   - gcc                      # [linux]
   - clang                    # [osx]

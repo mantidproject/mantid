@@ -34,20 +34,6 @@ proxy_servers:
 ```{include} MantidDeveloperPixiSetup.md
 ```
 
-## Alternative: setup a mantid conda environment
-
-### Install [Miniforge](https://github.com/conda-forge/miniforge/releases)
-
-- Choose the latest version of `Miniforge3-Linux-x86_64.sh`
-- Run your downloaded script from the terminal using `bash Miniforge3-Linux-x86_64.sh`.
-  If it asks whether or not you want to initialise conda with conda init, choose to do so.
-- Restart your terminal.
-
-### Create the conda environment
-
-```{include} MantidDeveloperCondaSetup.md
-```
-
 ## Configure CMake and generate build files
 
 - Still using the terminal.
@@ -55,7 +41,6 @@ proxy_servers:
 - If not already activated in the previous step, activate your environment:
 
   - For pixi, run `pixi shell` from your mantid source directory, or prefix the commands below with `pixi run` if your build folder is a subdirectory of the source directory.
-  - For conda, run `conda activate mantid-developer`.
 
 - Navigate back to your mantid source directory using `cd mantid` if you used the default name during cloning from git.
 

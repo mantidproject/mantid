@@ -7,8 +7,6 @@ channels = [
   "mantid",
   "https://prefix.dev/skill-forge",
 ]
-# when editing local copy of mantid-developer, will need to temporarily remove
-# the platforms that you aren't working on
 platforms = ["linux-64", "win-64", { platform = "osx-arm64", macos = "14.0" }]
 
 [environments]
@@ -85,6 +83,8 @@ rsync = "*"
 mamba = ">=2.9,<3"
 rattler-index = ">=0.31.5,<1.0"
 
+# Pins of packages that are also in conda/recipes/conda_build_config.yaml must match it.
+# tools/dependencies/check_pixi_build_config_pins.py checks this in pre-commit.
 [dependencies]
 cmake = ">=4.2,<5"
 pyqt6 = ">=6.11,<7"

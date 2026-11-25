@@ -13,7 +13,7 @@ Conda
 
 Mantid provides packages to be consumed by the `conda <conda_>`_ package manager.
 Even though it is a single codebase the repository is split across four conda
-packages for users, and a metapackage used to create a development environment:
+packages for users:
 
 - ``mantid``: Provides Python access to the non-GUI elements of mantid and allows
   users to import mantid as a Python library for use in other programs.
@@ -25,9 +25,6 @@ packages for users, and a metapackage used to create a development environment:
   workbench.
 - ``mantidworkbench``: The graphical application produced by the Mantid project that
   brings together all of the above packages.
-- ``mantid-developer``: The metapackage used to create a development environment. It contains
-  all the required packages for building and testing our software. See :ref:`GettingStarted`
-  for more detail on how to setup a development environment.
 
 Each package is built separately for ``x64`` Windows, Linux and macOS with the
 exception of ``mantiddocs`` where a single, ``noarch`` package is created for all
@@ -173,39 +170,6 @@ Say I've implemented a new file searching method on a branch ``1234_new_file_sea
 7. Head to IDAaaS (or any linux system) and run ``mamba install -c mantid-test/label/new_file_search_test mantidworkbench`` in a new environment to install the test package.
 
 Most often, you won't need to upload the packages to Anaconda, this is most useful in cases where installing standalone packages is inconvenient. Standalone package builds created by the jenkins job can be found under the jenkins job build artifacts, this is near the top of the page. Say you built a package for Windows using the jenkins job, you should find a ``mantidworkbench`` exe file in the build artifacts.
-
-.. _build_custom_mantid-developer:
-
-Building a custom ``mantid-developer`` environment
---------------------------------------------------
-
-This is useful if you need to change a pinned version of one of Mantid's dependencies and test the change locally.
-
-1. The required tooling lives in the pixi environment backed by the ``rattler-builder`` feature.
-2. Make your changes to the conda recipe files.
-3. Change directory to ``mantid/conda/recipes``
-4. Activate the environment and run
-
-   .. code-block:: sh
-
-        pixi shell -e rattler-builder --frozen
-        MANTID_VERSION=$(versioningit ../../) rattler-build build -r ./mantid-developer -m ./conda_build_config.yaml --output-dir=/home/me/tmp/rattler
-
-   This will build a local version of ``mantid-developer`` with your changes and place it in the directory ``/home/me/tmp/rattler``. **This must be outside of the buildtree** because rattler will recursively copy everything.
-5. Index the new packages
-
-   .. code-block:: sh
-
-       rattler-index fs /home/me/tmp/rattler/
-
-   This will allow conda to install the package by name rather than by file. At this time, creating an environment using the filename will skip installing the dependencies and not use any channels.
-6. Create a new environment with the new developer package
-
-   .. code-block:: sh
-
-       mamba create -n test -c /home/me/tmp/rattler/ -c neutrons mantid-developer
-
-7. You will need to re-run ``cmake --fresh ...`` with this new environment.
 
 Exploring package contents
 --------------------------

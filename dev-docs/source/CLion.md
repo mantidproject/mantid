@@ -13,18 +13,10 @@ from [here](https://jetbrains.com/clion/download/).
 ## Development environment
 
 CLion needs to use the tools from the development environment you set up by following the [Getting Started](GettingStarted/GettingStarted) guide.
-Follow the section below for your environment.
 In the rest of this page, `{ENV}` refers to the root directory of that environment.
-
-### Pixi
 
 - `{ENV}` is `/path/to/source/mantid/.pixi/envs/default`.
 - To activate the environment in a terminal, navigate to your mantid source directory and run `pixi shell`.
-
-### Conda
-
-- `{ENV}` is the location of your conda environment, e.g. `/path/to/miniforge/envs/mantid-developer`.
-- To activate the environment in a terminal, run `conda activate mantid-developer`.
 
 ## Opening CLion
 
@@ -115,17 +107,12 @@ This is useful when you're working on both Mantid and other projects in CLion si
 
 1. Navigate to `File > Settings > Build, Execution, Deployment > CMake`
 1. Under `environment`, add new environment variable `CONDA_PREFIX` with value `{ENV}`.
-1. Set up the Python interpreter by following the section below for your environment.
+1. Set up the Python interpreter as described below.
 
-#### Pixi Python interpreter
+#### Python interpreter
 
 Navigate to `File > Settings > Build, Execution, Deployment > Python Interpreter > Add Interpreter > Add Local Interpreter > Select existing`,
 then select the `python` executable in your pixi environment: `{ENV}/bin/python` on Linux, or `{ENV}/python.exe` on Windows.
-
-#### Conda Python interpreter
-
-Navigate to `File > Settings > Build, Execution, Deployment > Python Interpreter > Add Interpreter > Add Local Interpreter > Conda Environment > Use existing environment`,
-then select `mantid-developer`.
 
 ## Building with CLion
 
@@ -137,20 +124,13 @@ If this fails, you may need to open CLion from a terminal with your development 
 ### Activating the environment in CLion terminals
 
 It is also useful to have your terminals in CLion to run with your development environment.
-In your `home` directory create a file named `.clionrc` and open it in your favourite text editor, adding the lines for your environment from the sections below.
+In your `home` directory create a file named `.clionrc` and open it in your favourite text editor, adding the following lines.
 
-#### Pixi `.clionrc`
+#### `.clionrc` contents
 
 ```sh
 source ~/.bashrc
 eval "$(pixi shell-hook --manifest-path /path/to/source/mantid --frozen)"
-```
-
-#### Conda `.clionrc`
-
-```sh
-source ~/.bashrc
-source ~/miniforge/bin/activate mantid-developer
 ```
 
 #### Using `.clionrc` in CLion terminals

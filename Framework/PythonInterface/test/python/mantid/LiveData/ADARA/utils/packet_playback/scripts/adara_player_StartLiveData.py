@@ -1,3 +1,11 @@
+"""
+Calls `StartLiveData` against an `adara_player` running in playback mode.
+
+For setup and usage, see the "Example playback mode session" section of
+https://developer.mantidproject.org/Testing/LiveData/LiveDataPacketPlayback.html
+(source: dev-docs/source/Testing/LiveData/LiveDataPacketPlayback.rst).
+"""
+
 import logging
 import os
 import time
@@ -7,52 +15,6 @@ from mantid.kernel import ConfigService
 from mantid.simpleapi import StartLiveData
 
 logger = logging.getLogger("adara_player_StartLiveData")
-
-"""
-Instructions:
--------------
-
-In the following we assume that:
-
-- your mantid build directory is ${BUILD}
-
-
-1. Either build mantid, or make sure you're using a version that has an updated `SNSLiveEventDataListener`.
-
-::
-
-  mkdir ${BUILD}; cd ${BUILD}
-  cmake .. -GNinja
-  cmake --build . --target AllTests workbench StandardTestData dev-docs-html
-
-2. In its own console: start `adara_player` in playback mode:
-
-::
-
-  # activate your `mantid-developer` environment
-  mamba activate mantid-developer
-
-  # the location of these scripts:
-  SCRIPTS=${BUILD}/../Framework/LiveData/test/Python/scripts
-  cd ${SCRIPTS} # or not, but otherwise you'll need to add to your `PYTHONPATH`
-
-  # from your ${BUILD}/bin/launch_mantidworkbench.sh:
-  export LOCAL_PRELOAD=${HOME}/mambaforge/envs/mantid-developer/lib/libjemalloc.so.2
-  export LOCAL_PYTHONPATH=${BUILD}/bin/
-  export adara_player_conf=${SCRIPTS}/adara_player_conf.yml
-
-  echo "default SERVER_ADDRESS: ${XDG_RUNTIME_DIR}/sock-adara_player"
-  LD_PRELOAD=${LOCAL_PRELOAD} PYTHONPATH=${LOCAL_PYTHONPATH} python adara_player.py --files=${SCRIPTS}/example_sessions.yml
-
-3. In another console, or in `workbench`, run the script that calls `StartLiveData`:
-
-::
-
-  ... # setup your env vars as above
-  LD_PRELOAD=${LOCAL_PRELOAD} PYTHONPATH=${LOCAL_PYTHONPATH} python ${SCRIPTS}/adara_player_StartLiveData.py
-
-  # ... log output summarizing each loaded chunk ...
-"""
 
 PROCESSING_SCRIPT = """
 from mantid.api import mtd

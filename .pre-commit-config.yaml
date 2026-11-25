@@ -91,19 +91,12 @@ repos:
 
   - repo: local
     hooks:
-      - id: pixi-deps
-        name: pixi-dependency-updater
+      - id: pixi-build-config-pins
+        name: pixi-build-config-pin-check
         language: python
-        entry: python tools/dependencies/pixi_dependency_updater.py
-        files: |
-          (?x)^(
-          ^conda/recipes/mantid-developer/recipe.yaml$|
-          ^conda/recipes/conda_build_config.yaml$|
-          ^pixi.toml$|
-          ^pixi.lock$
-          )$
-        additional_dependencies:
-          - pyyaml
+        entry: python tools/dependencies/check_pixi_build_config_pins.py
+        files: ^(pixi\.toml|conda/recipes/conda_build_config\.yaml)$
+        pass_filenames: false
       - id: unreferenced-release-notes
         name: unreferenced-release-note-check
         language: python

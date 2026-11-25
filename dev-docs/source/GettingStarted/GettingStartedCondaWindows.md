@@ -34,18 +34,6 @@ heading-offset: 1
 ```{include} MantidDeveloperPixiSetup.md
 ```
 
-## Alternative: setup a mantid conda environment
-
-### Install [Miniforge](https://github.com/conda-forge/miniforge/releases)
-
-- Choose the latest version of `Miniforge3-Windows-x86_64.exe`
-- Run your downloaded `Miniforge3-Windows-x86_64.exe` and work through the installer until it finishes. In order to make it easier later on, check the box that adds conda to your path.
-
-### Create the conda environment
-
-```{include} MantidDeveloperCondaSetup.md
-```
-
 ## Configure CMake and generate build files
 
 - You can configure CMake using an MS Visual Studio or Ninja generator. Choose one of the following:
@@ -58,7 +46,6 @@ heading-offset: 1
 - If not already activated in the previous step, activate your environment:
 
   - For pixi, run `pixi shell` from your mantid source directory, or prefix the commands below with `pixi run` if your build folder is a subdirectory of the source directory.
-  - For conda, run `conda activate mantid-developer`.
 
 - If you want your build directory inside your source directory, run either:
 

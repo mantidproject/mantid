@@ -597,7 +597,7 @@ def package_conda_options(platform) {
     docs_flags = "--build-docs"
   }
 
-  def package_flags = "--build-mantid-developer --build-mantid --build-qt ${docs_flags}"
+  def package_flags = "--build-mantid --build-qt ${docs_flags}"
 
   // Build mantidworkbench noarch package on Linux only.
   if(platform.startsWith('linux')) {
