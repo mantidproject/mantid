@@ -47,7 +47,8 @@ const std::string FILENAME{"Filename"};
 const std::string TIME_ZERO{"TimeZero"};
 const std::string TIME_ZERO_CORRECTED{"TimeZeroCorrected"};
 const std::string FIRST_GOOD_DATA{"FirstGoodData"};
-const std::string FIRST_GOOD_DATA_RELATIVE{"FirstGoodDataRelativeToTimeZero"};
+const std::string LAST_GOOD_DATA{"LastGoodData"};
+const std::string GOOD_DATA_RELATIVE{"GoodDataRelativeToTimeZero"};
 const std::string MAIN_FIELD_DIRECTION{"MainFieldDirection"};
 const std::string DEAD_TIME_TABLE{"DeadTimeTable"};
 const std::string GROUPING_TABLE{"DetectorGroupingTable"};
@@ -160,18 +161,17 @@ int32_t binIndex(const double time, const double width) { return static_cast<int
 /// The resolution in picoseconds, as stored in the file
 int32_t resolutionPicoseconds(const double width) { return static_cast<int32_t>(std::lround(width * 1e6)); }
 
-/// The first good bin to store: the bin nearest to first good data, moved to the first bin that is not before time
-/// zero when rounding would put it earlier. Bins are measured in the resolution the loader decodes them with.
-int32_t firstGoodBin(const double firstGoodData, const double timeZero, const int32_t resolution) {
-  // Allows for float rounding in time zero when it lies on a bin edge
-  constexpr double binTolerance = 1e-6;
+/// Allows for float rounding in a time that lies on a bin edge, as a fraction of a bin
+constexpr double BIN_TOLERANCE = 1e-6;
+
+/// The good data bin to store: the bin nearest to time, kept within the bins that are not before earliest or after
+/// latest. Bins are measured in the resolution the loader decodes them with. If no bin lies in that range, the first
+/// bin not before earliest is used.
+int32_t goodDataBin(const double time, const double earliest, const double latest, const int32_t resolution) {
   const double binWidth = static_cast<double>(resolution) / 1e6;
-  const double timeZeroBins = timeZero / binWidth;
-  const auto bin = binIndex(firstGoodData, binWidth);
-  if (static_cast<double>(bin) >= timeZeroBins - binTolerance) {
-    return bin;
-  }
-  return static_cast<int32_t>(std::ceil(timeZeroBins - binTolerance));
+  const auto firstBin = static_cast<int32_t>(std::ceil(earliest / binWidth - BIN_TOLERANCE));
+  const auto lastBin = static_cast<int32_t>(std::floor(latest / binWidth + BIN_TOLERANCE));
+  return std::max(firstBin, std::min(binIndex(time, binWidth), lastBin));
 }
 
 /// Writes the times and values of a log, returning the number of values written
@@ -228,14 +228,18 @@ void SaveNexusMuon::init() {
   declareProperty(Prop::TIME_ZERO_CORRECTED, true,
                   "Whether TimeZero has already been subtracted from the time axis of the workspace, as Load does "
                   "when CorrectTime is set. If so, TimeZero is added back before saving.");
-  declareProperty(
-      Prop::FIRST_GOOD_DATA, EMPTY_DBL(),
-      "First good data in microseconds, which must not be before time zero. FirstGoodDataRelativeToTimeZero "
-      "sets whether it is measured from time zero or from the start of the raw time axis. If not set, it "
-      "is taken from the FirstGoodData log.");
-  declareProperty(Prop::FIRST_GOOD_DATA_RELATIVE, true,
-                  "Whether FirstGoodData is measured from time zero, as shown in Muon Analysis, rather than from the "
-                  "start of the raw time axis, as given by the FirstGoodData output of Load.");
+  declareProperty(Prop::FIRST_GOOD_DATA, EMPTY_DBL(),
+                  "First good data in microseconds, which must not be before time zero. GoodDataRelativeToTimeZero "
+                  "sets whether it is measured from time zero or from the start of the raw time axis. If not set, it "
+                  "is taken from the FirstGoodData log.");
+  declareProperty(Prop::LAST_GOOD_DATA, EMPTY_DBL(),
+                  "Last good data in microseconds, which must be after FirstGoodData and not after the end of the "
+                  "time axis. GoodDataRelativeToTimeZero sets whether it is measured from time zero or from the start "
+                  "of the raw time axis. If not set, the data is good up to the end of the time axis.");
+  declareProperty(Prop::GOOD_DATA_RELATIVE, true,
+                  "Whether FirstGoodData and LastGoodData are measured from time zero, as shown in Muon Analysis, "
+                  "rather than from the start of the raw time axis, as given by the FirstGoodData and LastGoodData "
+                  "outputs of Load.");
   const std::vector<std::string> fieldOptions{"", "Longitudinal", "Transverse"};
   declareProperty(Prop::MAIN_FIELD_DIRECTION, "", std::make_shared<StringListValidator>(fieldOptions),
                   "The main field direction. If not set, it is taken from the main_field_direction log. If neither "
@@ -372,9 +376,11 @@ void SaveNexusMuon::validateWorkspace(const MatrixWorkspace &ws, std::map<std::s
   }
   const bool fromProperty = !isEmpty(static_cast<double>(getProperty(Prop::FIRST_GOOD_DATA)));
   const std::string source = fromProperty ? "FirstGoodData" : "The FirstGoodData log";
-  const std::string check = fromProperty ? "Check FirstGoodDataRelativeToTimeZero." : "Check TimeZeroCorrected.";
+  const std::string check = fromProperty ? "Check GoodDataRelativeToTimeZero." : "Check TimeZeroCorrected.";
   std::ostringstream message;
-  if (firstGoodData < timeZero) {
+  if (!std::isfinite(firstGoodData)) {
+    message << source << " must be a finite number.";
+  } else if (firstGoodData < timeZero) {
     message << source << " gives a first good data of " << firstGoodData
             << " microseconds from the start of the raw time axis, which is before TimeZero (" << timeZero << "). "
             << check;
@@ -387,6 +393,28 @@ void SaveNexusMuon::validateWorkspace(const MatrixWorkspace &ws, std::map<std::s
   }
   if (!message.str().empty()) {
     issues[Prop::FIRST_GOOD_DATA] = message.str();
+    return;
+  }
+
+  const double lastGoodDataProperty = getProperty(Prop::LAST_GOOD_DATA);
+  if (isEmpty(lastGoodDataProperty)) {
+    return;
+  }
+  const double lastGoodData = absoluteLastGoodData(ws);
+  std::ostringstream lastMessage;
+  if (!std::isfinite(lastGoodDataProperty)) {
+    lastMessage << "LastGoodData must be a finite number.";
+  } else if (lastGoodData <= firstGoodData) {
+    lastMessage << "LastGoodData gives a last good data of " << lastGoodData
+                << " microseconds from the start of the raw time axis, which is not after first good data ("
+                << firstGoodData << "). Check GoodDataRelativeToTimeZero.";
+  } else if (lastGoodData > lastTime) {
+    lastMessage << "LastGoodData gives a last good data of " << lastGoodData
+                << " microseconds from the start of the raw time axis, which is after the end of the time axis ("
+                << lastTime << "). Check GoodDataRelativeToTimeZero.";
+  }
+  if (!lastMessage.str().empty()) {
+    issues[Prop::LAST_GOOD_DATA] = lastMessage.str();
   }
 }
 
@@ -443,7 +471,7 @@ double SaveNexusMuon::absoluteFirstGoodData(const MatrixWorkspace &ws) const {
   const double timeZero = getProperty(Prop::TIME_ZERO);
   const double property = getProperty(Prop::FIRST_GOOD_DATA);
   if (!isEmpty(property)) {
-    const bool relative = getProperty(Prop::FIRST_GOOD_DATA_RELATIVE);
+    const bool relative = getProperty(Prop::GOOD_DATA_RELATIVE);
     return property + (relative ? timeZero : 0.0);
   }
   const auto &run = ws.run();
@@ -453,6 +481,19 @@ double SaveNexusMuon::absoluteFirstGoodData(const MatrixWorkspace &ws) const {
   // The FirstGoodData log is relative to time zero when the time axis has been corrected
   const bool corrected = getProperty(Prop::TIME_ZERO_CORRECTED);
   return run.getPropertyAsSingleValue("FirstGoodData") + (corrected ? timeZero : 0.0);
+}
+
+/// Last good data measured from the start of the raw time axis. Without a LastGoodData property, the data is good to
+/// the end of the time axis, as in ISIS muon files, where last_good_bin is the end of the data.
+double SaveNexusMuon::absoluteLastGoodData(const MatrixWorkspace &ws) const {
+  const double timeZero = getProperty(Prop::TIME_ZERO);
+  const double property = getProperty(Prop::LAST_GOOD_DATA);
+  if (!isEmpty(property)) {
+    const bool relative = getProperty(Prop::GOOD_DATA_RELATIVE);
+    return property + (relative ? timeZero : 0.0);
+  }
+  const bool corrected = getProperty(Prop::TIME_ZERO_CORRECTED);
+  return ws.x(0).back() + (corrected ? timeZero : 0.0);
 }
 
 std::string SaveNexusMuon::mainFieldDirection(const MatrixWorkspace &ws) const {
@@ -552,8 +593,8 @@ void SaveNexusMuon::writeInstrument(Nexus::File &file, const MatrixWorkspace &ws
   const bool corrected = getProperty(Prop::TIME_ZERO_CORRECTED);
   const double timeZero = getProperty(Prop::TIME_ZERO);
   const double timeShift = corrected ? timeZero : 0.0;
-  const auto width = binWidth(ws);
-  const auto resolution = resolutionPicoseconds(width);
+  const double lastTime = ws.x(0).back() + timeShift;
+  const auto resolution = resolutionPicoseconds(binWidth(ws));
   const auto ids = detectorIDs(ws);
   const auto maxDetector = static_cast<size_t>(*std::max_element(ids.cbegin(), ids.cend()));
 
@@ -581,8 +622,8 @@ void SaveNexusMuon::writeInstrument(Nexus::File &file, const MatrixWorkspace &ws
   file.putAttr("signal", int32_t{1});
   file.putAttr("axes", std::string("period_index,spectrum_index,raw_time"));
   file.putAttr("units", std::string("counts"));
-  file.putAttr(NeXusEntry::FIRSTGOODBIN, firstGoodBin(absoluteFirstGoodData(ws), timeZero, resolution));
-  file.putAttr(NeXusEntry::LASTGOODBIN, binIndex(ws.x(0).back() + timeShift, width));
+  file.putAttr(NeXusEntry::FIRSTGOODBIN, goodDataBin(absoluteFirstGoodData(ws), timeZero, lastTime, resolution));
+  file.putAttr(NeXusEntry::LASTGOODBIN, goodDataBin(absoluteLastGoodData(ws), timeZero, lastTime, resolution));
   links.emplace_back(file.getDataID());
   file.closeData();
 

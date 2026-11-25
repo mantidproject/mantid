@@ -168,7 +168,7 @@ public:
     const auto original = loadRun(INPUT_FILE, "original");
     auto alg = createSaver(original);
     alg->setProperty("FirstGoodData", 0.48);
-    alg->setProperty("FirstGoodDataRelativeToTimeZero", false);
+    alg->setProperty("GoodDataRelativeToTimeZero", false);
     alg->setProperty("MainFieldDirection", "Transverse");
     alg->setProperty("DeadTimeTable", deadTimeTable({{1, 0.01}, {96, 0.02}}));
     alg->setProperty("DetectorGroupingTable", groupingTable({{1, 2, 3}, {4, 5}}));
@@ -321,12 +321,65 @@ public:
     TS_ASSERT_DELTA(saved.firstGoodData, 0.16, 1e-6);
   }
 
+  void test_last_good_data_relative_to_time_zero() {
+    // Time zero is 0.16, so last good data 20 microseconds after it is 20.16 from the start of the raw time axis
+    const auto original = loadRun(INPUT_FILE, "original");
+    auto alg = createSaver(original);
+    alg->setProperty("LastGoodData", 20.0);
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    const auto saved = loadRun(m_filename, "saved");
+
+    TS_ASSERT_DELTA(saved.lastGoodData, 20.16, 1e-6);
+    TS_ASSERT_DELTA(saved.firstGoodData, original.firstGoodData, 1e-6);
+  }
+
+  void test_last_good_data_from_start_of_raw_time_axis() {
+    // The LastGoodData output of Load can be passed in directly
+    const auto original = loadRun(INPUT_FILE, "original");
+    auto alg = createSaver(original);
+    alg->setProperty("LastGoodData", 20.0);
+    alg->setProperty("GoodDataRelativeToTimeZero", false);
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    const auto saved = loadRun(m_filename, "saved");
+
+    TS_ASSERT_DELTA(saved.lastGoodData, 20.0, 1e-6);
+  }
+
+  void test_last_good_data_not_after_first_good_data_is_rejected() {
+    // First good data is 0.224 after time zero, from the FirstGoodData log
+    const auto original = loadRun(INPUT_FILE, "original");
+    auto alg = createSaver(original);
+    alg->setProperty("LastGoodData", 0.1);
+    assertIssue(*alg, "LastGoodData", "not after first good data");
+  }
+
+  void test_last_good_data_after_end_of_time_axis_is_rejected() {
+    const auto original = loadRun(INPUT_FILE, "original");
+    auto alg = createSaver(original);
+    alg->setProperty("LastGoodData", 40.0);
+    assertIssue(*alg, "LastGoodData", "after the end of the time axis");
+  }
+
+  void test_non_finite_first_good_data_is_rejected() {
+    const auto original = loadRun(INPUT_FILE, "original");
+    auto alg = createSaver(original);
+    alg->setProperty("FirstGoodData", std::numeric_limits<double>::quiet_NaN());
+    assertIssue(*alg, "FirstGoodData", "finite");
+  }
+
+  void test_non_finite_last_good_data_is_rejected() {
+    const auto original = loadRun(INPUT_FILE, "original");
+    auto alg = createSaver(original);
+    alg->setProperty("LastGoodData", std::numeric_limits<double>::quiet_NaN());
+    assertIssue(*alg, "LastGoodData", "finite");
+  }
+
   void test_absolute_first_good_data_before_time_zero_is_rejected() {
     // Time zero is 0.16, so an absolute first good data of 0.1 is before it
     const auto original = loadRun(INPUT_FILE, "original");
     auto alg = createSaver(original);
     alg->setProperty("FirstGoodData", 0.1);
-    alg->setProperty("FirstGoodDataRelativeToTimeZero", false);
+    alg->setProperty("GoodDataRelativeToTimeZero", false);
     assertIssue(*alg, "FirstGoodData", "before TimeZero");
   }
 

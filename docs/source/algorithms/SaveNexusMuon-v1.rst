@@ -17,7 +17,7 @@ The usual way to use the algorithm is to save a workspace loaded from a muon fil
 bad counts or editing sample logs. Pass the ``TimeZero``, ``DeadTimeTable`` and ``DetectorGroupingTable`` outputs of
 :ref:`Load <algm-Load>` to the matching properties so they are kept in the saved file.
 
-Time zero and first good data
+Time zero and good data range
 #############################
 
 By default :ref:`Load <algm-Load>` subtracts time zero from the time axis (``CorrectTime=True``) and stores the
@@ -27,12 +27,18 @@ the workspace was loaded with ``CorrectTime=False``, set ``TimeZeroCorrected`` t
 
 ``FirstGoodData`` can also be given directly. By default it is measured from time zero, as shown in the Muon Analysis
 interface. To give it from the start of the raw time axis instead, as returned by the ``FirstGoodData`` output of
-:ref:`Load <algm-Load>`, set ``FirstGoodDataRelativeToTimeZero`` to false. For example, if time zero is 0.213
+:ref:`Load <algm-Load>`, set ``GoodDataRelativeToTimeZero`` to false. For example, if time zero is 0.213
 microseconds and first good data is 0.107 microseconds after it, give ``FirstGoodData=0.107``, or
-``FirstGoodData=0.32`` with ``FirstGoodDataRelativeToTimeZero=False``. First good data before time zero is rejected.
+``FirstGoodData=0.32`` with ``GoodDataRelativeToTimeZero=False``. First good data before time zero is rejected.
+
+Workspaces do not record the last good data, so to keep it, pass the ``LastGoodData`` output of
+:ref:`Load <algm-Load>` with ``GoodDataRelativeToTimeZero=False``, or give it measured from time zero. It must be
+after the first good data and not after the end of the time axis. If it is not given, the data is good up to the end
+of the time axis, as in ISIS muon files.
 
 The file stores first and last good data as bin numbers, in units of the resolution, which is the width of the first
-time bin. The values saved are rounded to the nearest whole bin.
+time bin. The values saved are rounded to the nearest whole bin, but the first good bin is never before time zero and
+the last good bin is never after the end of the time axis.
 
 What is saved
 #############
@@ -47,6 +53,7 @@ Field in the file                       Source
 ``resolution``                          The width of the first time bin.
 ``time_zero``                           The ``TimeZero`` property.
 ``first_good_bin``                      The ``FirstGoodData`` property, or the ``FirstGoodData`` sample log.
+``last_good_bin``                       The ``LastGoodData`` property, or the end of the time axis.
 ``dead_time``                           The ``DeadTimeTable`` property. Detectors not in the table, or all detectors
                                         if no table is given, have a dead time of zero.
 ``grouping``                            The ``DetectorGroupingTable`` property. If no table is given, grouping is not
