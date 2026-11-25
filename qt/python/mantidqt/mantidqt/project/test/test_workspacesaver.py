@@ -124,10 +124,12 @@ class WorkspaceSaverTest(unittest.TestCase):
         original = CreateGroupingWorkspace(
             InputWorkspace="enginx_instr", CustomGroupingString="1,2,3+4", OutputWorkspace="group"
         ).OutputWorkspace
+        # ADS.clear() below invalidates the original handle, so copy everything needed for comparison first
+        original_num_histograms = original.getNumberHistograms()
         original_groups = original.extractY().copy()
         original_group_ids = original.getGroupIDs().copy()
         # Detector IDs are instrument-specific, so take them from the workspace rather than hard-coding them
-        original_det_ids = [list(original.getDetectorIDs(i)) for i in range(original.getNumberHistograms())]
+        original_det_ids = [list(original.getDetectorIDs(i)) for i in range(original_num_histograms)]
         original_values = {det_ids[0]: original.getValue(det_ids[0]) for det_ids in original_det_ids[:4]}
         workspacesaver.WorkspaceSaver(self.working_directory).save_workspaces(["group"])
         ADS.clear()
@@ -136,7 +138,7 @@ class WorkspaceSaverTest(unittest.TestCase):
 
         loaded = ADS.retrieve("group")
         self.assertTrue(isinstance(loaded, GroupingWorkspace))
-        self.assertEqual(original.getNumberHistograms(), loaded.getNumberHistograms())
+        self.assertEqual(original_num_histograms, loaded.getNumberHistograms())
         numpy.testing.assert_array_equal(original_groups, loaded.extractY())
         numpy.testing.assert_array_equal(original_group_ids, loaded.getGroupIDs())
         loaded_det_ids = [list(loaded.getDetectorIDs(i)) for i in range(loaded.getNumberHistograms())]
