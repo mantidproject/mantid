@@ -930,6 +930,12 @@ This is a work around for a known issue in the normalisation of total scattering
 
 S(Q) should tend to 1 at high Q if normalisation and conversion are done correctly. This option forces S(Q) to 1 by subtracting the final value of S(Q)-1 of the back-scattering bank (last focussed spectrum) from all values, i.e. subtracting a constant, before computing the pair distribution function (PDFFourierTransform).
 
+.. _mayers_ms_corr_mode_polaris_isis-powder-diffraction-ref:
+
+mayers_ms_corr_mode
+^^^^^^^^^^^^^^^^^^^
+Select the multiple scattering correction mode (MSCorrectionMode) used in :ref:`algm-MayersSampleCorrection`. See the algorithm's documentation for details.
+
 .. _vanadium_sample_details_polaris_isis-powder-diffraction-ref:
 
 Vanadium sample details

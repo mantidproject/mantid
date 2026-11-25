@@ -68,5 +68,6 @@ attr_mapping = [
     ParamMapEntry(ext_name="wavelength_lims", int_name="wavelength_lims", optional=True),
     ParamMapEntry(ext_name="r_lims", int_name="r_lims", optional=True),
     ParamMapEntry(ext_name="enforce_high_q_to_1", int_name="enforce_high_q_to_1", optional=True),
+    ParamMapEntry(ext_name="mayers_ms_corr_mode", int_name="mayers_ms_corr_mode", optional=True),
 ]
 attr_mapping.extend(COMMON_PARAM_MAPPING)

@@ -137,6 +137,7 @@ class Polaris(AbstractInst):
                 multiple_scattering=self._inst_settings.multiple_scattering,
                 is_vanadium=self._is_vanadium,
                 msevents=self._inst_settings.mayers_mult_scat_events,
+                mayers_ms_corr_mode=self._inst_settings.mayers_ms_corr_mode,
             )
         else:
             return absorb_corrections.run_cylinder_absorb_corrections(
