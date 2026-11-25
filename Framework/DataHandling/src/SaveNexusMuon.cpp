@@ -73,10 +73,9 @@ void writeScalar(Nexus::File &file, const std::string &name, const T value, cons
 
 /// Writes a block of strings as a two-dimensional character array
 void writeStringArray(Nexus::File &file, const std::string &name, const std::vector<std::string> &values) {
-  size_t maxLength = 1;
-  for (const auto &value : values) {
-    maxLength = std::max(maxLength, value.size());
-  }
+  const size_t maxLength =
+      std::accumulate(values.cbegin(), values.cend(), size_t{1},
+                      [](const size_t currentMax, const std::string &a) { return std::max(currentMax, a.size()); });
   std::vector<char> buffer(values.size() * maxLength, ' ');
   for (size_t i = 0; i < values.size(); ++i) {
     std::copy(values[i].cbegin(), values[i].cend(), buffer.begin() + i * maxLength);
