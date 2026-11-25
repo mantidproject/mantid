@@ -1,0 +1,2 @@
+- In :ref:`algm-MayersSampleCorrection` add MSCorrectionMode to select between versions of the correction factor.
+- In :ref:`POLARIS Powder Diffraction Script <isis-powder-diffraction-polaris-ref>` add :ref:`mayers_ms_corr_mode_polaris_isis-powder-diffraction-ref` option to set MSCorrectionMode for :ref:`algm-MayersSampleCorrection`.
