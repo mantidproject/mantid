@@ -766,11 +766,9 @@ class SANSFileInformation(metaclass=ABCMeta):
 
     def __eq__(self, other):
         if type(other) is type(self):
-            return self._attributes_for_comparison() == other._attributes_for_comparison()
+            # Objects of the same type set the same attributes in __init__, so checking self's attributes is enough
+            return all(value == getattr(other, name) for name, value in self.__dict__.items() if name not in self._LAZY_ATTRIBUTES)
         return False
-
-    def _attributes_for_comparison(self):
-        return {name: value for name, value in self.__dict__.items() if name not in self._LAZY_ATTRIBUTES}
 
     @abstractmethod
     def get_file_name(self):
