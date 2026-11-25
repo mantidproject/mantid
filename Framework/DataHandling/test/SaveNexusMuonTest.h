@@ -296,6 +296,31 @@ public:
     TS_ASSERT_DELTA(saved.workspace->run().getPropertyAsSingleValue("FirstGoodData"), 0.224, 1e-6);
   }
 
+  void test_first_good_data_at_time_zero_off_a_bin_edge_is_not_saved_before_time_zero() {
+    // With 0.016 microsecond bins, a time zero of 0.165 rounds to bin 10 (0.16), which is before time zero, so the
+    // first good bin must be 11 (0.176)
+    const auto original = loadRun(INPUT_FILE, "original", false);
+    auto alg = createSaver(original, false);
+    alg->setProperty("TimeZero", 0.165);
+    alg->setProperty("FirstGoodData", 0.0);
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    const auto saved = loadRun(m_filename, "saved", false);
+
+    TS_ASSERT_DELTA(saved.timeZero, 0.165, 1e-6);
+    TS_ASSERT_DELTA(saved.firstGoodData, 0.176, 1e-6);
+  }
+
+  void test_first_good_data_at_time_zero_on_a_bin_edge_is_unchanged() {
+    // Time zero of 0.16 is on the edge of bin 10, within float rounding, so that bin is kept
+    const auto original = loadRun(INPUT_FILE, "original");
+    auto alg = createSaver(original);
+    alg->setProperty("FirstGoodData", 0.0);
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    const auto saved = loadRun(m_filename, "saved");
+
+    TS_ASSERT_DELTA(saved.firstGoodData, 0.16, 1e-6);
+  }
+
   void test_absolute_first_good_data_before_time_zero_is_rejected() {
     // Time zero is 0.16, so an absolute first good data of 0.1 is before it
     const auto original = loadRun(INPUT_FILE, "original");

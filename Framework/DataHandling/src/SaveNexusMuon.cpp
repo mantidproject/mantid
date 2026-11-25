@@ -157,6 +157,23 @@ double binWidth(const MatrixWorkspace &ws) {
 
 int32_t binIndex(const double time, const double width) { return static_cast<int32_t>(std::lround(time / width)); }
 
+/// The resolution in picoseconds, as stored in the file
+int32_t resolutionPicoseconds(const double width) { return static_cast<int32_t>(std::lround(width * 1e6)); }
+
+/// The first good bin to store: the bin nearest to first good data, moved to the first bin that is not before time
+/// zero when rounding would put it earlier. Bins are measured in the resolution the loader decodes them with.
+int32_t firstGoodBin(const double firstGoodData, const double timeZero, const int32_t resolution) {
+  // Allows for float rounding in time zero when it lies on a bin edge
+  constexpr double binTolerance = 1e-6;
+  const double binWidth = static_cast<double>(resolution) / 1e6;
+  const double timeZeroBins = timeZero / binWidth;
+  const auto bin = binIndex(firstGoodData, binWidth);
+  if (static_cast<double>(bin) >= timeZeroBins - binTolerance) {
+    return bin;
+  }
+  return static_cast<int32_t>(std::ceil(timeZeroBins - binTolerance));
+}
+
 /// Writes the times and values of a log, returning the number of values written
 template <typename T>
 size_t writeTimeSeriesValues(Nexus::File &file, const TimeSeriesProperty<T> &log, const DateAndTime &start) {
@@ -536,6 +553,7 @@ void SaveNexusMuon::writeInstrument(Nexus::File &file, const MatrixWorkspace &ws
   const double timeZero = getProperty(Prop::TIME_ZERO);
   const double timeShift = corrected ? timeZero : 0.0;
   const auto width = binWidth(ws);
+  const auto resolution = resolutionPicoseconds(width);
   const auto ids = detectorIDs(ws);
   const auto maxDetector = static_cast<size_t>(*std::max_element(ids.cbegin(), ids.cend()));
 
@@ -563,7 +581,7 @@ void SaveNexusMuon::writeInstrument(Nexus::File &file, const MatrixWorkspace &ws
   file.putAttr("signal", int32_t{1});
   file.putAttr("axes", std::string("period_index,spectrum_index,raw_time"));
   file.putAttr("units", std::string("counts"));
-  file.putAttr(NeXusEntry::FIRSTGOODBIN, binIndex(absoluteFirstGoodData(ws), width));
+  file.putAttr(NeXusEntry::FIRSTGOODBIN, firstGoodBin(absoluteFirstGoodData(ws), timeZero, resolution));
   file.putAttr(NeXusEntry::LASTGOODBIN, binIndex(ws.x(0).back() + timeShift, width));
   links.emplace_back(file.getDataID());
   file.closeData();
@@ -587,7 +605,7 @@ void SaveNexusMuon::writeInstrument(Nexus::File &file, const MatrixWorkspace &ws
   links.emplace_back(file.getDataID());
   file.closeData();
 
-  writeScalar(file, NeXusEntry::RESOLUTION, static_cast<int32_t>(std::lround(width * 1e6)), "picoseconds");
+  writeScalar(file, NeXusEntry::RESOLUTION, resolution, "picoseconds");
   writeScalar(file, NeXusEntry::TIMEZERO, static_cast<float>(timeZero), "microseconds");
 
   // Dead times and grouping are indexed by detector ID - 1 when loaded. Dead times are always written, as
