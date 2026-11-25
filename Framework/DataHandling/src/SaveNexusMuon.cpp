@@ -166,7 +166,7 @@ std::vector<int32_t> detectorIDs(const MatrixWorkspace &ws) {
 
 /// The resolution stored in the file, which is the width of the first time bin. The bin edges are stored
 /// separately, so it only sets the bin numbers used for first and last good data, as in the muon loaders.
-double binWidth(const MatrixWorkspace &ws) {
+double firstBinWidth(const MatrixWorkspace &ws) {
   const auto &x = ws.x(0);
   return x[1] - x[0];
 }
@@ -327,7 +327,7 @@ void SaveNexusMuon::validateWorkspace(const MatrixWorkspace &ws, std::map<std::s
       addIssue("The time axis must only contain finite values.");
     } else if (std::adjacent_find(x.cbegin(), x.cend(), std::greater_equal<double>()) != x.cend()) {
       addIssue("The time axis must be increasing.");
-    } else if (const double width = binWidth(ws); !isStorableResolution(width)) {
+    } else if (const double width = firstBinWidth(ws); !isStorableResolution(width)) {
       std::ostringstream message;
       message << "The first time bin is " << width
               << " microseconds wide, which cannot be stored as the resolution of the file. It must round to between "
@@ -426,7 +426,7 @@ void SaveNexusMuon::validateWorkspace(const MatrixWorkspace &ws, std::map<std::s
   }
   const bool corrected = getProperty(Prop::TIME_ZERO_CORRECTED);
   const double lastTime = ws.x(0).back() + (corrected ? timeZero : 0.0);
-  const auto resolution = resolutionPicoseconds(binWidth(ws));
+  const auto resolution = resolutionPicoseconds(firstBinWidth(ws));
   if (!isStorableBin(timeZero, resolution)) {
     std::ostringstream message;
     message << "TimeZero (" << timeZero << ") is too far from zero to be stored as a bin number at the resolution of "
@@ -689,7 +689,7 @@ void SaveNexusMuon::writeInstrument(Nexus::File &file, const MatrixWorkspace &ws
   const double timeZero = getProperty(Prop::TIME_ZERO);
   const double timeShift = corrected ? timeZero : 0.0;
   const double lastTime = ws.x(0).back() + timeShift;
-  const auto resolution = resolutionPicoseconds(binWidth(ws));
+  const auto resolution = resolutionPicoseconds(firstBinWidth(ws));
   const auto ids = detectorIDs(ws);
   const auto maxDetector = static_cast<size_t>(*std::max_element(ids.cbegin(), ids.cend()));
 
