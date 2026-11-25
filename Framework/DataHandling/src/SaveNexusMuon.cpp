@@ -272,7 +272,9 @@ void SaveNexusMuon::validateWorkspace(const MatrixWorkspace &ws, std::map<std::s
     addIssue("All spectra must have the same time bins.");
   } else {
     const auto &x = ws.x(0);
-    if (std::adjacent_find(x.cbegin(), x.cend(), std::greater_equal<double>()) != x.cend()) {
+    if (std::any_of(x.cbegin(), x.cend(), [](const double time) { return !std::isfinite(time); })) {
+      addIssue("The time axis must only contain finite values.");
+    } else if (std::adjacent_find(x.cbegin(), x.cend(), std::greater_equal<double>()) != x.cend()) {
       addIssue("The time axis must be increasing.");
     }
   }
