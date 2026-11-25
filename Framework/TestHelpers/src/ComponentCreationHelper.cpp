@@ -19,6 +19,7 @@
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/BeamlineBuilder.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
@@ -346,10 +347,78 @@ MSVC_DIAG_ON(4996)
 GNU_DIAG_ON("deprecated-declarations")
 // end allow DetectorGroup
 
+namespace {
+using Node = BeamlineBuilder::Node;
+
+/// The instrument a builder describes, made as a legacy tree over the built arrays. The tree must not be edited
+/// afterwards: its arrays are already cached.
+Instrument_sptr instrumentFrom(BeamlineBuilder const &builder) { return Instrument::fromBeamline(builder.build()); }
+
+/// A source as addSourceToInstrument adds one: a shapeless ObjComponent.
+void addSource(BeamlineBuilder &builder, Node const root, V3D const &position, std::string const &name = "moderator") {
+  builder.setSource(builder.addObjComponent(root, name, position, Quat(), std::make_shared<CSGObject>()));
+}
+
+/// A sample as addSampleToInstrument adds one. That moves the instrument itself to the sample position, so callers
+/// place the root there and the sample at its origin.
+void addSample(BeamlineBuilder &builder, Node const root) { builder.setSample(builder.addComponent(root, "sample")); }
+
+/// The pixel shape of the rectangular test banks.
+std::shared_ptr<CSGObject> rectangularPixelShape(double const pixelSpacing) {
+  double const cylHeight(0.0002);
+  return createCappedCylinder(pixelSpacing / 2, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.),
+                              "pixel-shape");
+}
+
+/// A square grid of pixels with IDs filled along y first, as the rectangular test banks are initialized.
+Mantid::Beamline::PixelGridComponent squareGrid(int const pixels, double const start, double const pixelSpacing,
+                                                int const idStart) {
+  Mantid::Beamline::PixelGridComponent grid;
+  grid.nX = pixels;
+  grid.nY = pixels;
+  grid.xStart = start;
+  grid.yStart = start;
+  grid.xStep = pixelSpacing;
+  grid.yStep = pixelSpacing;
+  grid.idStart = idStart;
+  grid.idStep = 1;
+  grid.idStepByRow = pixels;
+  grid.idFillOrder = {'y', 'x', 'z'};
+  return grid;
+}
+
+/// The outline ObjCompAssembly::createOutline gives a tube of pixels at these positions relative to the tube.
+std::shared_ptr<IObject> tubeOutline(std::shared_ptr<CSGObject> const &pixelShape,
+                                     std::vector<V3D> const &pixelPositions) {
+  ObjCompAssembly tube("tube");
+  for (auto const &position : pixelPositions) {
+    auto *const pixel = new Detector("pixel", 0, pixelShape, &tube);
+    pixel->setPos(position);
+    tube.add(pixel);
+  }
+  return tube.createOutline();
+}
+
+/// A bank of width x height spherical pixels, numbered on from earlier calls, as sansInstrument has always made them.
+void addSansBank(BeamlineBuilder &builder, Node const parent, size_t const width, size_t const height) {
+  static int bankNo = 1;
+  static size_t id = 1;
+  auto const bank =
+      builder.addAssembly(parent, "Bank" + std::to_string(bankNo++), V3D{double(width) / 2, double(height) / 2, 0});
+  for (size_t i = 0; i < width; ++i) {
+    for (size_t j = 0; j < height; ++j) {
+      builder.addDetector(bank, "pixel", int(id++), V3D{double(i), double(j), double(0)}, Quat(),
+                          createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
+    }
+  }
+}
+} // namespace
+
 Instrument_sptr createTestInstrumentCylindrical(int num_banks, const Mantid::Kernel::V3D &sourcePos,
                                                 const Mantid::Kernel::V3D &samplePos, const double cylRadius,
-                                                const double cylHeight) {
-  auto testInst = std::make_shared<Instrument>("basic");
+                                                const double cylHeight, const std::string &instrumentName) {
+  BeamlineBuilder builder;
+  auto const root = builder.addAssembly(BeamlineBuilder::noParent, instrumentName, samplePos);
 
   // One object
   auto pixelShape = ComponentCreationHelper::createCappedCylinder(cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0),
@@ -359,34 +428,22 @@ Instrument_sptr createTestInstrumentCylindrical(int num_banks, const Mantid::Ker
   int pixelID = 1;
 
   for (int banknum = 1; banknum <= num_banks; banknum++) {
-    // Make a new bank
-    std::ostringstream bankname;
-    bankname << "bank" << banknum;
-    CompAssembly *bank = new CompAssembly(bankname.str());
-
+    auto const bank = builder.addAssembly(root, "bank" + std::to_string(banknum), V3D(0.0, 0.0, 5.0 * banknum));
     // Nine object components
     for (int i = -1; i < 2; ++i) {
       for (int j = -1; j < 2; ++j) {
         std::ostringstream lexer;
         lexer << "pixel-(" << j << ";" << i << ")";
-        Detector *physicalPixel = new Detector(lexer.str(), pixelID, pixelShape, bank);
         const double xpos = j * (cylRadius * 2.0);
         const double ypos = i * cylHeight;
-        physicalPixel->setPos(xpos, ypos, 0.0);
-        pixelID++;
-        bank->add(physicalPixel);
-        testInst->markAsDetector(physicalPixel);
+        builder.addDetector(bank, lexer.str(), pixelID++, V3D(xpos, ypos, 0.0), Quat(), pixelShape);
       }
     }
-
-    testInst->add(bank);
-    bank->setPos(V3D(0.0, 0.0, 5.0 * banknum));
   }
 
-  addSourceToInstrument(testInst, sourcePos);
-  addSampleToInstrument(testInst, samplePos);
-
-  return testInst;
+  addSource(builder, root, sourcePos);
+  addSample(builder, root);
+  return instrumentFrom(builder);
 }
 
 Mantid::Geometry::Instrument_sptr
@@ -405,29 +462,29 @@ createCylInstrumentWithVerticalOffsetsSpecified(size_t nTubes, const std::vector
 
   auto pixelShape = ComponentCreationHelper::createCappedCylinder(cylRadius, cylHeight, V3D(0.0, 0.0, 0.0),
                                                                   V3D(0., 1.0, 0.), "pixel-shape");
-  auto instrument = std::make_shared<Instrument>("instrument_with_tubes");
-  CompAssembly *bank = new CompAssembly("sixteenpack");
-  for (size_t i = 0; i < nTubes; ++i) {
-    ObjCompAssembly *tube = new ObjCompAssembly("tube" + std::to_string(i));
-    for (size_t j = 0; j < nDetsPerTube; ++j) {
-
-      auto id = static_cast<int>(i * nDetsPerTube + j);
-      Detector *physicalPixel = new Detector("det-" + std::to_string(id), id, pixelShape, tube);
-      tube->add(physicalPixel);
-      physicalPixel->setPos(V3D(0, static_cast<double>(j) * cylHeight, 0));
-      instrument->markAsDetector(physicalPixel);
-    }
-    tube->setPos(V3D(xMin + static_cast<double>(i) * tubeDiameter, -ySpan / 2 + verticalOffsets[i], 0));
-    tube->setOutline(tube->createOutline());
-    bank->add(tube);
-  }
-  bank->setPos(V3D(0, 0, bankZPos));
-  instrument->add(bank);
-  instrument->setReferenceFrame(
+  BeamlineBuilder builder;
+  auto const root = builder.addAssembly(BeamlineBuilder::noParent, "instrument_with_tubes", V3D(0, 0, sampleZPos));
+  builder.setReferenceFrame(
       std::make_shared<ReferenceFrame>(Mantid::Geometry::Y /*up*/, Mantid::Geometry::Z /*along*/, Left, "0,0,0"));
-  addSourceToInstrument(instrument, V3D(0, 0, sourceZPos));
-  addSampleToInstrument(instrument, V3D(0, 0, sampleZPos));
-  return instrument;
+  auto const bank = builder.addAssembly(root, "sixteenpack", V3D(0, 0, bankZPos));
+  std::vector<V3D> pixelPositions(nDetsPerTube);
+  for (size_t j = 0; j < nDetsPerTube; ++j) {
+    pixelPositions[j] = V3D(0, static_cast<double>(j) * cylHeight, 0);
+  }
+  for (size_t i = 0; i < nTubes; ++i) {
+    // Each tube has its own outline, as createOutline() gives
+    auto const tube = builder.addOutlineAssembly(
+        bank, "tube" + std::to_string(i),
+        V3D(xMin + static_cast<double>(i) * tubeDiameter, -ySpan / 2 + verticalOffsets[i], 0), Quat(),
+        tubeOutline(pixelShape, pixelPositions));
+    for (size_t j = 0; j < nDetsPerTube; ++j) {
+      auto id = static_cast<int>(i * nDetsPerTube + j);
+      builder.addDetector(tube, "det-" + std::to_string(id), id, pixelPositions[j], Quat(), pixelShape);
+    }
+  }
+  addSource(builder, root, V3D(0, 0, sourceZPos));
+  addSample(builder, root);
+  return instrumentFrom(builder);
 }
 
 /** create instrument with cylindrical detectors located in specific positions
@@ -440,9 +497,8 @@ bool double_cmprsn(double x1, double x2) {
 }
 Mantid::Geometry::Instrument_sptr createCylInstrumentWithDetInGivenPositions(const std::vector<double> &L2,
                                                                              const std::vector<double> &polar,
-                                                                             const std::vector<double> &azim) {
-
-  auto testInst = std::make_shared<Instrument>("processed");
+                                                                             const std::vector<double> &azim,
+                                                                             const std::string &instrumentName) {
   // find characteristic sizes of the detectors;
   double dAzi_min(FLT_MAX);
   double dPol_min(FLT_MAX);
@@ -476,32 +532,27 @@ Mantid::Geometry::Instrument_sptr createCylInstrumentWithDetInGivenPositions(con
   // One object
   auto pixelShape = ComponentCreationHelper::createCappedCylinder(cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0),
                                                                   V3D(0., 1.0, 0.), "pixel-shape");
+  BeamlineBuilder builder;
+  auto const root = builder.addAssembly(BeamlineBuilder::noParent, instrumentName);
+  // one bank
+  auto const bank = builder.addAssembly(root, "det_ass");
   // Just increment pixel ID's
   int pixelID = 1;
-  // one bank
-  CompAssembly *bank = new CompAssembly("det_ass");
-
   for (size_t i = 0; i < azim.size(); i++) {
-    Detector *physicalPixel = new Detector("det" + std::to_string(i), pixelID, pixelShape, bank);
     double zpos = L2[i] * cos(polar[i]);
     double xpos = L2[i] * sin(polar[i]) * cos(azim[i]);
     double ypos = L2[i] * sin(polar[i]) * sin(azim[i]);
-    physicalPixel->setPos(xpos, ypos, zpos);
-    pixelID++;
-    bank->add(physicalPixel);
-    testInst->markAsDetector(physicalPixel);
+    builder.addDetector(bank, "det" + std::to_string(i), pixelID++, V3D(xpos, ypos, zpos), Quat(), pixelShape);
   }
-  testInst->add(bank);
-  bank->setPos(V3D(0., 0., 0.));
 
-  addSourceToInstrument(testInst, V3D(0.0, 0.0, -L2_min));
-  addSampleToInstrument(testInst, V3D(0.0, 0.0, 0.0));
-
-  return testInst;
+  addSource(builder, root, V3D(0.0, 0.0, -L2_min));
+  addSample(builder, root);
+  return instrumentFrom(builder);
 }
 
 //----------------------------------------------------------------------------------------------
 
+/// Adds a rectangular bank to a legacy tree, for tests that build one by hand.
 void addRectangularBank(Instrument &testInstrument, int idStart, int pixels, double pixelSpacing,
                         const std::string &bankName, const V3D &bankPos, const Quat &bankRot) {
 
@@ -528,6 +579,29 @@ void addRectangularBank(Instrument &testInstrument, int idStart, int pixels, dou
   bank->setRot(bankRot);
 }
 
+namespace {
+/// The instrument createTestInstrumentRectangular makes, still to be built.
+BeamlineBuilder rectangularBuilder(int num_banks, int pixels, double pixelSpacing, double bankDistanceFromSample,
+                                   bool addMonitor, const std::string &instrumentName) {
+  BeamlineBuilder builder;
+  auto const root = builder.addAssembly(BeamlineBuilder::noParent, instrumentName);
+  for (int banknum = 1; banknum <= num_banks; banknum++) {
+    // Each bank has its own pixel shape, as addRectangularBank gives
+    builder.addRectangularBank(root, "bank" + std::to_string(banknum), V3D(0.0, 0.0, bankDistanceFromSample * banknum),
+                               Quat(), squareGrid(pixels, 0.0, pixelSpacing, banknum * pixels * pixels),
+                               rectangularPixelShape(pixelSpacing));
+  }
+
+  if (addMonitor) {
+    builder.addDetector(root, "test-monitor", 2 /*detector id*/, V3D(), Quat(), nullptr, /*isMonitor*/ true);
+  }
+
+  addSource(builder, root, V3D(0.0, 0.0, -10.0), "source");
+  addSample(builder, root);
+  return builder;
+}
+} // namespace
+
 //----------------------------------------------------------------------------------------------
 /**
  * Create an test instrument with n panels of rectangular detectors,
@@ -547,29 +621,37 @@ void addRectangularBank(Instrument &testInstrument, int idStart, int pixels, dou
 Instrument_sptr createTestInstrumentRectangular(int num_banks, int pixels, double pixelSpacing,
                                                 double bankDistanceFromSample, bool addMonitor,
                                                 const std::string &instrumentName) {
-  auto testInst = std::make_shared<Instrument>(instrumentName);
-
-  for (int banknum = 1; banknum <= num_banks; banknum++) {
-    // Make a new bank
-    std::ostringstream bankName;
-    bankName << "bank" << banknum;
-    V3D bankPos(0.0, 0.0, bankDistanceFromSample * banknum);
-    Quat bankRot{}; // Identity
-    addRectangularBank(*testInst, banknum * pixels * pixels, pixels, pixelSpacing, bankName.str(), bankPos, bankRot);
-  }
-
-  if (addMonitor) {
-    // A monitor
-    auto *mon = new Detector("test-monitor", 2 /*detector id*/, nullptr);
-    testInst->add(mon);
-    testInst->markAsMonitor(mon);
-  }
-
-  addSourceToInstrument(testInst, V3D(0.0, 0.0, -10.0), "source");
-  addSampleToInstrument(testInst, V3D(0.0, 0.0, 0.0));
-
-  return testInst;
+  return instrumentFrom(
+      rectangularBuilder(num_banks, pixels, pixelSpacing, bankDistanceFromSample, addMonitor, instrumentName));
 }
+
+Instrument_sptr createTestInstrumentRectangularWithExtendedDetectorSpace(int num_banks, int pixels,
+                                                                         std::shared_ptr<const IObject> extendedSpace) {
+  auto builder = rectangularBuilder(num_banks, pixels, 0.008, 5.0, false, "basic_rect");
+  builder.addObjComponent(0 /*the root*/, "extended-detector-space", V3D(0.0, 0.0, 0.0), Quat(),
+                          std::move(extendedSpace));
+  return instrumentFrom(builder);
+}
+
+namespace {
+/// Rectangular banks centred at (banknum, 0, 0), turned 90 degrees about the vertical to face the sample.
+Instrument_sptr createFacingRectangularBanks(std::string const &instrumentName, std::string const &bankPrefix,
+                                             bool const numberBanks, int const num_banks, int const pixels,
+                                             double const pixelSpacing) {
+  BeamlineBuilder builder;
+  auto const root = builder.addAssembly(BeamlineBuilder::noParent, instrumentName);
+  auto const pixelShape = rectangularPixelShape(pixelSpacing);
+  for (int banknum = 1; banknum <= num_banks; banknum++) {
+    auto const bankName = numberBanks ? bankPrefix + std::to_string(banknum) : bankPrefix;
+    builder.addRectangularBank(
+        root, bankName, V3D(1.0 * banknum, 0.0, 0.0), Quat(90.0, V3D(0, 1, 0)),
+        squareGrid(pixels, -pixels * pixelSpacing / 2.0, pixelSpacing, (banknum - 1) * pixels * pixels), pixelShape);
+  }
+  addSource(builder, root, V3D(0.0, 0.0, -10.0));
+  addSample(builder, root);
+  return instrumentFrom(builder);
+}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 /**
@@ -582,46 +664,11 @@ Instrument_sptr createTestInstrumentRectangular(int num_banks, int pixels, doubl
  * @param num_banks: number of rectangular banks to create
  * @param pixels : number of pixels in each direction.
  * @param pixelSpacing : padding between pixels
+ * @param instrumentName : the name of the new instrument
  */
-Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels, double pixelSpacing) {
-
-  const auto instrName = "basic_rect";
-  auto testInst = std::make_shared<Instrument>(instrName);
-
-  const double cylRadius(pixelSpacing / 2);
-  const double cylHeight(0.0002);
-  // One object
-  auto pixelShape = ComponentCreationHelper::createCappedCylinder(cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0),
-                                                                  V3D(0., 1.0, 0.), "pixel-shape");
-
-  for (int banknum = 1; banknum <= num_banks; banknum++) {
-    // Make a new bank
-    std::ostringstream bankname;
-    bankname << "bank" << banknum;
-    auto *bank = new RectangularDetector(bankname.str());
-    bank->initialize(pixelShape, pixels, -pixels * pixelSpacing / 2.0, pixelSpacing, pixels,
-                     -pixels * pixelSpacing / 2.0, pixelSpacing, (banknum - 1) * pixels * pixels, true, pixels);
-
-    // Mark them all as detectors
-    for (int x = 0; x < pixels; x++)
-      for (int y = 0; y < pixels; y++) {
-        std::shared_ptr<Detector> detector = bank->getAtXY(x, y);
-        if (detector)
-          // Mark it as a detector (add to the instrument cache)
-          testInst->markAsDetector(detector.get());
-      }
-
-    testInst->add(bank);
-    // Place the center.
-    bank->setPos(V3D(1.0 * banknum, 0.0, 0.0));
-    // rotate detector 90 degrees along vertical
-    bank->setRot(Quat(90.0, V3D(0, 1, 0)));
-  }
-
-  addSourceToInstrument(testInst, V3D(0.0, 0.0, -10.0));
-  addSampleToInstrument(testInst, V3D(0.0, 0.0, 0.0));
-
-  return testInst;
+Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels, double pixelSpacing,
+                                                 const std::string &instrumentName) {
+  return createFacingRectangularBanks(instrumentName, "bank", true, num_banks, pixels, pixelSpacing);
 }
 
 /**
@@ -636,43 +683,7 @@ Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels, doub
  * @param pixelSpacing :: padding between pixels
  */
 Instrument_sptr createTestUnnamedRectangular2(int num_banks, int pixels, double pixelSpacing) {
-  auto testInst = std::make_shared<Instrument>("");
-
-  const double cylRadius(pixelSpacing / 2);
-  const double cylHeight(0.0002);
-  // One object
-  auto pixelShape = ComponentCreationHelper::createCappedCylinder(cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0),
-                                                                  V3D(0., 1.0, 0.), "pixel-shape");
-
-  for (int banknum = 1; banknum <= num_banks; banknum++) {
-    // Make a new bank
-    std::ostringstream bankname;
-    bankname << "";
-
-    RectangularDetector *bank = new RectangularDetector(bankname.str());
-    bank->initialize(pixelShape, pixels, -pixels * pixelSpacing / 2.0, pixelSpacing, pixels,
-                     -pixels * pixelSpacing / 2.0, pixelSpacing, (banknum - 1) * pixels * pixels, true, pixels);
-
-    // Mark them all as detectors
-    for (int x = 0; x < pixels; x++)
-      for (int y = 0; y < pixels; y++) {
-        std::shared_ptr<Detector> detector = bank->getAtXY(x, y);
-        if (detector)
-          // Mark it as a detector (add to the instrument cache)
-          testInst->markAsDetector(detector.get());
-      }
-
-    testInst->add(bank);
-    // Place the center.
-    bank->setPos(V3D(1.0 * banknum, 0.0, 0.0));
-    // rotate detector 90 degrees along vertical
-    bank->setRot(Quat(90.0, V3D(0, 1, 0)));
-  }
-
-  addSourceToInstrument(testInst, V3D(0.0, 0.0, -10.0));
-  addSampleToInstrument(testInst, V3D(0.0, 0.0, 0.0));
-
-  return testInst;
+  return createFacingRectangularBanks("", "", false, num_banks, pixels, pixelSpacing);
 }
 
 /**
@@ -681,25 +692,30 @@ Instrument_sptr createTestUnnamedRectangular2(int num_banks, int pixels, double 
  * satisfy basic checks in algorithms.
  */
 Instrument_sptr createEmptyInstrument() {
-  Instrument_sptr instrument = std::make_shared<Instrument>();
-
-  V3D place_holder_pos(0, 0, 0);
-
+  BeamlineBuilder builder;
+  auto const root = builder.addAssembly(BeamlineBuilder::noParent, "");
   // A source
-  ObjComponent *place_holder_0 = new ObjComponent("place_holder");
-  place_holder_0->setPos(place_holder_pos);
-  place_holder_0->setShape(createSphere(0.01, V3D(0, 0, 0), "1"));
-  instrument->add(place_holder_0);
-  instrument->markAsSource(place_holder_0);
-
+  builder.setSource(
+      builder.addObjComponent(root, "place_holder", V3D(0, 0, 0), Quat(), createSphere(0.01, V3D(0, 0, 0), "1")));
   // A sample
-  Component *place_holder_1 = new Component("place_holder");
-  place_holder_1->setPos(place_holder_pos);
-  instrument->add(place_holder_1);
-  instrument->markAsSamplePos(place_holder_1);
-
-  return instrument;
+  builder.setSample(builder.addComponent(root, "place_holder"));
+  return instrumentFrom(builder);
 }
+
+namespace {
+/// The source, sample and point detector shared by the minimal instruments, beam along `along`.
+void addMinimalComponents(BeamlineBuilder &builder, Node const root, V3D const &sourcePos, V3D const &samplePos,
+                          Quat const &sourceRot = Quat()) {
+  builder.setSource(
+      builder.addObjComponent(root, "source", sourcePos, sourceRot, createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1")));
+  builder.setSample(builder.addComponent(root, "some-surface-holder", samplePos));
+}
+
+std::shared_ptr<ReferenceFrame> upYLeftHanded(PointingAlong const along) {
+  return std::make_shared<ReferenceFrame>(Mantid::Geometry::Y /*up*/, along, Left, "0,0,0");
+}
+} // namespace
+
 /**
  * createMinimalInstrument, creates the most simple possible definition of
  * an instrument in which we can extract a valid L1 and L2 distance for unit
@@ -715,31 +731,13 @@ Instrument_sptr createEmptyInstrument() {
  */
 Instrument_sptr createMinimalInstrument(const Mantid::Kernel::V3D &sourcePos, const Mantid::Kernel::V3D &samplePos,
                                         const Mantid::Kernel::V3D &detectorPos) {
-  Instrument_sptr instrument = std::make_shared<Instrument>();
-  instrument->setReferenceFrame(
-      std::make_shared<ReferenceFrame>(Mantid::Geometry::Y /*up*/, Mantid::Geometry::X /*along*/, Left, "0,0,0"));
-
-  // A source
-  ObjComponent *source = new ObjComponent("source");
-  source->setPos(sourcePos);
-  source->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
-  instrument->add(source);
-  instrument->markAsSource(source);
-
-  // A sample
-  Component *sample = new Component("some-surface-holder");
-  sample->setPos(samplePos);
-  instrument->add(sample);
-  instrument->markAsSamplePos(sample);
-
-  // A detector
-  Detector *det = new Detector("point-detector", 1 /*detector id*/, nullptr);
-  det->setPos(detectorPos);
-  det->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
-  instrument->add(det);
-  instrument->markAsDetector(det);
-
-  return instrument;
+  BeamlineBuilder builder;
+  auto const root = builder.addAssembly(BeamlineBuilder::noParent, "");
+  builder.setReferenceFrame(upYLeftHanded(Mantid::Geometry::X));
+  addMinimalComponents(builder, root, sourcePos, samplePos);
+  builder.addDetector(root, "point-detector", 1 /*detector id*/, detectorPos, Quat(),
+                      createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
+  return instrumentFrom(builder);
 }
 
 /**
@@ -755,41 +753,15 @@ Instrument_sptr createMinimalInstrument(const Mantid::Kernel::V3D &sourcePos, co
  */
 Instrument_sptr createMinimalInstrumentWithMonitor(const Mantid::Kernel::V3D &monitorPos,
                                                    const Mantid::Kernel::Quat &monitorRot) {
-  Instrument_sptr instrument = std::make_shared<Instrument>();
-  instrument->setReferenceFrame(
-      std::make_shared<ReferenceFrame>(Mantid::Geometry::Y /*up*/, Mantid::Geometry::X /*along*/, Left, "0,0,0"));
-
-  instrument->setName("test-instrument-with-monitor");
-
-  // A source
-  auto *source = new ObjComponent("source");
-  source->setPos(V3D(-10, 0, 0));
-  source->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
-  instrument->add(source);
-  instrument->markAsSource(source);
-
-  // A sample
-  auto *sample = new Component("some-surface-holder");
-  sample->setPos(V3D(0, 0, 0));
-  instrument->add(sample);
-  instrument->markAsSamplePos(sample);
-
-  // A detector
-  auto *det = new Detector("point-detector", 1 /*detector id*/, nullptr);
-  det->setPos(V3D(0, 0, 10));
-  det->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
-  instrument->add(det);
-  instrument->markAsDetector(det);
-
-  // A monitor
-  auto *mon = new Detector("test-monitor", 2 /*detector id*/, nullptr);
-  mon->setPos(monitorPos);
-  mon->setRot(monitorRot);
-  mon->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
-  instrument->add(mon);
-  instrument->markAsMonitor(mon);
-
-  return instrument;
+  BeamlineBuilder builder;
+  auto const root = builder.addAssembly(BeamlineBuilder::noParent, "test-instrument-with-monitor");
+  builder.setReferenceFrame(upYLeftHanded(Mantid::Geometry::X));
+  addMinimalComponents(builder, root, V3D(-10, 0, 0), V3D(0, 0, 0));
+  builder.addDetector(root, "point-detector", 1 /*detector id*/, V3D(0, 0, 10), Quat(),
+                      createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
+  builder.addDetector(root, "test-monitor", 2 /*detector id*/, monitorPos, monitorRot,
+                      createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"), /*isMonitor*/ true);
+  return instrumentFrom(builder);
 }
 
 /*
@@ -801,34 +773,18 @@ source/sample for unit test of exception handling.
 * @param haveDetector : bool option to have detector in instrument
 */
 Instrument_sptr createInstrumentWithOptionalComponents(bool haveSource, bool haveSample, bool haveDetector) {
-
-  Instrument_sptr instrument = std::make_shared<Instrument>();
-
-  // A source
+  BeamlineBuilder builder;
+  auto const root = builder.addAssembly(BeamlineBuilder::noParent, "");
   if (haveSource) {
-    ObjComponent *source = new ObjComponent("source");
-
-    instrument->add(source);
-    instrument->markAsSource(source);
+    builder.setSource(builder.addObjComponent(root, "source", V3D(), Quat(), nullptr));
   }
-
-  // A sample
   if (haveSample) {
-    Component *sample = new Component("some-sample");
-
-    instrument->add(sample);
-    instrument->markAsSamplePos(sample);
+    builder.setSample(builder.addComponent(root, "some-sample"));
   }
-
-  // A detector
   if (haveDetector) {
-    Detector *det = new Detector("point-detector", 1 /*detector id*/, nullptr);
-
-    instrument->add(det);
-    instrument->markAsDetector(det);
+    builder.addDetector(root, "point-detector", 1 /*detector id*/, V3D(), Quat(), nullptr);
   }
-
-  return instrument;
+  return instrumentFrom(builder);
 }
 
 /**
@@ -853,40 +809,14 @@ Instrument_sptr createSimpleInstrumentWithRotation(const Mantid::Kernel::V3D &so
                                                    const Mantid::Kernel::Quat &relativeBankRotation,
                                                    const Mantid::Kernel::Quat &relativeDetRotation,
                                                    const Mantid::Kernel::V3D &detOffset) {
-  Instrument_sptr instrument = std::make_shared<Instrument>();
-  instrument->setReferenceFrame(
-      std::make_shared<ReferenceFrame>(Mantid::Geometry::Y /*up*/, Mantid::Geometry::Z /*along*/, Left, "0,0,0"));
-
-  instrument->setName("test-instrument-with-detector-rotations");
-
-  // A source
-  ObjComponent *source = new ObjComponent("source");
-  source->setPos(sourcePos);
-  source->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
-  instrument->add(source);
-  instrument->markAsSource(source);
-
-  // A sample
-  Component *sample = new Component("some-surface-holder");
-  sample->setPos(samplePos);
-  instrument->add(sample);
-  instrument->markAsSamplePos(sample);
-
-  // A detector
-  Detector *det = new Detector("point-detector", 1 /*detector id*/, nullptr);
-  det->setPos(detOffset); // defaults to {0,0,0} if no input
-  det->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
-  det->setRot(relativeDetRotation);
-  instrument->markAsDetector(det);
-
-  auto compAss = new ObjCompAssembly("detector-stage");
-  compAss->add(det);
-  compAss->setPos(detectorPos);
-  compAss->setRot(relativeBankRotation);
-
-  instrument->add(compAss);
-
-  return instrument;
+  BeamlineBuilder builder;
+  auto const root = builder.addAssembly(BeamlineBuilder::noParent, "test-instrument-with-detector-rotations");
+  builder.setReferenceFrame(upYLeftHanded(Mantid::Geometry::Z));
+  addMinimalComponents(builder, root, sourcePos, samplePos);
+  auto const stage = builder.addOutlineAssembly(root, "detector-stage", detectorPos, relativeBankRotation, nullptr);
+  builder.addDetector(stage, "point-detector", 1 /*detector id*/, detOffset, relativeDetRotation,
+                      createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
+  return instrumentFrom(builder);
 }
 
 /**
@@ -906,60 +836,15 @@ Instrument_sptr createInstrumentWithSourceRotation(const Mantid::Kernel::V3D &so
                                                    const Mantid::Kernel::V3D &samplePos,
                                                    const Mantid::Kernel::V3D &detectorPos,
                                                    const Mantid::Kernel::Quat &relativeSourceRotation) {
-  Instrument_sptr instrument = std::make_shared<Instrument>();
-  instrument->setReferenceFrame(
-      std::make_shared<ReferenceFrame>(Mantid::Geometry::Y /*up*/, Mantid::Geometry::Z /*along*/, Left, "0,0,0"));
-
-  instrument->setName("test-instrument");
-
-  // A source
-  ObjComponent *source = new ObjComponent("source");
-  source->setPos(sourcePos);
-  source->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
-  source->setRot(relativeSourceRotation);
-  instrument->add(source);
-  instrument->markAsSource(source);
-
-  // A sample
-  Component *sample = new Component("some-surface-holder");
-  sample->setPos(samplePos);
-  instrument->add(sample);
-  instrument->markAsSamplePos(sample);
-
-  // A detector
-  Detector *det = new Detector("point-detector", 1 /*detector id*/, nullptr);
-  det->setPos({0, 0, 0}); // No offset relative to parent CompAssembly
-  det->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
-  instrument->markAsDetector(det);
-
-  auto compAss = new ObjCompAssembly("detector-stage");
-  compAss->add(det);
-  compAss->setPos(detectorPos);
-
-  instrument->add(compAss);
-
-  return instrument;
-}
-
-CompAssembly *makeBank(size_t width, size_t height, Instrument *instrument) {
-
-  auto width_d = double(width);
-  auto height_d = double(height);
-  static int bankNo = 1;
-  auto bank = new CompAssembly("Bank" + std::to_string(bankNo++));
-  static size_t id = 1;
-  for (size_t i = 0; i < width; ++i) {
-    for (size_t j = 0; j < height; ++j) {
-      Detector *det = new Detector("pixel", int(id++) /*detector id*/, bank);
-      det->setPos(V3D{double(i), double(j), double(0)});
-      det->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
-      bank->add(det);
-      instrument->markAsDetector(det);
-    }
-  }
-  bank->setPos(V3D{width_d / 2, height_d / 2, 0});
-
-  return bank;
+  BeamlineBuilder builder;
+  auto const root = builder.addAssembly(BeamlineBuilder::noParent, "test-instrument");
+  builder.setReferenceFrame(upYLeftHanded(Mantid::Geometry::Z));
+  addMinimalComponents(builder, root, sourcePos, samplePos, relativeSourceRotation);
+  // No offset relative to the stage
+  auto const stage = builder.addOutlineAssembly(root, "detector-stage", detectorPos, Quat(), nullptr);
+  builder.addDetector(stage, "point-detector", 1 /*detector id*/, V3D(0, 0, 0), Quat(),
+                      createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
+  return instrumentFrom(builder);
 }
 
 Instrument_sptr sansInstrument(const Mantid::Kernel::V3D &sourcePos, const Mantid::Kernel::V3D &samplePos,
@@ -970,39 +855,27 @@ Instrument_sptr sansInstrument(const Mantid::Kernel::V3D &sourcePos, const Manti
   therefore not
   an exact representation of an instrument one might expect to create for SANS.
    */
-  auto instrument = std::make_shared<Instrument>();
+  BeamlineBuilder builder;
+  auto const root = builder.addAssembly(BeamlineBuilder::noParent, "", samplePos);
+  builder.setReferenceFrame(upYLeftHanded(Mantid::Geometry::Z));
 
-  instrument->setReferenceFrame(
-      std::make_shared<ReferenceFrame>(Mantid::Geometry::Y /*up*/, Mantid::Geometry::Z /*along*/, Left, "0,0,0"));
-
-  addSourceToInstrument(instrument, sourcePos);
-  addSampleToInstrument(instrument, samplePos);
+  addSource(builder, root, sourcePos);
+  addSample(builder, root);
 
   size_t width = 100;
   size_t height = 100;
 
-  CompAssembly *trolley1 = new CompAssembly("Trolley1");
-  trolley1->setPos(trolley1Pos);
-  CompAssembly *trolley2 = new CompAssembly("Trolley2");
-  trolley2->setPos(trolley2Pos);
-
-  CompAssembly *N = makeBank(width, height, instrument.get());
-  trolley1->add(N);
-  CompAssembly *E = makeBank(width, height, instrument.get());
-  trolley1->add(E);
-  CompAssembly *S = makeBank(width, height, instrument.get());
-  trolley1->add(S);
-  CompAssembly *W = makeBank(width, height, instrument.get());
-  trolley1->add(W);
-
-  CompAssembly *l_curtain = makeBank(width, height, instrument.get());
-  trolley2->add(l_curtain);
-  CompAssembly *r_curtain = makeBank(width, height, instrument.get());
-  trolley2->add(r_curtain);
-
-  instrument->add(trolley1);
-  instrument->add(trolley2);
-  return instrument;
+  auto const trolley1 = builder.addAssembly(root, "Trolley1", trolley1Pos);
+  auto const trolley2 = builder.addAssembly(root, "Trolley2", trolley2Pos);
+  // N, E, S and W
+  for (int bank = 0; bank < 4; ++bank) {
+    addSansBank(builder, trolley1, width, height);
+  }
+  // The left and right curtains
+  for (int bank = 0; bank < 2; ++bank) {
+    addSansBank(builder, trolley2, width, height);
+  }
+  return instrumentFrom(builder);
 }
 
 Mantid::Geometry::Instrument_sptr createInstrumentWithPSDTubes(const size_t nTubes, const size_t nPixelsPerTube,
@@ -1014,12 +887,13 @@ Mantid::Geometry::Instrument_sptr createInstrumentWithPSDTubes(const size_t nTub
   //
   // Tubes will be located at 1 m from the sample (0, 0, 0) from 0 -> 90 deg
   // If mirror is set to true they will go from 0 -> -90 deg
-  Instrument_sptr testInst(new Instrument("PSDTubeInst"));
+  BeamlineBuilder builder;
+  auto const root = builder.addAssembly(BeamlineBuilder::noParent, "PSDTubeInst");
   int xDirection(1);
   if (mirrorTubes)
     xDirection = -1;
 
-  testInst->setReferenceFrame(
+  builder.setReferenceFrame(
       std::make_shared<ReferenceFrame>(Mantid::Geometry::Y, Mantid::Geometry::Z, Mantid::Geometry::X, Right, "0,0,0"));
 
   // Pixel shape
@@ -1034,8 +908,6 @@ Mantid::Geometry::Instrument_sptr createInstrumentWithPSDTubes(const size_t nTub
       "tubeShape");
 
   for (size_t i = 0; i < nTubes; ++i) {
-    std::ostringstream lexer;
-    lexer << "tube-" << i;
     const auto theta = (M_PI / 2.0) * double(i) / (double(nTubes) - 1);
     auto x = xDirection * radius * sin(theta);
     // A small correction to make testing easier where the instrument is
@@ -1043,24 +915,15 @@ Mantid::Geometry::Instrument_sptr createInstrumentWithPSDTubes(const size_t nTub
     if (i == 0 && xDirection < 0)
       x = -1e-32;
     const auto z = radius * cos(theta);
-    ObjCompAssembly *tube = new ObjCompAssembly(lexer.str());
-    tube->setShape(tubeShape);
-    tube->setPos(V3D(x, 0.0, z));
+    auto const tube = builder.addOutlineAssembly(root, "tube-" + std::to_string(i), V3D(x, 0.0, z), Quat(), tubeShape);
     for (size_t j = 0; j < nPixelsPerTube; ++j) {
-      lexer.str("");
-      lexer << "pixel-" << i * nPixelsPerTube + j;
-      Detector *pixel = new Detector(lexer.str(), int(i * nPixelsPerTube + j + 1), pixelShape, tube);
-      const double xpos = 0.0;
       const double ypos = double(j) * pixelHeight;
-      pixel->setPos(xpos, ypos, 0.0);
-      tube->add(pixel);
-      testInst->markAsDetector(pixel);
+      builder.addDetector(tube, "pixel-" + std::to_string(i * nPixelsPerTube + j), int(i * nPixelsPerTube + j + 1),
+                          V3D(0.0, ypos, 0.0), Quat(), pixelShape);
     }
-    testInst->add(tube);
   }
-  addSourceToInstrument(testInst, V3D(0.0, 0.0, -1.0));
-  addSampleToInstrument(testInst, V3D(0.0, 0.0, 0.0));
-
-  return testInst;
+  addSource(builder, root, V3D(0.0, 0.0, -1.0));
+  addSample(builder, root);
+  return instrumentFrom(builder);
 }
 } // namespace ComponentCreationHelper

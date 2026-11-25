@@ -9,6 +9,8 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidCrystal/AnvredCorrection.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/BeamlineBuilder.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Utils.h"
@@ -55,18 +57,12 @@ void LoadHKL::exec() {
   std::string convention = ConfigService::Instance().getString("Q.convention");
   if (convention == "Crystallography")
     qSign = 1.0;
-  Instrument_sptr inst(new Geometry::Instrument);
-  Detector *detector = new Detector("det1", -1, nullptr);
-  detector->setPos(0.0, 0.0, 0.0);
-  inst->add(detector); // This takes care of deletion
-  inst->markAsDetector(detector);
-  Mantid::Geometry::Component *sample = new Mantid::Geometry::Component("Sample");
-  inst->add(sample); // This takes care of deletion
-  inst->markAsSamplePos(sample);
-  Mantid::Geometry::ObjComponent *source = new Mantid::Geometry::ObjComponent("Source");
-  source->setPos(0.0, 0.0, -1.0);
-  inst->add(source); // This takes care of deletion
-  inst->markAsSource(source);
+  Geometry::BeamlineBuilder builder;
+  auto const root = builder.addAssembly(Geometry::BeamlineBuilder::noParent, "");
+  builder.addDetector(root, "det1", -1, V3D(0.0, 0.0, 0.0), Quat(), nullptr);
+  builder.setSample(builder.addComponent(root, "Sample"));
+  builder.setSource(builder.addObjComponent(root, "Source", V3D(0.0, 0.0, -1.0), Quat(), nullptr));
+  Instrument_sptr const inst = Geometry::Instrument::fromBeamline(builder.build());
 
   std::string line;
   bool first = true;

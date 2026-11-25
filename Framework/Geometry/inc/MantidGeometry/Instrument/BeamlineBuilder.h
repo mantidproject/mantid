@@ -26,6 +26,8 @@
 
 namespace Mantid {
 namespace Geometry {
+class ComponentInfo;
+class DetectorInfo;
 class IObject;
 class InstrumentMetadata;
 class Parameter;
@@ -62,6 +64,15 @@ public:
   /// nY detectors.
   Node addGridBank(Node const parent, std::string name, Kernel::V3D const &position, Kernel::Quat const &rotation,
                    Beamline::PixelGridComponent pixelGrid);
+  /// A rectangular bank holding the pixels RectangularDetector::initialize makes from pixelGrid, all of pixelShape:
+  /// columns and pixels named, placed and numbered as GridDetector does. nZ must be 0. The grid's minimum and
+  /// maximum detector IDs are filled in. Returns the bank.
+  Node addRectangularBank(Node const parent, std::string name, Kernel::V3D const &position,
+                          Kernel::Quat const &rotation, Beamline::PixelGridComponent pixelGrid,
+                          std::shared_ptr<const IObject> const &pixelShape);
+  /// A 3D grid bank holding the pixels GridDetector::initialize makes from pixelGrid, as addRectangularBank does.
+  Node addGridBank(Node const parent, std::string name, Kernel::V3D const &position, Kernel::Quat const &rotation,
+                   Beamline::PixelGridComponent pixelGrid, std::shared_ptr<const IObject> const &pixelShape);
   /// A structured bank. Its pixels are added under it as for any assembly: nX columns, each of nY detectors.
   Node addStructuredBank(Node const parent, std::string name, Kernel::V3D const &position, Kernel::Quat const &rotation,
                          Beamline::StructuredGridComponent structuredGrid);
@@ -76,6 +87,12 @@ public:
                    Kernel::Quat const &rotation, std::shared_ptr<const IObject> shape, bool const isMonitor = false);
 
   /// The source. As in the legacy instrument, only the first source set is kept; later ones are warned about.
+  /// A copy of the component at `index` of an existing beamline, and of everything under it, added under `parent`.
+  /// Each copied component keeps its position, rotation and side-by-side view position relative to its own parent,
+  /// as a cloned legacy component does. Returns the copy.
+  Node addCopy(Node const parent, ComponentInfo const &componentInfo, DetectorInfo const &detectorInfo,
+               size_t const index);
+
   void setSource(Node const node);
   /// The sample. As in the legacy instrument, only the first sample set is kept; later ones are warned about.
   void setSample(Node const node);
@@ -125,6 +142,7 @@ private:
   Node add(NodeRecord record);
   void checkNode(Node const node) const;
   bool isPixelGrid(Node const node, int const columns, int const pixels) const;
+  void addGridPixels(Node const bank, std::shared_ptr<const IObject> const &pixelShape);
   void checkBanks() const;
 
   std::vector<NodeRecord> m_nodes;

@@ -16,6 +16,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/BeamlineBuilder.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
@@ -485,21 +486,15 @@ void LoadGSS::createInstrumentGeometry(const MatrixWorkspace_sptr &workspace, co
   }
   g_log.debug(dbss.str());
 
-  // Create a new instrument and set its name
-  Geometry::Instrument_sptr instrument(new Geometry::Instrument(instrumentname));
+  // Lay out a new instrument with its name
+  Geometry::BeamlineBuilder builder;
+  auto const root = builder.addAssembly(Geometry::BeamlineBuilder::noParent, instrumentname);
 
   // Add dummy source and samplepos to instrument
-  Geometry::Component *samplepos = new Geometry::Component("Sample", instrument.get());
-  instrument->add(samplepos);
-  instrument->markAsSamplePos(samplepos);
-  samplepos->setPos(0.0, 0.0, 0.0);
-
-  Geometry::ObjComponent *source = new Geometry::ObjComponent("Source", instrument.get());
-  instrument->add(source);
-  instrument->markAsSource(source);
+  builder.setSample(builder.addComponent(root, "Sample", Kernel::V3D(0.0, 0.0, 0.0)));
 
   double l1 = primaryflightpath;
-  source->setPos(0.0, 0.0, -1.0 * l1);
+  builder.setSource(builder.addObjComponent(root, "Source", Kernel::V3D(0.0, 0.0, -1.0 * l1), Kernel::Quat(), nullptr));
 
   // Add detectors
   // The L2 and 2-theta values from Raw file assumed to be relative to sample
@@ -511,26 +506,20 @@ void LoadGSS::createInstrumentGeometry(const MatrixWorkspace_sptr &workspace, co
 
   // Assumption: detector IDs are in the same order of workspace index
   for (int i = 0; i < numDetector; ++i) {
-    // a) Create a new detector. Instrument will take ownership of pointer so no
-    // need to delete.
-    Geometry::Detector *detector = new Geometry::Detector("det", detectorids[i], samplepos);
     Kernel::V3D pos;
 
     // r is L2
     double r = totalflightpaths[i] - l1;
     pos.spherical(r, twothetas[i], 0.0);
 
-    detector->setPos(pos);
-
-    // add copy to instrument, spectrum and mark it
+    // add the detector to the spectrum and the instrument
     auto &spec = workspace->getSpectrum(i);
     spec.clearDetectorIDs();
     spec.addDetectorID(detectorids[i]);
-    instrument->add(detector);
-    instrument->markAsDetector(detector);
+    builder.addDetector(root, "det", detectorids[i], pos, Kernel::Quat(), nullptr);
 
   } // ENDFOR (i: spectrum)
-  workspace->setInstrument(instrument);
+  workspace->setInstrument(Geometry::Instrument::fromBeamline(builder.build()));
 
   auto &compInfo = workspace->mutableComponentInfo();
   for (size_t i = 0; i < workspace->getNumberHistograms(); i++) {

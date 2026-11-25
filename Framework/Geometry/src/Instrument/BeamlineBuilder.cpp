@@ -12,6 +12,7 @@
 #include "MantidGeometry/Instrument/ParameterInfo.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/EigenConversionHelpers.h"
+#include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 
@@ -30,7 +31,16 @@ using Kernel::V3D;
 
 namespace {
 Kernel::Logger g_log("BeamlineBuilder");
+
+/// The detector ID of pixel (x, y, z) of a grid bank, as GridDetector::getDetectorIDAtXYZ numbers it.
+detid_t gridDetectorId(Beamline::PixelGridComponent const &grid, int const x, int const y, int const z) {
+  auto const coordinate = [x, y, z](char const axis) { return axis == 'x' ? x : axis == 'y' ? y : z; };
+  auto const pixels = [&grid](char const axis) { return axis == 'x' ? grid.nX : axis == 'y' ? grid.nY : grid.nZ; };
+  auto const &order = grid.idFillOrder;
+  return grid.idStart + coordinate(order[0]) * grid.idStep + coordinate(order[1]) * grid.idStepByRow +
+         coordinate(order[2]) * pixels(order[1]) * grid.idStepByRow;
 }
+} // namespace
 
 /// Lays out the nodes as InstrumentVisitor does, filling the arrays the Infos are made from.
 class BeamlineBuilder::Layout {
@@ -212,7 +222,7 @@ private:
   std::vector<Quat> m_absoluteRotations;
   std::vector<std::optional<V2D>> m_absoluteSideBySide;
 
-  std::shared_ptr<const IObject> m_nullShape = std::make_shared<const CSGObject>();
+  std::shared_ptr<const IObject> m_nullShape = ComponentInfo::noShape();
   std::shared_ptr<std::vector<detid_t>> m_detectorIds;
   std::shared_ptr<const std::unordered_map<detid_t, size_t>> m_detectorIdToIndex;
   std::shared_ptr<std::vector<size_t>> m_assemblySortedDetectorIndices = std::make_shared<std::vector<size_t>>();
@@ -270,6 +280,60 @@ BeamlineBuilder::Node BeamlineBuilder::addGridBank(Node const parent, std::strin
   return add(std::move(record));
 }
 
+BeamlineBuilder::Node BeamlineBuilder::addRectangularBank(Node const parent, std::string name, V3D const &position,
+                                                          Quat const &rotation, Beamline::PixelGridComponent pixelGrid,
+                                                          std::shared_ptr<const IObject> const &pixelShape) {
+  if (pixelGrid.nZ != 0) {
+    throw std::invalid_argument("BeamlineBuilder: rectangular bank " + name + " is flat, so nZ must be 0");
+  }
+  auto const bank = addRectangularBank(parent, std::move(name), position, rotation, std::move(pixelGrid));
+  addGridPixels(bank, pixelShape);
+  return bank;
+}
+
+BeamlineBuilder::Node BeamlineBuilder::addGridBank(Node const parent, std::string name, V3D const &position,
+                                                   Quat const &rotation, Beamline::PixelGridComponent pixelGrid,
+                                                   std::shared_ptr<const IObject> const &pixelShape) {
+  auto const bank = addGridBank(parent, std::move(name), position, rotation, std::move(pixelGrid));
+  addGridPixels(bank, pixelShape);
+  return bank;
+}
+
+/// Fills a grid bank as GridDetector::createLayer does: z-layers (if any), each of x-columns of y-pixels.
+void BeamlineBuilder::addGridPixels(Node const bank, std::shared_ptr<const IObject> const &pixelShape) {
+  // Copied, because adding nodes reallocates m_nodes
+  auto const name = m_nodes[bank].name;
+  auto grid = *m_nodes[bank].pixelGrid;
+  if (grid.nX <= 0 || grid.nY <= 0 || grid.nZ < 0) {
+    throw std::invalid_argument("BeamlineBuilder: grid bank " + name + " needs at least one pixel in x and y");
+  }
+  if (!std::ranges::all_of(grid.idFillOrder, [](char const axis) { return axis >= 'x' && axis <= 'z'; })) {
+    throw std::invalid_argument("BeamlineBuilder: grid bank " + name + " has an ID fill order other than x, y and z");
+  }
+  auto const layered = grid.nZ > 0;
+  grid.minDetectorID = grid.idStart;
+  grid.maxDetectorID = grid.idStart;
+  for (int iz = 0; iz < std::max(grid.nZ, 1); ++iz) {
+    auto const layer = layered ? addAssembly(bank, name + "(z=" + std::to_string(iz) + ")") : bank;
+    auto const z = grid.zStart + iz * grid.zStep;
+    auto const columnPrefix = layered ? name + "(z=" + std::to_string(iz) + ",x=" : name + "(x=";
+    auto const pixelSuffix = layered ? "," + std::to_string(iz) + ")" : std::string(")");
+    for (int ix = 0; ix < grid.nX; ++ix) {
+      auto const column = addAssembly(layer, columnPrefix + std::to_string(ix) + ")");
+      auto const x = grid.xStart + ix * grid.xStep;
+      for (int iy = 0; iy < grid.nY; ++iy) {
+        auto const id = gridDetectorId(grid, ix, iy, iz);
+        grid.minDetectorID = std::min(grid.minDetectorID, id);
+        grid.maxDetectorID = std::max(grid.maxDetectorID, id);
+        auto const y = grid.yStart + iy * grid.yStep;
+        addDetector(column, name + "(" + std::to_string(ix) + "," + std::to_string(iy) + pixelSuffix, id, V3D(x, y, z),
+                    Quat(), pixelShape);
+      }
+    }
+  }
+  m_nodes[bank].pixelGrid = grid;
+}
+
 BeamlineBuilder::Node BeamlineBuilder::addStructuredBank(Node const parent, std::string name, V3D const &position,
                                                          Quat const &rotation,
                                                          Beamline::StructuredGridComponent structuredGrid) {
@@ -301,6 +365,66 @@ BeamlineBuilder::Node BeamlineBuilder::addDetector(Node const parent, std::strin
   record.shape = std::move(shape);
   record.id = id;
   return add(std::move(record));
+}
+
+BeamlineBuilder::Node BeamlineBuilder::addCopy(Node const parent, ComponentInfo const &componentInfo,
+                                               DetectorInfo const &detectorInfo, size_t const index) {
+  auto const &name = componentInfo.name(index);
+  auto const hasParent = componentInfo.hasParent(index);
+  auto const position = hasParent ? componentInfo.relativePosition(index) : componentInfo.position(index);
+  auto const rotation = hasParent ? componentInfo.relativeRotation(index) : componentInfo.rotation(index);
+  auto const &shape = (*componentInfo.m_shapes)[index];
+  Node node;
+  if (componentInfo.isDetector(index)) {
+    node = addDetector(parent, name, detectorInfo.detectorIDs()[index], position, rotation, shape,
+                       detectorInfo.isMonitor(index));
+  } else {
+    switch (componentInfo.componentType(index)) {
+    case Beamline::ComponentType::Unstructured:
+      // An outline assembly without an outline holds no shape at all
+      node = shape ? addAssembly(parent, name, position, rotation)
+                   : addOutlineAssembly(parent, name, position, rotation, nullptr);
+      break;
+    case Beamline::ComponentType::OutlineComposite:
+      node = addOutlineAssembly(parent, name, position, rotation, shape);
+      break;
+    case Beamline::ComponentType::Rectangular:
+      node = addRectangularBank(parent, name, position, rotation, componentInfo.pixelGridComponent(index));
+      break;
+    case Beamline::ComponentType::Grid:
+      node = addGridBank(parent, name, position, rotation, componentInfo.pixelGridComponent(index));
+      break;
+    case Beamline::ComponentType::Structured:
+      node = addStructuredBank(parent, name, position, rotation, componentInfo.structuredGridComponent(index));
+      break;
+    case Beamline::ComponentType::Generic:
+      node = shape == ComponentInfo::noShape() ? addComponent(parent, name, position, rotation)
+                                               : addObjComponent(parent, name, position, rotation, shape);
+      break;
+    case Beamline::ComponentType::Infinite:
+      node = addObjComponent(parent, name, position, rotation, shape);
+      break;
+    default:
+      throw std::invalid_argument("BeamlineBuilder: cannot copy " + name + ", which has an unexpected type");
+    }
+  }
+  // Side-by-side view positions are held absolute; a component holds its own relative to its parent's, and one equal
+  // to its parent's is taken to be inherited
+  auto const sideBySide = componentInfo.sideBySideViewPosition(index);
+  if (sideBySide.X() != EMPTY_DBL()) {
+    auto const parentSideBySide =
+        hasParent ? componentInfo.sideBySideViewPosition(componentInfo.parent(index)) : V2D(EMPTY_DBL(), EMPTY_DBL());
+    if (parentSideBySide.X() == EMPTY_DBL()) {
+      setSideBySideViewPosition(node, sideBySide);
+    } else if (sideBySide != parentSideBySide) {
+      setSideBySideViewPosition(node, sideBySide - parentSideBySide);
+    }
+  }
+  setScaleFactor(node, componentInfo.scaleFactor(index));
+  for (auto const child : componentInfo.children(index)) {
+    addCopy(node, componentInfo, detectorInfo, child);
+  }
+  return node;
 }
 
 BeamlineBuilder::Node BeamlineBuilder::add(NodeRecord record) {

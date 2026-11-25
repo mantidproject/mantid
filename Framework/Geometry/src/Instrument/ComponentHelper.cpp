@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/BeamlineBuilder.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -16,6 +18,27 @@
 
 namespace Mantid::Geometry::ComponentHelper {
 using Kernel::V3D;
+
+namespace {
+/// A source, a sample and point detectors (each a 1 cm sphere) in the given frame.
+Geometry::Instrument_sptr makeVirtualInstrument(Kernel::V3D const &sourcePos, Kernel::V3D const &samplePos,
+                                                std::vector<Kernel::V3D> const &vecdetpos,
+                                                std::vector<detid_t> const &vecdetid,
+                                                std::shared_ptr<const ReferenceFrame> referenceFrame) {
+  BeamlineBuilder builder;
+  auto const root = builder.addAssembly(BeamlineBuilder::noParent, "");
+  builder.setReferenceFrame(std::move(referenceFrame));
+  builder.setSource(builder.addObjComponent(root, "source", sourcePos, Kernel::Quat(),
+                                            createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1")));
+  builder.setSample(builder.addComponent(root, "some-surface-holder", samplePos));
+  for (size_t i = 0; i < vecdetpos.size(); ++i) {
+    // FIXME - should be cubi... pixel
+    builder.addDetector(root, "point-detector", vecdetid[i] /*detector id*/, vecdetpos[i], Kernel::Quat(),
+                        createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
+  }
+  return Instrument::fromBeamline(builder.build());
+}
+} // namespace
 
 /**
  * createOneDetectorInstrument, creates the most simple possible definition of
@@ -33,65 +56,17 @@ using Kernel::V3D;
 Geometry::Instrument_sptr createMinimalInstrument(const Mantid::Kernel::V3D &sourcePos,
                                                   const Mantid::Kernel::V3D &samplePos,
                                                   const Mantid::Kernel::V3D &detectorPos) {
-  Instrument_sptr instrument = std::make_shared<Instrument>();
-  instrument->setReferenceFrame(
+  return makeVirtualInstrument(
+      sourcePos, samplePos, {detectorPos}, {1},
       std::make_shared<ReferenceFrame>(Mantid::Geometry::Y /*up*/, Mantid::Geometry::X /*along*/, Left, "0,0,0"));
-
-  // A source
-  ObjComponent *source = new ObjComponent("source");
-  source->setPos(sourcePos);
-  source->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
-  instrument->add(source);
-  instrument->markAsSource(source);
-
-  // A sample
-  Component *sample = new Component("some-surface-holder");
-  sample->setPos(samplePos);
-  instrument->add(sample);
-  instrument->markAsSamplePos(sample);
-
-  // A detector
-  Detector *det = new Detector("point-detector", 1 /*detector id*/, nullptr);
-  det->setPos(detectorPos);
-  det->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
-  instrument->add(det);
-  instrument->markAsDetector(det);
-
-  return instrument;
 }
 
 Geometry::Instrument_sptr createVirtualInstrument(Kernel::V3D sourcePos, Kernel::V3D samplePos,
                                                   const std::vector<Kernel::V3D> &vecdetpos,
                                                   const std::vector<detid_t> &vecdetid) {
-  Instrument_sptr instrument = std::make_shared<Instrument>();
-  instrument->setReferenceFrame(
+  return makeVirtualInstrument(
+      sourcePos, samplePos, vecdetpos, vecdetid,
       std::make_shared<ReferenceFrame>(Mantid::Geometry::Y /*up*/, Mantid::Geometry::Z /*along*/, Right, "0,0,0"));
-
-  // A source
-  ObjComponent *source = new ObjComponent("source");
-  source->setPos(sourcePos);
-  source->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
-  instrument->add(source);
-  instrument->markAsSource(source);
-
-  // A sample
-  Component *sample = new Component("some-surface-holder");
-  sample->setPos(samplePos);
-  instrument->add(sample);
-  instrument->markAsSamplePos(sample);
-
-  // A detector
-  size_t numdets = vecdetpos.size();
-  for (size_t i = 0; i < numdets; ++i) {
-    Detector *det = new Detector("point-detector", vecdetid[i] /*detector id*/, nullptr);
-    det->setPos(vecdetpos[i]);
-    // FIXME - should be cubi... pixel
-    det->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
-    instrument->add(det);
-    instrument->markAsDetector(det);
-  }
-
-  return instrument;
 }
 
 /**

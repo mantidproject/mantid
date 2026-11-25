@@ -160,6 +160,8 @@ public:
   std::shared_ptr<const ReferenceFrame> referenceFrame() const;
 
   bool hasValidShape(const size_t componentIndex) const;
+  /// The empty shape held by every component made without one (a Component, as opposed to an ObjComponent).
+  static std::shared_ptr<const Geometry::IObject> const &noShape();
 
   const Geometry::IObject &shape(const size_t componentIndex) const;
   std::unordered_map<std::shared_ptr<const Geometry::IObject>, std::vector<size_t>> shapeToComponentIndices() const;
@@ -270,6 +272,7 @@ public:
   /// rather than keeping a parallel copy that would silently diverge.
   const std::shared_ptr<ParameterInfo> &sharedParameterInfo() const { return m_parameterInfo; }
 
+  friend class BeamlineBuilder;
   friend class Instrument;
 };
 

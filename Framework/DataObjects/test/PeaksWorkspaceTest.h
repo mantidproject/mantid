@@ -37,8 +37,7 @@ using namespace Mantid::Kernel;
  * @return PeaksWorkspace
  */
 PeaksWorkspace_sptr buildPW() {
-  Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
-  inst->setName("SillyInstrument");
+  Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 10, 0.008, "SillyInstrument");
   auto pw = std::make_shared<PeaksWorkspace>();
   pw->setInstrument(inst);
   std::string val = "value";

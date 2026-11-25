@@ -12,6 +12,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/BeamlineBuilder.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -65,21 +66,14 @@ void LoadInstrumentFromRaw::exec() {
     throw Exception::FileError("Unable to open File:", m_filename);
   }
 
-  // Create a new Instrument with the right name and add it to the workspace
-  Geometry::Instrument_sptr instrument(new Instrument(iraw.i_inst));
+  // Lay out a new instrument with the right name
+  Geometry::BeamlineBuilder builder;
+  auto const root = builder.addAssembly(Geometry::BeamlineBuilder::noParent, iraw.i_inst);
 
   // Add dummy source and samplepos to instrument
   // The L2 and 2-theta values from Raw file assumed to be relative to sample
   // position
-
-  Geometry::Component *samplepos = new Geometry::Component("Sample", instrument.get());
-  instrument->add(samplepos);
-  instrument->markAsSamplePos(samplepos);
-  samplepos->setPos(0.0, 0.0, 0.0);
-
-  Geometry::ObjComponent *source = new Geometry::ObjComponent("Source", instrument.get());
-  instrument->add(source);
-  instrument->markAsSource(source);
+  builder.setSample(builder.addComponent(root, "Sample", Kernel::V3D(0.0, 0.0, 0.0)));
 
   progress(0.5);
   // If user has provided an L1, use that
@@ -90,7 +84,7 @@ void LoadInstrumentFromRaw::exec() {
   if (l1 == 0)
     l1 = 10.0;
 
-  source->setPos(0.0, 0.0, -1.0 * l1);
+  builder.setSource(builder.addObjComponent(root, "Source", Kernel::V3D(0.0, 0.0, -1.0 * l1), Kernel::Quat(), nullptr));
 
   // add detectors
   const int numDetector = iraw.i_det;   // number of detectors
@@ -108,36 +102,24 @@ void LoadInstrumentFromRaw::exec() {
 
   double prog = 0.5;
   for (int i = 0; i < numDetector; ++i) {
-    //    g_log.error() << " ## " << detID[i];
-    // Create a new detector. Instrument will take ownership of pointer so no
-    // need to delete.
-    Geometry::Detector *detector = new Geometry::Detector("det", detID[i], samplepos);
     Kernel::V3D pos;
-
     if (phiPresent)
       pos.spherical(r[i], angle[i], phi[i]);
     else
       pos.spherical(r[i], angle[i], 0.0);
 
-    detector->setPos(pos);
-
-    // add to instrument
-    instrument->add(detector);
-
     // Check monitor list to see if this is a monitor that should be marked as
     // such
-    if (std::find(monIndex, monIndex + numMonitors, i + 1) != monIndex + numMonitors) {
-      instrument->markAsMonitor(detector);
+    bool const isMonitor = std::find(monIndex, monIndex + numMonitors, i + 1) != monIndex + numMonitors;
+    if (isMonitor) {
       g_log.information() << "Detector with ID " << detID[i] << " marked as a monitor.\n";
     }
-    // otherwise mark as a detector
-    else {
-      instrument->markAsDetector(detector);
-    }
+    builder.addDetector(root, "det", detID[i], pos, Kernel::Quat(), nullptr, isMonitor);
 
     prog += (0.5 / numDetector);
     progress(prog);
   }
+  auto const instrument = Geometry::Instrument_sptr(Geometry::Instrument::fromBeamline(builder.build()));
   localWorkspace->setInstrument(instrument);
 
   std::vector<detid_t> monitorList = instrument->getMonitorIDs();

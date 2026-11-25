@@ -48,8 +48,7 @@ public:
     TS_ASSERT(out);
 
     std::vector<double> L2{1, 1, 1}, pol{0.1, 0.2, 0.3}, azi{0, 1, 2};
-    Instrument_sptr inst = ComponentCreationHelper::createCylInstrumentWithDetInGivenPositions(L2, pol, azi);
-    inst->setName("Test");
+    Instrument_sptr inst = ComponentCreationHelper::createCylInstrumentWithDetInGivenPositions(L2, pol, azi, "Test");
 
     ExperimentInfo_sptr ei = ExperimentInfo_sptr(new Mantid::API::ExperimentInfo());
     ei->setInstrument(inst);

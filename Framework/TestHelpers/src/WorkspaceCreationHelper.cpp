@@ -31,6 +31,8 @@
 #include "MantidDataObjects/ScanningWorkspaceBuilder.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/BeamlineBuilder.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -253,9 +255,6 @@ Workspace2D_sptr maskSpectra(Workspace2D_sptr workspace, const std::set<int64_t>
   const auto nhist = static_cast<int>(workspace->getNumberHistograms());
   if (workspace->getInstrument()->nelements() == 0) {
     // We need detectors to be able to mask them.
-    auto instrument = std::make_shared<Instrument>();
-    workspace->setInstrument(instrument);
-
     std::string xmlShape = "<sphere id=\"shape\"> ";
     xmlShape += R"(<centre x="0.0"  y="0.0" z="0.0" /> )";
     xmlShape += "<radius val=\"0.05\" /> ";
@@ -264,13 +263,12 @@ Workspace2D_sptr maskSpectra(Workspace2D_sptr workspace, const std::set<int64_t>
 
     ShapeFactory sFactory;
     auto shape = sFactory.createShape(xmlShape);
+    BeamlineBuilder builder;
+    auto const root = builder.addAssembly(BeamlineBuilder::noParent, "");
     for (int i = 0; i < nhist; ++i) {
-      Detector *det = new Detector("det", detid_t(i + 1), shape, nullptr);
-      det->setPos(i, i + 1, 1);
-      instrument->add(det);
-      instrument->markAsDetector(det);
+      builder.addDetector(root, "det", detid_t(i + 1), V3D(i, i + 1, 1), Quat(), shape);
     }
-    workspace->setInstrument(instrument);
+    workspace->setInstrument(Instrument::fromBeamline(builder.build()));
     // Set IndexInfo without explicit spectrum definitions to trigger building
     // default mapping of spectra to detectors in new instrument.
     workspace->setIndexInfo(Indexing::IndexInfo(nhist));
@@ -613,6 +611,15 @@ Mantid::DataObjects::EventWorkspace_sptr createEventWorkspaceWithNonUniformInstr
   return ws;
 }
 
+namespace {
+/// The slits' vertical gaps, as parameters of the reflectometry instruments below.
+void setSlitGaps(MatrixWorkspace &workspace, double const vg1, double const vg2) {
+  auto &componentInfo = workspace.mutableComponentInfo();
+  componentInfo.addDouble(componentInfo.indexOfAny("slit1"), "vertical gap", vg1);
+  componentInfo.addDouble(componentInfo.indexOfAny("slit2"), "vertical gap", vg2);
+}
+} // namespace
+
 /** Creates a binned 2DWorkspace with title and TOF x-axis and counts y-axis
  *
  * @param startX :: start TOF x-value
@@ -653,23 +660,21 @@ MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrument(const double s
                                                                   const V3D &monitorPos, const V3D &samplePos,
                                                                   const V3D &detectorPos, const int nBins,
                                                                   const double deltaX) {
-  Instrument_sptr instrument = std::make_shared<Instrument>();
-  instrument->setReferenceFrame(
+  BeamlineBuilder builder;
+  auto const root = builder.addAssembly(BeamlineBuilder::noParent, "");
+  builder.setReferenceFrame(
       std::make_shared<ReferenceFrame>(PointingAlong::Y, PointingAlong::X, Handedness::Left, "0,0,0"));
 
-  InstrumentCreationHelper::addSource(instrument, sourcePos, "source");
-  InstrumentCreationHelper::addMonitor(instrument, monitorPos, 1, "Monitor");
-  InstrumentCreationHelper::addSample(instrument, samplePos, "some-surface-holder");
-  InstrumentCreationHelper::addDetector(instrument, detectorPos, 2, "point-detector");
-  auto slit1 = InstrumentCreationHelper::addComponent(instrument, slit1Pos, "slit1");
-  auto slit2 = InstrumentCreationHelper::addComponent(instrument, slit2Pos, "slit2");
+  InstrumentCreationHelper::addSource(builder, root, sourcePos, "source");
+  InstrumentCreationHelper::addMonitor(builder, root, monitorPos, 1, "Monitor");
+  InstrumentCreationHelper::addSample(builder, root, samplePos, "some-surface-holder");
+  InstrumentCreationHelper::addDetector(builder, root, detectorPos, 2, "point-detector");
+  InstrumentCreationHelper::addComponent(builder, root, slit1Pos, "slit1");
+  InstrumentCreationHelper::addComponent(builder, root, slit2Pos, "slit2");
 
   auto workspace = reflectometryWorkspace(startX, 2, nBins, deltaX);
-  workspace->setInstrument(instrument);
-
-  ParameterMap &pmap = workspace->instrumentParameters();
-  pmap.addDouble(slit1, "vertical gap", vg1);
-  pmap.addDouble(slit2, "vertical gap", vg2);
+  workspace->setInstrument(Instrument::fromBeamline(builder.build()));
+  setSlitGaps(*workspace, vg1, vg2);
 
   workspace->getSpectrum(0).setDetectorID(2);
   workspace->getSpectrum(1).setDetectorID(1);
@@ -699,29 +704,28 @@ MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrumentMultiDetector(
     const double startX, const double detSize, const V3D &slit1Pos, const V3D &slit2Pos, const double vg1,
     const double vg2, const V3D &sourcePos, const V3D &monitorPos, const V3D &samplePos, const V3D &detectorCenterPos,
     const int nSpectra, const int nBins, const double deltaX) {
-  Instrument_sptr instrument = std::make_shared<Instrument>();
-  instrument->setReferenceFrame(
+  BeamlineBuilder builder;
+  auto const root = builder.addAssembly(BeamlineBuilder::noParent, "");
+  builder.setReferenceFrame(
       std::make_shared<ReferenceFrame>(PointingAlong::Y /*up*/, PointingAlong::X /*along*/, Handedness::Left, "0,0,0"));
 
-  InstrumentCreationHelper::addSource(instrument, sourcePos, "source");
-  InstrumentCreationHelper::addSample(instrument, samplePos, "some-surface-holder");
-  InstrumentCreationHelper::addMonitor(instrument, monitorPos, 1, "Monitor");
+  InstrumentCreationHelper::addSource(builder, root, sourcePos, "source");
+  InstrumentCreationHelper::addSample(builder, root, samplePos, "some-surface-holder");
+  InstrumentCreationHelper::addMonitor(builder, root, monitorPos, 1, "Monitor");
 
   const int nDet = nSpectra - 1;
   const double minY = detectorCenterPos.Y() - detSize * (nDet - 1) / 2.;
   for (int i = 0; i < nDet; ++i) {
     const double y = minY + i * detSize;
     const V3D pos{detectorCenterPos.X(), y, detectorCenterPos.Z()};
-    InstrumentCreationHelper::addDetector(instrument, pos, i + 2, "point-detector");
+    InstrumentCreationHelper::addDetector(builder, root, pos, i + 2, "point-detector");
   }
-  auto slit1 = InstrumentCreationHelper::addComponent(instrument, slit1Pos, "slit1");
-  auto slit2 = InstrumentCreationHelper::addComponent(instrument, slit2Pos, "slit2");
+  InstrumentCreationHelper::addComponent(builder, root, slit1Pos, "slit1");
+  InstrumentCreationHelper::addComponent(builder, root, slit2Pos, "slit2");
 
   auto workspace = reflectometryWorkspace(startX, nSpectra, nBins, deltaX);
-  workspace->setInstrument(instrument);
-  ParameterMap &pmap = workspace->instrumentParameters();
-  pmap.addDouble(slit1, "vertical gap", vg1);
-  pmap.addDouble(slit2, "vertical gap", vg2);
+  workspace->setInstrument(Instrument::fromBeamline(builder.build()));
+  setSlitGaps(*workspace, vg1, vg2);
   for (int i = 0; i < nSpectra; ++i) {
     workspace->getSpectrum(i).setDetectorID(i + 1);
   }
@@ -730,21 +734,22 @@ MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrumentMultiDetector(
 
 void createInstrumentForWorkspaceWithDistances(const MatrixWorkspace_sptr &workspace, const V3D &samplePosition,
                                                const V3D &sourcePosition, const std::vector<V3D> &detectorPositions) {
-  Instrument_sptr instrument = std::make_shared<Instrument>();
-  instrument->setReferenceFrame(std::make_shared<ReferenceFrame>(Y, X, Left, "0,0,0"));
+  BeamlineBuilder builder;
+  auto const root = builder.addAssembly(BeamlineBuilder::noParent, "");
+  builder.setReferenceFrame(std::make_shared<ReferenceFrame>(Y, X, Left, "0,0,0"));
 
-  InstrumentCreationHelper::addSource(instrument, sourcePosition, "source");
-  InstrumentCreationHelper::addSample(instrument, samplePosition, "sample");
+  InstrumentCreationHelper::addSource(builder, root, sourcePosition, "source");
+  InstrumentCreationHelper::addSample(builder, root, samplePosition, "sample");
 
   for (int i = 0; i < static_cast<int>(detectorPositions.size()); ++i) {
     std::stringstream buffer;
     buffer << "detector_" << i;
-    InstrumentCreationHelper::addDetector(instrument, detectorPositions[i], i, buffer.str());
+    InstrumentCreationHelper::addDetector(builder, root, detectorPositions[i], i, buffer.str());
 
     // Link it to the workspace
     workspace->getSpectrum(i).addDetectorID(i);
   }
-  workspace->setInstrument(instrument);
+  workspace->setInstrument(Instrument::fromBeamline(builder.build()));
 }
 
 //================================================================================================================
