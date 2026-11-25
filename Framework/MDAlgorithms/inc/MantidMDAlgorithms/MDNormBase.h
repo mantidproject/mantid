@@ -34,6 +34,8 @@ public:
   MDNormBase();
   // @return a string with the character that identifies each dimension in order (01234)
   static std::string getDimensionChars() { return "012345"; }
+  /// Cumulative flux at momentum x, linearly interpolated as MDNorm does
+  static double interpolateIntegratedFlux(double x, const std::vector<double> &xData, const std::vector<double> &yData);
 
   // Parameters for continuous rotation processing when useLogTimes=True in ConvertToMD
   static constexpr double CHARGEBINSIZE = 1.0;    // Proton charge bin size in uA.hr for useLogTimes normalization

@@ -130,7 +130,11 @@ signal over the peak ellipsoid times its volume :math:`V`,
    \frac{N_\mathrm{shell}}{\mathcal{N}_\mathrm{shell}}\right),
 
 with :math:`N` the counts and :math:`\mathcal{N}` the normalization of the
-peak ellipsoid and of the background shell, and its uncertainty is
+peak ellipsoid and of the background shell. The shell is the region between
+the inner and outer background ellipsoids, so both its quantities are
+differences, :math:`N_\mathrm{shell} = N_\mathrm{outer} - N_\mathrm{inner}`
+and :math:`\mathcal{N}_\mathrm{shell} = \mathcal{N}_\mathrm{outer} -
+\mathcal{N}_\mathrm{inner}`. The uncertainty is
 propagated from the counts alone. *UseOnePercentBackgroundCorrection* is not
 used. Count mode is a ratio of sums: it divides the counts by the mean
 exposure over the ellipsoid rather than by the exposure where the peak is,

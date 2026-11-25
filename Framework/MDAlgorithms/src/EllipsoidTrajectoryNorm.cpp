@@ -186,7 +186,7 @@ constexpr double GAUSSIAN_CUTOFF = 8.0;
 /**
  * Integrals of G(k), k G(k) and k^2 G(k) with respect to Phi(k) over (lo, hi], for
  * G(k) = h exp(-(k - k0)^2 / (2 s^2)) and Phi the cumulative flux (x, y)
- * interpolated as interpolateIntegratedFlux does: linear between points,
+ * interpolated as MDNormBase::interpolateIntegratedFlux does: linear between points,
  * with jumps at x[0] (from 0), at the end of the last interpolated interval
  * (to y.back()) and at any repeated x.
  */
@@ -271,34 +271,6 @@ void fluxWeightedGaussianMoments(const double lo, const double hi, const double 
     addMass(x[last], y.back() - y[last]);
 }
 } // namespace
-
-double interpolateIntegratedFlux(const double x, const std::vector<double> &xData, const std::vector<double> &yData) {
-  const std::size_t spSize = yData.size();
-  // all integrals below xStart must be 0
-  if (x < xData.front())
-    return 0.0;
-  const double yMax = yData.back();
-  // all integrals above xEnd must be equal to yMax
-  if (x > xData.back())
-    return yMax;
-  // first interpolation point at or above x, or the last one
-  const auto last = xData.begin() + static_cast<std::ptrdiff_t>(spSize - 1);
-  const auto j = static_cast<std::size_t>(std::distance(xData.begin(), std::lower_bound(xData.begin(), last, x)));
-  // if x falls onto an interpolation point return the corresponding y
-  if (x == xData[j])
-    return yData[j];
-  // in the last interval it's yMax
-  if (j == spSize - 1)
-    return yMax;
-  if (j == 0)
-    return 0.0;
-  // interpolate between the consecutive points
-  const double x0 = xData[j - 1];
-  const double x1 = xData[j];
-  const double y0 = yData[j - 1];
-  const double y1 = yData[j];
-  return y0 + (y1 - y0) * (x - x0) / (x1 - x0);
-}
 
 std::size_t EllipsoidTrajectoryNorm::addFluxSpectrum(std::vector<double> x, std::vector<double> y) {
   if (y.empty() || x.size() < y.size())
@@ -388,7 +360,8 @@ EllipsoidNormResult EllipsoidTrajectoryNorm::integrate(const V3D &centre,
       return;
     const auto &x = m_fluxX[m_fluxIndex[p]];
     const auto &y = m_fluxY[m_fluxIndex[p]];
-    result.norm += m_weight[p] * (interpolateIntegratedFlux(hi, x, y) - interpolateIntegratedFlux(lo, x, y));
+    result.norm += m_weight[p] *
+                   (MDNormBase::interpolateIntegratedFlux(hi, x, y) - MDNormBase::interpolateIntegratedFlux(lo, x, y));
     ++result.numPixels;
   });
 
@@ -424,7 +397,8 @@ EllipsoidChords EllipsoidTrajectoryNorm::chords(const V3D &centre, const DataObj
       return;
     const auto &x = m_fluxX[m_fluxIndex[p]];
     const auto &y = m_fluxY[m_fluxIndex[p]];
-    result.norm += m_weight[p] * (interpolateIntegratedFlux(hi, x, y) - interpolateIntegratedFlux(lo, x, y));
+    result.norm += m_weight[p] *
+                   (MDNormBase::interpolateIntegratedFlux(hi, x, y) - MDNormBase::interpolateIntegratedFlux(lo, x, y));
     ++result.numPixels;
     chords.pixels.emplace_back(p);
     chords.kLow.emplace_back(lo);

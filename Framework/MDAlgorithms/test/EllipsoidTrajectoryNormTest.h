@@ -9,6 +9,7 @@
 #include "MantidDataObjects/PeakShapeEllipsoid_fwd.h"
 #include "MantidKernel/V3D.h"
 #include "MantidMDAlgorithms/EllipsoidTrajectoryNorm.h"
+#include "MantidMDAlgorithms/MDNormBase.h"
 
 #include <array>
 #include <cmath>
@@ -23,7 +24,7 @@ using Mantid::DataObjects::PeakEllipsoidFrame;
 using Mantid::Kernel::V3D;
 using Mantid::MDAlgorithms::EllipsoidNormResult;
 using Mantid::MDAlgorithms::EllipsoidTrajectoryNorm;
-using Mantid::MDAlgorithms::interpolateIntegratedFlux;
+using Mantid::MDAlgorithms::MDNormBase;
 
 namespace {
 const PeakEllipsoidFrame AXES{{V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)}};
@@ -67,24 +68,24 @@ public:
   void test_interpolate_points() {
     const std::vector<double> x{1.0, 2.0, 3.0, 4.0};
     const std::vector<double> y{0.5, 1.0, 3.0, 6.0};
-    TS_ASSERT_EQUALS(interpolateIntegratedFlux(0.5, x, y), 0.0);
-    TS_ASSERT_EQUALS(interpolateIntegratedFlux(1.0, x, y), 0.5);
-    TS_ASSERT_DELTA(interpolateIntegratedFlux(1.5, x, y), 0.75, 1e-12);
-    TS_ASSERT_EQUALS(interpolateIntegratedFlux(2.0, x, y), 1.0);
-    TS_ASSERT_DELTA(interpolateIntegratedFlux(2.25, x, y), 1.5, 1e-12);
+    TS_ASSERT_EQUALS(MDNormBase::interpolateIntegratedFlux(0.5, x, y), 0.0);
+    TS_ASSERT_EQUALS(MDNormBase::interpolateIntegratedFlux(1.0, x, y), 0.5);
+    TS_ASSERT_DELTA(MDNormBase::interpolateIntegratedFlux(1.5, x, y), 0.75, 1e-12);
+    TS_ASSERT_EQUALS(MDNormBase::interpolateIntegratedFlux(2.0, x, y), 1.0);
+    TS_ASSERT_DELTA(MDNormBase::interpolateIntegratedFlux(2.25, x, y), 1.5, 1e-12);
     // as in MDNorm, the last interval is not interpolated
-    TS_ASSERT_EQUALS(interpolateIntegratedFlux(3.5, x, y), 6.0);
-    TS_ASSERT_EQUALS(interpolateIntegratedFlux(4.0, x, y), 6.0);
-    TS_ASSERT_EQUALS(interpolateIntegratedFlux(5.0, x, y), 6.0);
+    TS_ASSERT_EQUALS(MDNormBase::interpolateIntegratedFlux(3.5, x, y), 6.0);
+    TS_ASSERT_EQUALS(MDNormBase::interpolateIntegratedFlux(4.0, x, y), 6.0);
+    TS_ASSERT_EQUALS(MDNormBase::interpolateIntegratedFlux(5.0, x, y), 6.0);
   }
 
   void test_interpolate_bin_edges() {
     const std::vector<double> x{1.0, 2.0, 3.0, 4.0, 5.0};
     const std::vector<double> y{0.5, 1.0, 3.0, 6.0};
-    TS_ASSERT_EQUALS(interpolateIntegratedFlux(0.5, x, y), 0.0);
-    TS_ASSERT_DELTA(interpolateIntegratedFlux(2.5, x, y), 2.0, 1e-12);
-    TS_ASSERT_EQUALS(interpolateIntegratedFlux(4.5, x, y), 6.0);
-    TS_ASSERT_EQUALS(interpolateIntegratedFlux(5.5, x, y), 6.0);
+    TS_ASSERT_EQUALS(MDNormBase::interpolateIntegratedFlux(0.5, x, y), 0.0);
+    TS_ASSERT_DELTA(MDNormBase::interpolateIntegratedFlux(2.5, x, y), 2.0, 1e-12);
+    TS_ASSERT_EQUALS(MDNormBase::interpolateIntegratedFlux(4.5, x, y), 6.0);
+    TS_ASSERT_EQUALS(MDNormBase::interpolateIntegratedFlux(5.5, x, y), 6.0);
   }
 
   void test_intersect_matches_brute_force() {
@@ -287,8 +288,9 @@ public:
             const double comp = q.scalar_prod(dirs[a]) / sigmas[a];
             m += comp * comp;
           }
-          expected += 0.5 * std::exp(-0.5 * m) *
-                      (interpolateIntegratedFlux(ka + dk, x, y) - interpolateIntegratedFlux(ka, x, y));
+          expected +=
+              0.5 * std::exp(-0.5 * m) *
+              (MDNormBase::interpolateIntegratedFlux(ka + dk, x, y) - MDNormBase::interpolateIntegratedFlux(ka, x, y));
         }
       }
     }
@@ -368,7 +370,8 @@ public:
           m += comp * comp;
         }
         const double weight =
-            0.5 * std::exp(-0.5 * m) * (interpolateIntegratedFlux(ka + dk, x, y) - interpolateIntegratedFlux(ka, x, y));
+            0.5 * std::exp(-0.5 * m) *
+            (MDNormBase::interpolateIntegratedFlux(ka + dk, x, y) - MDNormBase::interpolateIntegratedFlux(ka, x, y));
         for (size_t e = 0; e < 6; ++e)
           expected[e] += weight * q[pairs[e][0]] * q[pairs[e][1]];
       }

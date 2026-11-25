@@ -17,15 +17,6 @@
 
 namespace Mantid::MDAlgorithms {
 
-/**
- * Evaluate a cumulative (integrated) flux spectrum at momentum x, by linear
- * interpolation between the points (xData[j], yData[j]), exactly as MDNorm
- * does: zero below xData.front(), yData.back() above xData.back() and in the
- * last interval. xData may be bin edges (one longer than yData) or points.
- */
-MANTID_MDALGORITHMS_DLL double interpolateIntegratedFlux(double x, const std::vector<double> &xData,
-                                                         const std::vector<double> &yData);
-
 /// Normalization of one ellipsoid, with coverage diagnostics
 struct EllipsoidNormResult {
   /// sum over pixels of weight * [Phi(k2) - Phi(k1)]
@@ -98,7 +89,7 @@ public:
    * directions and standard deviations sigmas (peak height 1), i.e. the
    * expected counts per unit peak height over the chords' region, and its
    * gradient with respect to centre. Exact for Phi interpolated as
-   * interpolateIntegratedFlux does.
+   * MDNormBase::interpolateIntegratedFlux does.
    */
   GaussianExposure integrateGaussian(const EllipsoidChords &chords, const Kernel::V3D &centre,
                                      const DataObjects::PeakEllipsoidFrame &directions,
