@@ -86,16 +86,21 @@ void writeStringArray(Nexus::File &file, const std::string &name, const std::vec
   file.closeData();
 }
 
+/// The zero-based index of the period the workspace holds, from the current_period log
+size_t currentPeriodIndex(const Run &run) {
+  if (!run.hasProperty("current_period")) {
+    return 0;
+  }
+  return static_cast<size_t>(std::max(1, run.getPropertyAsIntegerValue("current_period")) - 1);
+}
+
 /// The single-period value of a period log, which holds a ';' separated value for each period of the original file
 std::optional<std::string> periodLogValue(const Run &run, const std::string &logName) {
   if (!run.hasProperty(logName)) {
     return std::nullopt;
   }
   const auto values = run.getProperty(logName)->value();
-  size_t period = 0;
-  if (run.hasProperty("current_period")) {
-    period = static_cast<size_t>(std::max(1, run.getPropertyAsIntegerValue("current_period")) - 1);
-  }
+  const auto period = currentPeriodIndex(run);
   std::vector<std::string> tokens;
   size_t start = 0;
   while (true) {
@@ -724,8 +729,12 @@ void SaveNexusMuon::writePeriods(Nexus::File &file, const MatrixWorkspace &ws) c
   writeScalar(file, NeXusEntry::GOODFRAMES, goodFrames);
   if (run.hasProperty("proton_charge_by_period")) {
     const auto *charges = dynamic_cast<ArrayProperty<double> *>(run.getProperty("proton_charge_by_period"));
-    if (charges && !charges->operator()().empty()) {
-      writeScalar(file, "proton_charge", static_cast<float>(charges->operator()().front()), "uAh");
+    const auto period = currentPeriodIndex(run);
+    if (charges && period < charges->operator()().size()) {
+      writeScalar(file, "proton_charge", static_cast<float>(charges->operator()()[period]), "uAh");
+    } else if (charges) {
+      g_log.warning() << "The proton_charge_by_period log has no value for period " << period + 1
+                      << ", so the period proton charge is not saved.\n";
     }
   }
   file.closeGroup();

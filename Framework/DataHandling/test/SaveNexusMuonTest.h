@@ -18,6 +18,7 @@
 #include "MantidDataHandling/LoadMuonNexusV2.h"
 #include "MantidDataHandling/SaveNexusMuon.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EmptyValues.h"
 
 #include <cxxtest/TestSuite.h>
@@ -162,6 +163,35 @@ public:
     assertDataEqual(*original.workspace, *saved.workspace);
     TS_ASSERT_DELTA(saved.timeZero, original.timeZero, 1e-6);
     TS_ASSERT_DELTA(saved.firstGoodData, original.firstGoodData, 1e-6);
+  }
+
+  void test_proton_charge_of_first_period_is_saved() {
+    const auto original = loadRun(INPUT_FILE, "original");
+    setPeriodProtonCharges(*original.workspace, 1);
+    save(original);
+    const auto saved = loadRun(m_filename, "saved");
+
+    TS_ASSERT_EQUALS(saved.workspace->run().getPropertyValueAsType<std::vector<double>>("proton_charge_by_period"),
+                     std::vector<double>{1.5});
+  }
+
+  void test_proton_charge_of_second_period_is_saved() {
+    const auto original = loadRun(INPUT_FILE, "original");
+    setPeriodProtonCharges(*original.workspace, 2);
+    save(original);
+    const auto saved = loadRun(m_filename, "saved");
+
+    TS_ASSERT_EQUALS(saved.workspace->run().getPropertyValueAsType<std::vector<double>>("proton_charge_by_period"),
+                     std::vector<double>{2.5});
+  }
+
+  void test_proton_charge_is_not_saved_for_a_period_without_one() {
+    const auto original = loadRun(INPUT_FILE, "original");
+    setPeriodProtonCharges(*original.workspace, 3);
+    save(original);
+    const auto saved = loadRun(m_filename, "saved");
+
+    TS_ASSERT(!saved.workspace->run().hasProperty("proton_charge_by_period"));
   }
 
   void test_explicit_properties_override_logs() {
@@ -439,6 +469,14 @@ private:
     }
     TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
     TS_ASSERT(!std::filesystem::exists(m_filename));
+  }
+
+  /// Makes the workspace hold the given period of a two-period run with proton charges of 1.5 and 2.5
+  static void setPeriodProtonCharges(MatrixWorkspace &ws, const int period) {
+    auto &run = ws.mutableRun();
+    run.addProperty("current_period", period, true);
+    run.addProperty(std::make_unique<ArrayProperty<double>>("proton_charge_by_period", std::vector<double>{1.5, 2.5}),
+                    true);
   }
 
   template <typename Modify> static void setCommonX(MatrixWorkspace &ws, Modify modify) {
