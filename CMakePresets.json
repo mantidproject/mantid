@@ -24,7 +24,8 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
         "ENABLE_PRECOMMIT": "OFF",
-        "COLORED_COMPILER_OUTPUT": "OFF"
+        "COLORED_COMPILER_OUTPUT": "OFF",
+        "SIMPLEAPI_STUBS_IN_ALL": "ON"
       }
     },
     {
@@ -190,7 +191,8 @@
         "conda"
       ],
       "cacheVariables": {
-        "USE_SANITIZER": "Address"
+        "USE_SANITIZER": "Address",
+        "SIMPLEAPI_STUBS_IN_ALL": "OFF"
       }
     },
     {
@@ -202,7 +204,8 @@
         "conda"
       ],
       "cacheVariables": {
-        "USE_SANITIZER": "Undefined"
+        "USE_SANITIZER": "Undefined",
+        "SIMPLEAPI_STUBS_IN_ALL": "OFF"
       }
     },
     {
@@ -214,7 +217,8 @@
         "conda"
       ],
       "cacheVariables": {
-        "USE_SANITIZER": "Thread"
+        "USE_SANITIZER": "Thread",
+        "SIMPLEAPI_STUBS_IN_ALL": "OFF"
       }
     },
     {

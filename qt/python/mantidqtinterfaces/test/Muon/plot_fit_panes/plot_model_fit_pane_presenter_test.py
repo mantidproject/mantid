@@ -44,6 +44,7 @@ class PlotFitPanePresenterTest(unittest.TestCase):
         self.figure_presenter = mock.Mock(spec=PlottingCanvasPresenterInterface)
         self.figure_presenter.set_errors = mock.Mock()
         self.figure_presenter.set_plot_range = mock.Mock()
+        self.figure_presenter.force_autoscale = mock.Mock()
 
         self.presenter = PlotModelFitPanePresenter(
             view=self.view,
@@ -71,6 +72,20 @@ class PlotFitPanePresenterTest(unittest.TestCase):
         self.presenter.update_x_plot_range(limits)
 
         self.figure_presenter.set_plot_range.assert_called_once_with([-1.2, 1.2])
+
+    def test_handle_plot_selected_fits_always_forces_autoscale(self):
+        # The plot still shows the previous parameter combination, e.g. A0 vs run
+        self.figure_presenter.get_plotted_workspaces_and_indices.return_value = (["A0_vs_run"], [0])
+        self.model.get_fit_workspace_and_indices = mock.MagicMock(return_value=([], []))
+        # raw plot of raw fit data, so the input workspace names are used unchanged
+        self.view.is_raw_plot.return_value = True
+        self.context.fitting_context.fit_to_raw = True
+        self.view.is_plot_diff.return_value = False
+
+        self.presenter.handle_plot_selected_fits([MockFitInfo(["Lambda_vs_run"])], autoscale=False)
+
+        self.figure_presenter.plot_workspaces.assert_called_once_with(["Lambda_vs_run"], [0], hold_on=False, autoscale=False)
+        self.figure_presenter.force_autoscale.assert_called_once()
 
     # this GUI can never have rebin data
     def test_rebin_does_nothing(self):

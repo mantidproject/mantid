@@ -15,6 +15,7 @@ from mantid.api import (
     AnalysisDataService,
     WorkspaceGroup,
     FileProperty,
+    FileFinder,
 )
 
 from mantid.kernel import (
@@ -62,6 +63,7 @@ from mantid.simpleapi import (
     AddSampleLog,
     MaskDetectors,
 )
+import functools
 import h5py
 import numpy as np
 import os
@@ -76,6 +78,18 @@ logger = Logger(__name__)
 MIDAS_NUM_TUBES = 7 * 16  # 7 banks of one 16-tube pack each
 MIDAS_PIXELS_PER_TUBE = 512
 MIDAS_MASKED_END_PIXELS = 40
+# Facility short names of the supported instruments, used in data file names and paths
+INSTRUMENT_SHORT_NAMES = {"MIDAS": "HB2A", "WAND^2": "HB2C"}
+
+
+@functools.lru_cache(maxsize=32)
+def _findRunFiles(shortName, runNumbers):
+    """Return the files of runNumbers (a tuple) on the instrument shortName, located by FileFinder.
+
+    The algorithm dialog validates the inputs whenever any property changes, so the results are
+    cached to avoid repeating the archive search.  A failed search raises and is not cached.
+    """
+    return tuple(FileFinder.findRuns(",".join(f"{shortName}_{run}" for run in runNumbers), [".nxs.h5"], True))
 
 
 class HFIRPowderReduction(DataProcessorAlgorithm):
@@ -93,27 +107,43 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         self.declareProperty(
             MultipleFileProperty(name="SampleFilename", action=FileAction.OptionalLoad, extensions=[".nxs.h5"]), "Sample files to Load"
         )
-        self.declareProperty("SampleIPTS", Property.EMPTY_INT, "Sample IPTS number to load from")
+        self.declareProperty(
+            "SampleIPTS",
+            Property.EMPTY_INT,
+            "Optional sample IPTS number to load from. If left empty, the IPTS is looked up from the run numbers",
+        )
         self.declareProperty(IntArrayProperty("SampleRunNumbers"), "Sample run numbers to load")
 
         self.declareProperty(
             MultipleFileProperty(name="VanadiumFilename", action=FileAction.OptionalLoad, extensions=[".nxs.h5"]), "Vanadium files to Load"
         )
-        self.declareProperty("VanadiumIPTS", Property.EMPTY_INT, "Vanadium IPTS number to load from")
+        self.declareProperty(
+            "VanadiumIPTS",
+            Property.EMPTY_INT,
+            "Optional vanadium IPTS number to load from. If left empty, the IPTS is looked up from the run numbers",
+        )
         self.declareProperty(IntArrayProperty("VanadiumRunNumbers", []), "Vanadium run numbers to load")
 
         self.declareProperty(
             MultipleFileProperty(name="VanadiumBackgroundFilename", action=FileAction.OptionalLoad, extensions=[".nxs.h5"]),
             "Vanadium background files to Load",
         )
-        self.declareProperty("VanadiumBackgroundIPTS", Property.EMPTY_INT, "Vanadium background IPTS number to load from")
+        self.declareProperty(
+            "VanadiumBackgroundIPTS",
+            Property.EMPTY_INT,
+            "Optional vanadium background IPTS number to load from. If left empty, the IPTS is looked up from the run numbers",
+        )
         self.declareProperty(IntArrayProperty("VanadiumBackgroundRunNumbers", []), "Vanadium background run numbers to load")
 
         self.declareProperty(
             MultipleFileProperty(name="SampleBackgroundFilename", action=FileAction.OptionalLoad, extensions=[".nxs.h5"]),
             "Sample background files to Load",
         )
-        self.declareProperty("SampleBackgroundIPTS", Property.EMPTY_INT, "Sample background IPTS number to load from")
+        self.declareProperty(
+            "SampleBackgroundIPTS",
+            Property.EMPTY_INT,
+            "Optional sample background IPTS number to load from. If left empty, the IPTS is looked up from the run numbers",
+        )
         self.declareProperty(IntArrayProperty("SampleBackgroundRunNumbers", []), "Sample background run numbers to load")
 
         self.declareProperty("ApplyMask", True, "If True standard masking will be applied to the workspace")
@@ -455,21 +485,14 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             "VanadiumBackgroundRunNumbers", SetDefaultWhenProperty("SampleFilename", checkFilenameforVanadiumBackgroundRunNumbers)
         )
 
-        # Helper function to get sample runs based on IPTS and run numbers
-        # Note: this should never be refactored to use FileFinder as we want to force the user to set the IPTS number when using run numbers
+        # Helper function to get the sample run files from the run numbers, built from SampleIPTS
+        # when it is set and looked up otherwise.  Returns an empty list when a run cannot be found.
         def getRuns():
-            runs = []
-            sampleIPTS = self.getProperty("SampleIPTS").value
-            sampleRunNumbers = self.getProperty("SampleRunNumbers").value
-            instrument = self.getProperty("Instrument").value
-            if sampleIPTS == Property.EMPTY_INT or len(sampleRunNumbers) == 0 or instrument == "":
-                return runs
-            else:
-                if instrument == "WAND^2":
-                    runs = ["/HFIR/HB2C/IPTS-{}/nexus/HB2C_{}.nxs.h5".format(sampleIPTS, run) for run in sampleRunNumbers]
-                elif instrument == "MIDAS":
-                    runs = ["/HFIR/HB2A/IPTS-{}/nexus/HB2A_{}.nxs.h5".format(sampleIPTS, run) for run in sampleRunNumbers]
-            return runs
+            try:
+                return self._runNumberFiles("Sample")
+            except RuntimeError as e:
+                logger.information(str(e))
+                return []
 
         def checkRunNumbersforWavelength(algo, currentProp, watchedProp):
             runs = getRuns()
@@ -665,20 +688,53 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         self.setPropertySettings("OutputWorkspace", SetDefaultWhenProperty("SampleIPTS", checkSampleforOutputWorkspace))
         self.setPropertySettings("OutputWorkspace", SetDefaultWhenProperty("SampleRunNumbers", checkSampleforOutputWorkspace))
         self.setPropertySettings("OutputWorkspace", SetDefaultWhenProperty("SampleFilename", checkSampleforOutputWorkspace))
+        self.setPropertySettings("OutputWorkspace", SetDefaultWhenProperty("Instrument", checkSampleforOutputWorkspace))
+
+    def _runNumberFiles(self, data_type):
+        """Return the files of the <data_type>RunNumbers runs.
+
+        The paths are built from <data_type>IPTS when it is set.  Otherwise the instrument and
+        run number identify each file, which FileFinder locates.  Returns an empty list when
+        there are no run numbers or no instrument, and raises RuntimeError when a run cannot be found.
+        """
+        run_numbers = self.getProperty(f"{data_type}RunNumbers").value
+        instrument = self.getProperty("Instrument").value
+        if len(run_numbers) == 0 or instrument not in INSTRUMENT_SHORT_NAMES:
+            return []
+        shortName = INSTRUMENT_SHORT_NAMES[instrument]
+        ipts = self.getProperty(f"{data_type}IPTS").value
+        if ipts != Property.EMPTY_INT:
+            return [f"/HFIR/{shortName}/IPTS-{ipts}/nexus/{shortName}_{run}.nxs.h5" for run in run_numbers]
+        return list(_findRunFiles(shortName, tuple(run_numbers)))
+
+    def _runFiles(self, data_type):
+        """Return the files to load for data_type: <data_type>Filename if set, else the run number files."""
+        filenames = self.getProperty(f"{data_type}Filename").value
+        if filenames:
+            return list(filenames)
+        return self._runNumberFiles(data_type)
 
     def _defaultOutputWorkspaceName(self):
         """Build the default output workspace name from the sample IPTS and run numbers.
 
         The name is IPTS<ipts>_Run<runs>, where <runs> is the run numbers collapsed by
         `_collapseRunNumbers`, so that runs 5, 6, 7 and 9 of IPTS-1234 give IPTS1234_Run5-7_9.
-        The IPTS and run numbers are taken from SampleIPTS and SampleRunNumbers, or, when those
-        are unset, from the paths in SampleFilename.  Returns an empty string when neither
-        provides them.
+        The IPTS and run numbers are taken from SampleIPTS and SampleRunNumbers.  When only
+        SampleRunNumbers is set, the IPTS is taken from the paths of the looked-up run files, and
+        when neither is set, both are taken from the paths in SampleFilename.  Returns an empty
+        string when none of these provides them.
         """
         ipts = self.getProperty("SampleIPTS").value
         runNumbers = self.getProperty("SampleRunNumbers").value
-        if ipts == Property.EMPTY_INT or len(runNumbers) == 0:
+        if len(runNumbers) == 0:
             ipts, runNumbers = self._iptsAndRunNumbersFromFilenames(self.getProperty("SampleFilename").value)
+        elif ipts == Property.EMPTY_INT:
+            try:
+                files = self._runNumberFiles("Sample")
+            except RuntimeError as e:
+                logger.information(str(e))
+                files = []
+            ipts, runNumbers = self._iptsAndRunNumbersFromFilenames(files)
         if ipts is None or len(runNumbers) == 0:
             return ""
         return f"IPTS{ipts}_Run{self._collapseRunNumbers(runNumbers)}"
@@ -775,9 +831,9 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         IPTSBool = self.getProperty("SampleIPTS").value
         runNumbersBool = len(self.getProperty("SampleRunNumbers").value)
         if IPTSBool == Property.EMPTY_INT and runNumbersBool == 0 and not fileNameBool:
-            issues["SampleFilename"] = "Missing required field: Must specify either SampleFilename or SampleIPTS AND SampleRunNumbers"
-            issues["SampleIPTS"] = "Missing required field: Must specify either SampleFilename or SampleIPTS AND SampleRunNumbers"
-            issues["SampleRunNumbers"] = "Missing required field: Must specify either SampleFilename or SampleIPTS AND SampleRunNumbers"
+            msg = "Missing required field: Must specify either SampleFilename or SampleRunNumbers"
+            issues["SampleFilename"] = msg
+            issues["SampleRunNumbers"] = msg
 
         allFields = ["Sample", "Vanadium", "VanadiumBackground", "SampleBackground"]
         for field in allFields:
@@ -785,22 +841,14 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             IPTSBool = self.getProperty(f"{field}IPTS").value
             runNumbersBool = len(self.getProperty(f"{field}RunNumbers").value)
             if (IPTSBool != Property.EMPTY_INT or runNumbersBool != 0) and fileNameBool:
-                issues[f"{field}Filename"] = (
-                    f"Too many fields filled: Must specify either {field}Filename or {field}IPTS AND {field}RunNumbers"
-                )
+                msg = f"Too many fields filled: Must specify either {field}Filename or {field}RunNumbers (with optional {field}IPTS)"
+                issues[f"{field}Filename"] = msg
                 if IPTSBool != Property.EMPTY_INT:
-                    issues[f"{field}IPTS"] = (
-                        f"Too many fields filled: Must specify either {field}Filename or {field}IPTS AND {field}RunNumbers"
-                    )
+                    issues[f"{field}IPTS"] = msg
                 if runNumbersBool:
-                    issues[f"{field}RunNumbers"] = (
-                        f"Too many fields filled: Must specify either {field}Filename or {field}IPTS AND {field}RunNumbers"
-                    )
-            elif (IPTSBool == Property.EMPTY_INT) ^ (runNumbersBool == 0):
-                if IPTSBool != Property.EMPTY_INT:
-                    issues[f"{field}RunNumbers"] = f"{field}RunNumbers must be provided if {field}IPTS is provided"
-                if runNumbersBool:
-                    issues[f"{field}IPTS"] = f"{field}IPTS must be provided if {field}RunNumbers is provided"
+                    issues[f"{field}RunNumbers"] = msg
+            elif IPTSBool != Property.EMPTY_INT and runNumbersBool == 0:
+                issues[f"{field}RunNumbers"] = f"{field}RunNumbers must be provided if {field}IPTS is provided"
 
         instrument = self.getProperty("Instrument").value
         if instrument == "":
@@ -847,22 +895,17 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             if self.getProperty("SampleDiameter").value == Property.EMPTY_DBL:
                 issues["SampleDiameter"] = "SampleDiameter is required when DoAttenuationCorrection is True"
 
-        # Check metadata consistency for multiple sample runs
-        files = []
-        filenames = self.getProperty("SampleFilename").value
-        if filenames:
-            files = list(filenames)
-        else:
-            # Build file list from IPTS and run numbers
-            ipts = self.getProperty("SampleIPTS").value
-            run_numbers = self.getProperty("SampleRunNumbers").value
-            instrument = self.getProperty("Instrument").value
-            if ipts != Property.EMPTY_INT and len(run_numbers) > 0 and instrument:
-                if instrument == "WAND^2":
-                    files = [f"/HFIR/HB2C/IPTS-{ipts}/nexus/HB2C_{run}.nxs.h5" for run in run_numbers]
-                elif instrument == "MIDAS":
-                    files = [f"/HFIR/HB2A/IPTS-{ipts}/nexus/HB2A_{run}.nxs.h5" for run in run_numbers]
+        # Report run numbers that cannot be found here, so the dialog shows them instead of PyExec failing
+        for field in allFields:
+            if f"{field}RunNumbers" in issues:
+                continue
+            try:
+                self._runNumberFiles(field)
+            except RuntimeError as e:
+                issues[f"{field}RunNumbers"] = f"Could not find the {field} run files: {e}"
 
+        # Check metadata consistency for multiple sample runs
+        files = self._runFiles("Sample") if "SampleRunNumbers" not in issues else []
         if len(files) > 1:
             self._checkMetadataConsistency(files, "Sample")
 
@@ -875,6 +918,29 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
                     )
 
         return issues
+
+    def _saveDatFile(self, workspace, filename):
+        """Save workspace as space separated X Y E columns, with no header lines.
+
+        SaveAscii still starts the file with an empty line for the spectrum metadata, and writes
+        a column header line for distribution workspaces, so the lines before the first data row
+        are removed.
+        """
+        SaveAscii(
+            InputWorkspace=workspace,
+            Filename=filename,
+            Separator="Space",
+            ColumnHeader=False,
+            WriteSpectrumID=False,
+            EnableLogging=False,
+        )
+        with open(filename, "r") as f:
+            lines = f.readlines()
+        first_data_line = 0
+        while first_data_line < len(lines) and (not lines[first_data_line].strip() or lines[first_data_line].startswith("#")):
+            first_data_line += 1
+        with open(filename, "w") as f:
+            f.writelines(lines[first_data_line:])
 
     def _resolveOutputFiles(self, workspace_name):
         """
@@ -1062,7 +1128,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             # Step 6: Save
             logger.information("Step 6: Saving output to file")
             output_dat_file, output_nexus_file = self._resolveOutputFiles(outWS.name())
-            SaveAscii(InputWorkspace=outWS, Filename=output_dat_file, EnableLogging=False)
+            self._saveDatFile(outWS, output_dat_file)
             SaveNexus(InputWorkspace=outWS, Filename=output_nexus_file)
 
         # Step 7: Cleanup
@@ -1199,17 +1265,12 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
 
     def _general_load_data(self, data_type):
         instrument = self.getProperty("Instrument").value
-
-        file_source_map = {
-            "MIDAS": "/HFIR/HB2A/IPTS-{ipts}/nexus/HB2A_{run}.nxs.h5",
-            "WAND^2": "/HFIR/HB2C/IPTS-{ipts}/nexus/HB2C_{run}.nxs.h5",
-        }
         loader_map = {"MIDAS": self._loadMIDASData, "WAND^2": self._load_WAND_Data}
-        return self._load_data(data_type, file_source_map[instrument], loader_map[instrument])
+        return self._load_data(data_type, loader_map[instrument])
 
-    def _load_data(self, data_type, source_template, loader):
+    def _load_data(self, data_type, loader):
         """
-        Generic function to load data from files or IPTS/run numbers.
+        Generic function to load data from files or run numbers, with or without an IPTS number.
 
         Args:
             data_type: String specifying the type of data to load.
@@ -1219,17 +1280,7 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
             list of workspace names, or empty list if nothing to load
         """
 
-        # Get properties based on data type
-        filenames = self.getProperty(f"{data_type}Filename").value
-        ipts = self.getProperty(f"{data_type}IPTS").value
-        run_numbers = self.getProperty(f"{data_type}RunNumbers").value
-
-        # Build file list
-        files_to_load = []
-        if filenames:
-            files_to_load = list(filenames)
-        elif ipts != Property.EMPTY_INT and len(run_numbers) > 0:
-            files_to_load = [source_template.format(run=run, ipts=ipts) for run in run_numbers]
+        files_to_load = self._runFiles(data_type)
 
         if not files_to_load:
             return None
@@ -1263,11 +1314,10 @@ class HFIRPowderReduction(DataProcessorAlgorithm):
         return False
 
     def _has_data_to_load(self, data_type):
-        """Check whether filenames or IPTS+run numbers are provided for the given data type."""
+        """Check whether filenames or run numbers are provided for the given data type."""
         filenames = self.getProperty(f"{data_type}Filename").value
-        ipts = self.getProperty(f"{data_type}IPTS").value
         run_numbers = self.getProperty(f"{data_type}RunNumbers").value
-        return bool(filenames) or (ipts != Property.EMPTY_INT and len(run_numbers) > 0)
+        return bool(filenames) or len(run_numbers) > 0
 
     def _load_sample_data(self):
         """Load sample data as individual workspaces."""

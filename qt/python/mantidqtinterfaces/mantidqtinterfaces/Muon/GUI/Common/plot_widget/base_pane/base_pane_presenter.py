@@ -107,8 +107,8 @@ class BasePanePresenter:
             self.remove_list_from_plot([name])
 
     def add_list_to_plot(self, ws_names, indices, hold=False, autoscale=False):
-        self._update_tile_plot()
         plotted_workspaces, _ = self._figure_presenter.get_plotted_workspaces_and_indices()
+        self._update_tile_plot()
         self._figure_presenter.plot_workspaces(ws_names, indices, hold, autoscale)
         if plotted_workspaces == []:
             self._figure_presenter.force_autoscale()

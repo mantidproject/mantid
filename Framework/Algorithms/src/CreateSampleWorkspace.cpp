@@ -15,6 +15,8 @@
 #include "MantidDataObjects/ScanningWorkspaceBuilder.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/BeamlineBuilder.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
@@ -513,10 +515,11 @@ Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
     API::Progress &progress, int numBanks, int numMonitors, int pixels, double pixelDiameter, double pixelHeight,
     double pixelSpacing, const double bankDistanceFromSample, const double sourceSampleDistance,
     const std::string &instrName) {
-  auto testInst = std::make_shared<Instrument>(instrName);
+  Geometry::BeamlineBuilder builder;
+  auto const root = builder.addAssembly(Geometry::BeamlineBuilder::noParent, instrName);
   // The instrument is going to be set up with z as the beam axis and y as the
   // vertical axis.
-  testInst->setReferenceFrame(std::make_shared<ReferenceFrame>(Y, Z, Left, ""));
+  builder.setReferenceFrame(std::make_shared<ReferenceFrame>(Y, Z, Left, ""));
 
   /* Captain! This is wrong */
   const double cylRadius(pixelDiameter / 2);
@@ -526,28 +529,18 @@ Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
       createCappedCylinder(cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.), "pixel-shape");
 
   for (int banknum = 1; banknum <= numBanks; banknum++) {
-    // Make a new bank
-    std::ostringstream bankname;
-    bankname << "bank" << banknum;
-
-    RectangularDetector *bank = new RectangularDetector(bankname.str());
-    bank->initialize(pixelShape, pixels, 0.0, pixelSpacing, pixels, 0.0, pixelSpacing, banknum * pixels * pixels, true,
-                     pixels);
-
-    // Mark them all as detectors
-    for (int x = 0; x < pixels; x++) {
-      for (int y = 0; y < pixels; y++) {
-        std::shared_ptr<Detector> detector = bank->getAtXY(x, y);
-        if (detector) {
-          // Mark it as a detector (add to the instrument cache)
-          testInst->markAsDetectorIncomplete(detector.get());
-        }
-      }
-    }
-
-    testInst->add(bank);
-    // Set the bank along the z-axis of the instrument. (beam direction).
-    bank->setPos(V3D(0.0, 0.0, bankDistanceFromSample * banknum));
+    // A square bank of pixels, with IDs filled along y first, set along the z-axis of the instrument (beam direction)
+    Beamline::PixelGridComponent pixelGrid;
+    pixelGrid.nX = pixels;
+    pixelGrid.xStep = pixelSpacing;
+    pixelGrid.nY = pixels;
+    pixelGrid.yStep = pixelSpacing;
+    pixelGrid.idStart = banknum * pixels * pixels;
+    pixelGrid.idFillOrder = {'y', 'x', 'z'};
+    pixelGrid.idStepByRow = pixels;
+    pixelGrid.idStep = 1;
+    builder.addRectangularBank(root, "bank" + std::to_string(banknum), V3D(0.0, 0.0, bankDistanceFromSample * banknum),
+                               Quat(), pixelGrid, pixelShape);
 
     progress.report();
   }
@@ -559,37 +552,24 @@ Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
 
   for (int monitorNumber = monitorsStart; monitorNumber < monitorsStart + numMonitors; monitorNumber++) {
     std::string monitorName = "monitor" + std::to_string(monitorNumber - monitorsStart + 1);
-
-    Detector *detector = new Detector(monitorName, monitorNumber, monitorShape, testInst.get());
-    // Mark it as a monitor (add to the instrument cache)
-    testInst->markAsMonitorIncomplete(detector);
-
-    testInst->add(detector);
-    // Set the bank along the z-axis of the instrument, between the detectors.
-    detector->setPos(V3D(0.0, 0.0, bankDistanceFromSample * (monitorNumber - monitorsStart + 0.5)));
+    // Set the monitor along the z-axis of the instrument, between the detectors.
+    builder.addDetector(root, monitorName, monitorNumber,
+                        V3D(0.0, 0.0, bankDistanceFromSample * (monitorNumber - monitorsStart + 0.5)), Quat(),
+                        monitorShape, /*isMonitor*/ true);
   }
 
-  // finalize the instrument
-  testInst->markAsDetectorFinalize();
-
   // Define a source component
-  ObjComponent *source = new ObjComponent("moderator", IObject_sptr(new CSGObject), testInst.get());
-  source->setPos(V3D(0.0, 0.0, -sourceSampleDistance));
-  testInst->add(source);
-  testInst->markAsSource(source);
+  builder.setSource(builder.addObjComponent(root, "moderator", V3D(0.0, 0.0, -sourceSampleDistance), Quat(),
+                                            std::make_shared<CSGObject>()));
 
   // Add chopper
-  ObjComponent *chopper = new ObjComponent("chopper-position", IObject_sptr(new CSGObject), testInst.get());
-  chopper->setPos(V3D(0.0, 0.0, -0.25 * sourceSampleDistance));
-  testInst->add(chopper);
+  builder.addObjComponent(root, "chopper-position", V3D(0.0, 0.0, -0.25 * sourceSampleDistance), Quat(),
+                          std::make_shared<CSGObject>());
 
   // Define a sample position
-  Component *sample = new Component("sample", testInst.get());
-  testInst->setPos(0.0, 0.0, 0.0);
-  testInst->add(sample);
-  testInst->markAsSamplePos(sample);
+  builder.setSample(builder.addComponent(root, "sample"));
 
-  return testInst;
+  return Instrument::fromBeamline(builder.build());
 }
 
 //----------------------------------------------------------------------------------------------

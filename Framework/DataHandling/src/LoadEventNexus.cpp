@@ -19,8 +19,11 @@
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/BeamlineBuilder.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidGeometry/Instrument/InstrumentMetadata.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -1332,80 +1335,80 @@ void LoadEventNexus::deleteBanks(const EventWorkspaceCollection_sptr &workspace,
   // work from the base instrument of the current workspace
   auto const &ws = workspace->getSingleHeldWorkspace();
   auto const &inst = ws->getInstrument()->baseInstrument();
+  auto const [componentInfo, detectorInfo] = inst->makeBaseBeamline();
 
-  // Build a list of Rectangular Detectors
-  std::vector<std::shared_ptr<RectangularDetector>> detList;
-  for (int i = 0; i < inst->nelements(); i++) {
-    std::shared_ptr<RectangularDetector> det;
-    std::shared_ptr<ICompAssembly> assem;
-    std::shared_ptr<ICompAssembly> assem2;
-
-    det = std::dynamic_pointer_cast<RectangularDetector>((*inst)[i]);
-    if (det) {
-      detList.emplace_back(det);
-    } else {
-      // Also, look in the first sub-level for RectangularDetectors (e.g.
-      // PG3). We are not doing a full recursive search since that will be
-      // very long for lots of pixels.
-      assem = std::dynamic_pointer_cast<ICompAssembly>((*inst)[i]);
-      if (assem) {
-        for (int j = 0; j < assem->nelements(); j++) {
-          det = std::dynamic_pointer_cast<RectangularDetector>((*assem)[j]);
-          if (det) {
-            detList.emplace_back(det);
-          } else {
-            // Also, look in the second sub-level for RectangularDetectors
-            // (e.g. PG3). We are not doing a full recursive search since that
-            // will be very long for lots of pixels.
-            assem2 = std::dynamic_pointer_cast<ICompAssembly>((*assem)[j]);
-            if (assem2) {
-              for (int k = 0; k < assem2->nelements(); k++) {
-                det = std::dynamic_pointer_cast<RectangularDetector>((*assem2)[k]);
-                if (det) {
-                  detList.emplace_back(det);
-                }
-              }
-            }
-          }
-        }
+  // Build a list of Rectangular Detectors, looking up to two levels below the root's children (e.g. PG3). We are not
+  // doing a full recursive search since that will be very long for lots of pixels.
+  auto const isRectangular = [&componentInfo](size_t const index) {
+    return !componentInfo->isDetector(index) &&
+           componentInfo->componentType(index) == Beamline::ComponentType::Rectangular;
+  };
+  std::vector<size_t> detList;
+  for (auto const i : componentInfo->children(componentInfo->root())) {
+    if (isRectangular(i)) {
+      detList.emplace_back(i);
+      continue;
+    }
+    for (auto const j : componentInfo->children(i)) {
+      if (isRectangular(j)) {
+        detList.emplace_back(j);
+        continue;
       }
+      std::copy_if(componentInfo->children(j).cbegin(), componentInfo->children(j).cend(), std::back_inserter(detList),
+                   isRectangular);
     }
   }
   if (detList.empty())
     return;
 
-  // Create a new instrument to hold the reduced set of detectors.
-  // This clones from the original instrument, but without copying any components
-  auto newInst = std::make_shared<Instrument>(*inst, false);
-  // Then add in only the needed detectors
-  for (auto &det : detList) {
-    std::string const det_name = det->getName();
+  // Create a new instrument to hold the reduced set of detectors: the original's sample, source and monitors, as
+  // children of the root, then the banks being loaded
+  if (!componentInfo->hasSample() || !componentInfo->hasSource()) {
+    throw std::runtime_error("Cannot copy instrument: source instrument must have valid sample and source components");
+  }
+  std::string instrumentName = inst->getName() + "_clone";
+  std::vector<size_t> banksToKeep;
+  for (auto const bank : detList) {
+    std::string const det_name = componentInfo->name(bank);
     std::string const det_name_check = det_name + "_events";
     bool const keep = std::any_of(bankNames.cbegin(), bankNames.cend(),
                                   [&det_name_check](const auto &bankName) { return bankName == det_name_check; });
     if (keep) {
-      // add this detector to the new instrument
-      newInst->setName(newInst->getName() + "_" + det_name);
-      auto *bankComp = dynamic_cast<IComponent const *>(det.get());
-      if (bankComp) {
-        std::unique_ptr<IComponent> clonedDet(det->clone());
-        auto *clonedRaw = clonedDet.get();
-        newInst->add(clonedDet.release());
-        std::vector<IDetector_const_sptr> detsInBank;
-        newInst->getDetectorsInBank(detsInBank, *clonedRaw);
-        for (auto const &dConst : detsInBank) {
-          auto *d = const_cast<IDetector *>(dConst.get());
-          if (d) {
-            newInst->markAsDetectorIncomplete(d);
-          }
-        }
-      }
-      newInst->markAsDetectorFinalize();
+      instrumentName += "_" + det_name;
+      banksToKeep.emplace_back(bank);
     }
   }
+  Geometry::BeamlineBuilder builder;
+  auto const root = builder.addAssembly(Geometry::BeamlineBuilder::noParent, instrumentName);
+  builder.setSample(builder.addCopy(root, *componentInfo, *detectorInfo, componentInfo->sample()));
+  builder.setSource(builder.addCopy(root, *componentInfo, *detectorInfo, componentInfo->source()));
+  // The monitors, in the order the legacy tree lists them (each component before its children)
+  std::vector<size_t> pending{componentInfo->root()};
+  while (!pending.empty()) {
+    auto const index = pending.back();
+    pending.pop_back();
+    if (componentInfo->isDetector(index)) {
+      if (detectorInfo->isMonitor(index)) {
+        builder.addCopy(root, *componentInfo, *detectorInfo, index);
+      }
+      continue;
+    }
+    auto const &children = componentInfo->children(index);
+    pending.insert(pending.end(), children.crbegin(), children.crend());
+  }
+  // Then add in only the needed detectors
+  for (auto const bank : banksToKeep) {
+    builder.addCopy(root, *componentInfo, *detectorInfo, bank);
+  }
+  builder.setReferenceFrame(componentInfo->referenceFrame());
+  builder.setMetadata(std::make_shared<Geometry::InstrumentMetadata>(
+      inst->getValidFromDate(), inst->getValidToDate(), "", "", inst->getDefaultView(), inst->getDefaultAxis()));
+  auto newInst = Geometry::Instrument::fromBeamline(builder.build());
+  newInst->getLogfileUnit() = inst->getLogfileUnit();
+
   // update the instrument in the workspaces
   // this will also create the new beamline wrappers
-  workspace->setInstrument(newInst);
+  workspace->setInstrument(Geometry::Instrument_sptr(std::move(newInst)));
 }
 //-----------------------------------------------------------------------------
 /**

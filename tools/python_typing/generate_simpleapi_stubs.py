@@ -4,14 +4,9 @@
 from __future__ import annotations
 
 import argparse
-import difflib
 import importlib
-import itertools
 import keyword
-import shutil
-import subprocess
 import sys
-import tempfile
 from pathlib import Path
 
 _workspace_imports: dict[str, str] = {}
@@ -66,7 +61,7 @@ def _mpi_algorithm_names(algorithm_factory) -> set[str]:
     MPIAlgorithms (BroadcastWorkspace, GatherWorkspaces) is an optional,
     Linux-only plugin built when MPI_BUILD is enabled, so whether these are
     registered depends on the build. They are left out on every platform so
-    that the committed stub does not depend on where it was generated.
+    that simpleapi.pyi does not depend on where it was generated.
     """
     return {descriptor.name for descriptor in algorithm_factory.getDescriptors(True) if _MPI_CATEGORY in descriptor.category.split(";")}
 
@@ -431,35 +426,6 @@ def _stub_for_custom_algorithm(name: str, version: int) -> tuple[list[str], list
     raise ValueError(f"No custom simpleapi stub implementation for {name}")
 
 
-def _format_with_ruff(contents: str) -> str:
-    """Format generated stub text using the repository's Ruff pre-commit hook."""
-    repo_root = Path(__file__).parents[2]
-    hook_runner = shutil.which("prek") or shutil.which("pre-commit")
-    if hook_runner is None:
-        raise RuntimeError("Stub generation requires prek or pre-commit to run the configured ruff-format hook")
-
-    with tempfile.NamedTemporaryFile(
-        mode="w", suffix=".pyi", prefix="_simpleapi_generated_", dir=repo_root / "tools/python_typing", delete=False
-    ) as temporary:
-        temporary.write(contents)
-        temporary_path = Path(temporary.name)
-
-    try:
-        relative_path = temporary_path.relative_to(repo_root)
-        result = subprocess.run(
-            [hook_runner, "run", "ruff-format", "--files", str(relative_path)],
-            cwd=repo_root,
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-        if result.returncode:
-            raise RuntimeError(f"Ruff formatting failed:\n{result.stdout}{result.stderr}")
-        return temporary_path.read_text()
-    finally:
-        temporary_path.unlink(missing_ok=True)
-
-
 def _check_python_plugins_loaded(simpleapi) -> None:
     """Fail if a Python plugin could not be imported, e.g. because a dependency is missing.
 
@@ -500,8 +466,6 @@ def main() -> int:
         help=f"emit only the MPI algorithms, for the {_MPI_STUB_MODULE} stub that simpleapi.pyi imports from",
     )
     parser.add_argument("--output", type=Path, help="output file (default: simpleapi.pyi, or _simpleapi_mpi.pyi with --mpi-only)")
-    parser.add_argument("--check", action="store_true", help="fail if output differs instead of writing it")
-    parser.add_argument("--no-format", action="store_true", help="skip the Ruff formatting that requires prek or pre-commit")
     args = parser.parse_args()
     if args.output is None:
         stub_name = "_simpleapi_mpi.pyi" if args.mpi_only else "simpleapi.pyi"
@@ -620,19 +584,6 @@ def main() -> int:
             "",
         ]
     )
-    if not args.no_format:
-        contents = _format_with_ruff(contents)
-
-    if args.check:
-        current = args.output.read_text() if args.output.exists() else ""
-        if current != contents:
-            print(f"Stubs are stale: {args.output}", file=sys.stderr)
-            diff = difflib.unified_diff(
-                current.splitlines(keepends=True), contents.splitlines(keepends=True), "committed", "generated", n=1
-            )
-            sys.stderr.writelines(itertools.islice(diff, 200))
-            return 1
-        return 0
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(contents)

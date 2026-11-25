@@ -15,6 +15,7 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
@@ -103,7 +104,7 @@ ComponentInfo::QuadrilateralComponent ComponentInfo::quadrilateralComponent(cons
   auto type = componentType(componentIndex);
   auto parentType = componentType(parent(componentIndex));
   if (!(type == Beamline::ComponentType::Structured || type == Beamline::ComponentType::Rectangular ||
-        parentType == Beamline::ComponentType::Grid))
+        type == Beamline::ComponentType::Grid || parentType == Beamline::ComponentType::Grid))
     throw std::runtime_error("ComponentType is not Structured or Rectangular "
                              "in ComponentInfo::quadrilateralComponent.");
 
@@ -248,6 +249,12 @@ void ComponentInfo::setRotation(const size_t componentIndex, const Kernel::Quat 
 }
 
 const IObject &ComponentInfo::shape(const size_t componentIndex) const { return *(*m_shapes)[componentIndex]; }
+
+/// One shared object, so that a component made without a shape can be told from one given an empty shape.
+std::shared_ptr<const IObject> const &ComponentInfo::noShape() {
+  static std::shared_ptr<const IObject> const empty = std::make_shared<const CSGObject>();
+  return empty;
+}
 
 /**
  * Build a map from each unique shape to the list of component indices that share it.
@@ -523,10 +530,14 @@ BoundingBox ComponentInfo::boundingBox(const size_t componentIndex, const Boundi
     for (const auto &childIndex : this->children(componentIndex)) {
       absoluteBB.grow(boundingBox(childIndex, reference, excludeMonitors));
     }
-  } else if (compFlag == Beamline::ComponentType::Grid) {
+  } else if (compFlag == Beamline::ComponentType::Grid && pixelGridComponent(componentIndex).nZ > 0) {
+    // Each child is a z-layer of columns
     for (const auto &childIndex : this->children(componentIndex)) {
       growBoundingBoxAsRectuangularBank(childIndex, reference, absoluteBB, excludeMonitors);
     }
+  } else if (compFlag == Beamline::ComponentType::Grid) {
+    // Without layers, the grid holds its columns itself
+    growBoundingBoxAsRectuangularBank(componentIndex, reference, absoluteBB, excludeMonitors);
   } else if (compFlag == Beamline::ComponentType::Rectangular || compFlag == Beamline::ComponentType::Structured ||
              parentFlag == Beamline::ComponentType::Grid) {
     growBoundingBoxAsRectuangularBank(componentIndex, reference, absoluteBB, excludeMonitors);

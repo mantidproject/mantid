@@ -15,6 +15,7 @@
 #include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/BeamlineBuilder.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/CSGObject.h"
@@ -112,16 +113,11 @@ void AddAbsorptionWeightedPathLengths::exec() {
   const int seed = getProperty("SeedValue");
 
   if (!inputWS->getInstrument()->hasSource()) {
-    Instrument_sptr inst(new Geometry::Instrument);
-    Detector *detector = new Detector("det1", -1, nullptr);
-    detector->setPos(0.0, 0.0, 0.0);
-    inst->add(detector); // This takes care of deletion
-    inst->markAsDetector(detector);
-    Mantid::Geometry::ObjComponent *source = new Mantid::Geometry::ObjComponent("Source");
-    source->setPos(0.0, 0.0, -1.0);
-    inst->add(source); // This takes care of deletion
-    inst->markAsSource(source);
-    inputWS->setInstrument(inst);
+    Geometry::BeamlineBuilder builder;
+    auto const root = builder.addAssembly(Geometry::BeamlineBuilder::noParent, "");
+    builder.addDetector(root, "det1", -1, Kernel::V3D(0.0, 0.0, 0.0), Kernel::Quat(), nullptr);
+    builder.setSource(builder.addObjComponent(root, "Source", Kernel::V3D(0.0, 0.0, -1.0), Kernel::Quat(), nullptr));
+    inputWS->setInstrument(Geometry::Instrument::fromBeamline(builder.build()));
   }
 
   bool useSinglePath = getProperty("UseSinglePath");

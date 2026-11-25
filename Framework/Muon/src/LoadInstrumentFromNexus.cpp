@@ -11,6 +11,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/BeamlineBuilder.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -59,21 +60,15 @@ void LoadInstrumentFromNexus::exec() {
   MuonNexusReader nxload;
   nxload.readFromFile(m_filename);
   progress(0.5);
-  // Create a new Instrument with the right name and add it to the workspace
-  Geometry::Instrument_sptr instrument(new Geometry::Instrument(nxload.getInstrumentName()));
+  // Lay out a new instrument with the right name
+  Geometry::BeamlineBuilder builder;
+  auto const root = builder.addAssembly(Geometry::BeamlineBuilder::noParent, nxload.getInstrumentName());
 
   // Add dummy source and samplepos to instrument
   // The L2 and 2-theta values from nexus file assumed to be relative to sample
   // position
+  builder.setSample(builder.addComponent(root, "Unknown", Kernel::V3D(0.0, 0.0, 0.0)));
 
-  Geometry::Component *samplepos = new Geometry::Component("Unknown", instrument.get());
-  instrument->add(samplepos);
-  instrument->markAsSamplePos(samplepos);
-  samplepos->setPos(0.0, 0.0, 0.0);
-
-  Geometry::ObjComponent *source = new Geometry::ObjComponent("Unknown", instrument.get());
-  instrument->add(source);
-  instrument->markAsSource(source);
   // If user has provided an L1, use that
   auto l1ConfigVal = Kernel::ConfigService::Instance().getValue<double>("instrument.L1");
   // Otherwise try and get it from the nexus file - but not there at present!
@@ -81,8 +76,9 @@ void LoadInstrumentFromNexus::exec() {
   // Default to 10 if the file doesn't have it set
   double l1 = l1ConfigVal.value_or(10.0);
 
-  source->setPos(0.0, -1.0 * l1, 0.0);
-  localWorkspace->setInstrument(instrument);
+  builder.setSource(
+      builder.addObjComponent(root, "Unknown", Kernel::V3D(0.0, -1.0 * l1, 0.0), Kernel::Quat(), nullptr));
+  localWorkspace->setInstrument(Geometry::Instrument::fromBeamline(builder.build()));
   progress(1.0);
 }
 

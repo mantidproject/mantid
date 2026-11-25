@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidGeometry/Instrument/BeamlineBuilder.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 
 namespace Mantid {
@@ -32,4 +33,17 @@ void addMonitor(Mantid::Geometry::Instrument_sptr &instrument, const Mantid::Ker
                 const std::string &name);
 void addDetector(Mantid::Geometry::Instrument_sptr &instrument, const Mantid::Kernel::V3D &position, const int ID,
                  const std::string &name, Mantid::Geometry::ObjCompAssembly *compAss = nullptr);
+
+// The same, for an instrument laid out with a BeamlineBuilder: each adds under `parent`.
+using Node = Mantid::Geometry::BeamlineBuilder::Node;
+Node addComponent(Mantid::Geometry::BeamlineBuilder &builder, Node const parent, const Mantid::Kernel::V3D &position,
+                  const std::string &name);
+void addSample(Mantid::Geometry::BeamlineBuilder &builder, Node const parent, const Mantid::Kernel::V3D &position,
+               const std::string &name);
+void addSource(Mantid::Geometry::BeamlineBuilder &builder, Node const parent, const Mantid::Kernel::V3D &position,
+               const std::string &name);
+void addMonitor(Mantid::Geometry::BeamlineBuilder &builder, Node const parent, const Mantid::Kernel::V3D &position,
+                const int ID, const std::string &name);
+void addDetector(Mantid::Geometry::BeamlineBuilder &builder, Node const parent, const Mantid::Kernel::V3D &position,
+                 const int ID, const std::string &name);
 } // namespace InstrumentCreationHelper

@@ -15,6 +15,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/BeamlineBuilder.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
@@ -264,15 +265,11 @@ void LoadNXSPE::exec() {
   outputWS->mutableRun().setGoniometer(gm, true);
 
   // generate instrument
-  Geometry::Instrument_sptr instrument(new Geometry::Instrument(instrument_name.empty() ? "NXSPE" : instrument_name));
-
-  Geometry::ObjComponent *source = new Geometry::ObjComponent("source");
-  source->setPos(0.0, 0.0, -10.);
-  instrument->add(source);
-  instrument->markAsSource(source);
-  Geometry::Component *sample = new Geometry::Component("sample");
-  instrument->add(sample);
-  instrument->markAsSamplePos(sample);
+  Geometry::BeamlineBuilder builder;
+  auto const root =
+      builder.addAssembly(Geometry::BeamlineBuilder::noParent, instrument_name.empty() ? "NXSPE" : instrument_name);
+  builder.setSource(builder.addObjComponent(root, "source", V3D(0.0, 0.0, -10.), Kernel::Quat(), nullptr));
+  builder.setSample(builder.addComponent(root, "sample"));
 
   constexpr double deg2rad = M_PI / 180.0;
 
@@ -290,13 +287,9 @@ void LoadNXSPE::exec() {
 
     const auto shape = Geometry::ShapeFactory().createSphere(V3D(0, 0, 0), std::max(rr, 0.01));
 
-    Geometry::Detector *det = new Geometry::Detector("pixel", static_cast<int>(i + 1), sample);
-    det->setPos(pos);
-    det->setShape(shape);
-    instrument->add(det);
-    instrument->markAsDetector(det);
+    builder.addDetector(root, "pixel", static_cast<int>(i + 1), pos, Kernel::Quat(), shape);
   }
-  outputWS->setInstrument(instrument);
+  outputWS->setInstrument(Geometry::Instrument::fromBeamline(builder.build()));
 
   std::vector<double>::iterator itdata = data.begin(), iterror = error.begin(), itdataend, iterrorend;
   auto &spectrumInfo = outputWS->mutableSpectrumInfo();

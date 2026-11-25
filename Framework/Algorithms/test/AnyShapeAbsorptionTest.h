@@ -220,8 +220,8 @@ public:
 
     // create the input workspace
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, NUM_VALS, WL_MIN, WL_DELTA);
-    auto testInst = ComponentCreationHelper::createCylInstrumentWithDetInGivenPositions({2.}, {90.}, {0.});
-    testInst->setName("ISIS_Histogram");
+    auto testInst =
+        ComponentCreationHelper::createCylInstrumentWithDetInGivenPositions({2.}, {90.}, {0.}, "ISIS_Histogram");
     inputWS->setInstrument(testInst);
     inputWS->rebuildSpectraMapping();
     inputWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
