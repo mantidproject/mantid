@@ -349,11 +349,8 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
 
     def set_autoscale(self, state: bool):
         self._options_presenter.set_autoscale(state)
-        if state:
-            self._options_presenter.disable_yaxis_changer()
-            self.force_autoscale()
-        else:
-            self._options_presenter.enable_yaxis_changer()
+        # Record the state in the context, otherwise a later quick-edit refresh restores the old state
+        self._handle_autoscale_y_axes()
 
     def _handle_autoscale_y_axes(self):
         # update the state of autoscale
