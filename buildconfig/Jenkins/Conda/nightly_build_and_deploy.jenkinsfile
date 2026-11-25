@@ -162,7 +162,7 @@ pipeline {
                 expression { params.BUILD_DEVEL == 'linux-64' }
             }
           }
-          agent { label 'linux-64' }
+          agent { label 'isis-mpi-fix' }
           options { timestamps() }
           steps {
             checkoutSource("${GIT_SHA}")
