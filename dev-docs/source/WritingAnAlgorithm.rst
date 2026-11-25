@@ -290,6 +290,32 @@ This call will also initialise the algorithm, so the algorithm's properties can 
 
 Because ``Property`` is generic to input **and** output, the workspace pointers cannot be ``const`` when shared with a child algorithm.
 
+Cleaning up finished algorithms
+-------------------------------
+
+Algorithms created through ``AlgorithmManager::Instance().create()``, which includes those run from ``mantid.simpleapi`` and the workbench dialogs, are *managed*.
+The ``AlgorithmManager`` keeps a shared pointer to each managed algorithm so that it can be listed and cancelled.
+That shared pointer keeps the algorithm object alive after it finishes, along with everything it owns, such as data members and workspaces held in its properties.
+
+A finished algorithm becomes ready for garbage collection a few seconds after it finishes.
+``AlgorithmManagerImpl::removeFinishedAlgorithms()`` releases every managed algorithm that is ready, and leaves running and recently finished algorithms alone.
+The framework calls it automatically:
+
+* when a new managed algorithm is created
+* when a non-child algorithm finishes executing
+* when the ``AnalysisDataService`` is cleared (e.g. ``mtd.clear()``)
+* when a workspace is deleted from the ``AnalysisDataService``
+
+When writing an algorithm, or code that runs algorithms, follow the same approach:
+
+* Run algorithms used inside ``exec()`` as child algorithms with ``createChildAlgorithm``.
+  Child algorithms are not managed and are released as soon as the last shared pointer to them goes out of scope.
+* Avoid holding large data in data members after ``exec()`` returns.
+  Reset or clear them at the end of ``exec()`` so the memory is freed even while the algorithm object is still held by the manager.
+* If C++ code needs to release finished managed algorithms at a specific point, call ``AlgorithmManager::Instance().removeFinishedAlgorithms()``.
+  Do not call ``AlgorithmManager::Instance().clear()`` for this.
+  ``clear()`` removes every algorithm that is not running, including recently finished ones that the GUI or a caller may still be using.
+
 WorkspaceGroup history from processGroups
 -----------------------------------------
 
