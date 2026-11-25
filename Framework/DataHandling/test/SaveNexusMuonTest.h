@@ -23,6 +23,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include <filesystem>
+#include <limits>
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
@@ -238,6 +239,42 @@ public:
     setCommonX(*original.workspace, [](auto &x) { x[2] = x[0]; });
     auto alg = createSaver(original);
     assertIssue(*alg, "InputWorkspace", "increasing");
+  }
+
+  void test_nan_time_axis_is_rejected() {
+    const auto original = loadRun(INPUT_FILE, "original");
+    setCommonX(*original.workspace, [](auto &x) { x[5] = std::numeric_limits<double>::quiet_NaN(); });
+    auto alg = createSaver(original);
+    assertIssue(*alg, "InputWorkspace", "finite");
+  }
+
+  void test_infinite_time_axis_is_rejected() {
+    const auto original = loadRun(INPUT_FILE, "original");
+    setCommonX(*original.workspace, [](auto &x) { x[x.size() - 1] = std::numeric_limits<double>::infinity(); });
+    auto alg = createSaver(original);
+    assertIssue(*alg, "InputWorkspace", "finite");
+  }
+
+  void test_duplicate_spectrum_number_is_rejected() {
+    // Spectrum index 1 is given the number and detector of index 0, so only the uniqueness check fails
+    const auto original = loadRun(INPUT_FILE, "original");
+    auto &spectrum = original.workspace->getSpectrum(1);
+    spectrum.setSpectrumNo(1);
+    spectrum.setDetectorID(1);
+    auto alg = createSaver(original);
+    assertIssue(*alg, "InputWorkspace", "unique");
+  }
+
+  void test_unordered_spectrum_numbers_are_accepted() {
+    const auto original = loadRun(INPUT_FILE, "original");
+    auto &first = original.workspace->getSpectrum(0);
+    auto &second = original.workspace->getSpectrum(1);
+    first.setSpectrumNo(2);
+    first.setDetectorID(2);
+    second.setSpectrumNo(1);
+    second.setDetectorID(1);
+    auto alg = createSaver(original);
+    TS_ASSERT(!alg->validateInputs().contains("InputWorkspace"));
   }
 
   void test_missing_required_log_is_rejected() {

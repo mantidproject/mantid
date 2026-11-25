@@ -282,6 +282,7 @@ void SaveNexusMuon::validateWorkspace(const MatrixWorkspace &ws, std::map<std::s
     addIssue("The time axis must be in microseconds.");
   }
 
+  std::set<specnum_t> spectrumNumbers;
   for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
     const auto &spectrum = ws.getSpectrum(i);
     const auto &ids = spectrum.getDetectorIDs();
@@ -289,6 +290,11 @@ void SaveNexusMuon::validateWorkspace(const MatrixWorkspace &ws, std::map<std::s
       addIssue("Each spectrum must contain a single detector whose ID equals its spectrum number, which must be "
                "positive. Spectrum " +
                std::to_string(spectrum.getSpectrumNo()) + " does not.");
+      break;
+    }
+    if (!spectrumNumbers.insert(spectrum.getSpectrumNo()).second) {
+      addIssue("Each spectrum number must be unique. Spectrum " + std::to_string(spectrum.getSpectrumNo()) +
+               " appears more than once.");
       break;
     }
     const auto &y = spectrum.y();
