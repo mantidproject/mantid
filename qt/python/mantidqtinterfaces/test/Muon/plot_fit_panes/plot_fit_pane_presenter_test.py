@@ -34,6 +34,7 @@ class PlotFitPanePresenterTest(unittest.TestCase):
         self.view.warning_popup = mock.MagicMock()
         self.figure_presenter = mock.Mock(spec=PlottingCanvasPresenterInterface)
         self.figure_presenter.force_autoscale = mock.Mock()
+        self.figure_presenter.get_plotted_workspaces_and_indices.return_value = ([], [])
         self.presenter = PlotFitPanePresenter(
             view=self.view,
             model=self.model,
@@ -54,6 +55,30 @@ class PlotFitPanePresenterTest(unittest.TestCase):
         self.view.is_plot_diff.return_value = mock.MagicMock(False)
         self.figure_presenter.plot_workspaces = mock.MagicMock()
         self.presenter.handle_plot_selected_fits(fits)
+
+    def _plot_selected_fits(self):
+        self.model.get_fit_workspace_and_indices = mock.MagicMock(return_value=(["fit"], [1]))
+        # raw plot of raw fit data, so the input workspace names are used unchanged
+        self.view.is_raw_plot.return_value = True
+        self.context.fitting_context.fit_to_raw = True
+        self.view.is_plot_diff.return_value = False
+        self.presenter.handle_plot_selected_fits([MockFitInfo(["unit"])], autoscale=False)
+
+    def test_handle_plot_selected_fits_does_not_force_autoscale_when_plot_already_has_data(self):
+        self.figure_presenter.get_plotted_workspaces_and_indices.return_value = (["old_data", "old_fit"], [0, 1])
+
+        self._plot_selected_fits()
+
+        self.figure_presenter.plot_workspaces.assert_called_once()
+        self.figure_presenter.force_autoscale.assert_not_called()
+
+    def test_handle_plot_selected_fits_forces_autoscale_when_plot_is_empty(self):
+        self.figure_presenter.get_plotted_workspaces_and_indices.return_value = ([], [])
+
+        self._plot_selected_fits()
+
+        self.figure_presenter.plot_workspaces.assert_called_once()
+        self.figure_presenter.force_autoscale.assert_called_once()
 
     def test_handle_use_raw_workspace_changed(self):
         self.presenter.check_if_can_use_rebin = mock.Mock(return_value=True)

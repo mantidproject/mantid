@@ -48,9 +48,14 @@ class PlotFitPanePresenter(BasePanePresenter):
                 indices += [0] * len(fit_information.input_workspaces) + fit_indices
                 # dont shade the data but do shade the fit lines
                 self._figure_presenter.add_shaded_region(fit_workspaces, fit_indices)
+        plotted_workspaces, _ = self._figure_presenter.get_plotted_workspaces_and_indices()
         self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=False, autoscale=autoscale)
-        # the data change probably means its the wrong scale
-        self._figure_presenter.force_autoscale()
+        if self._should_force_autoscale(plotted_workspaces):
+            self._figure_presenter.force_autoscale()
+
+    def _should_force_autoscale(self, plotted_workspaces: list) -> bool:
+        """Only force autoscale on an empty plot, so user y-limits survive new data when autoscale is off."""
+        return not plotted_workspaces
 
     def match_raw_selection(self, workspace_names, plot_raw):
         ws_list = []

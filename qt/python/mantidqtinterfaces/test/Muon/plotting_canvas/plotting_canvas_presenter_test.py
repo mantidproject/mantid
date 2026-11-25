@@ -68,6 +68,34 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
         expected_dict = {"fwd": [3.0, 8.0], "bwd": [4, 9]}
         self.presenter.update_y_limits_of_subplots.assert_called_once_with(expected_dict, subplots, axes)
 
+    def _select_single_subplot_with_autoscale_state(self, subplot, autoscale_in_context, checkbox_state):
+        self.options.get_selection.return_value = [subplot]
+        self.options.get_selection_index.return_value = 1
+        self.context.update_autoscale_state(subplot, autoscale_in_context)
+        # the mocked quick edit does not change its checkbox, so set the state it would have after set_autoscale
+        self.options.autoscale = checkbox_state
+        self.presenter.force_autoscale = mock.Mock()
+
+    def test_set_autoscale_off_records_state_in_context(self):
+        self._select_single_subplot_with_autoscale_state("one", autoscale_in_context=True, checkbox_state=False)
+
+        self.presenter.set_autoscale(False)
+
+        self.options.set_autoscale.assert_called_with(False)
+        self.assertFalse(self.context.get_autoscale_state("one"))
+        self.options.enable_yaxis_changer.assert_called_once()
+        self.presenter.force_autoscale.assert_not_called()
+
+    def test_set_autoscale_on_records_state_and_autoscales(self):
+        self._select_single_subplot_with_autoscale_state("one", autoscale_in_context=False, checkbox_state=True)
+
+        self.presenter.set_autoscale(True)
+
+        self.options.set_autoscale.assert_called_with(True)
+        self.assertTrue(self.context.get_autoscale_state("one"))
+        self.options.disable_yaxis_changer.assert_called_once()
+        self.presenter.force_autoscale.assert_called_once()
+
     def test_update_y_limits_of_subplots(self):
         subplots = ["fwd", "bwd", "top"]
         y_limits = {"fwd": [3.0, 8.0], "bwd": [4, 9], "top": [-1, 5]}
@@ -532,6 +560,8 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
         self.options.set_plot_x_range = mock.Mock()
         self.options.set_plot_y_range = mock.Mock()
         self.options.set_autoscale = mock.Mock()
+        # the checkbox state the real quick edit has after set_autoscale(False)
+        self.options.autoscale = False
         self.options.enable_yaxis_changer = mock.Mock()
         self.options.set_errors = mock.Mock()
 
