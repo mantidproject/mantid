@@ -18,13 +18,16 @@
 #include "MantidDataHandling/LoadMuonNexusV2.h"
 #include "MantidDataHandling/SaveNexusMuon.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EmptyValues.h"
 
 #include <cxxtest/TestSuite.h>
 
+#include <algorithm>
 #include <filesystem>
 #include <limits>
+#include <numeric>
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
@@ -245,11 +248,73 @@ public:
     assertIssue(*alg, "TimeZero", "must be set");
   }
 
+  void test_non_finite_time_zero_is_rejected() {
+    // With first good data from the start of the raw time axis, it does not depend on time zero
+    const auto original = loadRun(INPUT_FILE, "original", false);
+    auto alg = createSaver(original, false);
+    alg->setProperty("TimeZero", std::numeric_limits<double>::quiet_NaN());
+    alg->setProperty("FirstGoodData", 0.4);
+    alg->setProperty("GoodDataRelativeToTimeZero", false);
+    assertIssue(*alg, "TimeZero", "finite");
+  }
+
+  void test_time_zero_too_large_for_a_bin_number_is_rejected() {
+    const auto original = loadRun(INPUT_FILE, "original");
+    auto alg = createSaver(original);
+    alg->setProperty("TimeZero", 1e10);
+    assertIssue(*alg, "TimeZero", "too far from zero");
+  }
+
   void test_non_integer_counts_are_rejected() {
     const auto original = loadRun(INPUT_FILE, "original");
     original.workspace->mutableY(3)[10] = 1.5;
     auto alg = createSaver(original);
     assertIssue(*alg, "InputWorkspace", "whole numbers");
+  }
+
+  void test_spectra_with_different_numbers_of_bins_are_rejected() {
+    const auto original = loadRun(INPUT_FILE, "original");
+    original.workspace->setHistogram(1, Mantid::HistogramData::BinEdges{0.0, 1.0, 2.0},
+                                     Mantid::HistogramData::Counts{1.0, 2.0});
+    auto alg = createSaver(original);
+    assertIssue(*alg, "InputWorkspace", "same time bins");
+  }
+
+  void test_first_bin_too_narrow_for_the_resolution_is_rejected() {
+    // A first bin of 0.1 picoseconds rounds to a resolution of zero
+    const auto original = loadRun(INPUT_FILE, "original");
+    setCommonX(*original.workspace, [](auto &x) { x[1] = x[0] + 1e-7; });
+    auto alg = createSaver(original);
+    assertIssue(*alg, "InputWorkspace", "resolution");
+  }
+
+  void test_non_integer_frames_log_is_rejected() {
+    const auto original = loadRun(INPUT_FILE, "original");
+    original.workspace->mutableRun().addProperty("goodfrm", 1000.5, true);
+    auto alg = createSaver(original);
+    assertIssue(*alg, "InputWorkspace", "goodfrm log must be a whole number");
+  }
+
+  void test_non_numeric_sample_log_is_rejected() {
+    const auto original = loadRun(INPUT_FILE, "original");
+    original.workspace->mutableRun().addProperty("sample_temp", std::string("warm"), true);
+    auto alg = createSaver(original);
+    assertIssue(*alg, "InputWorkspace", "sample_temp log must be a number");
+  }
+
+  void test_total_counts_are_taken_from_the_saved_counts() {
+    const auto original = loadRun(INPUT_FILE, "original");
+    auto &y = original.workspace->mutableY(0);
+    std::fill(y.begin(), y.end(), 0.0);
+    double totalCounts = 0.0;
+    for (size_t i = 0; i < original.workspace->getNumberHistograms(); ++i) {
+      const auto &counts = original.workspace->y(i);
+      totalCounts += std::accumulate(counts.cbegin(), counts.cend(), 0.0);
+    }
+    save(original);
+    const auto saved = loadRun(m_filename, "saved");
+
+    TS_ASSERT_DELTA(saved.workspace->run().getPropertyAsSingleValue("total_counts_period"), totalCounts / 1e6, 1e-5);
   }
 
   void test_irregular_last_bin_is_saved() {
@@ -383,6 +448,14 @@ public:
     assertIssue(*alg, "LastGoodData", "not after first good data");
   }
 
+  void test_last_good_data_in_the_same_bin_as_first_good_data_is_rejected() {
+    // First good data is 0.384 (bin 24 of 0.016 microseconds) and last good data is 0.39, which also rounds to bin 24
+    const auto original = loadRun(INPUT_FILE, "original");
+    auto alg = createSaver(original);
+    alg->setProperty("LastGoodData", 0.23);
+    assertIssue(*alg, "LastGoodData", "leaves no good data");
+  }
+
   void test_last_good_data_after_end_of_time_axis_is_rejected() {
     const auto original = loadRun(INPUT_FILE, "original");
     auto alg = createSaver(original);
@@ -432,6 +505,20 @@ public:
     auto alg = createSaver(original);
     alg->setProperty("DeadTimeTable", deadTimeTable({{1, 0.01}, {200, 0.02}}));
     assertIssue(*alg, "DeadTimeTable", "200");
+  }
+
+  void test_dead_time_given_twice_for_a_spectrum_is_rejected() {
+    const auto original = loadRun(INPUT_FILE, "original");
+    auto alg = createSaver(original);
+    alg->setProperty("DeadTimeTable", deadTimeTable({{5, 0.01}, {5, 0.02}}));
+    assertIssue(*alg, "DeadTimeTable", "more than once");
+  }
+
+  void test_non_finite_dead_time_is_rejected() {
+    const auto original = loadRun(INPUT_FILE, "original");
+    auto alg = createSaver(original);
+    alg->setProperty("DeadTimeTable", deadTimeTable({{5, std::numeric_limits<double>::quiet_NaN()}}));
+    assertIssue(*alg, "DeadTimeTable", "finite");
   }
 
   void test_detector_in_two_groups_is_rejected() {

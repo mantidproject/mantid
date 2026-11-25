@@ -56,6 +56,10 @@ const std::string GROUPING_TABLE{"DetectorGroupingTable"};
 
 /// Logs which must be present because LoadMuonNexusV2 cannot load a file without the fields written from them
 const std::vector<std::string> REQUIRED_LOGS{"run_number", "goodfrm", "sample_temp", "sample_magn_field"};
+/// Logs which are written as integers, so must hold one if present
+const std::vector<std::string> INTEGER_LOGS{"goodfrm", "rawfrm", "current_period"};
+/// Logs which are written as single numbers, so must convert to one if present
+const std::vector<std::string> NUMERIC_LOGS{"sample_temp", "sample_magn_field"};
 /// Time series logs which LoadISISNexus regenerates on loading, so must not be written to the file
 const std::set<std::string> REGENERATED_LOGS{"periods"};
 /// Length of the ISO8601 date and time strings read by LoadISISNexus
@@ -95,7 +99,7 @@ size_t currentPeriodIndex(const Run &run) {
 }
 
 /// The single-period value of a period log, which holds a ';' separated value for each period of the original file
-std::optional<std::string> periodLogValue(const Run &run, const std::string &logName) {
+std::optional<std::string> periodLogValue(const Run &run, const std::string &logName, Logger &logger) {
   if (!run.hasProperty(logName)) {
     return std::nullopt;
   }
@@ -111,11 +115,17 @@ std::optional<std::string> periodLogValue(const Run &run, const std::string &log
     }
     start = end + 1;
   }
-  return tokens[period < tokens.size() ? period : 0];
+  if (period >= tokens.size()) {
+    logger.warning() << "The " << logName << " log has no value for period " << period + 1
+                     << ", so the value for period 1 is saved.\n";
+    return tokens[0];
+  }
+  return tokens[period];
 }
 
-template <typename T> T periodLogNumber(const Run &run, const std::string &logName, const T defaultValue) {
-  const auto value = periodLogValue(run, logName);
+template <typename T>
+T periodLogNumber(const Run &run, const std::string &logName, const T defaultValue, Logger &logger) {
+  const auto value = periodLogValue(run, logName, logger);
   if (!value) {
     return defaultValue;
   }
@@ -163,8 +173,20 @@ double binWidth(const MatrixWorkspace &ws) {
 
 int32_t binIndex(const double time, const double width) { return static_cast<int32_t>(std::lround(time / width)); }
 
+/// Whether a bin width in microseconds rounds to a resolution in picoseconds that the file can store
+bool isStorableResolution(const double width) {
+  const double picoseconds = width * 1e6;
+  return picoseconds >= 0.5 && picoseconds < static_cast<double>(std::numeric_limits<int32_t>::max()) + 0.5;
+}
+
 /// The resolution in picoseconds, as stored in the file
 int32_t resolutionPicoseconds(const double width) { return static_cast<int32_t>(std::lround(width * 1e6)); }
+
+/// Whether a time in microseconds can be stored as a bin number at the given resolution in picoseconds
+bool isStorableBin(const double time, const int32_t resolution) {
+  return std::abs(time * 1e6 / static_cast<double>(resolution)) <
+         static_cast<double>(std::numeric_limits<int32_t>::max());
+}
 
 /// Allows for float rounding in a time that lies on a bin edge, as a fraction of a bin
 constexpr double BIN_TOLERANCE = 1e-6;
@@ -274,8 +296,10 @@ std::map<std::string, std::string> SaveNexusMuon::validateInputs() {
     issues[Prop::INPUT_WORKSPACE] = "The input workspace must be a MatrixWorkspace.";
     return issues;
   }
-  if (isEmpty(static_cast<double>(getProperty(Prop::TIME_ZERO)))) {
+  if (const double timeZero = getProperty(Prop::TIME_ZERO); isEmpty(timeZero)) {
     issues[Prop::TIME_ZERO] = "TimeZero must be set. Use the TimeZero output of Load.";
+  } else if (!std::isfinite(timeZero)) {
+    issues[Prop::TIME_ZERO] = "TimeZero must be a finite number.";
   }
   validateWorkspace(*ws, issues);
   if (issues.contains(Prop::INPUT_WORKSPACE)) {
@@ -290,7 +314,8 @@ void SaveNexusMuon::validateWorkspace(const MatrixWorkspace &ws, std::map<std::s
   auto &issue = issues[Prop::INPUT_WORKSPACE];
   const auto addIssue = [&issue](const std::string &message) { issue += (issue.empty() ? "" : "\n") + message; };
 
-  if (ws.getNumberHistograms() == 0 || ws.blocksize() == 0) {
+  // blocksize() is not used, as it throws for spectra of different sizes, which isCommonBins reports
+  if (ws.getNumberHistograms() == 0 || ws.y(0).empty()) {
     addIssue("The workspace contains no data.");
   } else if (!ws.isHistogramData()) {
     addIssue("The workspace must contain histogram data.");
@@ -302,6 +327,13 @@ void SaveNexusMuon::validateWorkspace(const MatrixWorkspace &ws, std::map<std::s
       addIssue("The time axis must only contain finite values.");
     } else if (std::adjacent_find(x.cbegin(), x.cend(), std::greater_equal<double>()) != x.cend()) {
       addIssue("The time axis must be increasing.");
+    } else if (const double width = binWidth(ws); !isStorableResolution(width)) {
+      std::ostringstream message;
+      message << "The first time bin is " << width
+              << " microseconds wide, which cannot be stored as the resolution of the file. It must round to between "
+                 "1 and "
+              << std::numeric_limits<int32_t>::max() << " picoseconds.";
+      addIssue(message.str());
     }
   }
   if (const auto unit = ws.getAxis(0)->unit(); unit->label().ascii() != Units::Symbol::Microsecond.ascii()) {
@@ -348,6 +380,25 @@ void SaveNexusMuon::validateWorkspace(const MatrixWorkspace &ws, std::map<std::s
       addIssue("The workspace has no " + log + " log, which is needed to load the file.");
     }
   }
+  // Logs which are converted when writing the file, which must be checked before it is created
+  for (const auto &log : INTEGER_LOGS) {
+    try {
+      if (run.hasProperty(log)) {
+        static_cast<void>(run.getPropertyAsIntegerValue(log));
+      }
+    } catch (const std::exception &) {
+      addIssue("The " + log + " log must be a whole number.");
+    }
+  }
+  for (const auto &log : NUMERIC_LOGS) {
+    try {
+      if (run.hasProperty(log)) {
+        static_cast<void>(run.getPropertyAsSingleValue(log));
+      }
+    } catch (const std::exception &) {
+      addIssue("The " + log + " log must be a number.");
+    }
+  }
   if (run.hasProperty("run_number")) {
     try {
       static_cast<void>(std::stoi(run.getProperty("run_number")->value()));
@@ -368,12 +419,29 @@ void SaveNexusMuon::validateWorkspace(const MatrixWorkspace &ws, std::map<std::s
   }
   issues.erase(Prop::INPUT_WORKSPACE);
 
+  // A missing or non-finite TimeZero is reported in validateInputs
   const double timeZero = getProperty(Prop::TIME_ZERO);
-  if (isEmpty(timeZero)) {
+  if (isEmpty(timeZero) || !std::isfinite(timeZero)) {
     return;
   }
   const bool corrected = getProperty(Prop::TIME_ZERO_CORRECTED);
   const double lastTime = ws.x(0).back() + (corrected ? timeZero : 0.0);
+  const auto resolution = resolutionPicoseconds(binWidth(ws));
+  if (!isStorableBin(timeZero, resolution)) {
+    std::ostringstream message;
+    message << "TimeZero (" << timeZero << ") is too far from zero to be stored as a bin number at the resolution of "
+            << resolution << " picoseconds.";
+    issues[Prop::TIME_ZERO] = message.str();
+    return;
+  }
+  if (!isStorableBin(lastTime, resolution)) {
+    std::ostringstream message;
+    message << "The time axis ends at " << lastTime
+            << " microseconds, which is too far from zero to be stored as a bin number at the resolution of "
+            << resolution << " picoseconds.";
+    issues[Prop::INPUT_WORKSPACE] = message.str();
+    return;
+  }
   const double firstGoodData = absoluteFirstGoodData(ws);
   if (isEmpty(firstGoodData)) {
     issues[Prop::FIRST_GOOD_DATA] = "FirstGoodData must be set, as the workspace has no FirstGoodData log.";
@@ -401,25 +469,35 @@ void SaveNexusMuon::validateWorkspace(const MatrixWorkspace &ws, std::map<std::s
     return;
   }
 
-  const double lastGoodDataProperty = getProperty(Prop::LAST_GOOD_DATA);
-  if (isEmpty(lastGoodDataProperty)) {
-    return;
-  }
+  const bool lastFromProperty = !isEmpty(static_cast<double>(getProperty(Prop::LAST_GOOD_DATA)));
   const double lastGoodData = absoluteLastGoodData(ws);
   std::ostringstream lastMessage;
-  if (!std::isfinite(lastGoodDataProperty)) {
-    lastMessage << "LastGoodData must be a finite number.";
-  } else if (lastGoodData <= firstGoodData) {
-    lastMessage << "LastGoodData gives a last good data of " << lastGoodData
-                << " microseconds from the start of the raw time axis, which is not after first good data ("
-                << firstGoodData << "). Check GoodDataRelativeToTimeZero.";
-  } else if (lastGoodData > lastTime) {
-    lastMessage << "LastGoodData gives a last good data of " << lastGoodData
-                << " microseconds from the start of the raw time axis, which is after the end of the time axis ("
-                << lastTime << "). Check GoodDataRelativeToTimeZero.";
+  if (lastFromProperty) {
+    if (!std::isfinite(lastGoodData)) {
+      lastMessage << "LastGoodData must be a finite number.";
+    } else if (lastGoodData <= firstGoodData) {
+      lastMessage << "LastGoodData gives a last good data of " << lastGoodData
+                  << " microseconds from the start of the raw time axis, which is not after first good data ("
+                  << firstGoodData << "). Check GoodDataRelativeToTimeZero.";
+    } else if (lastGoodData > lastTime) {
+      lastMessage << "LastGoodData gives a last good data of " << lastGoodData
+                  << " microseconds from the start of the raw time axis, which is after the end of the time axis ("
+                  << lastTime << "). Check GoodDataRelativeToTimeZero.";
+    }
+  }
+  // The file stores whole bins, so good data that is valid as a time can still round to an empty range
+  if (lastMessage.str().empty()) {
+    const auto firstBin = goodDataBin(firstGoodData, timeZero, lastTime, resolution);
+    const auto lastBin = goodDataBin(lastGoodData, timeZero, lastTime, resolution);
+    if (lastBin <= firstBin) {
+      lastMessage << "First and last good data are stored as bins " << firstBin << " and " << lastBin
+                  << " at the resolution of " << resolution
+                  << " picoseconds, which leaves no good data. The last good data must be at least one bin after the "
+                     "first.";
+    }
   }
   if (!lastMessage.str().empty()) {
-    issues[Prop::LAST_GOOD_DATA] = lastMessage.str();
+    issues[lastFromProperty ? Prop::LAST_GOOD_DATA : Prop::FIRST_GOOD_DATA] = lastMessage.str();
   }
 }
 
@@ -434,10 +512,22 @@ void SaveNexusMuon::validateDeadTimeTable(const MatrixWorkspace &ws, std::map<st
   }
   const auto ids = detectorIDs(ws);
   const std::set<int32_t> detectors(ids.cbegin(), ids.cend());
+  std::set<int32_t> seen;
   for (size_t row = 0; row < table->rowCount(); ++row) {
-    if (!detectors.contains(table->cell<int>(row, 0))) {
-      issues[Prop::DEAD_TIME_TABLE] = "The dead time table contains spectrum " +
-                                      std::to_string(table->cell<int>(row, 0)) + ", which is not in the workspace.";
+    const auto spectrum = table->cell<int>(row, 0);
+    if (!detectors.contains(spectrum)) {
+      issues[Prop::DEAD_TIME_TABLE] =
+          "The dead time table contains spectrum " + std::to_string(spectrum) + ", which is not in the workspace.";
+      return;
+    }
+    if (!seen.insert(spectrum).second) {
+      issues[Prop::DEAD_TIME_TABLE] = "The dead time table contains spectrum " + std::to_string(spectrum) +
+                                      " more than once. The file can only store one dead time per detector.";
+      return;
+    }
+    if (!std::isfinite(table->cell<double>(row, 1))) {
+      issues[Prop::DEAD_TIME_TABLE] =
+          "The dead time of spectrum " + std::to_string(spectrum) + " must be a finite number.";
       return;
     }
   }
@@ -717,15 +807,15 @@ void SaveNexusMuon::writePeriods(Nexus::File &file, const MatrixWorkspace &ws) c
 
   file.makeGroup(NeXusEntry::PERIOD, "IXperiods", true);
   writeScalar<int32_t>(file, "number", 1);
-  file.writeData("labels", periodLogValue(run, "period_labels").value_or("Period 1"));
-  writeScalar(file, NeXusEntry::SEQUENCES, periodLogNumber<int32_t>(run, "period_sequences", 1));
-  writeScalar(file, NeXusEntry::TYPE, periodLogNumber<int32_t>(run, "period_type", 1));
-  writeScalar(file, NeXusEntry::REQUESTED, periodLogNumber<int32_t>(run, "frames_period_requested", 0));
-  writeScalar(file, NeXusEntry::RAWFRAMES, periodLogNumber<int32_t>(run, "frames_period_raw", 0));
-  writeScalar(file, NeXusEntry::PERIODOUTPUT, periodLogNumber<int32_t>(run, "period_output", 0));
-  // Total counts are in millions of events
-  writeScalar(file, NeXusEntry::PERIODCOUNTS,
-              periodLogNumber<float>(run, "total_counts_period", static_cast<float>(totalCounts / 1e6)), "Mev");
+  file.writeData("labels", periodLogValue(run, "period_labels", g_log).value_or("Period 1"));
+  writeScalar(file, NeXusEntry::SEQUENCES, periodLogNumber<int32_t>(run, "period_sequences", 1, g_log));
+  writeScalar(file, NeXusEntry::TYPE, periodLogNumber<int32_t>(run, "period_type", 1, g_log));
+  writeScalar(file, NeXusEntry::REQUESTED, periodLogNumber<int32_t>(run, "frames_period_requested", 0, g_log));
+  writeScalar(file, NeXusEntry::RAWFRAMES, periodLogNumber<int32_t>(run, "frames_period_raw", 0, g_log));
+  writeScalar(file, NeXusEntry::PERIODOUTPUT, periodLogNumber<int32_t>(run, "period_output", 0, g_log));
+  // Total counts are in millions of events. They are taken from the counts rather than the total_counts_period log,
+  // so that they match the counts saved after any changes to them.
+  writeScalar(file, NeXusEntry::PERIODCOUNTS, static_cast<float>(totalCounts / 1e6), "Mev");
   writeScalar(file, NeXusEntry::GOODFRAMES, goodFrames);
   if (run.hasProperty("proton_charge_by_period")) {
     const auto *charges = dynamic_cast<ArrayProperty<double> *>(run.getProperty("proton_charge_by_period"));
@@ -771,7 +861,12 @@ void SaveNexusMuon::writeLogs(Nexus::File &file, const MatrixWorkspace &ws) cons
     const auto *stringLog = dynamic_cast<const TimeSeriesProperty<std::string> *>(log);
     const auto *timeSeries = dynamic_cast<const ITimeSeriesProperty *>(log);
     // Boolean logs, such as running and the period filters, are regenerated on loading
-    if ((!doubleLog && !intLog && !stringLog) || timeSeries->realSize() == 0) {
+    if (!timeSeries || dynamic_cast<const TimeSeriesProperty<bool> *>(log) || timeSeries->realSize() == 0) {
+      continue;
+    }
+    if (!doubleLog && !intLog && !stringLog) {
+      g_log.warning() << "The log " << logName << " is not saved, as only time series of doubles, 32-bit integers "
+                      << "and text can be saved.\n";
       continue;
     }
     if (logName.contains('/')) {

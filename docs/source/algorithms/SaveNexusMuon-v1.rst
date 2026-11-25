@@ -38,7 +38,8 @@ of the time axis, as in ISIS muon files.
 
 The file stores first and last good data as bin numbers, in units of the resolution, which is the width of the first
 time bin. The values saved are rounded to the nearest whole bin, but the first good bin is never before time zero and
-the last good bin is never after the end of the time axis.
+the last good bin is never after the end of the time axis. The last good bin must be at least one bin after the first
+good bin.
 
 What is saved
 #############
@@ -63,9 +64,11 @@ Field in the file                       Source
 ``sample/magnetic_field``
 ``good_frames``, ``run_number``,        The ``goodfrm``, ``run_number``, ``run_start`` and ``run_end`` sample logs.
 ``start_time``, ``end_time``
-``periods``                             The ``period_*`` sample logs, or the values for a single period.
-``runlog``                              Every time series sample log of numbers or text. Logs that loading creates
-                                        itself, such as ``running`` and ``periods``, are not saved.
+``periods``                             The ``period_*`` sample logs, or the values for a single period. The total
+                                        counts are calculated from the saved counts.
+``runlog``                              Every time series sample log of floating-point numbers, 32-bit integers or
+                                        text. Logs that loading creates itself, such as ``running`` and ``periods``,
+                                        are not saved.
 ======================================= ===============================================================================
 
 The proton charge, raw frames and experiment identifier are taken from the ``gd_prtn_chrg``, ``tot_prtn_chrg``,
