@@ -125,8 +125,10 @@ class WorkspaceSaverTest(unittest.TestCase):
             InputWorkspace="enginx_instr", CustomGroupingString="1,2,3+4", OutputWorkspace="group"
         ).OutputWorkspace
         original_groups = original.extractY().copy()
-        original_group_of_det_3 = original.getValue(3)
-        original_group_of_det_4 = original.getValue(4)
+        original_group_ids = original.getGroupIDs().copy()
+        # Detector IDs are instrument-specific, so take them from the workspace rather than hard-coding them
+        original_det_ids = [list(original.getDetectorIDs(i)) for i in range(original.getNumberHistograms())]
+        original_values = {det_ids[0]: original.getValue(det_ids[0]) for det_ids in original_det_ids[:4]}
         workspacesaver.WorkspaceSaver(self.working_directory).save_workspaces(["group"])
         ADS.clear()
 
@@ -136,9 +138,12 @@ class WorkspaceSaverTest(unittest.TestCase):
         self.assertTrue(isinstance(loaded, GroupingWorkspace))
         self.assertEqual(original.getNumberHistograms(), loaded.getNumberHistograms())
         numpy.testing.assert_array_equal(original_groups, loaded.extractY())
-        self.assertEqual(original_group_of_det_3, loaded.getValue(3))
-        self.assertEqual(original_group_of_det_4, loaded.getValue(4))
-        self.assertEqual(loaded.getValue(3), loaded.getValue(4))
+        numpy.testing.assert_array_equal(original_group_ids, loaded.getGroupIDs())
+        loaded_det_ids = [list(loaded.getDetectorIDs(i)) for i in range(loaded.getNumberHistograms())]
+        self.assertEqual(original_det_ids, loaded_det_ids)
+        # getValue relies on the detector ID mapping, which has to be rebuilt on load
+        for det_id, value in original_values.items():
+            self.assertEqual(value, loaded.getValue(det_id))
 
     def _load_MDWorkspace_and_test_it(self, save_name):
         filename = self.working_directory + "/" + save_name + ".nxs"
