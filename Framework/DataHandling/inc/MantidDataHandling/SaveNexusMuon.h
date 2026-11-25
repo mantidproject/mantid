@@ -46,6 +46,7 @@ private:
   void validateWorkspace(const API::MatrixWorkspace &ws, std::map<std::string, std::string> &issues) const;
   void validateDeadTimeTable(const API::MatrixWorkspace &ws, std::map<std::string, std::string> &issues) const;
   void validateGroupingTable(const API::MatrixWorkspace &ws, std::map<std::string, std::string> &issues) const;
+  double timeZeroIf(const std::string &flagProperty) const;
   double absoluteFirstGoodData(const API::MatrixWorkspace &ws) const;
   double absoluteLastGoodData(const API::MatrixWorkspace &ws) const;
   std::string mainFieldDirection(const API::MatrixWorkspace &ws) const;

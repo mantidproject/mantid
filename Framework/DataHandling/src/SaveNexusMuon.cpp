@@ -18,6 +18,8 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitLabelTypes.h"
@@ -65,17 +67,6 @@ const std::set<std::string> REGENERATED_LOGS{"periods"};
 /// Length of the ISO8601 date and time strings read by LoadISISNexus
 constexpr size_t ISO_TIME_LENGTH = 19;
 
-/// Writes a scalar as a one-element array, which is how ISIS muon files store scalars
-template <typename T>
-void writeScalar(Nexus::File &file, const std::string &name, const T value, const std::string &units = "") {
-  file.writeData(name, std::vector<T>{value});
-  if (!units.empty()) {
-    file.openData(name);
-    file.putAttr("units", units);
-    file.closeData();
-  }
-}
-
 /// Writes a block of strings as a two-dimensional character array
 void writeStringArray(Nexus::File &file, const std::string &name, const std::vector<std::string> &values) {
   const size_t maxLength =
@@ -90,12 +81,49 @@ void writeStringArray(Nexus::File &file, const std::string &name, const std::vec
   file.closeData();
 }
 
+using Attributes = std::vector<std::pair<std::string, std::string>>;
+
+/// Writes a dataset with the given text attributes, leaving out those that are empty, and returns its link
+template <typename T>
+NXlink writeWithAttributes(Nexus::File &file, const std::string &name, const T &value,
+                           const Attributes &attributes = {}) {
+  if constexpr (std::is_same_v<T, std::vector<std::string>>) {
+    writeStringArray(file, name, value);
+  } else {
+    file.writeData(name, value);
+  }
+  file.openData(name);
+  for (const auto &[attribute, text] : attributes) {
+    if (!text.empty()) {
+      file.putAttr(attribute, text);
+    }
+  }
+  const auto link = file.getDataID();
+  file.closeData();
+  return link;
+}
+
+/// Writes a scalar as a one-element array, which is how ISIS muon files store scalars
+template <typename T>
+void writeScalar(Nexus::File &file, const std::string &name, const T value, const std::string &units = "") {
+  writeWithAttributes(file, name, std::vector<T>{value}, {{"units", units}});
+}
+
+/// The value of a log as text, or an empty string if the log does not exist
+std::string logValue(const Run &run, const std::string &logName) {
+  return run.hasProperty(logName) ? run.getProperty(logName)->value() : "";
+}
+
+/// The log with the given name and type, or null if there is no such log
+template <typename T> const T *findLog(const Run &run, const std::string &logName) {
+  return run.hasProperty(logName) ? dynamic_cast<const T *>(run.getProperty(logName)) : nullptr;
+}
+
 /// The zero-based index of the period the workspace holds, from the current_period log
 size_t currentPeriodIndex(const Run &run) {
-  if (!run.hasProperty("current_period")) {
-    return 0;
-  }
-  return static_cast<size_t>(std::max(1, run.getPropertyAsIntegerValue("current_period")) - 1);
+  return run.hasProperty("current_period")
+             ? static_cast<size_t>(std::max(1, run.getPropertyAsIntegerValue("current_period")) - 1)
+             : 0;
 }
 
 /// The single-period value of a period log, which holds a ';' separated value for each period of the original file
@@ -103,18 +131,10 @@ std::optional<std::string> periodLogValue(const Run &run, const std::string &log
   if (!run.hasProperty(logName)) {
     return std::nullopt;
   }
+  // An empty log holds one empty value, but the tokenizer gives no tokens for it
   const auto values = run.getProperty(logName)->value();
+  const auto tokens = values.empty() ? std::vector<std::string>{""} : StringTokenizer(values, ";").asVector();
   const auto period = currentPeriodIndex(run);
-  std::vector<std::string> tokens;
-  size_t start = 0;
-  while (true) {
-    const auto end = values.find(';', start);
-    tokens.emplace_back(values.substr(start, end - start));
-    if (end == std::string::npos) {
-      break;
-    }
-    start = end + 1;
-  }
   if (period >= tokens.size()) {
     logger.warning() << "The " << logName << " log has no value for period " << period + 1
                      << ", so the value for period 1 is saved.\n";
@@ -123,18 +143,11 @@ std::optional<std::string> periodLogValue(const Run &run, const std::string &log
   return tokens[period];
 }
 
-template <typename T>
-T periodLogNumber(const Run &run, const std::string &logName, const T defaultValue, Logger &logger) {
+/// The single-period value of a period log as a whole number, or defaultValue if it has none
+int32_t periodLogNumber(const Run &run, const std::string &logName, const int32_t defaultValue, Logger &logger) {
   const auto value = periodLogValue(run, logName, logger);
-  if (!value) {
-    return defaultValue;
-  }
   try {
-    if constexpr (std::is_integral_v<T>) {
-      return static_cast<T>(std::stoi(*value));
-    } else {
-      return static_cast<T>(std::stod(*value));
-    }
+    return value ? std::stoi(*value) : defaultValue;
   } catch (const std::logic_error &) {
     return defaultValue;
   }
@@ -171,8 +184,6 @@ double firstBinWidth(const MatrixWorkspace &ws) {
   return x[1] - x[0];
 }
 
-int32_t binIndex(const double time, const double width) { return static_cast<int32_t>(std::lround(time / width)); }
-
 /// Whether a bin width in microseconds rounds to a resolution in picoseconds that the file can store
 bool isStorableResolution(const double width) {
   const double picoseconds = width * 1e6;
@@ -198,48 +209,32 @@ int32_t goodDataBin(const double time, const double earliest, const double lates
   const double binWidth = static_cast<double>(resolution) / 1e6;
   const auto firstBin = static_cast<int32_t>(std::ceil(earliest / binWidth - BIN_TOLERANCE));
   const auto lastBin = static_cast<int32_t>(std::floor(latest / binWidth + BIN_TOLERANCE));
-  return std::max(firstBin, std::min(binIndex(time, binWidth), lastBin));
-}
-
-/// Writes the times and values of a log, returning the number of values written
-template <typename T>
-size_t writeTimeSeriesValues(Nexus::File &file, const TimeSeriesProperty<T> &log, const DateAndTime &start) {
-  const auto values = log.valuesAsVector();
-  const auto times = log.timesAsVectorSeconds(start);
-  file.writeData("time", times);
-  file.openData("time");
-  file.putAttr("start", isoTime(start));
-  file.putAttr("units", std::string("second"));
-  file.closeData();
-  if constexpr (std::is_same_v<T, std::string>) {
-    writeStringArray(file, "value", values);
-  } else {
-    file.writeData("value", values);
-  }
-  if (!log.units().empty()) {
-    file.openData("value");
-    file.putAttr("units", log.units());
-    file.closeData();
-  }
-  return values.size();
+  const auto bin = static_cast<int32_t>(std::lround(time / binWidth));
+  return std::max(firstBin, std::min(bin, lastBin));
 }
 
 /// Writes the validity of each log value, recorded on loading as a separate boolean log
 void writeValidity(Nexus::File &file, const Run &run, const std::string &logName, const size_t numValues) {
-  const auto validityName = LogManager::getInvalidValuesFilterLogName(logName);
-  if (!run.hasProperty(validityName)) {
-    return;
-  }
-  const auto *validity = dynamic_cast<const TimeSeriesProperty<bool> *>(run.getProperty(validityName));
+  const auto *validity = findLog<TimeSeriesProperty<bool>>(run, LogManager::getInvalidValuesFilterLogName(logName));
   if (!validity || validity->size() == 0) {
     return;
   }
   // Loading appends the last value at the run end time to the value log but not to its validity log
-  auto flags = validity->valuesAsVector();
-  std::vector<int32_t> valid(numValues, flags.back() ? 1 : 0);
-  std::transform(flags.cbegin(), flags.cbegin() + std::min(flags.size(), numValues), valid.begin(),
-                 [](const bool flag) { return flag ? 1 : 0; });
+  const auto flags = validity->valuesAsVector();
+  std::vector<int32_t> valid(numValues, static_cast<int32_t>(flags.back()));
+  std::copy_n(flags.cbegin(), std::min(flags.size(), numValues), valid.begin());
   file.writeData("value_valid", valid);
+}
+
+/// Writes a time series log as an NXlog group of its times, values and their validity
+template <typename T>
+void writeLog(Nexus::File &file, const Run &run, const TimeSeriesProperty<T> &log, const DateAndTime &start) {
+  const auto values = log.valuesAsVector();
+  file.makeGroup(log.name(), "NXlog", true);
+  writeWithAttributes(file, "time", log.timesAsVectorSeconds(start), {{"start", isoTime(start)}, {"units", "second"}});
+  writeWithAttributes(file, "value", values, {{"units", log.units()}});
+  writeValidity(file, run, log.name(), values.size());
+  file.closeGroup();
 }
 } // namespace
 
@@ -267,8 +262,8 @@ void SaveNexusMuon::init() {
                   "Whether FirstGoodData and LastGoodData are measured from time zero, as shown in Muon Analysis, "
                   "rather than from the start of the raw time axis, as given by the FirstGoodData and LastGoodData "
                   "outputs of Load.");
-  const std::vector<std::string> fieldOptions{"", "Longitudinal", "Transverse"};
-  declareProperty(Prop::MAIN_FIELD_DIRECTION, "", std::make_shared<StringListValidator>(fieldOptions),
+  declareProperty(Prop::MAIN_FIELD_DIRECTION, "",
+                  std::make_shared<StringListValidator>(std::vector<std::string>{"", "Longitudinal", "Transverse"}),
                   "The main field direction. If not set, it is taken from the main_field_direction log. If neither "
                   "is available, it is not written and loading assumes Longitudinal.");
   declareProperty(std::make_unique<WorkspaceProperty<ITableWorkspace>>(Prop::DEAD_TIME_TABLE, "", Direction::Input,
@@ -381,31 +376,21 @@ void SaveNexusMuon::validateWorkspace(const MatrixWorkspace &ws, std::map<std::s
     }
   }
   // Logs which are converted when writing the file, which must be checked before it is created
-  for (const auto &log : INTEGER_LOGS) {
-    try {
-      if (run.hasProperty(log)) {
-        static_cast<void>(run.getPropertyAsIntegerValue(log));
+  const auto checkLogs = [&](const std::vector<std::string> &logs, const std::string &kind, const auto &convert) {
+    for (const auto &log : logs) {
+      try {
+        if (run.hasProperty(log)) {
+          static_cast<void>(convert(log));
+        }
+      } catch (const std::exception &) {
+        addIssue("The " + log + " log must be " + kind + ".");
       }
-    } catch (const std::exception &) {
-      addIssue("The " + log + " log must be a whole number.");
     }
-  }
-  for (const auto &log : NUMERIC_LOGS) {
-    try {
-      if (run.hasProperty(log)) {
-        static_cast<void>(run.getPropertyAsSingleValue(log));
-      }
-    } catch (const std::exception &) {
-      addIssue("The " + log + " log must be a number.");
-    }
-  }
-  if (run.hasProperty("run_number")) {
-    try {
-      static_cast<void>(std::stoi(run.getProperty("run_number")->value()));
-    } catch (const std::logic_error &) {
-      addIssue("The run_number log must be a whole number.");
-    }
-  }
+  };
+  checkLogs(INTEGER_LOGS, "a whole number", [&run](const auto &log) { return run.getPropertyAsIntegerValue(log); });
+  checkLogs(NUMERIC_LOGS, "a number", [&run](const auto &log) { return run.getPropertyAsSingleValue(log); });
+  checkLogs({"run_number"}, "a whole number",
+            [&run](const auto &log) { return std::stoi(run.getProperty(log)->value()); });
   try {
     if (run.endTime() < run.startTime()) {
       addIssue("The run_end log is before the run_start log.");
@@ -424,8 +409,7 @@ void SaveNexusMuon::validateWorkspace(const MatrixWorkspace &ws, std::map<std::s
   if (isEmpty(timeZero) || !std::isfinite(timeZero)) {
     return;
   }
-  const bool corrected = getProperty(Prop::TIME_ZERO_CORRECTED);
-  const double lastTime = ws.x(0).back() + (corrected ? timeZero : 0.0);
+  const double lastTime = ws.x(0).back() + timeZeroIf(Prop::TIME_ZERO_CORRECTED);
   const auto resolution = resolutionPicoseconds(firstBinWidth(ws));
   if (!isStorableBin(timeZero, resolution)) {
     std::ostringstream message;
@@ -561,43 +545,35 @@ void SaveNexusMuon::validateGroupingTable(const MatrixWorkspace &ws, std::map<st
   }
 }
 
+/// TimeZero if the given boolean property is set, otherwise zero
+double SaveNexusMuon::timeZeroIf(const std::string &flagProperty) const {
+  const bool flag = getProperty(flagProperty);
+  return flag ? static_cast<double>(getProperty(Prop::TIME_ZERO)) : 0.0;
+}
+
 /// First good data measured from the start of the raw time axis, or EMPTY_DBL if it is not available
 double SaveNexusMuon::absoluteFirstGoodData(const MatrixWorkspace &ws) const {
-  const double timeZero = getProperty(Prop::TIME_ZERO);
-  const double property = getProperty(Prop::FIRST_GOOD_DATA);
-  if (!isEmpty(property)) {
-    const bool relative = getProperty(Prop::GOOD_DATA_RELATIVE);
-    return property + (relative ? timeZero : 0.0);
-  }
-  const auto &run = ws.run();
-  if (!run.hasProperty("FirstGoodData")) {
-    return EMPTY_DBL();
+  if (const double property = getProperty(Prop::FIRST_GOOD_DATA); !isEmpty(property)) {
+    return property + timeZeroIf(Prop::GOOD_DATA_RELATIVE);
   }
   // The FirstGoodData log is relative to time zero when the time axis has been corrected
-  const bool corrected = getProperty(Prop::TIME_ZERO_CORRECTED);
-  return run.getPropertyAsSingleValue("FirstGoodData") + (corrected ? timeZero : 0.0);
+  const auto &run = ws.run();
+  return run.hasProperty("FirstGoodData")
+             ? run.getPropertyAsSingleValue("FirstGoodData") + timeZeroIf(Prop::TIME_ZERO_CORRECTED)
+             : EMPTY_DBL();
 }
 
 /// Last good data measured from the start of the raw time axis. Without a LastGoodData property, the data is good to
 /// the end of the time axis, as in ISIS muon files, where last_good_bin is the end of the data.
 double SaveNexusMuon::absoluteLastGoodData(const MatrixWorkspace &ws) const {
-  const double timeZero = getProperty(Prop::TIME_ZERO);
   const double property = getProperty(Prop::LAST_GOOD_DATA);
-  if (!isEmpty(property)) {
-    const bool relative = getProperty(Prop::GOOD_DATA_RELATIVE);
-    return property + (relative ? timeZero : 0.0);
-  }
-  const bool corrected = getProperty(Prop::TIME_ZERO_CORRECTED);
-  return ws.x(0).back() + (corrected ? timeZero : 0.0);
+  return isEmpty(property) ? ws.x(0).back() + timeZeroIf(Prop::TIME_ZERO_CORRECTED)
+                           : property + timeZeroIf(Prop::GOOD_DATA_RELATIVE);
 }
 
 std::string SaveNexusMuon::mainFieldDirection(const MatrixWorkspace &ws) const {
   const std::string property = getProperty(Prop::MAIN_FIELD_DIRECTION);
-  if (!property.empty()) {
-    return property;
-  }
-  const auto &run = ws.run();
-  return run.hasProperty("main_field_direction") ? run.getProperty("main_field_direction")->value() : "";
+  return property.empty() ? logValue(ws.run(), "main_field_direction") : property;
 }
 
 void SaveNexusMuon::exec() {
@@ -610,10 +586,7 @@ void SaveNexusMuon::exec() {
 
   const auto instrumentName = ws->getInstrument()->getName();
   writeScalar<int32_t>(file, "IDF_version", 2);
-  file.writeData("definition", "pulsedTD");
-  file.openData("definition");
-  file.putAttr("version", std::string("2.0"));
-  file.closeData();
+  writeWithAttributes(file, "definition", std::string("pulsedTD"), {{"version", "2.0"}});
   file.writeData("beamline", instrumentName);
   file.writeData("name", instrumentName);
   file.writeData("program_name", "mantid");
@@ -631,9 +604,7 @@ void SaveNexusMuon::exec() {
 
 void SaveNexusMuon::writeRunDetails(Nexus::File &file, const MatrixWorkspace &ws) const {
   const auto &run = ws.run();
-  const auto title =
-      ws.getTitle().empty() && run.hasProperty("run_title") ? run.getProperty("run_title")->value() : ws.getTitle();
-  file.writeData("title", title);
+  file.writeData("title", ws.getTitle().empty() ? logValue(run, "run_title") : ws.getTitle());
   file.writeData("notes", ws.getComment());
   writeScalar<int32_t>(file, "run_number", std::stoi(run.getProperty("run_number")->value()));
   file.writeData("start_time", isoTime(run.startTime()));
@@ -658,8 +629,7 @@ void SaveNexusMuon::writeRunDetails(Nexus::File &file, const MatrixWorkspace &ws
   writeLogOrZero("proton_charge", "gd_prtn_chrg", "uAh");
   writeLogOrZero("proton_charge_raw", "tot_prtn_chrg", "uAh");
 
-  const auto goodFrames = static_cast<int32_t>(run.getPropertyAsIntegerValue("goodfrm"));
-  writeScalar(file, "good_frames", goodFrames);
+  writeScalar(file, "good_frames", static_cast<int32_t>(run.getPropertyAsIntegerValue("goodfrm")));
   if (!run.hasProperty("rawfrm")) {
     notRecorded.emplace_back("raw_frames");
   }
@@ -668,15 +638,10 @@ void SaveNexusMuon::writeRunDetails(Nexus::File &file, const MatrixWorkspace &ws
   if (!run.hasProperty("rb_proposal")) {
     notRecorded.emplace_back("experiment_identifier");
   }
-  file.writeData("experiment_identifier",
-                 run.hasProperty("rb_proposal") ? run.getProperty("rb_proposal")->value() : std::string(""));
+  file.writeData("experiment_identifier", logValue(run, "rb_proposal"));
 
   if (!notRecorded.empty()) {
-    std::string fields;
-    for (const auto &field : notRecorded) {
-      fields += (fields.empty() ? "" : ", ") + field;
-    }
-    g_log.notice() << "The workspace does not record " << fields
+    g_log.notice() << "The workspace does not record " << Strings::join(notRecorded.cbegin(), notRecorded.cend(), ", ")
                    << ", so they are written as zero or blank. Muon analysis does not use them.\n";
   }
 }
@@ -685,9 +650,8 @@ void SaveNexusMuon::writeInstrument(Nexus::File &file, const MatrixWorkspace &ws
   const auto &run = ws.run();
   const auto numSpectra = ws.getNumberHistograms();
   const auto numBins = ws.blocksize();
-  const bool corrected = getProperty(Prop::TIME_ZERO_CORRECTED);
   const double timeZero = getProperty(Prop::TIME_ZERO);
-  const double timeShift = corrected ? timeZero : 0.0;
+  const double timeShift = timeZeroIf(Prop::TIME_ZERO_CORRECTED);
   const double lastTime = ws.x(0).back() + timeShift;
   const auto resolution = resolutionPicoseconds(firstBinWidth(ws));
   const auto ids = detectorIDs(ws);
@@ -726,20 +690,9 @@ void SaveNexusMuon::writeInstrument(Nexus::File &file, const MatrixWorkspace &ws
   std::vector<float> rawTime(x.size());
   std::transform(x.cbegin(), x.cend(), rawTime.begin(),
                  [timeShift](const double time) { return static_cast<float>(time + timeShift); });
-  file.writeData("raw_time", rawTime);
-  file.openData("raw_time");
-  file.putAttr("units", std::string("microseconds"));
-  links.emplace_back(file.getDataID());
-  file.closeData();
-
-  file.writeData("spectrum_index", ids);
-  file.openData("spectrum_index");
-  links.emplace_back(file.getDataID());
-  file.closeData();
-  file.writeData("period_index", std::vector<int32_t>{1});
-  file.openData("period_index");
-  links.emplace_back(file.getDataID());
-  file.closeData();
+  links.emplace_back(writeWithAttributes(file, "raw_time", rawTime, {{"units", "microseconds"}}));
+  links.emplace_back(writeWithAttributes(file, "spectrum_index", ids));
+  links.emplace_back(writeWithAttributes(file, "period_index", std::vector<int32_t>{1}));
 
   writeScalar(file, NeXusEntry::RESOLUTION, resolution, "picoseconds");
   writeScalar(file, NeXusEntry::TIMEZERO, static_cast<float>(timeZero), "microseconds");
@@ -754,10 +707,7 @@ void SaveNexusMuon::writeInstrument(Nexus::File &file, const MatrixWorkspace &ws
   } else {
     g_log.notice("No DeadTimeTable was given, so zero dead times are written.\n");
   }
-  file.writeData(NeXusEntry::DEADTIME, deadTimeValues);
-  file.openData(NeXusEntry::DEADTIME);
-  file.putAttr("units", std::string("microseconds"));
-  file.closeData();
+  writeWithAttributes(file, NeXusEntry::DEADTIME, deadTimeValues, {{"units", "microseconds"}});
   if (const ITableWorkspace_sptr grouping = getProperty(Prop::GROUPING_TABLE)) {
     std::vector<int32_t> groups(maxDetector, 0);
     for (size_t row = 0; row < grouping->rowCount(); ++row) {
@@ -798,7 +748,6 @@ void SaveNexusMuon::writeSample(Nexus::File &file, const MatrixWorkspace &ws) co
 
 void SaveNexusMuon::writePeriods(Nexus::File &file, const MatrixWorkspace &ws) const {
   const auto &run = ws.run();
-  const auto goodFrames = static_cast<int32_t>(run.getPropertyAsIntegerValue("goodfrm"));
   double totalCounts = 0.0;
   for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
     const auto &y = ws.y(i);
@@ -808,21 +757,20 @@ void SaveNexusMuon::writePeriods(Nexus::File &file, const MatrixWorkspace &ws) c
   file.makeGroup(NeXusEntry::PERIOD, "IXperiods", true);
   writeScalar<int32_t>(file, "number", 1);
   file.writeData("labels", periodLogValue(run, "period_labels", g_log).value_or("Period 1"));
-  writeScalar(file, NeXusEntry::SEQUENCES, periodLogNumber<int32_t>(run, "period_sequences", 1, g_log));
-  writeScalar(file, NeXusEntry::TYPE, periodLogNumber<int32_t>(run, "period_type", 1, g_log));
-  writeScalar(file, NeXusEntry::REQUESTED, periodLogNumber<int32_t>(run, "frames_period_requested", 0, g_log));
-  writeScalar(file, NeXusEntry::RAWFRAMES, periodLogNumber<int32_t>(run, "frames_period_raw", 0, g_log));
-  writeScalar(file, NeXusEntry::PERIODOUTPUT, periodLogNumber<int32_t>(run, "period_output", 0, g_log));
+  writeScalar(file, NeXusEntry::SEQUENCES, periodLogNumber(run, "period_sequences", 1, g_log));
+  writeScalar(file, NeXusEntry::TYPE, periodLogNumber(run, "period_type", 1, g_log));
+  writeScalar(file, NeXusEntry::REQUESTED, periodLogNumber(run, "frames_period_requested", 0, g_log));
+  writeScalar(file, NeXusEntry::RAWFRAMES, periodLogNumber(run, "frames_period_raw", 0, g_log));
+  writeScalar(file, NeXusEntry::PERIODOUTPUT, periodLogNumber(run, "period_output", 0, g_log));
   // Total counts are in millions of events. They are taken from the counts rather than the total_counts_period log,
   // so that they match the counts saved after any changes to them.
   writeScalar(file, NeXusEntry::PERIODCOUNTS, static_cast<float>(totalCounts / 1e6), "Mev");
-  writeScalar(file, NeXusEntry::GOODFRAMES, goodFrames);
-  if (run.hasProperty("proton_charge_by_period")) {
-    const auto *charges = dynamic_cast<ArrayProperty<double> *>(run.getProperty("proton_charge_by_period"));
-    const auto period = currentPeriodIndex(run);
-    if (charges && period < charges->operator()().size()) {
-      writeScalar(file, "proton_charge", static_cast<float>(charges->operator()()[period]), "uAh");
-    } else if (charges) {
+  writeScalar(file, NeXusEntry::GOODFRAMES, static_cast<int32_t>(run.getPropertyAsIntegerValue("goodfrm")));
+  if (const auto *charges = findLog<ArrayProperty<double>>(run, "proton_charge_by_period")) {
+    const auto &values = (*charges)();
+    if (const auto period = currentPeriodIndex(run); period < values.size()) {
+      writeScalar(file, "proton_charge", static_cast<float>(values[period]), "uAh");
+    } else {
       g_log.warning() << "The proton_charge_by_period log has no value for period " << period + 1
                       << ", so the period proton charge is not saved.\n";
     }
@@ -839,8 +787,7 @@ void SaveNexusMuon::writeMeasurement(Nexus::File &file, const MatrixWorkspace &w
   }
   file.makeGroup("measurement", "NXcollection", true);
   for (const auto &field : fields) {
-    const auto logName = "measurement_" + field;
-    file.writeData(field, run.hasProperty(logName) ? run.getProperty(logName)->value() : std::string(""));
+    file.writeData(field, logValue(run, "measurement_" + field));
   }
   file.closeGroup();
 }
@@ -873,17 +820,13 @@ void SaveNexusMuon::writeLogs(Nexus::File &file, const MatrixWorkspace &ws) cons
       g_log.warning() << "The log " << logName << " is not saved, as its name contains '/'.\n";
       continue;
     }
-    file.makeGroup(logName, "NXlog", true);
-    size_t numValues = 0;
     if (doubleLog) {
-      numValues = writeTimeSeriesValues(file, *doubleLog, start);
+      writeLog(file, run, *doubleLog, start);
     } else if (intLog) {
-      numValues = writeTimeSeriesValues(file, *intLog, start);
+      writeLog(file, run, *intLog, start);
     } else {
-      numValues = writeTimeSeriesValues(file, *stringLog, start);
+      writeLog(file, run, *stringLog, start);
     }
-    writeValidity(file, run, logName, numValues);
-    file.closeGroup();
   }
   file.closeGroup();
 }
