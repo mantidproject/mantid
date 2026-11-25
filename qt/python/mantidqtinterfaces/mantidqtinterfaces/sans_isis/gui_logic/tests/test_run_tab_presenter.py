@@ -194,14 +194,14 @@ class RunTabPresenterTest(unittest.TestCase):
     def test_file_information_exceptions_handled(self):
         for e in [ValueError, RuntimeError, OSError]:
             mocked_row = mock.Mock()
-            type(mocked_row).file_information = mock.PropertyMock(side_effect=e)
+            mocked_row.read_file_information = mock.Mock(side_effect=e)
             exception_rows = [mocked_row, mocked_row]
             self._mock_table.get_non_empty_rows = mock.Mock(return_value=exception_rows)
 
             self.presenter.on_update_rows()  # should not throw
 
     def test_update_rows_looks_up_the_file_of_the_first_row_only(self):
-        lookups = [mock.PropertyMock(return_value=mock.NonCallableMock()) for _ in range(5)]
+        lookups = [mock.Mock(return_value=mock.NonCallableMock()) for _ in range(5)]
         self._set_rows_with_file_information_lookups(lookups)
         self.presenter.on_user_file_load = mock.Mock()
 
@@ -215,9 +215,9 @@ class RunTabPresenterTest(unittest.TestCase):
 
     def test_update_rows_uses_the_first_row_whose_file_is_found(self):
         lookups = [
-            mock.PropertyMock(side_effect=RuntimeError),
-            mock.PropertyMock(return_value=mock.NonCallableMock()),
-            mock.PropertyMock(return_value=mock.NonCallableMock()),
+            mock.Mock(side_effect=RuntimeError),
+            mock.Mock(return_value=mock.NonCallableMock()),
+            mock.Mock(return_value=mock.NonCallableMock()),
         ]
         self._set_rows_with_file_information_lookups(lookups)
         self.presenter.on_user_file_load = mock.Mock()
@@ -235,14 +235,12 @@ class RunTabPresenterTest(unittest.TestCase):
         # Loading the user file looks up the instrument files and keeps them on the file information
         loaded.get_idf_file_path()
         self.presenter.on_user_file_load = mock.Mock()
-        self._set_rows_with_file_information_lookups([mock.PropertyMock(return_value=loaded)])
+        self._set_rows_with_file_information_lookups([mock.Mock(return_value=loaded)])
         self.presenter.on_update_rows()
         self.presenter.on_user_file_load.assert_called_once_with()
 
         self.presenter.on_user_file_load.reset_mock()
-        self._set_rows_with_file_information_lookups(
-            [mock.PropertyMock(return_value=factory.create_sans_file_information("SANS2D00022024"))]
-        )
+        self._set_rows_with_file_information_lookups([mock.Mock(return_value=factory.create_sans_file_information("SANS2D00022024"))])
         self.presenter.on_update_rows()
 
         self.presenter.on_user_file_load.assert_not_called()
@@ -250,14 +248,12 @@ class RunTabPresenterTest(unittest.TestCase):
     def test_update_rows_reloads_user_file_when_the_file_changes(self):
         factory = SANSFileInformationFactory()
         self.presenter.on_user_file_load = mock.Mock()
-        self._set_rows_with_file_information_lookups(
-            [mock.PropertyMock(return_value=factory.create_sans_file_information("SANS2D00022024"))]
-        )
+        self._set_rows_with_file_information_lookups([mock.Mock(return_value=factory.create_sans_file_information("SANS2D00022024"))])
         self.presenter.on_update_rows()
 
         self.presenter.on_user_file_load.reset_mock()
         new_file_information = factory.create_sans_file_information("SANS2D00022048")
-        self._set_rows_with_file_information_lookups([mock.PropertyMock(return_value=new_file_information)])
+        self._set_rows_with_file_information_lookups([mock.Mock(return_value=new_file_information)])
         self.presenter.on_update_rows()
 
         self.presenter.on_user_file_load.assert_called_once_with()
@@ -914,11 +910,7 @@ class RunTabPresenterTest(unittest.TestCase):
         return batch_file_path, user_file_path, view
 
     def _set_rows_with_file_information_lookups(self, lookups):
-        rows = []
-        for lookup in lookups:
-            row = mock.NonCallableMock()
-            type(row).file_information = lookup
-            rows.append(row)
+        rows = [mock.NonCallableMock(read_file_information=lookup) for lookup in lookups]
         self._mock_table.get_non_empty_rows = mock.Mock(return_value=rows)
 
     @staticmethod

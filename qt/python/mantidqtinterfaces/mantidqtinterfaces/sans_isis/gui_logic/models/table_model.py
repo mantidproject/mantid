@@ -204,7 +204,6 @@ class TableModel(object):
         self.notify_subscribers()
 
     def failure_handler(self, entry, error):
-        entry.file_information = None
         entry.sample_thickness = None
         entry.sample_height = None
         entry.sample_width = None
