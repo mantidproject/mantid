@@ -131,7 +131,7 @@ if(COVERAGE)
   coverage_turn_on()
 endif()
 
-set(QT6_MIN_VERSION 6.11)
+set(QT6_MIN_VERSION 6.12)
 
 if(ENABLE_WORKBENCH OR BUILD_MANTIDQT)
   if(NOT MANTID_QT_VERSION EQUAL 6)
@@ -156,8 +156,8 @@ if(ENABLE_WORKBENCH OR BUILD_MANTIDQT)
   endif()
   find_package(PyQt${QT_VERSION_MAJOR} REQUIRED)
   find_package(SIP REQUIRED)
-  # Disable use of C++ API deprecated before Qt 6.11.
-  add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x060B00)
+  # Disable use of C++ API deprecated before Qt 6.12.
+  add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x060C00)
 endif()
 
 # Now add in all the components
