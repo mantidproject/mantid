@@ -90,8 +90,12 @@ rm -f $workbench_ini
 echo MultiThreaded.MaxCores=2 > $userprops
 
 if [[ $OSTYPE == "msys"* ]]; then
-    WINDOWS_BUILD_OPTIONS="--config Release"
-    WINDOWS_TEST_OPTIONS="-C Release"
+    # Only a multi-config (Visual Studio) build takes a configuration. systemtest.bat refuses -C
+    # for a Ninja build.
+    if [[ ! -f $WORKSPACE/build/build.ninja ]]; then
+        WINDOWS_BUILD_OPTIONS="--config Release"
+        WINDOWS_TEST_OPTIONS="-C Release"
+    fi
     WINDOWS_UNITTEST_TIMEOUT_OPTIONS="--timeout 500"
     export PYTHONHOME=$CONDA_PREFIX
     SYSTEM_TEST_EXECUTABLE=$WORKSPACE/build/systemtest.bat
