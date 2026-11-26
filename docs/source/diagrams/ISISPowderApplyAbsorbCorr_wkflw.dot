@@ -1,93 +1,110 @@
-digraph isisPowderGenericAlgs{
+digraph isisPowderApplyAbsorbCorr{
     label="ISISPowder - Apply absorption corrections"
     $global_style
 
     // **Labels
-    label_GEM                               [label="Apply absorption corrections - GEM"]
-    label_PEARL                             [label="Apply absorption corrections - PEARL"]
-    label_POLARIS                           [label="Apply absorption corrections - POLARIS"]
+    label_GEM_POLARIS                       [label="Apply absorption corrections - GEM / POLARIS"]
+    label_PEARL                             [label="Apply absorption corrections - PEARL\n (vanadium only)"]
 
     // **Parameters
     subgraph params {
         $param_style
 
         // General
-        param_MayersInputs  [label="User/Adv config:\n\n Chemical Formula\n Cylinder Height\n Cylinder Position\n Cylinder Radius\n Number Density\n"]
+        param_advVanMayersInputs            [label="Adv config: Vanadium sample details\n (chemical formula, cylinder geometry,\n number density)"]
+        param_userSampleDetails             [label="User param: Sample details\n (set with 'set_sample_details')"]
+        param_multipleScattering            [label="User/Adv config: multiple_scattering"]
 
         // PEARL
-        param_advAbsFilename                [label="Adv config: Absorption Filename"]
-    }
-
-    // **Processes (inc. bespoke inst steps)
-    subgraph {
-        $process_style
-
+        param_genAbsorb                     [label="User param: gen_absorb"]
+        param_absorbOutFile                 [label="User param: absorb_corrections_out_filename"]
+        param_advAbsFilename                [label="Adv config: Vanadium absorption file"]
     }
 
     // **Algorithms
     subgraph algorithms{
         $algorithm_style
 
-        // General
+        // GEM / POLARIS
+        alg_GEM_maskDetector                [label="GEM: Mask detectors 1-100"]
+        alg_POLARIS_maskDetector            [label="POLARIS: Mask detectors 1-54"]
+        alg_SetSample                       [label="Set Sample: cylinder"]
+        alg_ConvertUnitsTOF                 [label="Convert Units: TOF"]
         alg_MayersSampleCorr                [label="Mayers Sample Correction"]
-
-        // GEM
-        alg_GEM_maskDetector                [label="Mask detectors 1-100"]
+        alg_ConvertUnitsOriginal            [label="Convert Units: original units"]
 
         // PEARL
-        alg_PEARL_Divide                    [label="Divide: Van ws / Absorb ws"]
+        alg_PEARL_Clone                     [label="Clone Workspace"]
+        alg_PEARL_ConvertUnitsWavelength    [label="Convert Units: Wavelength"]
+        alg_PEARL_CreateSampleShape         [label="Create Sample Shape: sphere"]
+        alg_PEARL_AbsorptionCorrection      [label="Absorption Correction"]
+        alg_PEARL_SaveNexus                 [label="Save Nexus"]
         alg_PEARL_Load                      [label="Load"]
-        alg_PEARL_RebinWorkspace            [label="Rebin: Van ws to match Absorb ws"]
-
-        // POLARIS
-        alg_POLARIS_maskDetector            [label="Mask detectors 1-54"]
-
+        alg_PEARL_ConvertUnitsAbsorb        [label="Convert Units:\n Van ws to absorption ws units"]
+        alg_PEARL_ExtractSpectra            [label="Extract Spectra:\n Keep common detectors only"]
+        alg_PEARL_RebinToWorkspace          [label="Rebin To Workspace:\n Absorb ws to match Van ws"]
+        alg_PEARL_Divide                    [label="Divide: Van ws / Absorb ws"]
+        alg_PEARL_ConvertUnitsOriginal      [label="Convert Units: original units"]
     }
 
     // **Decisions
     subgraph decisions{
         $decision_style
 
-        // GEM
-        if_GEM_isVanadium                   [label="If: Is Vanadium"]
-        // POLARIS
-        if_POLARIS_isVanadium               [label="If: Is Vanadium"]
+        // GEM / POLARIS
+        if_isVanadium                       [label="If: Is Vanadium"]
+        if_GEM_or_POLARIS                   [label="Instrument"]
+
+        // PEARL
+        if_PEARL_genAbsorb                  [label="If: gen_absorb"]
     }
 
     // **Graph layout for GEM / POLARIS
     subgraph ApplyAbsorbCorrGemPolaris{
-        // *GEM
-        label_GEM                       ->  if_GEM_isVanadium
+        label_GEM_POLARIS               ->  if_isVanadium
 
         // Is Vanadium
-        if_GEM_isVanadium               ->  alg_GEM_maskDetector    [label="True"]
-        alg_GEM_maskDetector            ->  alg_MayersSampleCorr    [label="Use Adv Config"]
+        if_isVanadium                   ->  if_GEM_or_POLARIS       [label="True"]
+        if_GEM_or_POLARIS               ->  alg_GEM_maskDetector    [label="GEM"]
+        if_GEM_or_POLARIS               ->  alg_POLARIS_maskDetector [label="POLARIS"]
+        alg_GEM_maskDetector            ->  alg_SetSample
+        alg_POLARIS_maskDetector        ->  alg_SetSample
+        param_advVanMayersInputs        ->  alg_SetSample
 
         // Not Vanadium
-        if_GEM_isVanadium               ->  alg_MayersSampleCorr    [label="False - Use User Config"]
+        if_isVanadium                   ->  alg_SetSample           [label="False"]
+        param_userSampleDetails         ->  alg_SetSample
 
-        // *POLARIS
-        label_POLARIS                   ->  if_POLARIS_isVanadium
-
-        // Is Vanadium
-        if_POLARIS_isVanadium           ->  alg_POLARIS_maskDetector [label="True"]
-        alg_POLARIS_maskDetector        ->  alg_MayersSampleCorr    [label="Use Adv Config"]
-
-        // Not Vanadium
-        if_POLARIS_isVanadium           ->  alg_MayersSampleCorr    [label="False - Use User Config"]
-
-        // Vanadium params
-        param_MayersInputs              ->  alg_MayersSampleCorr
+        // Mayers correction is done in TOF
+        alg_SetSample                   ->  alg_ConvertUnitsTOF
+        alg_ConvertUnitsTOF             ->  alg_MayersSampleCorr
+        param_multipleScattering        ->  alg_MayersSampleCorr    [label="Vanadium only"]
+        alg_MayersSampleCorr            ->  alg_ConvertUnitsOriginal
     }
 
     // **Graph layout for PEARL
     subgraph ApplyAbsorbPearl{
-        // Load previously calculated Abs corrections
-        label_PEARL                     ->  alg_PEARL_Load
+        label_PEARL                     ->  if_PEARL_genAbsorb
+        param_genAbsorb                 ->  if_PEARL_genAbsorb
+
+        // Generate absorption corrections
+        if_PEARL_genAbsorb              ->  alg_PEARL_Clone             [label="True"]
+        alg_PEARL_Clone                 ->  alg_PEARL_ConvertUnitsWavelength
+        alg_PEARL_ConvertUnitsWavelength -> alg_PEARL_CreateSampleShape
+        alg_PEARL_CreateSampleShape     ->  alg_PEARL_AbsorptionCorrection
+        alg_PEARL_AbsorptionCorrection  ->  alg_PEARL_SaveNexus
+        param_absorbOutFile             ->  alg_PEARL_SaveNexus
+
+        // Load previously calculated absorption corrections
+        if_PEARL_genAbsorb              ->  alg_PEARL_Load              [label="False"]
         param_advAbsFilename            ->  alg_PEARL_Load
 
-        // Rebin and divide
-        alg_PEARL_Load                  ->  alg_PEARL_RebinWorkspace
-        alg_PEARL_RebinWorkspace        ->  alg_PEARL_Divide
+        // Match units, detectors and binning then divide
+        alg_PEARL_SaveNexus             ->  alg_PEARL_ConvertUnitsAbsorb
+        alg_PEARL_Load                  ->  alg_PEARL_ConvertUnitsAbsorb
+        alg_PEARL_ConvertUnitsAbsorb    ->  alg_PEARL_ExtractSpectra
+        alg_PEARL_ExtractSpectra        ->  alg_PEARL_RebinToWorkspace
+        alg_PEARL_RebinToWorkspace      ->  alg_PEARL_Divide
+        alg_PEARL_Divide                ->  alg_PEARL_ConvertUnitsOriginal
     }
 }

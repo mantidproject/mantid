@@ -10,21 +10,23 @@ digraph isisPowderCreateVanadium{
         $param_style
 
         // User input
-        param_apply_absorb              [label="User param: absorption corrections"]
+        param_apply_absorb              [label="User param: do_absorb_corrections"]
 
         // From user provided files
-        param_calFileName               [label="Calibration file name"]
-        param_calMapping_1              [label="Calibration mapping file"]
-        param_calMapping_2              [label="Calibration mapping file"]
+        param_calFileName               [label="Calibration (offset) file"]
+        param_calMapping                [label="Calibration mapping file"]
         param_emptyRunNumber            [label="Empty run number(s)"]
         param_vanadiumRunNumber         [label="Vanadium run number(s)"]
 
         // From advanced config
-        param_groupingCalFile           [label="Adv config: Grouping cal file name"]
+        param_groupingCalFile           [label="Adv config: Grouping file"]
         param_rawTOFCropValues          [label="Adv config: Raw TOF cropping values"]
         param_vanadiumTOFCropValues     [label="Adv config: Vanadium TOF cropping values"]
-        param_vanadiumSplineCoefficient [label="Adv config: Vanadium Spline Coefficient"]
+        param_vanadiumSplineCoefficient [label="Adv config: Vanadium spline coefficient"]
 
+        // Output files
+        param_summedEmptyFile           [label="Summed empty instrument file"]
+        param_splinedVanFile            [label="Splined vanadium file"]
     }
 
     // **Processes (inc. bespoke inst steps)
@@ -32,26 +34,31 @@ digraph isisPowderCreateVanadium{
         $process_style
 
         // Common
-        proc_LoadCurrentNormWS_1        [label="Load current normalised workspace(s)"]
-        proc_LoadCurrentNormWS_2        [label="Load current normalised workspace(s)"]
+        proc_LoadCurrentNormWS_van      [label="Load current normalised workspace(s)\n InputMode=Summed"]
+        proc_LoadCurrentNormWS_empty    [label="Load current normalised workspace(s)\n InputMode=Summed"]
 
         // Bespoke
+        proc_InstCreateSolidAngle       [label="Inst specific: Create solid angle corrections\n (HRPD only)"]
         proc_InstApplyAbsorbCorr        [label="Inst specific: Apply absorption corrections"]
-        proc_InstMaskPeaks              [label="Inst specific: Mask peaks in Vanadium data"]
+        proc_InstMaskPeaks              [label="Inst specific: Mask / strip Bragg peaks\n in vanadium data"]
         proc_InstSaveFocused            [label="Inst specific: Save focused banks"]
+        proc_InstSolidAngle             [label="Inst specific: Divide by solid angle corrections\n (HRPD only)"]
     }
 
     // **Algorithms
     subgraph algorithms{
         $algorithm_style
 
-        alg_Align                       [label="Align Detectors"]
+        alg_ApplyDiffCal                [label="ApplyDiffCal"]
+        alg_ClearDiffCal                [label="ApplyDiffCal: ClearCalibration"]
+        alg_ConvertUnitsDSpacing        [label="Convert Units: dSpacing"]
         alg_CropRawTOF                  [label="Crop data to expected TOF"]
-        alg_CropVanTOF                  [label="Crop data to expected TOF"]
-        alg_DiffractionFocusing         [label="Diffraction Focusing"]
+        alg_CropVanTOF                  [label="Crop banks to vanadium TOF range"]
+        alg_DiffractionFocusing         [label="Diffraction Focussing"]
         alg_ExtractWsSpectra            [label="Extract spectra into individual banks"]
-        alg_SaveNexusProcessedEmpty     [label="Save Nexus file"]
-        alg_SaveNexusProcessed          [label="Save Nexus file"]
+        alg_SaveNexusEmpty              [label="Save Nexus"]
+        alg_SaveNexusSpline             [label="Save Nexus"]
+        alg_SetSampleMaterial           [label="Set Sample Material: V"]
         alg_SplineVanadium              [label="Spline Background"]
         alg_Subtract_van_empty          [label="Subtract: vanadium - empty"]
     }
@@ -60,59 +67,65 @@ digraph isisPowderCreateVanadium{
     subgraph decisions{
         $decision_style
 
+        if_subtract_empty               [label="If: subtract empty instrument"]
         if_apply_absorb                 [label="If: absorb corrections"]
     }
 
     // **Graph layout
     subgraph ISISPwd_create_van {
-        // Load current normalised vanadium file
-        label_start                     ->      param_calMapping_1
-        param_calMapping_1              ->      param_vanadiumRunNumber
-        param_vanadiumRunNumber         ->      proc_LoadCurrentNormWS_1      [label="InputMode=Summed"]
+        // Load and sum vanadium runs
+        label_start                     ->      param_calMapping
+        param_calMapping                ->      param_vanadiumRunNumber
+        param_vanadiumRunNumber         ->      proc_LoadCurrentNormWS_van
+        proc_LoadCurrentNormWS_van      ->      proc_InstCreateSolidAngle
+        proc_InstCreateSolidAngle       ->      if_subtract_empty
 
-        // Load current normalised empty file
-        param_calMapping_1              ->      param_emptyRunNumber
-        param_emptyRunNumber            ->      proc_LoadCurrentNormWS_2      [label="InputMode=Summed"]
-
-        proc_LoadCurrentNormWS_2        ->      alg_SaveNexusProcessedEmpty
-
-        // Subtract empty from vanadium
-        proc_LoadCurrentNormWS_1        ->      alg_Subtract_van_empty
-        alg_SaveNexusProcessedEmpty     ->      alg_Subtract_van_empty
+        // Load, sum and subtract empty
+        if_subtract_empty               ->      proc_LoadCurrentNormWS_empty  [label="True"]
+        param_calMapping                ->      param_emptyRunNumber
+        param_emptyRunNumber            ->      proc_LoadCurrentNormWS_empty
+        proc_LoadCurrentNormWS_empty    ->      alg_SaveNexusEmpty
+        alg_SaveNexusEmpty              ->      param_summedEmptyFile
+        alg_SaveNexusEmpty              ->      alg_Subtract_van_empty
 
         // Crop to expected raw TOF
-        param_rawTOFCropValues          ->      alg_CropRawTOF
+        if_subtract_empty               ->      alg_CropRawTOF              [label="False"]
         alg_Subtract_van_empty          ->      alg_CropRawTOF
-
-        // Align detectors
-        param_calMapping_2              ->      param_calFileName
-        param_calFileName               ->      alg_Align
-        alg_CropRawTOF                  ->      alg_Align
+        param_rawTOFCropValues          ->      alg_CropRawTOF
 
         // Apply absorption corrections
-        alg_Align                       ->      if_apply_absorb
+        alg_CropRawTOF                  ->      if_apply_absorb
         param_apply_absorb              ->      if_apply_absorb
         if_apply_absorb                 ->      proc_InstApplyAbsorbCorr    [label="True"]
+        if_apply_absorb                 ->      alg_SetSampleMaterial       [label="False"]
+
+        // Align
+        proc_InstApplyAbsorbCorr        ->      alg_ApplyDiffCal
+        alg_SetSampleMaterial           ->      alg_ApplyDiffCal
+        param_calMapping                ->      param_calFileName
+        param_calFileName               ->      alg_ApplyDiffCal
+        alg_ApplyDiffCal                ->      alg_ConvertUnitsDSpacing
+        alg_ConvertUnitsDSpacing        ->      proc_InstSolidAngle
 
         // Focusing
+        proc_InstSolidAngle             ->      alg_DiffractionFocusing
         param_groupingCalFile           ->      alg_DiffractionFocusing
-        if_apply_absorb                 ->      alg_DiffractionFocusing     [label="False"]
-        proc_InstApplyAbsorbCorr        ->      alg_DiffractionFocusing
+        alg_DiffractionFocusing         ->      alg_ClearDiffCal
 
-        // Save focused spectra
-        alg_DiffractionFocusing         ->      proc_InstSaveFocused
-
-        // Extract and crop vanadium spectra for spline
-        alg_DiffractionFocusing         ->      alg_ExtractWsSpectra        [label="Creating vanadium splines"]
-        param_vanadiumTOFCropValues     ->      alg_CropVanTOF
+        // Split into banks and crop
+        alg_ClearDiffCal                ->      alg_ExtractWsSpectra
         alg_ExtractWsSpectra            ->      alg_CropVanTOF
-        alg_CropVanTOF                  ->      proc_InstMaskPeaks
+        param_vanadiumTOFCropValues     ->      alg_CropVanTOF
+
+        // Save focused (unsplined) vanadium
+        alg_CropVanTOF                  ->      proc_InstSaveFocused
 
         // Spline the vanadium
-        param_vanadiumSplineCoefficient ->      alg_SplineVanadium
+        alg_CropVanTOF                  ->      proc_InstMaskPeaks          [label="If: do_spline"]
         proc_InstMaskPeaks              ->      alg_SplineVanadium
-        alg_SplineVanadium              ->      alg_SaveNexusProcessed
-
+        param_vanadiumSplineCoefficient ->      alg_SplineVanadium
+        alg_SplineVanadium              ->      alg_SaveNexusSpline
+        alg_SaveNexusSpline             ->      param_splinedVanFile
     }
 
 }

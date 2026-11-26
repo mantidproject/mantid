@@ -11,19 +11,24 @@ digraph isisPowderfocus{
 
         // User input
         param_runNumbers                [label="User param: Run number(s)"]
-        param_sampleEmptyRunNumber      [label="User param: Sample empty run number(s)"]
-        param_vanNorm                   [label="User param: Vanadium normalisation"]
+        param_apply_absorb              [label="User param: do_absorb_corrections"]
+        param_emptyCanMethod            [label="User param: empty_can_subtraction_method"]
+        param_sampleDetails             [label="User param: Sample details"]
+        param_vanNorm                   [label="User param: do_van_normalisation"]
 
         // From user provided files
-        param_calFileName               [label="Calibration file name"]
-        param_calMapping_1              [label="Calibration mapping file"]
-        param_calMapping_2              [label="Calibration mapping file"]
+        param_calFileName               [label="Calibration (offset) file"]
+        param_calMapping                [label="Calibration mapping file"]
         param_emptyRunNumber            [label="Empty run number(s)"]
+        param_sampleEmptyRunNumber      [label="Sample empty run number(s)"]
+        param_splinedVanFile            [label="Splined vanadium file\n from 'create_vanadium'"]
+        param_summedEmptyFile           [label="Pre-summed empty instrument file"]
 
         // From advanced config
-        param_groupingCalFile           [label="Adv config: Grouping cal file name"]
+        param_groupingCalFile           [label="Adv config: Grouping file"]
         param_rawTOFCropValues          [label="Adv config: Raw TOF cropping values"]
-
+        param_focusedTOFCropValues      [label="Adv config: Focused TOF cropping values"]
+        param_sampleEmptyScale          [label="Adv config: Sample empty scale"]
     }
 
     // **Processes (inc. bespoke inst steps)
@@ -31,11 +36,17 @@ digraph isisPowderfocus{
         $process_style
 
         // Common
-        proc_LoadCurrentNormWS_1        [label="Load current normalised workspace(s)"]
+        proc_LoadCurrentNormWS_runs     [label="Load current normalised workspace(s)\n InputMode from user"]
+        proc_LoadCurrentNormWS_empty    [label="Load current normalised workspace(s)\n InputMode=Summed"]
+        proc_LoadCurrentNormWS_sEmpty   [label="Load current normalised workspace(s)\n InputMode=Summed"]
 
         // Bespoke
         proc_InstApplyAbsorbCorr        [label="Inst specific: Apply absorption corrections"]
-        proc_InstReduceBinWidths        [label="Inst specific: Rebin to reduce final bin widths"]
+        proc_InstPaalmanPings           [label="Inst specific: Paalman-Pings absorption\n corrections and empty subtraction"]
+        proc_InstPerDetectorVan         [label="Inst specific: Per detector vanadium\n normalisation and corrections\n (focused banks are then divided by\n number of detectors per bank)"]
+        proc_InstSolidAngle             [label="Inst specific: Divide by solid angle corrections\n (HRPD only)"]
+        proc_InstFocusedCalibration     [label="Inst specific: Apply calibration to focused data"]
+        proc_InstReduceBinWidths        [label="Inst specific: Rebin to final bin widths"]
         proc_InstSaveFocused            [label="Inst specific: Save focused banks"]
     }
 
@@ -43,87 +54,116 @@ digraph isisPowderfocus{
     subgraph algorithms{
         $algorithm_style
 
-        alg_Align                       [label="Align Detectors"]
-        alg_ConvertUnitsTOFVan          [label="Convert Units: TOF"]
+        alg_ApplyDiffCal                [label="ApplyDiffCal"]
+        alg_ConvertUnitsDSpacing        [label="Convert Units: dSpacing"]
+        alg_ConvertUnitsTOF             [label="Convert Units: TOF"]
         alg_CropRawTOF                  [label="Crop data to expected TOF"]
-        alg_CropFinalTOF                [label="Crop data to final TOF range"]
-        alg_DiffractionFocusing         [label="Diffraction Focusing"]
+        alg_CropRawTOF_pp               [label="Crop data to expected TOF"]
+        alg_CropFinalTOF                [label="Crop banks to final TOF range"]
+        alg_DiffractionFocusing         [label="Diffraction Focussing"]
         alg_DivideVan                   [label="Divide: data / Vanadium"]
         alg_ExtractWsSpectra            [label="Extract spectra into individual banks"]
-        alg_LoadNexusVan                [label="Load splined Vanadium from 'create_vanadium'"]
-        alg_RebinToWorkspaceVan         [label="Rebin: Van ws to match data binning"]
-        alg_Subtract_sample_empty       [label="Subtract: runs - sample empty"]
-        alg_Subtract_van_empty          [label="Subtract: runs - instrument empty"]
-        alg_Load                        [label="Load"]
+        alg_LoadNexusEmpty              [label="Load Nexus"]
+        alg_LoadNexusVan                [label="Load Nexus"]
+        alg_RebinToWorkspaceVan         [label="Rebin To Workspace:\n Van ws to match data binning"]
+        alg_ReplaceSpecialValues        [label="Replace Special Values"]
+        alg_ScaleSampleEmpty            [label="Scale"]
+        alg_SetSample                   [label="Set Sample\n (if sample details given)"]
+        alg_Subtract_empty              [label="Subtract: runs - empty"]
     }
 
     // **Decisions
     subgraph decisions{
         $decision_style
 
-        if_apply_absorb                 [label="If: absorb corrections"]
-        if_van_normalisation            [label="If: Vanadium normalisation"]
-        if_sample_empty_provided_1      [label="If: Sample empty given"]
+        if_sample_empty_given           [label="If: Sample empty given"]
+        if_subtract_empty_inst          [label="If: Subtract empty instrument"]
         if_presummed_empty_exists       [label="If: Pre-summed empty exists"]
+        if_paalman_pings                [label="If: absorb corrections and\n method is 'PaalmanPings'"]
+        if_apply_absorb                 [label="If: absorb corrections"]
+        if_per_detector                 [label="If: per detector vanadium"]
+        if_van_normalisation            [label="If: Vanadium normalisation"]
     }
 
     // **Graph layout
     subgraph ISISPwd_focus {
-        // Load workspace to be processed
-        label_start                     ->  param_runNumbers
-        param_runNumbers                ->  proc_LoadCurrentNormWS_1
+        // Load workspace(s) to be processed
+        label_start                     ->      param_runNumbers
+        param_runNumbers                ->      proc_LoadCurrentNormWS_runs
+        proc_LoadCurrentNormWS_runs     ->      if_sample_empty_given
 
-        // Load empty workspace
-        param_calMapping_1              ->      param_emptyRunNumber
-        param_emptyRunNumber            ->      if_presummed_empty_exists
-        if_presummed_empty_exists       ->      proc_LoadCurrentNormWS_1    [label="False"]
-        if_presummed_empty_exists       ->      alg_Load                    [label="True"]
+        // Sample empty (e.g. empty can)
+        param_calMapping                ->      param_sampleEmptyRunNumber
+        if_sample_empty_given           ->      proc_LoadCurrentNormWS_sEmpty   [label="True"]
+        param_sampleEmptyRunNumber      ->      proc_LoadCurrentNormWS_sEmpty
+        proc_LoadCurrentNormWS_sEmpty   ->      alg_ScaleSampleEmpty
+        param_sampleEmptyScale          ->      alg_ScaleSampleEmpty            [label="Not used for 'PaalmanPings'"]
+        alg_ScaleSampleEmpty            ->      if_paalman_pings
 
-        // Load sample empty run numbers
-        if_sample_empty_provided_1      ->      param_sampleEmptyRunNumber
-        param_sampleEmptyRunNumber      ->      proc_LoadCurrentNormWS_1
+        // Empty instrument
+        if_sample_empty_given           ->      if_subtract_empty_inst          [label="False"]
+        if_subtract_empty_inst          ->      if_presummed_empty_exists       [label="True"]
+        if_subtract_empty_inst          ->      if_paalman_pings                [label="False"]
+        param_summedEmptyFile           ->      if_presummed_empty_exists
+        if_presummed_empty_exists       ->      alg_LoadNexusEmpty              [label="True"]
+        if_presummed_empty_exists       ->      proc_LoadCurrentNormWS_empty    [label="False"]
+        param_calMapping                ->      param_emptyRunNumber
+        param_emptyRunNumber            ->      proc_LoadCurrentNormWS_empty
+        alg_LoadNexusEmpty              ->      if_paalman_pings
+        proc_LoadCurrentNormWS_empty    ->      if_paalman_pings
 
-        // Subtract empty instrument
-        alg_Load                        ->      alg_Subtract_van_empty
-        proc_LoadCurrentNormWS_1        ->      alg_Subtract_van_empty
+        // Paalman-Pings route
+        param_apply_absorb              ->      if_paalman_pings
+        param_emptyCanMethod            ->      if_paalman_pings
+        if_paalman_pings                ->      proc_InstPaalmanPings           [label="True"]
+        param_sampleDetails             ->      proc_InstPaalmanPings
+        proc_InstPaalmanPings           ->      alg_CropRawTOF_pp
 
-        // Subtract sample empty
-        alg_Subtract_van_empty          ->      alg_Subtract_sample_empty   [label="If: Sample empty given"]
-
-        // Crop raw data in TOF
+        // Simple subtraction route
+        if_paalman_pings                ->      alg_Subtract_empty              [label="False"]
+        alg_Subtract_empty              ->      alg_CropRawTOF
         param_rawTOFCropValues          ->      alg_CropRawTOF
-        alg_Subtract_sample_empty       ->      alg_CropRawTOF
-        alg_Subtract_van_empty          ->      alg_CropRawTOF
-
-        // Align detectors
-        param_calMapping_2              ->      param_calFileName
-        param_calFileName               ->      alg_Align
-        alg_CropRawTOF                  ->      alg_Align
-
-        // Apply absorption corrections
-        alg_Align                       ->      if_apply_absorb
+        param_rawTOFCropValues          ->      alg_CropRawTOF_pp
+        alg_CropRawTOF                  ->      if_apply_absorb
         param_apply_absorb              ->      if_apply_absorb
-        if_apply_absorb                 ->      proc_InstApplyAbsorbCorr    [label="True"]
+        if_apply_absorb                 ->      proc_InstApplyAbsorbCorr        [label="True"]
+        if_apply_absorb                 ->      alg_SetSample                   [label="False"]
+        param_sampleDetails             ->      alg_SetSample
+
+        // Per detector vanadium corrections
+        alg_CropRawTOF_pp               ->      if_per_detector
+        proc_InstApplyAbsorbCorr        ->      if_per_detector
+        alg_SetSample                   ->      if_per_detector
+        if_per_detector                 ->      proc_InstPerDetectorVan         [label="True"]
+
+        // Align
+        if_per_detector                 ->      alg_ApplyDiffCal                [label="False"]
+        proc_InstPerDetectorVan         ->      alg_ApplyDiffCal
+        param_calMapping                ->      param_calFileName
+        param_calFileName               ->      alg_ApplyDiffCal
+        alg_ApplyDiffCal                ->      alg_ConvertUnitsDSpacing
+        alg_ConvertUnitsDSpacing        ->      proc_InstSolidAngle
 
         // Focusing
+        proc_InstSolidAngle             ->      alg_DiffractionFocusing
         param_groupingCalFile           ->      alg_DiffractionFocusing
-        if_apply_absorb                 ->      alg_DiffractionFocusing     [label="False"]
-        proc_InstApplyAbsorbCorr        ->      alg_DiffractionFocusing
+        alg_DiffractionFocusing         ->      proc_InstFocusedCalibration
+        proc_InstFocusedCalibration     ->      alg_ConvertUnitsTOF
 
-        // Splitting into banks
-        alg_DiffractionFocusing         ->      alg_ConvertUnitsTOFVan
-        alg_ConvertUnitsTOFVan          ->      alg_ExtractWsSpectra
-
-        // Vanadium normalisation
-        alg_ExtractWsSpectra            ->      if_van_normalisation
+        // Vanadium normalisation (per bank)
+        alg_ConvertUnitsTOF             ->      if_van_normalisation
         param_vanNorm                   ->      if_van_normalisation
-        if_van_normalisation            ->      alg_LoadNexusVan            [label="True"]
+        if_van_normalisation            ->      alg_ExtractWsSpectra            [label="Per bank vanadium"]
+        param_splinedVanFile            ->      alg_LoadNexusVan
+        alg_ExtractWsSpectra            ->      alg_RebinToWorkspaceVan         [label="If: Vanadium normalisation"]
         alg_LoadNexusVan                ->      alg_RebinToWorkspaceVan
         alg_RebinToWorkspaceVan         ->      alg_DivideVan
+        alg_DivideVan                   ->      alg_ReplaceSpecialValues
 
         // Crop data to final TOF range
-        if_van_normalisation            ->      alg_CropFinalTOF            [label="False"]
-        alg_DivideVan                   ->      alg_CropFinalTOF
+        alg_ExtractWsSpectra            ->      alg_CropFinalTOF                [label="If: no Vanadium normalisation"]
+        alg_ReplaceSpecialValues        ->      alg_CropFinalTOF
+        param_focusedTOFCropValues      ->      alg_CropFinalTOF
         alg_CropFinalTOF                ->      proc_InstReduceBinWidths
 
         // Save data

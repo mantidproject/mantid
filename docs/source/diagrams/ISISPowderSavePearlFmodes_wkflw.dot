@@ -1,4 +1,4 @@
-digraph isisPowderCreateVanadium{
+digraph isisPowderSavePearlFmodes{
     label="ISISPowder - PEARL Focus Mode saving"
     $global_style
 
@@ -15,10 +15,11 @@ digraph isisPowderCreateVanadium{
     subgraph params {
         $param_style
 
-        param_attenuatePearl_all                [label="User param: attenuate"]
-        param_attenuatePearl_trans              [label="User param: attenuate"]
+        param_attenuatePearl_all                [label="User param: perform_attenuation"]
+        param_attenuatePearl_trans              [label="User param: perform_attenuation"]
+        param_transModNums                      [label="User param: trans_mod_nums\n (default modules 1-9)"]
 
-        param_attenuatePearlFilePath            [label="User param:\n Full file path to attenuation file"]
+        param_attenuatePearlFilePath            [label="User param: attenuation_file\n (path looked up by name in attenuation_files)"]
     }
 
     // **Processes (inc. bespoke inst steps)
@@ -27,6 +28,12 @@ digraph isisPowderCreateVanadium{
 
         proc_attenuatePearl_all                 [label="Pearl: Attenuate workspace"]
         proc_attenuatePearl_trans               [label="Pearl: Attenuate workspace"]
+
+        proc_saveRemaining_all                  [label="For each of banks 10-14 (inc.)"]
+        proc_saveRemaining_groups               [label="For each of banks 10-14 (inc.)"]
+        proc_saveEach_groups                    [label="For each of the 4 summed workspaces"]
+        proc_saveEach_mods                      [label="For each bank"]
+        proc_saveEach_trans                     [label="For each selected module"]
     }
 
     // **Algorithms
@@ -35,50 +42,68 @@ digraph isisPowderCreateVanadium{
 
         // Focus mode: All
         alg_MergeRuns_all                       [label="Merge Runs: Banks 1-9 (inc.)"]
-        alg_Scale_all                           [label="Scale: 0.11111111 (1/9)"]
+        alg_Crop_all                            [label="Crop Workspace:\n Remove first and last bin"]
+        alg_Scale_all                           [label="Scale: 1/9"]
+        alg_ConvertUnitsTOF_all                 [label="Convert Units: TOF"]
+        alg_SaveGss_all                         [label="Save GSS: Bank 1"]
+        alg_SaveXyeTOF_all                      [label="Save Focused XYE: TOF"]
+        alg_ConvertUnitsD_all                   [label="Convert Units: dSpacing"]
+        alg_SaveNexus_all                       [label="Save Nexus"]
 
-        alg_SaveGss_all                         [label="Save GSS: TOF\n Appending banks 10-12 (inc.) to merged runs"]
-        alg_SaveGssSummed_all                   [label="Save GSS: TOF"]
+        alg_ConvertUnitsTOF_rem_all             [label="Convert Units: TOF"]
+        alg_SaveGss_rem_all                     [label="Save GSS: Appending as banks 2-6"]
+        alg_SaveXyeTOF_rem_all                  [label="Save Focused XYE: TOF\n One file per bank"]
+        alg_ConvertUnitsD_rem_all               [label="Convert Units: dSpacing"]
+        alg_SaveNexus_rem_all                   [label="Save Nexus: Appending"]
 
-        alg_SaveNexusProcessedSummed_all        [label="Save Nexus Processed: dSpacing"]
-        alg_SaveNexusProcessed_all              [label="Save Nexus Processed: dSpacing\n Appending banks 10-12 (inc.) to merged runs"]
-
-        // Focus mode: GROUPS
-        alg_Plus_groups                         [label="Plus: Runs (4-6) + (7-9)"]
+        // Focus mode: Groups
         alg_MergeRuns_groups                    [label="Merge Runs: (1-3)/(4-6)/(7-9)\n All inc."]
-        alg_Scale_groups                        [label="Scale: Each workspace by 0.333333 (1/3)"]
-        alg_ScaleHalf_groups                    [label="Scale: 0.5 (1/2)"]
+        alg_Crop_groups                         [label="Crop Workspace:\n Remove first and last bin"]
+        alg_Scale_groups                        [label="Scale: Each workspace by 1/3"]
+        alg_MergeRuns49_groups                  [label="Merge Runs: Banks 4-9 (inc.)"]
+        alg_Crop49_groups                       [label="Crop Workspace:\n Remove first and last bin"]
+        alg_ScaleHalf_groups                    [label="Scale: 1/2"]
 
-        alg_SaveGssSummed_groups                [label="Save GSS: TOF"]
-        alg_SaveGss_groups                      [label="Save GSS: TOF\n Appending banks 10-14 (inc.) to merged runs"]
+        alg_ConvertUnitsTOF_groups              [label="Convert Units: TOF"]
+        alg_SaveGss_groups                      [label="Save GSS"]
+        alg_SaveXyeTOF_groups                   [label="Save Focused XYE: TOF"]
+        alg_ConvertUnitsD_groups                [label="Convert Units: dSpacing"]
+        alg_SaveNexus_groups                    [label="Save Nexus:\n Appending after the first"]
 
-        alg_SaveNexusProcessedSummed_groups     [label="Save Nexus Processed: dSpacing"]
-        alg_SaveNexusProcessed_groups           [label="Save Nexus Processed: dSpacing\n Appending banks 10-14 (inc.) to merged runs"]
+        alg_ConvertUnitsTOF_rem_groups          [label="Convert Units: TOF"]
+        alg_SaveGss_rem_groups                  [label="Save GSS: Appending as banks 5-9"]
+        alg_SaveXyeTOF_rem_groups               [label="Save Focused XYE: TOF\n One file per bank"]
+        alg_ConvertUnitsD_rem_groups            [label="Convert Units: dSpacing"]
+        alg_SaveNexus_rem_groups                [label="Save Nexus: Appending"]
 
-        // Focus mode: MODS
-        alg_SaveGss_mods                        [label="Save GSS: TOF\n Appending each workspace"]
-        alg_SaveNexusProcessed_mods             [label="Save Nexus Processed: dSpacing\n Appending each workspace"]
+        // Focus mode: Mods
+        alg_ConvertUnitsTOF_mods                [label="Convert Units: TOF"]
+        alg_SaveXyeTOF_mods                     [label="Save Focused XYE: TOF"]
+        alg_SaveGss_mods                        [label="Save GSS:\n Appending after the first"]
+        alg_ConvertUnitsD_mods                  [label="Convert Units: dSpacing"]
+        alg_SaveNexus_mods                      [label="Save Nexus:\n Appending after the first"]
 
-        // Focus mode : TRANS
-        alg_MergeRuns_trans                     [label="Merge Runs: Banks 1-9 (inc.)"]
-        alg_Scale_trans                         [label="Scale: 0.11111111 (1/9)"]
+        // Focus mode: Trans
+        alg_MergeRuns_trans                     [label="Merge Runs: Selected modules"]
+        alg_Crop_trans                          [label="Crop Workspace:\n Remove first and last bin"]
+        alg_Scale_trans                         [label="Scale: 1/(number of modules)"]
+        alg_ConvertUnitsTOF_trans               [label="Convert Units: TOF"]
+        alg_SaveGss_trans                       [label="Save GSS: Bank 1"]
+        alg_SaveXyeTOF_trans                    [label="Save Focused XYE: TOF"]
+        alg_ConvertUnitsD_trans                 [label="Convert Units: dSpacing"]
+        alg_SaveXyeD_trans                      [label="Save Focused XYE: dSpacing"]
+        alg_SaveNexus_trans                     [label="Save Nexus"]
 
-        alg_SaveGssSummed_trans                 [label="Save GSS: TOF"]
-
-        alg_SaveFocusedXyeDSummed_trans         [label="Save Focused XYE: dSpacing"]
-        alg_SaveFocusedXyeTOFSummed_trans       [label="Save Focused XYE: TOF"]
-
-        alg_SaveNexusProcessedSummed_trans      [label="Save Nexus Processed: dSpacing"]
-        alg_SaveNexusProcessed_trans            [label="Save Nexus Processed: dSpacing\n Appending banks 1-10 (inc.) to merged runs"]
+        alg_ConvertUnitsD_each_trans            [label="Convert Units: dSpacing"]
+        alg_SaveNexus_each_trans                [label="Save Nexus: Appending"]
 
         // Attenuate workspace
-        alg_ConvertToHistogram                  [label="Convert To Histogram"]
-        alg_ConvertUnits                        [label="Convert Units:\n Match the loaded attenuation workspace"]
-        alg_ConvertUnitsOriginal                [label="Convert Units:\n Back to original input units"]
-        alg_Divide                              [label="Divide: Data Ws / Attenuated Workspace"]
         alg_PearlMCAbsorption                   [label="PearlMCAbsorption"]
-        alg_RebinWorkspace                      [label="Rebin:\n Attenuated workspace to match workspace to correct"]
-
+        alg_ConvertToHistogram                  [label="Convert To Histogram"]
+        alg_ConvertUnits                        [label="Convert Units:\n Data ws to match attenuation ws"]
+        alg_RebinToWorkspace                    [label="Rebin To Workspace:\n Attenuation ws to match data ws"]
+        alg_Divide                              [label="Divide: Data ws / Attenuation ws"]
+        alg_ConvertUnitsOriginal                [label="Convert Units:\n Back to original units"]
     }
 
     // **Decisions
@@ -91,75 +116,98 @@ digraph isisPowderCreateVanadium{
 
     // *Focus mode - ALL
     subgraph SaveFocusModeAll{
-        // Merge + Scale
+        // Merge, crop and scale banks 1-9
         label_focusModeAllPearl         -> alg_MergeRuns_all
-        alg_MergeRuns_all               -> alg_Scale_all
+        alg_MergeRuns_all               -> alg_Crop_all
+        alg_Crop_all                    -> alg_Scale_all
 
-        // All - Attenuate
+        // Attenuate
         alg_Scale_all                   -> if_attenuatePearl_all
         param_attenuatePearl_all        -> if_attenuatePearl_all
         if_attenuatePearl_all           -> proc_attenuatePearl_all      [label="True"]
 
-        // All - continue saving summed WS
-        proc_attenuatePearl_all         -> alg_SaveGssSummed_all
-        if_attenuatePearl_all           -> alg_SaveGssSummed_all    [label="False"]
-        alg_SaveGssSummed_all           -> alg_SaveNexusProcessedSummed_all
+        // Save summed workspace
+        if_attenuatePearl_all           -> alg_ConvertUnitsTOF_all      [label="False"]
+        proc_attenuatePearl_all         -> alg_ConvertUnitsTOF_all
+        alg_ConvertUnitsTOF_all         -> alg_SaveGss_all
+        alg_SaveGss_all                 -> alg_SaveXyeTOF_all
+        alg_SaveXyeTOF_all              -> alg_ConvertUnitsD_all
+        alg_ConvertUnitsD_all           -> alg_SaveNexus_all
 
-        // All - Save remaining workspaces (come from label)
-        label_focusModeAllPearl         -> alg_SaveGss_all
-        alg_SaveGss_all                 -> alg_SaveNexusProcessed_all
-
+        // Save remaining banks
+        alg_SaveNexus_all               -> proc_saveRemaining_all
+        proc_saveRemaining_all          -> alg_ConvertUnitsTOF_rem_all
+        alg_ConvertUnitsTOF_rem_all     -> alg_SaveGss_rem_all
+        alg_SaveGss_rem_all             -> alg_SaveXyeTOF_rem_all
+        alg_SaveXyeTOF_rem_all          -> alg_ConvertUnitsD_rem_all
+        alg_ConvertUnitsD_rem_all       -> alg_SaveNexus_rem_all
     }
 
     // *Focus Mode - GROUPS
     subgraph SaveFocusModeGroups{
-        // Merge individual groups of banks
+        // Sum groups of three banks
         label_focusModeGroupsPearl      -> alg_MergeRuns_groups
-        alg_MergeRuns_groups            -> alg_Scale_groups
+        alg_MergeRuns_groups            -> alg_Crop_groups
+        alg_Crop_groups                 -> alg_Scale_groups
 
-        // Add banks 4-9 together and scale
-        alg_Scale_groups                -> alg_Plus_groups
-        alg_Plus_groups                 -> alg_ScaleHalf_groups
+        // Sum banks 4-9
+        label_focusModeGroupsPearl      -> alg_MergeRuns49_groups
+        alg_MergeRuns49_groups          -> alg_Crop49_groups
+        alg_Crop49_groups               -> alg_ScaleHalf_groups
 
-        // Save all the various grouped workspaces
-        alg_Scale_groups                -> alg_SaveGssSummed_groups
-        alg_ScaleHalf_groups            -> alg_SaveGssSummed_groups
-        alg_SaveGssSummed_groups        -> alg_SaveNexusProcessedSummed_groups
+        // Save the four summed workspaces
+        alg_Scale_groups                -> proc_saveEach_groups
+        alg_ScaleHalf_groups            -> proc_saveEach_groups
+        proc_saveEach_groups            -> alg_ConvertUnitsTOF_groups
+        alg_ConvertUnitsTOF_groups      -> alg_SaveGss_groups
+        alg_SaveGss_groups              -> alg_SaveXyeTOF_groups
+        alg_SaveXyeTOF_groups           -> alg_ConvertUnitsD_groups
+        alg_ConvertUnitsD_groups        -> alg_SaveNexus_groups
 
-        // Save remaining workspaces (come from label)
-        label_focusModeGroupsPearl      -> alg_SaveGss_groups
-        alg_SaveGss_groups              -> alg_SaveNexusProcessed_groups
+        // Save remaining banks
+        alg_SaveNexus_groups            -> proc_saveRemaining_groups
+        proc_saveRemaining_groups       -> alg_ConvertUnitsTOF_rem_groups
+        alg_ConvertUnitsTOF_rem_groups  -> alg_SaveGss_rem_groups
+        alg_SaveGss_rem_groups          -> alg_SaveXyeTOF_rem_groups
+        alg_SaveXyeTOF_rem_groups       -> alg_ConvertUnitsD_rem_groups
+        alg_ConvertUnitsD_rem_groups    -> alg_SaveNexus_rem_groups
     }
 
     // *Focus Mode - MODS
     subgraph SaveFocusModeMods{
-        label_focusModeModsPearl        -> alg_SaveGss_mods
-        alg_SaveGss_mods                -> alg_SaveNexusProcessed_mods
+        label_focusModeModsPearl        -> proc_saveEach_mods
+        proc_saveEach_mods              -> alg_ConvertUnitsTOF_mods
+        alg_ConvertUnitsTOF_mods        -> alg_SaveXyeTOF_mods
+        alg_SaveXyeTOF_mods             -> alg_SaveGss_mods
+        alg_SaveGss_mods                -> alg_ConvertUnitsD_mods
+        alg_ConvertUnitsD_mods          -> alg_SaveNexus_mods
     }
 
     // *Focus Mode - TRANS
     subgraph SaveFocusModeTrans{
         label_focusModeTransPearl       -> alg_MergeRuns_trans
-        alg_MergeRuns_trans             -> alg_Scale_trans
+        param_transModNums              -> alg_MergeRuns_trans
+        alg_MergeRuns_trans             -> alg_Crop_trans
+        alg_Crop_trans                  -> alg_Scale_trans
 
         // Attenuate
         alg_Scale_trans                 -> if_attenuatePearl_trans
         param_attenuatePearl_trans      -> if_attenuatePearl_trans
-        if_attenuatePearl_trans         -> proc_attenuatePearl_trans      [label="True"]
+        if_attenuatePearl_trans         -> proc_attenuatePearl_trans    [label="True"]
 
-        // Continue saving summed WS
-        if_attenuatePearl_trans         -> alg_SaveGssSummed_trans        [label="False"]
-        proc_attenuatePearl_trans       -> alg_SaveGssSummed_trans
+        // Save summed workspace
+        if_attenuatePearl_trans         -> alg_ConvertUnitsTOF_trans    [label="False"]
+        proc_attenuatePearl_trans       -> alg_ConvertUnitsTOF_trans
+        alg_ConvertUnitsTOF_trans       -> alg_SaveGss_trans
+        alg_SaveGss_trans               -> alg_SaveXyeTOF_trans
+        alg_SaveXyeTOF_trans            -> alg_ConvertUnitsD_trans
+        alg_ConvertUnitsD_trans         -> alg_SaveXyeD_trans
+        alg_SaveXyeD_trans              -> alg_SaveNexus_trans
 
-        // XYE
-        alg_SaveGssSummed_trans         -> alg_SaveFocusedXyeTOFSummed_trans
-        alg_SaveFocusedXyeTOFSummed_trans   -> alg_SaveFocusedXyeDSummed_trans
-
-        // Nexus processed
-        alg_SaveFocusedXyeDSummed_trans     -> alg_SaveNexusProcessedSummed_trans
-
-        // Save remaining workspaces
-        alg_SaveNexusProcessedSummed_trans  -> alg_SaveNexusProcessed_trans
+        // Save selected individual modules
+        alg_SaveNexus_trans             -> proc_saveEach_trans
+        proc_saveEach_trans             -> alg_ConvertUnitsD_each_trans
+        alg_ConvertUnitsD_each_trans    -> alg_SaveNexus_each_trans
     }
 
     // Attenuate workspace step
@@ -168,14 +216,13 @@ digraph isisPowderCreateVanadium{
         label_attenuateWorkspacePearl   -> alg_PearlMCAbsorption
         param_attenuatePearlFilePath    -> alg_PearlMCAbsorption
 
-        // Fixup units and binning
+        // Fix up units and binning
         alg_PearlMCAbsorption           -> alg_ConvertToHistogram
         alg_ConvertToHistogram          -> alg_ConvertUnits
 
-
         // Rebin and divide
-        alg_ConvertUnits                -> alg_RebinWorkspace
-        alg_RebinWorkspace              -> alg_Divide
+        alg_ConvertUnits                -> alg_RebinToWorkspace
+        alg_RebinToWorkspace            -> alg_Divide
         alg_Divide                      -> alg_ConvertUnitsOriginal
     }
 

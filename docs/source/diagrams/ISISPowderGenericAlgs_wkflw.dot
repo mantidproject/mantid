@@ -13,7 +13,7 @@ digraph isisPowderGenericAlgs{
         param_runNumbers                    [label="Param: Run number(s)"]
 
         // User input
-        param_inputMode                     [label="User param: input mode"]
+        param_inputMode                     [label="User param: input_mode\n (may be overridden, e.g. 'Summed'\n for vanadium and empty runs)"]
     }
 
     // **Processes (inc. bespoke inst steps)
@@ -21,6 +21,7 @@ digraph isisPowderGenericAlgs{
         $process_style
 
         // Bespoke
+        proc_instMaskPromptPulses           [label="Inst specific: Mask prompt pulses\n (HRPD only)"]
         proc_instNormaliseWorkspaces        [label="Inst specific: Normalise Workspace(s)"]
     }
 
@@ -29,7 +30,8 @@ digraph isisPowderGenericAlgs{
         $algorithm_style
 
         alg_Load                            [label="Load Workspace(s)"]
-        alg_MergeWorkspaces                   [label="Merge Runs"]
+        alg_Clone                           [label="Clone Workspace: '<file name>_red'\n (if keep_raw_workspace, default True)"]
+        alg_MergeRuns                       [label="Merge Runs"]
     }
 
     // **Decisions
@@ -44,15 +46,16 @@ digraph isisPowderGenericAlgs{
         // Load the list / single workspace to process
         label_LoadCurrentNormWs             ->      alg_Load
         param_runNumbers                    ->      alg_Load
+        alg_Load                            ->      alg_Clone
 
         // Sum if input batching set
-        alg_Load                            ->      if_inputMode
+        alg_Clone                           ->      if_inputMode
         param_inputMode                     ->      if_inputMode
-        if_inputMode                        ->      alg_MergeWorkspaces     [label="'Summed' or not set"]
+        if_inputMode                        ->      alg_MergeRuns   [label="'Summed' and more than one run"]
 
-        // Normalise workspaces
-        alg_MergeWorkspaces                 ->      proc_instNormaliseWorkspaces
-        if_inputMode                        ->      proc_instNormaliseWorkspaces    [label="'Individual'"]
-
+        // Mask and normalise workspaces
+        alg_MergeRuns                       ->      proc_instMaskPromptPulses
+        if_inputMode                        ->      proc_instMaskPromptPulses   [label="'Individual'"]
+        proc_instMaskPromptPulses           ->      proc_instNormaliseWorkspaces
     }
 }
