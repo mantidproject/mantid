@@ -5,7 +5,6 @@ hidden:
 GettingStartedCondaWindows
 GettingStartedCondaLinux
 GettingStartedCondaOSX
-GettingStartedNoneConda
 ```
 
 (gettingstarted)=
@@ -15,13 +14,9 @@ GettingStartedNoneConda
 We recommend using [pixi](https://pixi.sh) to set up your Mantid development environment.
 Pixi installs the dependency versions pinned in the `pixi.lock` file in the Mantid repository, so all developers get the same environment.
 
-Setting up a conda environment with the `mantid-developer` metapackage is still possible, but the `mantid-developer` metapackage will be removed in a future release.
-New developers should use pixi.
-
 - [Develop on Windows](GettingStartedCondaWindows)
 - [Develop on Linux](GettingStartedCondaLinux)
 - [Develop on macOS](GettingStartedCondaOSX)
-- [Develop without conda](GettingStartedNoneConda)
 
 ## Custom git setup for inside the ORNL firewall:
 

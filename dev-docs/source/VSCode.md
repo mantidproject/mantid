@@ -10,7 +10,7 @@ for C++ development on any platform that VSCode supports
 - An installed copy of VSCode - [download](https://code.visualstudio.com/).
 - A clone of the main Mantid repo
 - Follow the [Getting Started](GettingStarted/GettingStarted) guide to get a:
-- Pixi development environment (or a conda environment)
+- Pixi development environment
 - Built copy of Mantid (In "Debug" mode for any debugging option not "Release")
 - GDB for Linux/OSX debugging (GDB can be switched out for LLDB at any stage on OSX) or MSVC (Visual Studio) for Windows
 
@@ -25,17 +25,8 @@ for C++ development on any platform that VSCode supports
 
 ### Selecting the Python interpreter
 
-Open the command palette (Ctrl+Shift+P or ⌘+Shift+P), run "Python: Select Interpreter", and then follow the section below for your environment.
-
-#### Pixi
-
-Choose the interpreter in the `.pixi/envs/default` directory inside your Mantid source directory.
+Open the command palette (Ctrl+Shift+P or ⌘+Shift+P), run "Python: Select Interpreter", and then choose the interpreter in the `.pixi/envs/default` directory inside your Mantid source directory.
 Its full path is `/Path/To/Source/mantid/.pixi/envs/default/bin/python`.
-
-#### Conda
-
-Choose your `mantid-developer` conda environment.
-Its full path is `/Path/To/Miniforge/envs/mantid-developer/bin/python`.
 
 ## Extensions
 

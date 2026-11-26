@@ -31,20 +31,12 @@ On Linux and macOS, use `Debug`.
 
 - Click `Add Interpreter` on the top right, then `Add Local Interpreter...`.
 
-- Select the interpreter from your development environment by following the section below for your environment.
+- Select the interpreter from your pixi development environment:
 
-### Pixi interpreter
+  - Choose `Select existing`, set the type to `Python`, and set the path to the `python` executable in your pixi environment:
 
-- Choose `Select existing`, set the type to `Python`, and set the path to the `python` executable in your pixi environment:
-
-  - On Linux or MacOS: `{SOURCE}/.pixi/envs/default/bin/python`
-  - On Windows: `{SOURCE}\.pixi\envs\default\python.exe`
-
-### Conda interpreter
-
-- From the left side of the window select `Conda Environment`.
-- Add the path to your conda executable, e.g. `C:\Users\<username>\AppData\Local\miniforge\Scripts\conda.exe` and click `Load Environments`.
-- Click the `Use Existing environment` radio button and select the `mantid-developer` environment in the drop down list.
+    - On Linux or MacOS: `{SOURCE}/.pixi/envs/default/bin/python`
+    - On Windows: `{SOURCE}\.pixi\envs\default\python.exe`
 
 ### Project structure
 

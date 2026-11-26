@@ -9,26 +9,13 @@ Style
 - Unless otherwise specified, follow `PEP 8
   <https://www.python.org/dev/peps/pep-0008>`_; this means using
   `snake_case <https://en.wikipedia.org/wiki/Snake_case>`_
-- Use `black <https://black.readthedocs.io/en/stable/>`_ to format Python code with the configuration in the ``pyproject.toml`` in the root of the repository
 - Always use four spaces for indentation
 - For docstrings please follow `Docstring Conventions PEP 257
   <https://www.python.org/dev/peps/pep-0257>`_ and document code to
   aid `sphinx
   <https://pythonhosted.org/an_example_pypi_project/sphinx.html#full-code-example>`_
 
-Formatting with black
----------------------
-
-To ensure that formatting matches across all developers please use the latest version of black.
-This is installed by the mantid-developer conda metapackage and will eventually be enforced by a pre-commit hook.
-black automatically finds the configuration in the ``pyproject.toml`` file when executed inside the Mantid source directory.
-To format a given file you may use ``python -m black path/to/file.py``.
-
-To automatically format any Python files you have changed prior to committing you may use the command: ``git diff --name-only --cached | grep '\.py' | xargs python -m black``.
-This will in place format any files with the ``.py`` extension that you have staged.
-Adding configuration of black into pre-commit is planned.
-
-The `editor integration <https://black.readthedocs.io/en/stable/integrations/editors.html>`_ from black's documentation provide details.
+Formatting is enforced using ruff inside of the pre-commit framework.
 
 None checks
 -----------

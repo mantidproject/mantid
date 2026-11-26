@@ -140,7 +140,7 @@ Checks enabled:
 - **Linters**: ruff-check, rstcheck
 - **Security**: gitleaks
 - **File checks**: trailing-whitespace, check-merge-conflict, check-yaml, end-of-file-fixer
-- **Custom**: cmake-missing-pytest-files, mantid-release-note-check, pixi-dependency-updater
+- **Custom**: cmake-missing-pytest-files, mantid-release-note-check, pixi-build-config-pin-check
 
 ### Python Code Style (`pyproject.toml`)
 

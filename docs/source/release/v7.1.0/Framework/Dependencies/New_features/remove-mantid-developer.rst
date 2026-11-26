@@ -1,0 +1,1 @@
+- The ``mantid-developer`` conda package is no longer published. To build Mantid from source, set up the development environment with `pixi <https://pixi.sh>`__ as described in the `developer documentation <https://developer.mantidproject.org/GettingStarted/GettingStarted.html>`__.

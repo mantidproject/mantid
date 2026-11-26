@@ -211,7 +211,7 @@ instrument run number 68851:
 
 ::
 
-  (mantid-developer) [ADARA-data]$ ls -al ${ADARA-data}/SNAP/${68851_DATA} | cut -d' ' -f1-3,6-
+  (mantid) [ADARA-data]$ ls -al ${ADARA-data}/SNAP/${68851_DATA} | cut -d' ' -f1-3,6-
   total 799824
   -rw-rw-r--  1 209715276 Nov 20 20:22 ds00000001-s00000001-run-68851.adara
   -rw-rw-r--  1 209715244 Nov 20 20:51 ds00000001-s00000002-run-68851.adara
@@ -239,14 +239,14 @@ log, which then contains the summary content:
 
 ::
 
-  (mantid-developer) [ADARA-data]adara_player --config ${adara_player_conf} --summarize "${SOURCE}/0001/*.adara"
+  (mantid) [ADARA-data]adara_player --config ${adara_player_conf} --summarize "${SOURCE}/0001/*.adara"
   2026-01-26 05:24:06,189: INFO: Summarizing content of ADARA-packet files ...
   2026-01-26 05:24:06,189: INFO: Session 0001:
   2026-01-26 05:25:19,704: INFO: Summary available at: '${ADARA_PLAYER_LOGS}/session.574768.log'.
 
 ::
 
-  (mantid-developer) [ADARA-data]$cat ${ADARA_PLAYER_LOGS}/session.574768.log
+  (mantid) [ADARA-data]$cat ${ADARA_PLAYER_LOGS}/session.574768.log
   2026-01-26 05:24:06,189: INFO: Summarizing content of ADARA-packet files ...
   2026-01-26 05:24:06,189: INFO: Session 0001:
   2026-01-26 05:24:06,190: INFO: Found 9 files ...
@@ -466,7 +466,7 @@ when running these actions, and the directory locations will then automatically 
   BUILD=*** FILL THIS IN! ***
 
   # probable definitions, but check in your own ``${BUILD}/bin/launch_mantidworkbench.sh``
-  LOCAL_PRELOAD=${HOME}/mambaforge/envs/mantid-developer/lib/libjemalloc.so.2
+  LOCAL_PRELOAD=${REPO_BASE}/.pixi/envs/default/lib/libtbbmalloc_proxy.so.2
   LOCAL_PYTHONPATH=${BUILD}/bin
 
   LIVEDATA_TEST_SCRIPTS=${REPO_BASE}/Framework/PythonInterface/test/python/mantid/LiveData/ADARA/utils/packet_playback/scripts
@@ -495,8 +495,8 @@ Example ``playback`` mode session
 
 ::
 
-  # activate your `mantid-developer` environment
-  mamba activate mantid-developer
+  # activate the pixi environment of your mantid source directory
+  eval "$(pixi shell-hook --manifest-path /path/to/source/mantid --frozen)"
 
   ##
   ## DEFINE all of your environment variables as in ``Setup for examples``!
@@ -513,7 +513,7 @@ Example ``playback`` mode session
 
 ::
 
-  (mantid-developer) [packet_playback]> LD_PRELOAD=${LOCAL_PRELOAD} PYTHONPATH=${LOCAL_PYTHONPATH}  python ${ADARA_PLAYER} --config ${adara_player_conf} --files=${LIVEDATA_TEST_SCRIPTS}/adara_player_sessions.yml
+  (mantid) [packet_playback]> LD_PRELOAD=${LOCAL_PRELOAD} PYTHONPATH=${LOCAL_PYTHONPATH}  python ${ADARA_PLAYER} --config ${adara_player_conf} --files=${LIVEDATA_TEST_SCRIPTS}/adara_player_sessions.yml
   2026-01-27 05:06:19,835: INFO: Waiting for client connection at /run/user/46619/sock-adara_player...
   2026-01-27 05:06:19,836: INFO: Type CNTL-C to exit.
 
@@ -523,8 +523,8 @@ Example ``playback`` mode session
 
 ::
 
-  # activate your `mantid-developer` environment
-  mamba activate mantid-developer
+  # activate the pixi environment of your mantid source directory
+  eval "$(pixi shell-hook --manifest-path /path/to/source/mantid --frozen)"
 
   ##
   ## DEFINE all of your environment variables as in ``Setup for examples``!
@@ -536,7 +536,7 @@ Example ``playback`` mode session
 
 ::
 
-  (mantid-developer) [scripts]> LD_PRELOAD=${LOCAL_PRELOAD} PYTHONPATH=${LOCAL_PYTHONPATH}\
+  (mantid) [scripts]> LD_PRELOAD=${LOCAL_PRELOAD} PYTHONPATH=${LOCAL_PYTHONPATH}\
     python adara_player_StartLiveData.py
   FrameworkManager-[Notice] Welcome to Mantid 6.14.0.1.dev87
   FrameworkManager-[Notice] Please cite: https://doi.org/10.1016/j.nima.2014.07.029 and this release: https://doi.org/10.5286/Software/Mantid
@@ -558,7 +558,7 @@ Example ``playback`` mode session
   MonitorLiveData-[Notice] Run #68851 ended. Clearing existing workspace.
   MonitorLiveData-[Notice] Loading live data chunk 1 at 10:44:23
   MonitorLiveData-[Warning] MonitorLiveData: Execution cancelled by user.
-  (mantid-developer) [scripts]$
+  (mantid) [scripts]$
 
 
 Example ``record`` mode session
@@ -574,8 +574,8 @@ sections above, but with a few small changes.
 
 ::
 
-  # activate your `mantid-developer` environment
-  mamba activate mantid-developer
+  # activate the pixi environment of your mantid source directory
+  eval "$(pixi shell-hook --manifest-path /path/to/source/mantid --frozen)"
 
   ##
   ## DEFINE all of your environment variables as in ``Setup for examples``!
@@ -597,8 +597,8 @@ address)**:
 
 ::
 
-  # activate your `mantid-developer` environment
-  mamba activate mantid-developer
+  # activate the pixi environment of your mantid source directory
+  eval "$(pixi shell-hook --manifest-path /path/to/source/mantid --frozen)"
 
   ##
   ## DEFINE all of your environment variables as in ``Setup for examples``!
@@ -618,8 +618,8 @@ address)**:
 
 ::
 
-  # activate your `mantid-developer` environment
-  mamba activate mantid-developer
+  # activate the pixi environment of your mantid source directory
+  eval "$(pixi shell-hook --manifest-path /path/to/source/mantid --frozen)"
 
   ##
   ## DEFINE all of your environment variables as in ``Setup for examples``!
@@ -633,7 +633,7 @@ After the client session completes, the contents of the ``${ADARA_PLAYER_OUTPUT_
 
 ::
 
-    (mantid-developer) [packet_playback]$ tree ${ADARA_PLAYER_OUTPUT_DATA}
+    (mantid) [packet_playback]$ tree ${ADARA_PLAYER_OUTPUT_DATA}
     ${ADARA_PLAYER_OUTPUT_DATA}
     └── 0001
         ├── session.adara
@@ -650,8 +650,8 @@ corresponding command to play this back is just ``adara_player ${ADARA_PLAYER_OU
 
 ::
 
-  # activate your `mantid-developer` environment
-  mamba activate mantid-developer
+  # activate the pixi environment of your mantid source directory
+  eval "$(pixi shell-hook --manifest-path /path/to/source/mantid --frozen)"
 
   ##
   ## DEFINE all of your environment variables as in ``Setup for examples``!
@@ -672,7 +672,7 @@ corresponding command to play this back is just ``adara_player ${ADARA_PLAYER_OU
 
 ::
 
-  (mantid-developer) [packet_playback]$ cat ${ADARA_PLAYER_LOGS}/session.615527.log
+  (mantid) [packet_playback]$ cat ${ADARA_PLAYER_LOGS}/session.615527.log
   2026-01-27 11:33:27,528: INFO: Summarizing content of ADARA-packet files ...
   2026-01-27 11:33:27,528: INFO: Session 0001:
   2026-01-27 11:33:27,529: INFO: Found 1 files ...

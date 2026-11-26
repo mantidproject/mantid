@@ -19,7 +19,6 @@ Guides
    Packaging
    Architecture
    InstrumentGeometry
-   BuildingOnOSX
    BuildingWithCMake
    LocalMantidBuildWithPixi
    CMakeBestPractices

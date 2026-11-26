@@ -33,7 +33,6 @@ doxygen:
  - *files_pixi
  - *files_cpp
  - 'Framework/Doxygen/**'
- - 'conda/recipes/mantid-developer/**'
  - 'conda/recipes/conda_build_config.yaml'
  - '.github/filters.yaml'
  - '.github/actions/doxygen-build/**'
@@ -42,7 +41,6 @@ devsite:
  - *files_config
  - *files_pixi
  - 'dev-docs/**'
- - 'conda/recipes/mantid-developer/**'
  - 'conda/recipes/conda_build_config.yaml'
  - '.github/filters.yaml'
  - '.github/actions/devsite-build/**'

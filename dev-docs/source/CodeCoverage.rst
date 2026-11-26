@@ -35,7 +35,7 @@ Setup
     cmake /path/to/src -DCOVERAGE=ON
     ninja # or make
 
-- Install gcovr (already included in mantid-developer environments)
+- Install gcovr (already included in the pixi development environment)
 
   .. code-block:: shell
 
