@@ -104,7 +104,6 @@ class QtTreePropertyBrowserPrivate;
 
 class EXPORT_OPT_MANTIDQT_COMMON QtTreePropertyBrowser : public QtAbstractPropertyBrowser {
   Q_OBJECT
-  Q_ENUMS(ResizeMode)
   Q_PROPERTY(int indentation READ indentation WRITE setIndentation)
   Q_PROPERTY(bool rootIsDecorated READ rootIsDecorated WRITE setRootIsDecorated)
   Q_PROPERTY(bool alternatingRowColors READ alternatingRowColors WRITE setAlternatingRowColors)
@@ -114,6 +113,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QtTreePropertyBrowser : public QtAbstractProper
   Q_PROPERTY(bool propertiesWithoutValueMarked READ propertiesWithoutValueMarked WRITE setPropertiesWithoutValueMarked)
 public:
   enum ResizeMode { Interactive, Stretch, Fixed, ResizeToContents };
+  Q_ENUM(ResizeMode)
 
   QtTreePropertyBrowser(QWidget *parent = nullptr, const QStringList &options = QStringList(),
                         bool darkTopLevel = true);

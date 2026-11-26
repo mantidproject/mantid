@@ -1,0 +1,1 @@
+- Migrated to Qt 6.12 from Qt 6.11, resulting in leaner build and deployment environments with fewer unused dependencies.

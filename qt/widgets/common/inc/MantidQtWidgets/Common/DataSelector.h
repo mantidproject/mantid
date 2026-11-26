@@ -49,10 +49,8 @@ class EXPORT_OPT_MANTIDQT_COMMON DataSelector : public API::MantidWidget {
   Q_PROPERTY(bool multiEntry READ doMultiEntry WRITE doMultiEntry)
   Q_PROPERTY(QString algorithmAndProperty READ getAlgorithmProperty WRITE setAlgorithmProperty)
   Q_PROPERTY(bool extsAsSingleOption READ extsAsSingleOption WRITE extsAsSingleOption)
-  Q_PROPERTY(ButtonOpts buttonOpts READ doButtonOpt WRITE doButtonOpt)
-  Q_PROPERTY(LiveButtonOpts liveButton READ liveButtonState WRITE liveButtonState)
-  Q_ENUMS(ButtonOpts)
-  Q_ENUMS(LiveButtonOpts)
+  Q_PROPERTY(MantidQt::API::FileFinderWidget::ButtonOpts buttonOpts READ doButtonOpt WRITE doButtonOpt)
+  Q_PROPERTY(MantidQt::API::FileFinderWidget::LiveButtonOpts liveButton READ liveButtonState WRITE liveButtonState)
 
   // These are properties of the workspace selector sub-widget
   Q_PROPERTY(QStringList workspaceSuffixes READ getWSSuffixes WRITE setWSSuffixes)
