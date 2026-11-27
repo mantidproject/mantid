@@ -10,6 +10,7 @@
 #include "MantidCurveFitting/Functions/VesuvioResolution.h"
 
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/LabFrameSample.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SampleShapeValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -181,8 +182,8 @@ void VesuvioCalculateMS::cacheInputs() {
   // Convert to metres
   m_srcR2 /= 100.0;
 
-  // Sample shape
-  m_sampleShape = &(m_inputWS->sample().getShape());
+  // Sample shape, where the goniometer puts it: the tracks, beam and detectors are in the lab frame
+  m_sampleShape = API::labFrameSampleShape(*m_inputWS);
   // We know the shape is valid from the property validator
   // Use the bounding box as an approximation to determine the extents
   // as this will match in both height and width for a cuboid & cylinder

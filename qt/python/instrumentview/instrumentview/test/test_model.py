@@ -3,7 +3,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from instrumentview.Globals import CurrentTab
-from mantid.simpleapi import CreateSampleWorkspace, CreatePeaksWorkspace, AddPeak
+from mantid.simpleapi import CreateSampleWorkspace, CreatePeaksWorkspace, AddPeak, DeleteWorkspace, SetGoniometer, SetSample
 from mantid.dataobjects import PeaksWorkspace
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 from instrumentview.Projections.ProjectionType import ProjectionType
@@ -134,6 +134,17 @@ class TestFullInstrumentViewModel(unittest.TestCase):
         model._workspace_x_unit = base_unit
         model._can_convert_units = None
         return model
+
+    def test_sample_shape_is_turned_by_the_goniometer(self):
+        model, _ = self._setup_model([1, 2, 3])
+        ws = CreateSampleWorkspace(OutputWorkspace="TestFullInstrumentViewModel_turned_plate")
+        self.addCleanup(DeleteWorkspace, ws)
+        SetSample(ws, Geometry={"Shape": "FlatPlate", "Width": 4, "Height": 2, "Thick": 0.5, "Center": [0, 0, 0]})
+        SetGoniometer(ws, Axis0="90,0,1,0,1")  # after SetSample, so the shape stays in its own frame
+
+        mesh = model._get_sample_shape_from_workspace(ws)
+
+        np.testing.assert_allclose(np.ptp(mesh.reshape(-1, 3), axis=0), [0.005, 0.02, 0.04], atol=1e-6)
 
     def test_update_integration_range(self):
         model, mock_workspace = self._setup_model([1, 2, 3])

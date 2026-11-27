@@ -23,6 +23,7 @@ from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import (
     CreateWorkspace,
     CreateSampleWorkspace,
+    SetGoniometer,
     SetSample,
     LoadSampleShape,
     DeleteWorkspace,
@@ -140,6 +141,15 @@ class PlotSampleShapeTest(TestCase):
         workspace = setup_workspace_shape_from_mesh()
         self.assertIsNotNone(workspace.sample().getShape())
         self.assertIsNotNone(sample_shape.get_valid_sample_mesh_from_workspace(workspace))
+
+    def test_sample_mesh_is_turned_by_the_goniometer(self):
+        workspace = CreateSampleWorkspace(OutputWorkspace="ws_shape")
+        SetSample(workspace, Geometry={"Shape": "FlatPlate", "Width": 4, "Height": 2, "Thick": 0.5, "Center": [0, 0, 0]})
+        SetGoniometer(workspace, Axis0="90,0,1,0,1")  # after SetSample, so the shape stays in its own frame
+
+        mesh = sample_shape.get_valid_sample_mesh_from_workspace(workspace)
+
+        assert_allclose(np.ptp(mesh.reshape(-1, 3), axis=0), [0.005, 0.02, 0.04], atol=1e-6)
 
     def test_container_valid(self):
         workspace = setup_workspace_container_CSG()

@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/InstrumentFileFinder.h"
+#include "MantidAPI/LabFrameSample.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -17,7 +18,6 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument_fwd.h"
 #include "MantidGeometry/Objects/IObject.h"
-#include "MantidGeometry/Objects/ShapeRotation.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/Converters/PySequenceToVector.h"
 #include "MantidPythonInterface/core/Converters/ToPyList.h"
@@ -99,10 +99,9 @@ const std::string &instrumentDefaultAxis(const ExperimentInfo &expInfo) {
   return expInfo.instrumentMetadata().defaultAxis();
 }
 
-/// Lives here rather than on Sample: ExperimentInfo is the only class holding both the sample and
-/// the run the goniometer sits on.
-Mantid::Geometry::IObject_sptr getLabFrameSampleShape(const ExperimentInfo &self) {
-  return Mantid::Geometry::getLabFrameShape(self.sample().getShape(), self.run().getGoniometer().getR());
+/// Shared, as Sample is exported noncopyable: Python owns the copy.
+std::shared_ptr<Mantid::API::Sample> getLabFrameSample(const ExperimentInfo &self) {
+  return std::make_shared<Mantid::API::Sample>(Mantid::API::labFrameSample(self));
 }
 } // namespace
 
@@ -137,14 +136,17 @@ void export_ExperimentInfo() {
            "modified, use mutableSample to modify.")
       .def("mutableSample", &ExperimentInfo::mutableSample, return_value_policy<reference_existing_object>(),
            args("self"), "Return a modifiable :class:`~mantid.api.Sample` object.")
-      .def("getLabFrameSampleShape", &getLabFrameSampleShape, args("self"),
+      .def("getLabFrameSampleShape", &Mantid::API::labFrameSampleShape, args("self"),
            "Return the sample shape as it sits in the lab frame, rotated by whatever part of this "
            "workspace's goniometer rotation the shape does not already carry.\n\n"
            "A shape may be stored in its own frame or already rotated into the lab frame - "
            ":ref:`algm-CopySample` bakes the goniometer in, while :ref:`algm-SetGoniometer` alone "
            "leaves the shape untouched - so rotating by the goniometer unconditionally would turn an "
-           "already-rotated shape a second time. This applies only what is outstanding, and returns "
-           "a new shape; the workspace's own sample is unchanged.")
+           "already-rotated shape a second time. This applies only what is outstanding; the "
+           "workspace's own sample is unchanged. A sample in an environment is returned as defined.")
+      .def("getLabFrameSample", &getLabFrameSample, args("self"),
+           "Return a copy of the :class:`~mantid.api.Sample` carrying the shape getLabFrameSampleShape "
+           "gives. The environment is not currently rotated by the goniometer, so it is copied as defined.")
       .def("run", &ExperimentInfo::run, return_value_policy<reference_existing_object>(), args("self"),
            "Return the :class:`~mantid.api.Run` object. This cannot be "
            "modified, use mutableRun to modify.")

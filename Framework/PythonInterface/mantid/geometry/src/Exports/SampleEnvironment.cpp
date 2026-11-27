@@ -9,6 +9,7 @@
 
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/return_internal_reference.hpp>
 
 using Mantid::Geometry::SampleEnvironment;
 using namespace boost::python;
@@ -20,10 +21,9 @@ void export_SampleEnvironment() {
 
   class_<SampleEnvironment>("SampleEnvironment", no_init)
       .def("getContainer", &SampleEnvironment::getContainer, (args("self")), "Returns the Container or Can",
-           return_value_policy<reference_existing_object>())
+           return_internal_reference<>())
       .def("getComponent", &SampleEnvironment::getComponent, (args("self", "index")),
-           "Returns the requested IObject. Index 0 is considered the container",
-           return_value_policy<reference_existing_object>())
+           "Returns the requested IObject. Index 0 is considered the container", return_internal_reference<>())
       .def("nelements", &SampleEnvironment::nelements, (args("self")),
            "Returns the number of elements the environment is composed of.");
 }

@@ -13,6 +13,7 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 from mantid.api import AnalysisDataService as ADS
 from mantidqt.plotting.sample_shape_ads_observer import SampleShapePlotADSObserver
+from mantidqt.utils.lab_frame_sample import lab_frame_sample
 from workbench.plotting.globalfiguremanager import FigureAction, GlobalFigureManager
 from workbench.plotting.toolbar import ToolbarStateManager
 from mantidqt.utils.qt.qappthreadcall import run_on_qapp_thread
@@ -208,7 +209,7 @@ def get_valid_sample_mesh_from_workspace(workspace):
 
 def get_sample_shape_from_workspace(workspace_with_sample):
     if workspace_with_sample.sample():
-        return workspace_with_sample.sample().getShape()
+        return lab_frame_sample(workspace_with_sample).getShape()
 
 
 def get_valid_container_mesh_from_workspace(workspace):

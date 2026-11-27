@@ -1,0 +1,1 @@
+- In the :ref:`Instrument View <InstrumentViewer>`, when the workspace has a goniometer rotation, for example from :ref:`algm-SetGoniometer`, the sample shape is now drawn where the goniometer puts it. Previously it was drawn unrotated unless :ref:`algm-CopySample` had rotated the shape itself.
