@@ -12,6 +12,7 @@ from mantid.kernel import config
 from sans.command_interface.batch_csv_parser import BatchCsvParser
 from sans.common.enums import SANSFacility, ReductionDimensionality, SaveType, RowState, OutputMode
 from sans.common.enums import SANSInstrument
+from sans.common.file_information import SANSFileInformationFactory
 from sans.data_objects.row_entries import RowEntries
 from mantidqtinterfaces.sans_isis.gui_logic.models.file_loading import UserFileLoadException
 from mantidqtinterfaces.sans_isis.gui_logic.models.run_tab_model import RunTabModel
@@ -193,11 +194,89 @@ class RunTabPresenterTest(unittest.TestCase):
     def test_file_information_exceptions_handled(self):
         for e in [ValueError, RuntimeError, OSError]:
             mocked_row = mock.Mock()
-            type(mocked_row).file_information = mock.PropertyMock(side_effect=e)
+            mocked_row.read_file_information = mock.Mock(side_effect=e)
             exception_rows = [mocked_row, mocked_row]
             self._mock_table.get_non_empty_rows = mock.Mock(return_value=exception_rows)
 
             self.presenter.on_update_rows()  # should not throw
+
+    def test_update_rows_looks_up_the_file_of_the_first_row_only(self):
+        lookups = [mock.Mock(return_value=mock.NonCallableMock()) for _ in range(5)]
+        self._set_rows_with_file_information_lookups(lookups)
+        self.presenter.on_user_file_load = mock.Mock()
+
+        self.presenter.on_update_rows()
+
+        lookups[0].assert_called_once_with()
+        for lookup in lookups[1:]:
+            lookup.assert_not_called()
+        self.assertIs(self.presenter._file_information, lookups[0].return_value)
+        self.presenter.on_user_file_load.assert_called_once_with()
+
+    def test_update_rows_uses_the_first_row_whose_file_is_found(self):
+        lookups = [
+            mock.Mock(side_effect=RuntimeError),
+            mock.Mock(return_value=mock.NonCallableMock()),
+            mock.Mock(return_value=mock.NonCallableMock()),
+        ]
+        self._set_rows_with_file_information_lookups(lookups)
+        self.presenter.on_user_file_load = mock.Mock()
+
+        self.presenter.on_update_rows()
+
+        lookups[0].assert_called_once_with()
+        lookups[1].assert_called_once_with()
+        lookups[2].assert_not_called()
+        self.assertIs(self.presenter._file_information, lookups[1].return_value)
+
+    def test_update_rows_does_not_reload_user_file_when_the_file_is_unchanged(self):
+        factory = SANSFileInformationFactory()
+        loaded = factory.create_sans_file_information("SANS2D00022024")
+        # Loading the user file looks up the instrument files and keeps them on the file information
+        loaded.get_idf_file_path()
+        self.presenter.on_user_file_load = mock.Mock()
+        self._set_rows_with_file_information_lookups([mock.Mock(return_value=loaded)])
+        self.presenter.on_update_rows()
+        self.presenter.on_user_file_load.assert_called_once_with()
+
+        self.presenter.on_user_file_load.reset_mock()
+        self._set_rows_with_file_information_lookups([mock.Mock(return_value=factory.create_sans_file_information("SANS2D00022024"))])
+        self.presenter.on_update_rows()
+
+        self.presenter.on_user_file_load.assert_not_called()
+
+    def test_update_rows_reloads_user_file_when_the_file_changes(self):
+        factory = SANSFileInformationFactory()
+        self.presenter.on_user_file_load = mock.Mock()
+        self._set_rows_with_file_information_lookups([mock.Mock(return_value=factory.create_sans_file_information("SANS2D00022024"))])
+        self.presenter.on_update_rows()
+
+        self.presenter.on_user_file_load.reset_mock()
+        new_file_information = factory.create_sans_file_information("SANS2D00022048")
+        self._set_rows_with_file_information_lookups([mock.Mock(return_value=new_file_information)])
+        self.presenter.on_update_rows()
+
+        self.presenter.on_user_file_load.assert_called_once_with()
+        self.assertIs(self.presenter._file_information, new_file_information)
+
+    def test_editing_a_row_keeps_manual_settings(self):
+        # Editing a row used to reload the user file, which reset any Settings changed by hand
+        _, user_file_path, view = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_2)
+        self.addCleanup(remove_file, user_file_path)
+        table_model = TableModel()
+        table_model.subscribe_to_model_changes(self.presenter)
+        self.presenter._table_model = table_model
+        table_model.add_multiple_table_entries(
+            [RowEntries(sample_scatter="SANS2D00022024", output_name="a"), RowEntries(sample_scatter="SANS2D00022024", output_name="b")]
+        )
+        self.presenter.on_update_rows()
+        view.reset_all_fields_to_default.assert_called_once_with()
+
+        view.reset_all_fields_to_default.reset_mock()
+        self.presenter.on_data_changed(1, RowEntries(sample_scatter="SANS2D00022024", output_name="edited"))
+
+        self.assertEqual(table_model.get_row(1).output_name, "edited")
+        view.reset_all_fields_to_default.assert_not_called()
 
     def test_that_gets_states_from_view(self):
         # Arrange
@@ -829,6 +908,10 @@ class RunTabPresenterTest(unittest.TestCase):
         view.is_multi_period_view = mock.MagicMock(return_value=is_multi_period)
         self.presenter.set_view(view)
         return batch_file_path, user_file_path, view
+
+    def _set_rows_with_file_information_lookups(self, lookups):
+        rows = [mock.NonCallableMock(read_file_information=lookup) for lookup in lookups]
+        self._mock_table.get_non_empty_rows = mock.Mock(return_value=rows)
 
     @staticmethod
     def _remove_files(user_file_path=None, batch_file_path=None):

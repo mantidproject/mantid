@@ -56,8 +56,8 @@ In the ``Runs`` tab:
    an output name, one row without.
 #. Try changing a random setting in the settings tab and remember what you set
    it to.
-#. Make some more edits to the table. The settings will be reverted to the defaults
-   set in the User File.
+#. Make some more edits to the table. Check that the setting still shows the
+   value you changed it to, rather than the value from the User File.
 #. Click the ``Export Table`` button and save the table as a csv file. Check
    the file in an editor or Excel and ensure it looks like a sensible
    representation of the table in the format ``key,value,key,value,...``.

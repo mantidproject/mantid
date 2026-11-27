@@ -209,8 +209,11 @@ class RowEntries(_UserEntries):
     def __hash__(self):
         return id(self)
 
-    @property
-    def file_information(self):
+    def read_file_information(self):
+        """
+        Finds the sample scatter run file and reads its metadata. This searches the data directories and opens
+        the file, so it can be slow, and it raises if the file can't be found or read.
+        """
         # TODO this should be removed from row entries - it's an internal state not a GUI one
         file_factory = SANSFileInformationFactory()
         return file_factory.create_sans_file_information(self.sample_scatter)

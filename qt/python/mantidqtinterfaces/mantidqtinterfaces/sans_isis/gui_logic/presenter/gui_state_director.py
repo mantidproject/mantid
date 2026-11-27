@@ -41,7 +41,7 @@ class GuiStateDirector(object):
 
         # 1. Get the data settings, such as sample_scatter, etc... and create the data state.
         if file_lookup:
-            file_information = row_entry.file_information
+            file_information = row_entry.read_file_information()
         else:
             file_information = SANSFileInformationBlank()
 

@@ -761,9 +761,13 @@ class SANSFileInformation(metaclass=ABCMeta):
 
         self._run_number = self._init_run_number()
 
+    # Filled in on first use, so they can differ between two objects describing the same file
+    _LAZY_ATTRIBUTES = ("_idf_file_path", "_ipf_file_path")
+
     def __eq__(self, other):
         if type(other) is type(self):
-            return self.__dict__ == other.__dict__
+            # Objects of the same type set the same attributes in __init__, so checking self's attributes is enough
+            return all(value == getattr(other, name) for name, value in self.__dict__.items() if name not in self._LAZY_ATTRIBUTES)
         return False
 
     @abstractmethod

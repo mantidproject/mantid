@@ -43,7 +43,7 @@ def _get_thickness_for_row(row):
     if row.is_empty():
         return
 
-    file_info = row.file_information
+    file_info = row.read_file_information()
 
     for attr in ["sample_thickness", "sample_height", "sample_width"]:
         original_val = getattr(row, attr)
@@ -66,7 +66,7 @@ def _create_row_state(row_entry, file_lookup, gui_state_director):
     state = None
 
     try:
-        if not row_entry.file_information and file_lookup:
+        if not row_entry.read_file_information() and file_lookup:
             error_message = (
                 "Trying to find the SANS file {0}, but cannot find it. Make sure that "
                 "the relevant paths are added and the correct instrument is selected."

@@ -1,0 +1,1 @@
+- The :ref:`ISIS SANS GUI <ISIS_Sans_interface_contents>` loads and edits long batch files much faster: a change to the runs table now looks up only the first row's run file, not every row's. Editing the runs table also no longer resets values changed by hand on the Settings tab.
