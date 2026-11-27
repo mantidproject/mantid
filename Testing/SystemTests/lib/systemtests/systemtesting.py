@@ -20,6 +20,11 @@ if os.environ.get("MANTID_FRAMEWORK_CONDA_SYSTEMTEST"):
     # conda build of mantid-framework sometimes require importing matplotlib before mantid
     import matplotlib
 
+# Must run before anything loads OpenGL, so that VTK can fall back to software rendering on Windows
+from software_opengl import use_software_opengl_if_needed
+
+use_software_opengl_if_needed()
+
 # =========================================================
 import datetime
 import difflib
