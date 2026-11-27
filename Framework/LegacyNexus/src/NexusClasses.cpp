@@ -8,10 +8,28 @@
 #include "MantidLegacyNexus/NeXusException.hpp"
 
 #include <algorithm>
+#include <array>
+#include <limits>
 #include <memory>
 #include <utility>
 
 namespace Mantid::LegacyNexus {
+
+namespace {
+void readDataSetInfo(const NXhandle fileID, NXInfo &info, const std::string &name) {
+  std::array<int64_t, NX_MAXRANK> dims{};
+  info.stat = NXgetinfo64(fileID, &info.rank, dims.data(), &info.type);
+  if (info.stat != NXstatus::NX_OK)
+    throw Exception("Failed to read information for dataset " + name, info.stat);
+  if (info.rank > 4)
+    throw Exception("Dataset " + name + " has unsupported rank greater than 4", NXstatus::NX_ERROR);
+  for (int i = 0; i < info.rank; ++i) {
+    if (dims[static_cast<size_t>(i)] < 0 || dims[static_cast<size_t>(i)] > std::numeric_limits<int>::max())
+      throw Exception("Dataset " + name + " has a dimension outside the supported range", NXstatus::NX_ERROR);
+    info.dims[i] = static_cast<int>(dims[static_cast<size_t>(i)]);
+  }
+}
+} // namespace
 
 /**  Returns the value of an attribute
  *   @param name :: The name of the attribute
@@ -63,10 +81,11 @@ void NXObject::getAttributes() {
   NXnumtype iType;
   int iLength;
   int rank;
-  int dims[4];
+  std::array<int, NX_MAXRANK> dims{};
   std::vector<char> buff(128);
 
-  while (NXgetnextattra(m_fileID, pName, &rank, dims, &iType) != NXstatus::NX_EOD) {
+  NXstatus status;
+  while ((status = NXgetnextattra(m_fileID, pName, &rank, dims.data(), &iType)) == NXstatus::NX_OK) {
     if (rank > 1) { // mantid only supports single value attributes
       throw std::runtime_error("Encountered attribute with multi-dimensional array value");
     }
@@ -77,31 +96,36 @@ void NXObject::getAttributes() {
 
     switch (iType) {
     case NXnumtype::CHAR: {
-      if (iLength >= 0 && (unsigned)iLength > buff.size()) {
-        buff.resize(iLength);
+      if (iLength >= 0 && static_cast<size_t>(iLength + 1) > buff.size()) {
+        buff.resize(static_cast<size_t>(iLength + 1));
       }
       int nz = iLength + 1;
-      NXgetattr(m_fileID, pName, buff.data(), &nz, &iType);
+      if (NXgetattr(m_fileID, pName, buff.data(), &nz, &iType) != NXstatus::NX_OK)
+        throw Exception("Failed to read attribute " + std::string(pName), NXstatus::NX_ERROR);
+      buff[static_cast<size_t>(iLength)] = '\0';
       attributes.set(pName, buff.data());
       break;
     }
     case NXnumtype::INT16: {
-      short int value;
-      NXgetattr(m_fileID, pName, &value, &iLength, &iType);
+      short int value{};
+      if (NXgetattr(m_fileID, pName, &value, &iLength, &iType) != NXstatus::NX_OK)
+        throw Exception("Failed to read attribute " + std::string(pName), NXstatus::NX_ERROR);
       sprintf(buff.data(), "%i", value);
       attributes.set(pName, buff.data());
       break;
     }
     case NXnumtype::INT32: {
-      int value;
-      NXgetattr(m_fileID, pName, &value, &iLength, &iType);
+      int value{};
+      if (NXgetattr(m_fileID, pName, &value, &iLength, &iType) != NXstatus::NX_OK)
+        throw Exception("Failed to read attribute " + std::string(pName), NXstatus::NX_ERROR);
       sprintf(buff.data(), "%i", value);
       attributes.set(pName, buff.data());
       break;
     }
     case NXnumtype::UINT16: {
-      short unsigned int value;
-      NXgetattr(m_fileID, pName, &value, &iLength, &iType);
+      short unsigned int value{};
+      if (NXgetattr(m_fileID, pName, &value, &iLength, &iType) != NXstatus::NX_OK)
+        throw Exception("Failed to read attribute " + std::string(pName), NXstatus::NX_ERROR);
       sprintf(buff.data(), "%u", value);
       attributes.set(pName, buff.data());
       break;
@@ -109,7 +133,9 @@ void NXObject::getAttributes() {
     default:
       break;
     }
-  };
+  }
+  if (status == NXstatus::NX_ERROR)
+    throw Exception("Failed to enumerate attributes", status);
 }
 //---------------------------------------------------------
 //          NXClass methods
@@ -135,9 +161,18 @@ void NXClass::readAllInfo() {
   while ((info = getNextEntry())) {
     if (info.nxclass == "SDS") {
       NXInfo data_info;
-      NXopendata(m_fileID, info.nxname.c_str());
-      data_info.stat = NXgetinfo(m_fileID, &data_info.rank, data_info.dims, &data_info.type);
-      NXclosedata(m_fileID);
+      if (NXopendata(m_fileID, info.nxname.c_str()) != NXstatus::NX_OK)
+        throw Exception("Failed to open dataset " + info.nxname, NXstatus::NX_ERROR);
+
+      try {
+        readDataSetInfo(m_fileID, data_info, info.nxname);
+      } catch (...) {
+        NXclosedata(m_fileID);
+        throw;
+      }
+      const NXstatus closeStatus = NXclosedata(m_fileID);
+      if (closeStatus != NXstatus::NX_OK)
+        throw Exception("Failed to close dataset " + info.nxname, closeStatus);
       data_info.nxname = info.nxname;
       m_datasets->emplace_back(data_info);
     } else if (info.nxclass.substr(0, 2) == "NX" || info.nxclass.substr(0, 2) == "IX") {
@@ -292,23 +327,30 @@ void NXDataSet::open() {
     throw std::runtime_error("Error opening data in group \"" + name() + "\"");
   }
 
-  if (NXgetinfo(m_fileID, &m_info.rank, m_info.dims, &m_info.type) != NXstatus::NX_OK) {
-    throw std::runtime_error("Error retrieving information for " + name() + " group");
+  try {
+    readDataSetInfo(m_fileID, m_info, name());
+    getAttributes();
+  } catch (...) {
+    NXclosedata(m_fileID);
+    throw;
   }
-
-  getAttributes();
-  NXclosedata(m_fileID);
+  if (NXclosedata(m_fileID) != NXstatus::NX_OK)
+    throw Exception("Failed to close dataset " + name(), NXstatus::NX_ERROR);
 }
 
 void NXDataSet::openLocal() {
   if (NXopendata(m_fileID, name().c_str()) != NXstatus::NX_OK) {
     throw std::runtime_error("Error opening data in group \"" + name() + "\"");
   }
-  if (NXgetinfo(m_fileID, &m_info.rank, m_info.dims, &m_info.type) != NXstatus::NX_OK) {
-    throw std::runtime_error("Error retrieving information for " + name() + " group");
+  try {
+    readDataSetInfo(m_fileID, m_info, name());
+    getAttributes();
+  } catch (...) {
+    NXclosedata(m_fileID);
+    throw;
   }
-  getAttributes();
-  NXclosedata(m_fileID);
+  if (NXclosedata(m_fileID) != NXstatus::NX_OK)
+    throw Exception("Failed to close dataset " + name(), NXstatus::NX_ERROR);
 }
 
 /**

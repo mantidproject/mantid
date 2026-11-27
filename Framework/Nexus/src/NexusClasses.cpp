@@ -13,6 +13,8 @@
 namespace Mantid::Nexus {
 
 static NXDimArray nxdimArray(const DimVector &xd) {
+  if (xd.size() > NXDimArray{}.size())
+    throw Exception("NexusClasses does not support datasets with rank greater than 4", "nxdimArray");
   NXDimArray ret{0};
   for (std::size_t i = 0; i < xd.size(); i++) {
     ret[i] = xd[i];
