@@ -1,0 +1,1 @@
+- :ref:`algm-IntegratePeaksShapeMD` no longer integrates events from masked detectors, and no longer places events at the wrong momentum in workspaces with monitors or spectra without detectors.

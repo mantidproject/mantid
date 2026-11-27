@@ -596,6 +596,41 @@ void MDNormBase::calculateNormInner(const API::SpectrumInfo &spectrumInfo, const
 }
 
 /**
+ * Evaluate a cumulative (integrated) flux spectrum at momentum x, by linear
+ * interpolation between the points (xData[j], yData[j]), exactly as MDNorm
+ * does: zero below xData.front(), yData.back() above xData.back() and in the
+ * last interval. xData may be bin edges (one longer than yData) or points.
+ */
+double MDNormBase::interpolateIntegratedFlux(const double x, const std::vector<double> &xData,
+                                             const std::vector<double> &yData) {
+  const std::size_t spSize = yData.size();
+  // all integrals below xStart must be 0
+  if (x < xData.front())
+    return 0.0;
+  const double yMax = yData.back();
+  // all integrals above xEnd must be equal to yMax
+  if (x > xData.back())
+    return yMax;
+  // first interpolation point at or above x, or the last one
+  const auto last = xData.begin() + static_cast<std::ptrdiff_t>(spSize - 1);
+  const auto j = static_cast<std::size_t>(std::distance(xData.begin(), std::lower_bound(xData.begin(), last, x)));
+  // if x falls onto an interpolation point return the corresponding y
+  if (x == xData[j])
+    return yData[j];
+  // in the last interval it's yMax
+  if (j == spSize - 1)
+    return yMax;
+  if (j == 0)
+    return 0.0;
+  // interpolate between the consecutive points
+  const double x0 = xData[j - 1];
+  const double x1 = xData[j];
+  const double y0 = yData[j - 1];
+  const double y1 = yData[j];
+  return y0 + (y1 - y0) * (x - x0) / (x1 - x0);
+}
+
+/**
  * Linearly interpolate between the points in integrFlux at xValues and save the
  * results in yValues.
  * @param xValues :: X-values at which to interpolate
@@ -608,67 +643,12 @@ void MDNormBase::calcIntegralsForIntersections(const std::vector<double> &xValue
                                                std::vector<double> &yValues) const {
   assert(xValues.size() == yValues.size());
 
-  // the x-data from the workspace
-  const auto &xData = integrFlux.x(sp);
-  const double xStart = xData.front();
-  const double xEnd = xData.back();
-
   // the values in integrFlux are expected to be integrals of a non-negative
-  // function
-  // ie they must make a non-decreasing function
-  const auto &yData = integrFlux.y(sp);
-  size_t spSize = yData.size();
-
-  const double yMin = 0.0;
-  const double yMax = yData.back();
-
-  size_t nData = xValues.size();
-  // all integrals below xStart must be 0
-  if (xValues[nData - 1] < xStart) {
-    std::fill(yValues.begin(), yValues.end(), yMin);
-    return;
-  }
-
-  // all integrals above xEnd must be equal tp yMax
-  if (xValues[0] > xEnd) {
-    std::fill(yValues.begin(), yValues.end(), yMax);
-    return;
-  }
-
-  size_t i = 0;
-  // integrals below xStart must be 0
-  while (i < nData - 1 && xValues[i] < xStart) {
-    yValues[i] = yMin;
-    i++;
-  }
-  size_t j = 0;
-  for (; i < nData; i++) {
-    // integrals above xEnd must be equal tp yMax
-    if (j >= spSize - 1) {
-      yValues[i] = yMax;
-    } else {
-      double xi = xValues[i];
-      while (j < spSize - 1 && xi > xData[j])
-        j++;
-      // if x falls onto an interpolation point return the corresponding y
-      if (xi == xData[j]) {
-        yValues[i] = yData[j];
-      } else if (j == spSize - 1) {
-        // if we get above xEnd it's yMax
-        yValues[i] = yMax;
-      } else if (j > 0) {
-        // interpolate between the consecutive points
-        double x0 = xData[j - 1];
-        double x1 = xData[j];
-        double y0 = yData[j - 1];
-        double y1 = yData[j];
-        yValues[i] = y0 + (y1 - y0) * (xi - x0) / (x1 - x0);
-      } else // j == 0
-      {
-        yValues[i] = yMin;
-      }
-    }
-  }
+  // function, ie they must make a non-decreasing function
+  const auto &xData = integrFlux.x(sp).rawData();
+  const auto &yData = integrFlux.y(sp).rawData();
+  std::transform(xValues.cbegin(), xValues.cend(), yValues.begin(),
+                 [&](const double x) { return interpolateIntegratedFlux(x, xData, yData); });
 }
 
 /**
