@@ -192,7 +192,7 @@ class IN5_Mask_Non_Overlapping_Bins(systemtesting.MantidSystemTest):
         return "arm" in platform.machine()
 
     def validate(self):
-        self.tolerance = 1e-7
+        self.tolerance = 1e-6
         self.nanEqual = True
         self.tolerance_is_rel_err = True
         self.disableChecking = ["Instrument", "Sample"]

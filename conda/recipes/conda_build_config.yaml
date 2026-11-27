@@ -24,7 +24,7 @@ c_stdlib_version:
   - '2022.*'                 # [win]
 
 python:
-  - '3.13.*'
+  - '3.14.*'
 
 # Aim to follow conda-forge
 libboost:
@@ -77,7 +77,7 @@ mystparser:
 
 # Aim to build using the latest minor version, and rely on numpy's generous backward compatibility.
 numpy:
-  - '2.1.*'
+  - '2.3.*'
 
 matplotlib:
   - '3.10.*'

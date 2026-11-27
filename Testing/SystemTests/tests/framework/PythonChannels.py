@@ -27,7 +27,7 @@ import unittest
 import subprocess
 import systemtesting
 import platform
-from multiprocessing import Process
+import multiprocessing
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 script_template = """
@@ -109,7 +109,10 @@ class PythonChannelTest(systemtesting.MantidSystemTest):
         return platform.system() == "Darwin"
 
     def runTest(self):
-        self._server = Process(target=run_server)
+        # Request `fork` where available: Python 3.14 defaults to `forkserver` on Linux, which fails when
+        # this test itself runs in a forkserver-started worker (runSystemTests.py -j N)
+        ctx = multiprocessing.get_context("fork" if "fork" in multiprocessing.get_all_start_methods() else None)
+        self._server = ctx.Process(target=run_server)
         self._server.start()
         suite = unittest.TestSuite()
         suite.addTest(unittest.defaultTestLoader.loadTestsFromTestCase(PythonLoggingTests))
