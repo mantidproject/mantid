@@ -22,6 +22,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 
+#include <numbers>
 #include <vector>
 
 using namespace Mantid::API;
@@ -118,6 +119,42 @@ public:
 
     // Check the total number of elements in the map for SLS
     check_workspace_detectors(output, 2502);
+  }
+
+  void testExecHRPDX() {
+    LoadEmptyInstrument loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "HRPD-X_Definition.xml");
+    const std::string outputName = "LoadEmptyInstrumentTestHRPDX";
+    loader.setPropertyValue("OutputWorkspace", outputName);
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT(loader.isExecuted());
+
+    const auto output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputName);
+    // 15236 detector pixels in 4 banks plus 5 monitors
+    check_workspace_detectors(output, 15241);
+    TS_ASSERT_EQUALS(output->getInstrument()->getName(), "HRPD-X");
+
+    const auto &detectorInfo = output->detectorInfo();
+    TS_ASSERT_DELTA(detectorInfo.l1(), 95.0, 1e-6);
+    for (Mantid::detid_t monitorID = 1001; monitorID <= 1005; ++monitorID) {
+      TS_ASSERT(detectorInfo.isMonitor(detectorInfo.indexOf(monitorID)));
+    }
+
+    // Detector IDs are <bank><module><pixel>; pixel numbers increase from high to low 2theta within a module.
+    // Reference L2 and 2theta values are from the HRPD-X DAE detector table.
+    constexpr double degToRad = std::numbers::pi / 180.0;
+    const auto firstPixel = detectorInfo.indexOf(310001);
+    const auto midPixel = detectorInfo.indexOf(310422);
+    const auto lastPixel = detectorInfo.indexOf(310456);
+    TS_ASSERT_DELTA(detectorInfo.l2(firstPixel), 2.3588, 1e-3);
+    TS_ASSERT_DELTA(detectorInfo.twoTheta(firstPixel), 55.880 * degToRad, 0.01 * degToRad);
+    TS_ASSERT_DELTA(detectorInfo.l2(midPixel), 3.2425, 1e-3);
+    TS_ASSERT_DELTA(detectorInfo.twoTheta(midPixel), 37.031 * degToRad, 0.01 * degToRad);
+    TS_ASSERT_DELTA(detectorInfo.l2(lastPixel), 3.3247, 1e-3);
+    TS_ASSERT_DELTA(detectorInfo.twoTheta(lastPixel), 35.970 * degToRad, 0.01 * degToRad);
+
+    AnalysisDataService::Instance().remove(outputName);
   }
 
   void testExecMUSR() {

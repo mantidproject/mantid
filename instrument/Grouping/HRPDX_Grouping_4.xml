@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<detector-grouping instrument='HRPD-X' idf-date='2026-03-01' description='Equatorial modules only, one group per bank (4 groups)'>
+  <group ID='1' name='B1'>
+    <detids>103001-103286,107001-107286</detids>
+  </group>
+  <group ID='2' name='B2'>
+    <detids>204001-204402,211001-211402</detids>
+  </group>
+  <group ID='3' name='B3'>
+    <detids>303001-303456,308001-308456</detids>
+  </group>
+  <group ID='4' name='B4'>
+    <detids>403001-403276,408001-408276</detids>
+  </group>
+</detector-grouping>

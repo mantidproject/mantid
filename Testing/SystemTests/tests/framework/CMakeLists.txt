@@ -71,6 +71,7 @@ set(SYSTEST_NAMES
     HFIRSCDSubtractBackgroundTest.py
     HFIRTestsAPIv2.py
     HFIRTransAPIv2.py
+    HRPDXGroupingTest.py
     HYSPECReductionTest.py
     ILLDetectorEfficiencyCorUserTest.py
     ILLDirectGeometryReductionTest.py

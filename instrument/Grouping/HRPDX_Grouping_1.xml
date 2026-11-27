@@ -1,0 +1,153 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<detector-grouping instrument='HRPD-X' idf-date='2026-03-01' description='One group per module; Bank 1 inner and outer modules grouped separately (50 groups)'>
+  <group ID='1' name='B1_inner_mod1'>
+    <detids>101001-101132</detids>
+  </group>
+  <group ID='2' name='B1_outer_mod1'>
+    <detids>101133-101286</detids>
+  </group>
+  <group ID='3' name='B1_inner_mod2'>
+    <detids>102001-102132</detids>
+  </group>
+  <group ID='4' name='B1_outer_mod2'>
+    <detids>102133-102286</detids>
+  </group>
+  <group ID='5' name='B1_inner_mod3'>
+    <detids>103001-103132</detids>
+  </group>
+  <group ID='6' name='B1_outer_mod3'>
+    <detids>103133-103286</detids>
+  </group>
+  <group ID='7' name='B1_inner_mod4'>
+    <detids>104001-104132</detids>
+  </group>
+  <group ID='8' name='B1_outer_mod4'>
+    <detids>104133-104286</detids>
+  </group>
+  <group ID='9' name='B1_inner_mod5'>
+    <detids>105001-105132</detids>
+  </group>
+  <group ID='10' name='B1_outer_mod5'>
+    <detids>105133-105286</detids>
+  </group>
+  <group ID='11' name='B1_inner_mod6'>
+    <detids>106001-106132</detids>
+  </group>
+  <group ID='12' name='B1_outer_mod6'>
+    <detids>106133-106286</detids>
+  </group>
+  <group ID='13' name='B1_inner_mod7'>
+    <detids>107001-107132</detids>
+  </group>
+  <group ID='14' name='B1_outer_mod7'>
+    <detids>107133-107286</detids>
+  </group>
+  <group ID='15' name='B1_inner_mod8'>
+    <detids>108001-108132</detids>
+  </group>
+  <group ID='16' name='B1_outer_mod8'>
+    <detids>108133-108286</detids>
+  </group>
+  <group ID='17' name='B2_mod1'>
+    <detids>201001-201402</detids>
+  </group>
+  <group ID='18' name='B2_mod2'>
+    <detids>202001-202402</detids>
+  </group>
+  <group ID='19' name='B2_mod3'>
+    <detids>203001-203402</detids>
+  </group>
+  <group ID='20' name='B2_mod4'>
+    <detids>204001-204402</detids>
+  </group>
+  <group ID='21' name='B2_mod5'>
+    <detids>205001-205402</detids>
+  </group>
+  <group ID='22' name='B2_mod6'>
+    <detids>206001-206402</detids>
+  </group>
+  <group ID='23' name='B2_mod7'>
+    <detids>207001-207402</detids>
+  </group>
+  <group ID='24' name='B2_mod8'>
+    <detids>208001-208402</detids>
+  </group>
+  <group ID='25' name='B2_mod9'>
+    <detids>209001-209402</detids>
+  </group>
+  <group ID='26' name='B2_mod10'>
+    <detids>210001-210402</detids>
+  </group>
+  <group ID='27' name='B2_mod11'>
+    <detids>211001-211402</detids>
+  </group>
+  <group ID='28' name='B2_mod12'>
+    <detids>212001-212402</detids>
+  </group>
+  <group ID='29' name='B2_mod13'>
+    <detids>213001-213402</detids>
+  </group>
+  <group ID='30' name='B2_mod14'>
+    <detids>214001-214402</detids>
+  </group>
+  <group ID='31' name='B3_mod1'>
+    <detids>301001-301456</detids>
+  </group>
+  <group ID='32' name='B3_mod2'>
+    <detids>302001-302456</detids>
+  </group>
+  <group ID='33' name='B3_mod3'>
+    <detids>303001-303456</detids>
+  </group>
+  <group ID='34' name='B3_mod4'>
+    <detids>304001-304456</detids>
+  </group>
+  <group ID='35' name='B3_mod5'>
+    <detids>305001-305456</detids>
+  </group>
+  <group ID='36' name='B3_mod6'>
+    <detids>306001-306456</detids>
+  </group>
+  <group ID='37' name='B3_mod7'>
+    <detids>307001-307456</detids>
+  </group>
+  <group ID='38' name='B3_mod8'>
+    <detids>308001-308456</detids>
+  </group>
+  <group ID='39' name='B3_mod9'>
+    <detids>309001-309456</detids>
+  </group>
+  <group ID='40' name='B3_mod10'>
+    <detids>310001-310456</detids>
+  </group>
+  <group ID='41' name='B4_mod1'>
+    <detids>401001-401276</detids>
+  </group>
+  <group ID='42' name='B4_mod2'>
+    <detids>402001-402276</detids>
+  </group>
+  <group ID='43' name='B4_mod3'>
+    <detids>403001-403276</detids>
+  </group>
+  <group ID='44' name='B4_mod4'>
+    <detids>404001-404276</detids>
+  </group>
+  <group ID='45' name='B4_mod5'>
+    <detids>405001-405276</detids>
+  </group>
+  <group ID='46' name='B4_mod6'>
+    <detids>406001-406276</detids>
+  </group>
+  <group ID='47' name='B4_mod7'>
+    <detids>407001-407276</detids>
+  </group>
+  <group ID='48' name='B4_mod8'>
+    <detids>408001-408276</detids>
+  </group>
+  <group ID='49' name='B4_mod9'>
+    <detids>409001-409276</detids>
+  </group>
+  <group ID='50' name='B4_mod10'>
+    <detids>410001-410276</detids>
+  </group>
+</detector-grouping>
