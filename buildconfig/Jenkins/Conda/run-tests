@@ -95,6 +95,21 @@ if [[ $OSTYPE == "msys"* ]]; then
     WINDOWS_UNITTEST_TIMEOUT_OPTIONS="--timeout 500"
     export PYTHONHOME=$CONDA_PREFIX
     SYSTEM_TEST_EXECUTABLE=$WORKSPACE/build/systemtest.bat
+
+    # VTK, which draws the new instrument view, needs OpenGL 3.2. Windows machines without a GPU, such as the VMs
+    # hosting some CI runners, only provide OpenGL 1.1. On those, copy Qt's Mesa software renderer next to python.exe
+    # as opengl32.dll. Windows loads DLLs from the program's own folder before System32, so every Python process in
+    # the tests then renders in software. Qt already falls back to this DLL by itself, but VTK does not.
+    # The copy is only made in this CI environment, never in a package, and is redone on every run.
+    APP_LOCAL_OPENGL=$CONDA_PREFIX/opengl32.dll
+    rm -f "$APP_LOCAL_OPENGL"
+    if python -c "import sys, vtkmodules.vtkRenderingOpenGL2; from vtkmodules.vtkRenderingCore import vtkRenderWindow; sys.exit(0 if vtkRenderWindow().SupportsOpenGL() else 1)"; then
+        echo "Native OpenGL supports VTK"
+    else
+        # A crash in the check also lands here, which is what VTK tends to do with OpenGL 1.1
+        echo "Native OpenGL does not support VTK: using the Mesa software renderer bundled with Qt"
+        cp "$CONDA_PREFIX/Library/bin/opengl32sw.dll" "$APP_LOCAL_OPENGL"
+    fi
 else
     SYSTEM_TEST_EXECUTABLE=$WORKSPACE/build/systemtest
 fi

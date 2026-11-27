@@ -33,8 +33,8 @@ class CppInterfacesStartupTest(systemtesting.MantidSystemTest):
         self._app = get_application()
         self._interface_manager = InterfaceManager()
         self._cpp_interface_names = set(chain.from_iterable(gather_cpp_interface_names().values()))
-        # Open the interfaces with the new instrument view, whatever the local settings say. On machines without a GPU,
-        # such as the Windows CI runners, systemtesting falls back to software OpenGL so that VTK can still render.
+        # Open the interfaces with the new instrument view, whatever the local settings say. On Windows CI machines
+        # without a GPU, run-tests sets up software OpenGL so that VTK can still render.
         self._legacy_instrument_view_setting_exists = CONF.has(LEGACY_INSTRUMENT_VIEW_SETTING)
         self._original_use_legacy_instrument_view = (
             CONF.get(LEGACY_INSTRUMENT_VIEW_SETTING) if self._legacy_instrument_view_setting_exists else None
