@@ -4,12 +4,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from collections.abc import Sequence
 import copy
 import warnings
 
 import mantid.kernel as kernel
 import mantid.simpleapi as mantid
+from Diffraction.isis_powder.routines.instrument_settings import expand_parameter_list
 from mantid.api import AnalysisDataService, WorkspaceGroup, MatrixWorkspace
 from mantid.dataobjects import Workspace2D
 from Diffraction.isis_powder.routines.common_enums import INPUT_BATCHING, WORKSPACE_UNITS
@@ -86,30 +86,21 @@ def crop_banks_using_crop_list(bank_list, crop_values_list):
     :param crop_values_list: The cropping values to apply to each bank
     :return: A list of cropped workspaces
     """
-    if not isinstance(crop_values_list, Sequence):
-        raise ValueError("The cropping values were not in a list or tuple type")
-    elif not isinstance(bank_list, list):
+    if not isinstance(bank_list, list):
         # This error is probably internal as we control the bank lists
         raise RuntimeError("Attempting to use list based cropping on a single workspace not in a list")
 
     output_list = []
-    if not isinstance(crop_values_list[0], Sequence):  # All banks use the same cropping parameters.
-        for spectra in bank_list:
-            output_list.append(crop_in_tof(ws_to_crop=spectra, x_min=crop_values_list[0], x_max=crop_values_list[-1]))
-    else:  # Each bank has its own cropping parameters.
-        num_banks = len(bank_list)
-        num_crop_vals = len(crop_values_list)
+    try:
+        crop_values_list = expand_parameter_list(crop_values_list, len(bank_list))
+    except RuntimeError as e:
+        raise RuntimeError("The number of TOF cropping values does not match the number of banks for this instrument.\n %s", str(e))
 
-        # Finally check the number of elements are equal
-        if num_banks != num_crop_vals:
-            raise RuntimeError(
-                "The number of TOF cropping values does not match the number of banks for this "
-                "instrument.\n "
-                "{} cropping windows were supplied for {} banks".format(num_crop_vals, num_banks)
-            )
+    for spectra, cropping_values in zip(bank_list, crop_values_list):
+        if not isinstance(cropping_values, tuple):
+            raise ValueError("The cropping values were not in a list or tuple type")
+        output_list.append(crop_in_tof(ws_to_crop=spectra, x_min=cropping_values[0], x_max=cropping_values[-1]))
 
-        for spectra, cropping_values in zip(bank_list, crop_values_list):
-            output_list.append(crop_in_tof(ws_to_crop=spectra, x_min=cropping_values[0], x_max=cropping_values[-1]))
     return output_list
 
 
@@ -501,8 +492,9 @@ def spline_workspaces(focused_vanadium_spectra, num_splines):
         tof_ws_list.append(mantid.ConvertUnits(InputWorkspace=ws, Target="TOF", OutputWorkspace=out_name))
 
     splined_ws_list = []
-    for ws in tof_ws_list:
-        splined_ws_list.append(mantid.SplineBackground(InputWorkspace=ws, OutputWorkspace=ws, NCoeff=num_splines))
+    num_splines = expand_parameter_list(num_splines, len(tof_ws_list))
+    for bank_index, ws in enumerate(tof_ws_list):
+        splined_ws_list.append(mantid.SplineBackground(InputWorkspace=ws, OutputWorkspace=ws, NCoeff=num_splines[bank_index]))
 
     return splined_ws_list
 
