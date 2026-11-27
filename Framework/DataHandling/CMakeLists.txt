@@ -478,6 +478,7 @@ set(TEST_FILES
     ISISDataArchiveTest.h
     ISISJournalGetExperimentRunsTest.h
     ISISJournalTest.h
+    InstrumentDefinitionSnapshotTest.h
     InstrumentRayTracerTest.h
     InstrumentSpectraMappingTest.h
     JoinISISPolarizationEfficienciesTest.h
