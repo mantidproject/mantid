@@ -18,6 +18,8 @@ class MersenneTwister;
 }
 namespace Algorithms {
 
+enum class MSCorrectionMode { NO_RNS, RNS_OUT, RNS_IN, enum_count };
+
 /**
 
   Applies the procedure found in section 4 of
@@ -43,6 +45,7 @@ public:
     double cylHeight; ///< Height of cylinder (m)
     size_t msNEvents; ///< Number of second-order scatters per run
     size_t msNRuns;   ///< Number of runs to average ms correction over
+    MSCorrectionMode msCorrMode;
   };
 
   /// Constructor

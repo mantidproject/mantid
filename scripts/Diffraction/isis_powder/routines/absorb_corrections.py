@@ -35,7 +35,9 @@ def create_vanadium_sample_details_obj(config_dict):
     return vanadium_sample_details
 
 
-def run_cylinder_absorb_corrections(ws_to_correct, multiple_scattering, sample_details_obj, is_vanadium, msevents=None):
+def run_cylinder_absorb_corrections(
+    ws_to_correct, multiple_scattering, sample_details_obj, is_vanadium, msevents=None, mayers_ms_corr_mode=None
+):
     """
     Sets a cylindrical sample from the user specified config dictionary and performs Mayers
     sample correction on the workspace. The SampleDetails object defines the sample, material
@@ -46,6 +48,7 @@ def run_cylinder_absorb_corrections(ws_to_correct, multiple_scattering, sample_d
     :param sample_details_obj: The object containing the sample details
     :param is_vanadium: Whether the sample is a vanadium
     :param msevents: parameter MSEvents in MayerSampleCorrection algorithm (number of events in mult. scat. calc.)
+    :param mayers_ms_corr_mode: parameter MSCorrectionMode in MayerSampleCorrection algorithm
     :return: The corrected workspace
     """
 
@@ -70,11 +73,14 @@ def run_cylinder_absorb_corrections(ws_to_correct, multiple_scattering, sample_d
         sample_details_obj=sample_details_obj,
         is_vanadium=is_vanadium,
         msevents=msevents,
+        mayers_ms_corr_mode=mayers_ms_corr_mode,
     )
     return ws_to_correct
 
 
-def _calculate__cylinder_absorb_corrections(ws_to_correct, multiple_scattering, sample_details_obj, is_vanadium, msevents):
+def _calculate__cylinder_absorb_corrections(
+    ws_to_correct, multiple_scattering, sample_details_obj, is_vanadium, msevents, mayers_ms_corr_mode
+):
     """
     Calculates vanadium absorption corrections for the specified workspace. The workspace
     should have any monitor spectra masked before being passed into this method. Additionally
@@ -93,6 +99,7 @@ def _calculate__cylinder_absorb_corrections(ws_to_correct, multiple_scattering, 
         multiple_scattering=multiple_scattering,
         is_vanadium=is_vanadium,
         msevents=msevents,
+        mayers_ms_corr_mode=mayers_ms_corr_mode,
     )
     return ws_to_correct
 
@@ -103,7 +110,7 @@ def _setup_sample_for_cylinder_absorb_corrections(ws_to_correct, sample_details_
     mantid.SetSample(InputWorkspace=ws_to_correct, Geometry=geometry_json, Material=material_json)
 
 
-def _do_cylinder_absorb_corrections(ws_to_correct, multiple_scattering, is_vanadium, msevents):
+def _do_cylinder_absorb_corrections(ws_to_correct, multiple_scattering, is_vanadium, msevents, mayers_ms_corr_mode):
     previous_units = ws_to_correct.getAxis(0).getUnit().unitID()
     ws_units = common_enums.WORKSPACE_UNITS
 
@@ -113,7 +120,11 @@ def _do_cylinder_absorb_corrections(ws_to_correct, multiple_scattering, is_vanad
 
     if is_vanadium:
         ws_to_correct = mantid.MayersSampleCorrection(
-            InputWorkspace=ws_to_correct, MultipleScattering=multiple_scattering, OutputWorkspace=ws_to_correct, MSEvents=msevents
+            InputWorkspace=ws_to_correct,
+            MultipleScattering=multiple_scattering,
+            OutputWorkspace=ws_to_correct,
+            MSEvents=msevents,
+            MSCorrectionMode=mayers_ms_corr_mode,
         )
     else:
         # Ensure we never do multiple scattering if the sample is not isotropic (e.g. not a Vanadium)

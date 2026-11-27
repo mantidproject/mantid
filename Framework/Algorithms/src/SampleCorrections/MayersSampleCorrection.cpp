@@ -16,12 +16,21 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/EnumeratedString.h"
+#include "MantidKernel/EnumeratedStringProperty.h"
 #include "MantidKernel/Material.h"
 
 #include <cmath>
 
 namespace Mantid::Algorithms {
 
+namespace {
+const std::vector<std::string> MSCorrectionModeNames{"(1-b)", "(1-b)/rns", "(1-b/rns)"};
+typedef Mantid::Kernel::EnumeratedString<MSCorrectionMode, &MSCorrectionModeNames> MSCMode;
+} // namespace
+
+using namespace Kernel;
 using API::MatrixWorkspace_sptr;
 using Geometry::IDetector_const_sptr;
 using Kernel::Direction;
@@ -75,6 +84,12 @@ void MayersSampleCorrection::init() {
                   "computed as the average over the runs. Only applicable"
                   "where MultipleScattering=True.",
                   Direction::Input);
+  declareProperty(
+      std::make_unique<EnumeratedStringProperty<MSCorrectionMode, &MSCorrectionModeNames>>("MSCorrectionMode"),
+      "Switch between forms of the correction factor used in multiple scattering correction. "
+      "Only applicable where MultipleScattering=True.");
+  setPropertySettings("MSCorrectionMode",
+                      std::make_unique<EnabledWhenProperty>("MultipleScattering", IS_EQUAL_TO, "1"));
   // Outputs
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
@@ -88,6 +103,7 @@ void MayersSampleCorrection::exec() {
   const bool mscatOn = getProperty("MultipleScattering");
   const int msEvents = getProperty("MSEvents");
   const int msRuns = getProperty("MSRuns");
+  const auto msCorrMode = (MSCMode)getPropertyValue("MSCorrectionMode");
 
   MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS);
   // Instrument constants
@@ -139,6 +155,7 @@ void MayersSampleCorrection::exec() {
     params.cylHeight = height;
     params.msNEvents = static_cast<size_t>(msEvents);
     params.msNRuns = static_cast<size_t>(msRuns);
+    params.msCorrMode = msCorrMode;
 
     MayersSampleCorrectionStrategy correction(params, inputWS->histogram(i));
     outputWS->setHistogram(i, correction.getCorrectedHisto());

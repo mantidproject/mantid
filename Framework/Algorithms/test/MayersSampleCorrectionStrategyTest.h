@@ -200,6 +200,7 @@ private:
     pars.cylHeight = 0.04;
     pars.msNEvents = 500;
     pars.msNRuns = 10;
+    pars.msCorrMode = Mantid::Algorithms::MSCorrectionMode::NO_RNS;
     return pars;
   }
 };
