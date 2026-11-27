@@ -25,6 +25,7 @@ set(TEST_PY_FILES
 if(MANTID_QT_LIB STREQUAL "BUILD")
   set(PYUNITTEST_QT_API pyqt${MANTID_QT_VERSION}) # force to use the configured Qt version
   pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.scripts ${TEST_PY_FILES})
+  pyunittest_add_test(${CMAKE_SOURCE_DIR}/scripts/Inelastic/vesuvio python.scripts LoadVesuvioFixedFoilTest.py)
   unset(PYUNITTEST_QT_API)
 endif()
 
