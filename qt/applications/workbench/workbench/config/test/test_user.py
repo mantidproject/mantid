@@ -15,7 +15,9 @@ from unittest.mock import patch
 
 from qtpy.QtCore import QSettings
 
+from workbench.config import configure_qsettings_dir
 from workbench.config.user import UserConfig, remove_lock_files
+from workbench.identity import APPNAME, ORGANIZATION
 
 
 class ConfigUserManager(object):
@@ -171,6 +173,19 @@ class ConfigUserTest(TestCase):
     def test_set_raises_when_key_is_not_str_and_second_is_none(self):
         self.assertRaises(TypeError, self.cfg.set, 123, None)
 
+    def test_mantid_qsettings_dir_overrides_ini_location(self):
+        original_dir = str(Path(QSettings(QSettings.IniFormat, QSettings.UserScope, ORGANIZATION, APPNAME).fileName()).parents[1])
+        self.addCleanup(QSettings.setPath, QSettings.IniFormat, QSettings.UserScope, original_dir)
+        with TemporaryDirectory() as temp_dir, patch.dict(os.environ, {"MANTID_QSETTINGS_DIR": temp_dir}):
+            configure_qsettings_dir()
+            cfg = UserConfig(ORGANIZATION, APPNAME, {})
+            cfg.set("main", "override_test", "value")
+            cfg.qsettings.sync()
+            expected_ini = Path(temp_dir) / ORGANIZATION / f"{APPNAME}.ini"
+            self.assertEqual(expected_ini, Path(cfg.filename))
+            self.assertTrue(expected_ini.is_file())
+            del cfg
+
 
 class RemoveLockFilesTest(TestCase):
     @patch("workbench.config.user.sleep")
@@ -212,6 +227,21 @@ class RemoveLockFilesTest(TestCase):
 
         remove_lock_files_mock.assert_called_once_with()
         start_mock.assert_called_once()
+
+    @patch("workbench.config.user.sleep")
+    def test_remove_lockfiles_uses_mantid_qsettings_dir(self, _):
+        with TemporaryDirectory() as temp_dir:
+            settings_file = Path(temp_dir) / "mantidproject" / "mantidworkbench.ini"
+            lock_file = settings_file.with_name(settings_file.name + ".lock")
+            settings_file.parent.mkdir(parents=True, exist_ok=True)
+            settings_file.touch()
+            lock_file.touch()
+
+            with patch.dict(os.environ, {"MANTID_QSETTINGS_DIR": temp_dir}):
+                remove_lock_files()
+
+            self.assertTrue(settings_file.exists())
+            self.assertFalse(lock_file.exists())
 
 
 if __name__ == "__main__":

@@ -7,6 +7,7 @@
 #  This file is part of the mantid workbench.
 #
 #
+import os
 from pathlib import Path
 from posixpath import join as joinsettings
 from qtpy.QtCore import QSettings, QStandardPaths
@@ -146,6 +147,9 @@ class UserConfig(object):
 
 
 def _get_settings_dir() -> Path:
+    if qsettings_dir := os.environ.get("MANTID_QSETTINGS_DIR"):
+        return Path(qsettings_dir)
+
     # get directories to look in
     options = QStandardPaths.standardLocations(QStandardPaths.ConfigLocation)
     if len(options) < 1:

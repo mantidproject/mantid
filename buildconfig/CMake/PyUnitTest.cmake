@@ -84,6 +84,8 @@ function(PY_ADD_TEST _test_type _test_runner_module _additional_flags _test_src_
   endif()
   # Define the environment
   list(APPEND _test_environment "PYTHONPATH=${_python_path}")
+  # Keep CTest-run tests from clobbering the developer's QSettings (e.g. mantidworkbench.ini)
+  list(APPEND _test_environment "MANTID_QSETTINGS_DIR=${CMAKE_BINARY_DIR}/Testing/qsettings")
   if(PYUNITTEST_QT_API)
     list(APPEND _test_environment "QT_API=${PYUNITTEST_QT_API}")
   endif()
