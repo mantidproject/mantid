@@ -2,11 +2,9 @@
 Profiling with ``jemalloc``
 ===========================
 
-The ``jemalloc`` allocator is a drop-in replacement for ``malloc``.  It is used primarily as shared library preloaded via the dynamic linker, although it can also be linked statically.  ``jemalloc`` offers substantial improvement over ``malloc`` in terms of its concurrency support, and in regards to its avoidance of memory fragmentation.  When Mantid is launched via ``workbench``, or when a python interpreter is launched to call ``mantid`` algorithms from scripts (in the recommended manner), the ``jemalloc`` library will be preloaded automatically.
+The ``jemalloc`` allocator is a drop-in replacement for ``malloc``.  It is used primarily as shared library preloaded via the dynamic linker, although it can also be linked statically.  ``jemalloc`` offers substantial improvement over ``malloc`` in terms of its concurrency support, and in regards to its avoidance of memory fragmentation.  On Linux, Mantid preloads ``tbbmalloc`` rather than ``jemalloc`` (see :ref:`BuildingWithCMake_tbbmalloc`), so to profile with ``jemalloc`` you must preload it yourself, as shown below.
 
 When used as an allocator, ``jemalloc`` provides extensive allocation  control and profiling hooks.  These hooks may be accessed either using the environment variable ``MALLOC_CONF`` (and several other environment variables) or also programmatically using the *nonstandard* ``mallctl`` entrypoint.  Note here that there are *very many* control hooks available!  In this note, only a few specific profiling techniques will be elaborated, primarily using specific examples.
-
-It should *always* be kept in mind that although Mantid does use ``jemalloc``, its usage is only partially optimized, and there is always room for improvement.  This means that the first solution that should be considered during profiling is the possibility of further optimizing ``jemalloc``'s control settings during Mantid's *loading* process.
 
 **All of the following examples assume a standard developer environment on linux machine.**  Most other OS should also work, and the setup commands will be similar, but this note won't cover those details.
 
@@ -29,7 +27,7 @@ The standard ``jemalloc`` library does not include the profiling hooks, and it w
 Use ``jemalloc`` to profile an existing Mantid build
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Any existing build of Mantid can be successfully profiled simply by changing the ``LD_PRELOAD`` to include the new ``jemalloc`` build instead of the standard one.  This example will also show how to enable profiling using the ``MALLOC_CONF`` environment variable.  Here's how to generate a series of memory-allocation profiles, with a new profile written every time memory allocation increases by 1GB::
+Any existing build of Mantid can be successfully profiled simply by changing the ``LD_PRELOAD`` to include the new ``jemalloc`` build instead of the standard one.  On Linux, also set ``MANTID_DISABLE_TBBMALLOC=1``, otherwise Python restarts itself with ``tbbmalloc`` ahead of ``jemalloc`` in ``LD_PRELOAD`` (see :ref:`BuildingWithCMake_tbbmalloc`).  This example will also show how to enable profiling using the ``MALLOC_CONF`` environment variable.  Here's how to generate a series of memory-allocation profiles, with a new profile written every time memory allocation increases by 1GB::
 
     # Notes: enable and activate profiling, generate a profile every ~1GB of additional memory allocated.
     #   The profile-dump interval is expressed somewhat cryptically as $\log_2$\ of the memory quantity:
@@ -43,6 +41,7 @@ Any existing build of Mantid can be successfully profiled simply by changing the
     #   First try removing the `PYTHONPATH` lines below and just assume that your Pixi environment has set the path correctly!
     LOCAL_PYTHONPATH=<Mantid's PYTHONPATH>
 
+    MANTID_DISABLE_TBBMALLOC=1 \
     LD_PRELOAD=${LOCAL_PRELOAD} \
         PYTHONPATH=${LOCAL_PYTHONPATH} \
         ${CONDA_PREFIX}/bin/python -m workbench
