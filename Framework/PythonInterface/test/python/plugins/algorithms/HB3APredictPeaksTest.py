@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # ruff: noqa: E741  # Ambiguous variable name
 import unittest
+import numpy as np
 from mantid.simpleapi import HB3APredictPeaks, HB3AAdjustSampleNorm
 
 
@@ -22,10 +23,9 @@ class HB3APredictPeaksTest(unittest.TestCase):
         self.assertEqual(peak0.getL(), 6)
         self.assertEqual(peak0.getRunNumber(), 9)
         self.assertAlmostEqual(peak0.getWavelength(), 1.008)
-        q_sample = peak0.getQSampleFrame()
-        self.assertAlmostEqual(q_sample[0], -0.401367, places=5)
-        self.assertAlmostEqual(q_sample[1], 1.71447, places=5)
-        self.assertAlmostEqual(q_sample[2], 2.29083, places=5)
+        q_sample = np.array(peak0.getQSampleFrame())
+        expected = 2 * np.pi * peaks.sample().getOrientedLattice().getUB() @ np.array([0, 0, 6])
+        np.testing.assert_allclose(q_sample, expected, atol=1e-8)
 
     def testSatellitePeaks(self):
         data = HB3AAdjustSampleNorm("HB3A_data.nxs")
