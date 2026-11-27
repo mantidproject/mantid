@@ -46,7 +46,6 @@ hdf4:
 hdf5: # this is to move to libcurl>=8.4
   - '>1.14.0,<1.15'
 
-
 graphviz:
   - '>=2.47.0'
 
@@ -64,6 +63,10 @@ libglu:
 
 mantid_sphinx_theme:
   - '>=0.1.0,<1'
+
+# Implicit dependency on Windows; moving to 2026.2 causes test failures. Unpin when resolved.
+mkl:
+  - '2026.1.*'
 
 #v2.3.5 caused seg faults on Mantid conda versions and large numbers of tests failing
 muparser:
