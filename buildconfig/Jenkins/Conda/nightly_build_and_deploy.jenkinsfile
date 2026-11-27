@@ -613,11 +613,7 @@ def package_conda_options(platform) {
 
   // Build mantidworkbench noarch package on Linux only.
   if(platform.startsWith('linux')) {
-    if(buildMantiddocs) {
-      package_flags += " --build-workbench"
-    } else {
-      package_flags += " --build-workbench-without-docs"
-    }
+    package_flags += " --build-workbench"
   }
 
   def package_options = "${package_flags} --git-tag ${GIT_TAG} --platform ${platform}"
