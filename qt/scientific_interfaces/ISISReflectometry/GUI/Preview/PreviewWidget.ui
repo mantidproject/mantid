@@ -153,6 +153,23 @@
        </property>
       </spacer>
      </item>
+     <item>
+      <widget class="QLabel" name="slice_label">
+       <property name="visible">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>Slice</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="slice_combo_box">
+       <property name="visible">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>

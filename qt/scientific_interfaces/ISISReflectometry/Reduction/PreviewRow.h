@@ -46,13 +46,13 @@ public:
 
   Mantid::API::Workspace_sptr getLoadedWs() const noexcept;
   Mantid::API::Workspace_sptr getSummedWs() const noexcept;
-  Mantid::API::Workspace_sptr getReducedWs() const noexcept;
+  std::vector<Mantid::API::Workspace_sptr> const &getReducedWss() const noexcept;
   std::optional<ProcessingInstructions> getSelectedBanks() const noexcept;
   std::optional<ProcessingInstructions> getProcessingInstructions(ROIType regionType) const;
 
   void setLoadedWs(Mantid::API::Workspace_sptr ws) noexcept;
   void setSummedWs(Mantid::API::Workspace_sptr ws) noexcept;
-  void setReducedWs(Mantid::API::Workspace_sptr ws) noexcept;
+  void setReducedWss(std::vector<Mantid::API::Workspace_sptr> wss) noexcept;
   void setSelectedBanks(std::optional<ProcessingInstructions> selectedBanks) noexcept;
   void setProcessingInstructions(ROIType regionType, std::optional<ProcessingInstructions> processingInstructions);
 
@@ -71,7 +71,7 @@ private:
   std::optional<ProcessingInstructions> m_transmissionProcessingInstructions{std::nullopt};
   Mantid::API::Workspace_sptr m_loadedWs;
   Mantid::API::Workspace_sptr m_summedWs;
-  Mantid::API::Workspace_sptr m_reducedWs;
+  std::vector<Mantid::API::Workspace_sptr> m_reducedWss;
 };
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

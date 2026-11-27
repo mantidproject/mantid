@@ -912,8 +912,10 @@ Typical usage of the tool is as follows:
 
   - When previewing a workspace group, detector and TOF region bounds are retained when changing group member.
     Masks drawn on the TOF plot are retained separately for each member.
-  - Select **Plot reduction preview for all group members** to compare the reduced reflectivity curves on the same
-    plot.
+  - If performing a sliced reduction, use **Slice** to determine which of the output slices should be plotted on the
+    reflectivity curve.
+  - Select **Plot reduction preview for all group members** to compare the reduced reflectivity curves and slices
+    on the same plot.
 
 - Click the **Apply** button to save the regions of interest into the batch settings.
 

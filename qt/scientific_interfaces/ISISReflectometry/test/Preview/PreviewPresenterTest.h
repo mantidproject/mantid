@@ -67,6 +67,7 @@ public:
     EXPECT_CALL(*mockView, getWorkspaceName()).Times(1).WillOnce(Return(workspaceName));
     EXPECT_CALL(*mockView, disableMainWidget()).Times(1);
     EXPECT_CALL(*mockView, setGroupMembers(std::vector<std::string>{}));
+    EXPECT_CALL(*mockView, setSlices(std::vector<std::string>{}));
     EXPECT_CALL(*mockDockedWidgets, setPlotAllGroupMembersCheckboxVisible(false));
     EXPECT_CALL(*mockModel, loadWorkspaceFromAds(workspaceName)).Times(1).WillOnce(Return(false));
     EXPECT_CALL(*mockModel, loadAndPreprocessWorkspaceAsync(Eq(workspaceName), Ref(*mockJobManager))).Times(1);
@@ -329,6 +330,31 @@ public:
         PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), makeJobManager(), std::move(mockDockedWidgets),
                                   std::move(mockRegionSelector), std::move(mockLinePlot)));
     presenter.notifyGroupMemberSelectionChanged();
+  }
+
+  void test_slice_selection_changed_updates_model_and_performs_plot() {
+    auto mockModel = makeModel();
+    auto mockView = std::make_unique<MockPreviewView>();
+    auto mockDockedWidgets = std::make_unique<MockPreviewDockedWidgets>();
+    auto mockRegionSelector = makeRegionSelector();
+    auto mockLinePlot = std::make_unique<MockPlotPresenter>();
+
+    MatrixWorkspace_sptr const reduced = WorkspaceCreationHelper::create2DWorkspace(1, 1);
+    MatrixWorkspace_sptr const otherReduced = WorkspaceCreationHelper::create2DWorkspace(1, 1);
+    auto const reducedWorkspaces = std::vector<MatrixWorkspace_sptr>{reduced, otherReduced};
+    auto const reducedModelWorkspaces = std::vector<Workspace_sptr>{reduced, otherReduced};
+
+    EXPECT_CALL(*mockView, getSelectedSlice()).WillOnce(Return(1));
+    EXPECT_CALL(*mockModel, getSelectedReducedWs()).WillOnce(Return(otherReduced));
+    EXPECT_CALL(*mockModel, setSelectedSlice(1));
+    EXPECT_CALL(*mockLinePlot, setSpectrum(otherReduced, 0)).Times(1);
+    EXPECT_CALL(*mockLinePlot, plot());
+
+    auto presenter =
+        PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), makeJobManager(), std::move(mockDockedWidgets),
+                                  std::move(mockRegionSelector), std::move(mockLinePlot)));
+
+    presenter.notifySliceSelectionChanged();
   }
 
   void test_notify_load_workspace_error_reenables_load_widgets() {
@@ -736,6 +762,27 @@ public:
     presenter.notifyReductionCompleted();
   }
 
+  void test_slices_are_assigned_when_reduction_completed() {
+    auto mockView = makeView();
+    auto mockModel = makeModel();
+    auto mockLinePlot = std::make_unique<MockPlotPresenter>();
+    auto lineLabel = std::string("line_label");
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument();
+    auto expectedSlices = std::vector<std::string>{"_1", "_2"};
+
+    EXPECT_CALL(*mockModel, getSelectedReducedWs()).Times(1).WillOnce(Return(ws));
+    EXPECT_CALL(*mockModel, getSliceDisplayNames()).Times(1).WillOnce(Return(expectedSlices));
+    EXPECT_CALL(*mockLinePlot, setSpectrum(ws, 0)).Times(1);
+    EXPECT_CALL(*mockLinePlot, plot()).Times(1);
+    EXPECT_CALL(*mockView, setSlices(expectedSlices)).Times(1);
+
+    auto presenter =
+        PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), makeJobManager(), makePreviewDockedWidgets(),
+                                  makeRegionSelector(), std::move(mockLinePlot)));
+
+    presenter.notifyReductionCompleted();
+  }
+
   void test_all_group_member_line_plots_are_displayed_when_reduction_completed() {
     auto mockView = makeView();
     auto mockModel = makeModel();
@@ -766,7 +813,7 @@ public:
     auto const second = WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument();
     auto const workspaces = std::vector<MatrixWorkspace_sptr>{first, second};
 
-    EXPECT_CALL(*mockModel, getReducedWs()).WillOnce(Return(first));
+    EXPECT_CALL(*mockModel, getReducedWss()).WillOnce(Return(std::vector<Workspace_sptr>{first}));
     EXPECT_CALL(*mockDockedWidgets, getPlotAllGroupMembers()).WillOnce(Return(true));
     EXPECT_CALL(*mockModel, getReducedWorkspaceMembers()).WillOnce(Return(workspaces));
     EXPECT_CALL(*mockModel, getSelectedReducedWs()).Times(0);
@@ -785,7 +832,7 @@ public:
     auto mockModel = makeModel();
     auto mockLinePlot = std::make_unique<MockPlotPresenter>();
 
-    EXPECT_CALL(*mockModel, getReducedWs()).WillOnce(Return(nullptr));
+    EXPECT_CALL(*mockModel, getReducedWss()).WillOnce(Return(std::vector<Workspace_sptr>{}));
     EXPECT_CALL(*mockLinePlot, plot()).Times(0);
 
     auto presenter =
@@ -801,7 +848,7 @@ public:
     auto mockLinePlot = std::make_unique<MockPlotPresenter>();
     auto const workspace = WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument();
 
-    EXPECT_CALL(*mockModel, getReducedWs()).WillOnce(Return(workspace));
+    EXPECT_CALL(*mockModel, getReducedWss()).WillOnce(Return(std::vector<Workspace_sptr>{workspace}));
     EXPECT_CALL(*mockDockedWidgets, getPlotAllGroupMembers()).WillOnce(Return(false));
     EXPECT_CALL(*mockModel, getSelectedReducedWs()).WillOnce(Return(workspace));
     EXPECT_CALL(*mockModel, getReducedWorkspaceMembers()).Times(0);
@@ -975,6 +1022,7 @@ public:
     auto mockRegionSelector = makeRegionSelector();
     auto mockPlotPresenter = std::make_unique<MockPlotPresenter>();
     Workspace_sptr reducedWorkspace = WorkspaceCreationHelper::create2DWorkspace(1, 1);
+    std::vector<Workspace_sptr> reducedWss{reducedWorkspace};
     auto const summedWorkspace = createRectangularDetectorWorkspace();
     Workspace_sptr const genericSummedWorkspace = summedWorkspace;
     auto const loadedWorkspace = createLinearDetectorWorkspace();
@@ -982,14 +1030,12 @@ public:
     EXPECT_CALL(*mockModel, getSelectedSummedWs()).WillOnce(Return(summedWorkspace));
     EXPECT_CALL(*mockRegionSelector, updateWorkspace(genericSummedWorkspace));
     EXPECT_CALL(*mockModel, getSelectedLoadedWs()).WillOnce(Return(loadedWorkspace));
-    EXPECT_CALL(*mockModel, clearReducedWorkspace()).WillOnce(::testing::Invoke([&reducedWorkspace] {
-      reducedWorkspace.reset();
+    EXPECT_CALL(*mockModel, clearReducedWorkspaces()).Times(2).WillRepeatedly(::testing::Invoke([&reducedWss] {
+      reducedWss = {};
     }));
     EXPECT_CALL(*mockModel, reduceAsync(Ref(*mockJobManager)));
     expectReductionPlotCleared(mockPlotPresenter.get());
-    EXPECT_CALL(*mockModel, getReducedWs()).WillOnce(::testing::Invoke([&reducedWorkspace] {
-      return reducedWorkspace;
-    }));
+    EXPECT_CALL(*mockModel, getReducedWss()).WillOnce(::testing::Invoke([&reducedWss] { return reducedWss; }));
 
     auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager),
                                                std::move(mockDockedWidgets), std::move(mockRegionSelector),
@@ -1365,7 +1411,7 @@ private:
     EXPECT_CALL(mockModel, setSelectedRegion(ROIType::Background, roi)).Times(1);
     EXPECT_CALL(mockModel, setSelectedRegion(ROIType::Transmission, roi)).Times(1);
     // Check reduction is executed
-    EXPECT_CALL(mockModel, clearReducedWorkspace()).Times(1);
+    EXPECT_CALL(mockModel, clearReducedWorkspaces()).Times(1);
     EXPECT_CALL(mockModel, reduceAsync(Ref(mockJobManager))).Times(1);
   }
 
