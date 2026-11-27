@@ -9,19 +9,24 @@
 
 import unittest
 
+import numpy
+
 from os import listdir
 from os.path import isdir
 from shutil import rmtree
 import tempfile
 
 from mantid.api import AnalysisDataService as ADS, IMDEventWorkspace
-from mantid.dataobjects import MDHistoWorkspace, MaskWorkspace  # noqa: F401
+from mantid.dataobjects import GroupingWorkspace, MDHistoWorkspace, MaskWorkspace  # noqa: F401
 from mantidqt.project import workspacesaver
+from mantidqt.project.workspaceloader import WorkspaceLoader
 from unittest import mock
 from mantid.simpleapi import LoadMask, MaskDetectors, ExtractMask  # noqa: F401
 from mantid.simpleapi import (
+    CreateGroupingWorkspace,
     CreateSampleWorkspace,
     CreateMDHistoWorkspace,
+    LoadEmptyInstrument,
     LoadMD,
     GroupWorkspaces,
 )
@@ -103,6 +108,44 @@ class WorkspaceSaverTest(unittest.TestCase):
             'Couldn\'t save workspace in project: "group2" because SaveNexusProcessed-v1: '
             "NeXus files do not support nested groups of groups"
         )
+
+    def test_saving_grouping_workspace(self):
+        LoadEmptyInstrument(InstrumentName="ENGINX", OutputWorkspace="enginx_instr")
+        CreateGroupingWorkspace(InputWorkspace="enginx_instr", CustomGroupingString="1,2,3+4", OutputWorkspace="group")
+        ws_saver = workspacesaver.WorkspaceSaver(self.working_directory)
+
+        ws_saver.save_workspaces(["group"])
+
+        self.assertEqual(["group"], ws_saver.get_output_list())
+        self.assertTrue("group.nxs" in listdir(self.working_directory))
+
+    def test_grouping_workspace_round_trips_through_project_save_and_load(self):
+        LoadEmptyInstrument(InstrumentName="ENGINX", OutputWorkspace="enginx_instr")
+        original = CreateGroupingWorkspace(
+            InputWorkspace="enginx_instr", CustomGroupingString="1,2,3+4", OutputWorkspace="group"
+        ).OutputWorkspace
+        # ADS.clear() below invalidates the original handle, so copy everything needed for comparison first
+        original_num_histograms = original.getNumberHistograms()
+        original_groups = original.extractY().copy()
+        original_group_ids = original.getGroupIDs().copy()
+        # Detector IDs are instrument-specific, so take them from the workspace rather than hard-coding them
+        original_det_ids = [list(original.getDetectorIDs(i)) for i in range(original_num_histograms)]
+        original_values = {det_ids[0]: original.getValue(det_ids[0]) for det_ids in original_det_ids[:4]}
+        workspacesaver.WorkspaceSaver(self.working_directory).save_workspaces(["group"])
+        ADS.clear()
+
+        WorkspaceLoader.load_workspaces(self.working_directory, ["group"])
+
+        loaded = ADS.retrieve("group")
+        self.assertTrue(isinstance(loaded, GroupingWorkspace))
+        self.assertEqual(original_num_histograms, loaded.getNumberHistograms())
+        numpy.testing.assert_array_equal(original_groups, loaded.extractY())
+        numpy.testing.assert_array_equal(original_group_ids, loaded.getGroupIDs())
+        loaded_det_ids = [list(loaded.getDetectorIDs(i)) for i in range(loaded.getNumberHistograms())]
+        self.assertEqual(original_det_ids, loaded_det_ids)
+        # getValue relies on the detector ID mapping, which has to be rebuilt on load
+        for det_id, value in original_values.items():
+            self.assertEqual(value, loaded.getValue(det_id))
 
     def _load_MDWorkspace_and_test_it(self, save_name):
         filename = self.working_directory + "/" + save_name + ".nxs"

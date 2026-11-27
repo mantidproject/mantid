@@ -1,0 +1,1 @@
+- Grouping workspaces are now saved when saving a project, instead of being skipped with the warning "Grouping Workspaces not supported by SaveNexusProcessed".
