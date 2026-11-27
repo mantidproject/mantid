@@ -383,7 +383,9 @@ void PaalmanPingsAbsorptionCorrection::retrieveBaseProperties() {
 
 /// Create the sample object using the Geometry classes, or use the existing one
 void PaalmanPingsAbsorptionCorrection::constructSample(const API::Sample &sample) {
-  m_containerObject = &(sample.getEnvironment().getContainer());
+  // The quadrature intersects a lab-frame region.
+  m_labFrameSample = API::labFrameSample(*m_inputWS);
+  m_containerObject = &(m_labFrameSample.getEnvironment().getContainer());
 
   // Check there is one, and fail if not
   if (!sample.getShape().hasValidShape()) {
@@ -392,9 +394,7 @@ void PaalmanPingsAbsorptionCorrection::constructSample(const API::Sample &sample
     throw std::invalid_argument(mess);
   }
 
-  // The quadrature intersects a lab-frame region.
-  m_labFrameSampleShape = API::labFrameSampleShape(*m_inputWS);
-  m_sampleObject = m_labFrameSampleShape.get();
+  m_sampleObject = &m_labFrameSample.getShape();
   // Check there is one, and fail if not
   if (!m_containerObject->hasValidShape()) {
     const std::string mess("No shape has been defined for the container in the input workspace");

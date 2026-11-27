@@ -63,7 +63,7 @@ the actual geometry difference when running this algorithm.
 Sample Orientation
 ##################
 
-The sample is always held in a container, which the goniometer does not currently rotate, so the run's goniometer rotation is not applied to the sample either and a warning is logged when there is one. A shape that already carries a rotation, for example one copied by :ref:`algm-CopySample`, is used as it is.
+The sample and its container are used where the run's goniometer, for example from :ref:`algm-SetGoniometer`, puts them, unless the container is marked as fixed; see :ref:`SampleEnvironment_goniometer`. A shape that already carries that rotation, for example one copied by :ref:`algm-CopySample`, is not turned again.
 
 Usage
 -----

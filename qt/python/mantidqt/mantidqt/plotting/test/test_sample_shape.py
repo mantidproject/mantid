@@ -103,7 +103,7 @@ def get_sample_container_components_meshes():
     workspace = setup_workspace_sample_container_and_components_from_mesh()
     sample_mesh = workspace.sample().getShape().getMesh()
     container_mesh = workspace.sample().getEnvironment().getContainer().getShape().getMesh()
-    component_meshes = sample_shape.get_valid_component_meshes_from_workspace(workspace)
+    component_meshes = sample_shape.get_valid_component_meshes(workspace.sample())
     return sample_mesh, container_mesh, component_meshes
 
 
@@ -125,51 +125,60 @@ class PlotSampleShapeTest(TestCase):
     def test_CSG_merged_shape_is_valid(self):
         workspace = setup_workspace_shape_from_CSG_merged()
         self.assertIsNotNone(workspace.sample().getShape())
-        self.assertIsNotNone(sample_shape.get_valid_sample_mesh_from_workspace(workspace))
+        self.assertIsNotNone(sample_shape.get_valid_sample_mesh(workspace.sample()))
 
     def test_CSG_sphere_is_valid(self):
         workspace = CreateSampleWorkspace(OutputWorkspace="ws_shape")
         self.assertIsNotNone(workspace.sample().getShape())
-        self.assertIsNotNone(sample_shape.get_valid_sample_mesh_from_workspace(workspace))
+        self.assertIsNotNone(sample_shape.get_valid_sample_mesh(workspace.sample()))
 
     def test_CSG_empty_shape_is_not_valid(self):
         workspace = CreateWorkspace(OutputWorkspace="ws_shape", DataX=[1, 1], DataY=[2, 2])
         self.assertIsNotNone(workspace.sample().getShape())
-        self.assertIsNone(sample_shape.get_valid_sample_mesh_from_workspace(workspace))
+        self.assertIsNone(sample_shape.get_valid_sample_mesh(workspace.sample()))
 
     def test_mesh_is_valid(self):
         workspace = setup_workspace_shape_from_mesh()
         self.assertIsNotNone(workspace.sample().getShape())
-        self.assertIsNotNone(sample_shape.get_valid_sample_mesh_from_workspace(workspace))
+        self.assertIsNotNone(sample_shape.get_valid_sample_mesh(workspace.sample()))
 
-    def test_sample_mesh_is_turned_by_the_goniometer(self):
+    @patch("mantidqt.plotting.sample_shape.try_to_plot_all_sample_shapes", return_value=(True, True, False))
+    def test_sample_and_container_are_drawn_turned_together_by_the_goniometer(self, mock_plot_all):
         workspace = CreateSampleWorkspace(OutputWorkspace="ws_shape")
-        SetSample(workspace, Geometry={"Shape": "FlatPlate", "Width": 4, "Height": 2, "Thick": 0.5, "Center": [0, 0, 0]})
-        SetGoniometer(workspace, Axis0="90,0,1,0,1")  # after SetSample, so the shape stays in its own frame
+        SetSample(
+            workspace,
+            Geometry={"Shape": "Cylinder", "Height": 10, "Radius": 1, "Center": [0, 0, 0]},
+            ContainerGeometry={"Shape": "HollowCylinder", "Height": 10, "InnerRadius": 1, "OuterRadius": 1.3, "Center": [0, 0, 0]},
+        )
+        SetGoniometer(workspace, Axis0="90,0,0,1,1")  # lays the upright cylinders along x
 
-        mesh = sample_shape.get_valid_sample_mesh_from_workspace(workspace)
+        sample_shape.plot_sample_container_and_components(workspace.name())
 
-        assert_allclose(np.ptp(mesh.reshape(-1, 3), axis=0), [0.005, 0.02, 0.04], atol=1e-6)
+        _, sample_mesh, container_mesh, *_ = mock_plot_all.call_args.args
+        for mesh in (sample_mesh, container_mesh):
+            x_extent, y_extent, _ = np.ptp(mesh.reshape(-1, 3), axis=0)
+            self.assertAlmostEqual(x_extent, 0.1, places=6)
+            self.assertLess(y_extent, 0.03)
 
     def test_container_valid(self):
         workspace = setup_workspace_container_CSG()
-        self.assertIsNotNone(sample_shape.get_valid_container_mesh_from_workspace(workspace))
+        self.assertIsNotNone(sample_shape.get_valid_container_mesh(workspace.sample()))
 
     @patch("mantidqt.plotting.sample_shape.is_mesh_not_empty")
     def test_container_invalid(self, mock_is_mesh_not_empty):
         workspace = setup_workspace_sample_container_and_components_from_mesh()
         mock_is_mesh_not_empty.return_value = False
-        self.assertIsNone(sample_shape.get_valid_container_mesh_from_workspace(workspace))
+        self.assertIsNone(sample_shape.get_valid_container_mesh(workspace.sample()))
 
     def test_component_valid(self):
         workspace = setup_workspace_sample_container_and_components_from_mesh()
-        self.assertIsNotNone(sample_shape.get_valid_component_meshes_from_workspace(workspace))
+        self.assertIsNotNone(sample_shape.get_valid_component_meshes(workspace.sample()))
 
     @patch("mantidqt.plotting.sample_shape.is_mesh_not_empty")
     def test_component_invalid(self, mock_is_mesh_not_empty):
         workspace = setup_workspace_sample_container_and_components_from_mesh()
         mock_is_mesh_not_empty.return_value = False
-        self.assertIsNone(sample_shape.get_valid_container_mesh_from_workspace(workspace))
+        self.assertIsNone(sample_shape.get_valid_container_mesh(workspace.sample()))
 
     def test_plot_created_for_CSG_sphere_sample_only(self):
         CreateSampleWorkspace(OutputWorkspace="ws_shape")

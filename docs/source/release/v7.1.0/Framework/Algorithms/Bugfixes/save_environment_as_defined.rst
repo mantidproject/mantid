@@ -1,0 +1,1 @@
+- In :ref:`algm-SaveSampleEnvironmentAndShape`, when the sample shape was turned by the goniometer as it was loaded, for example by :ref:`algm-LoadSampleShape`, the sample is now saved as defined, alongside its environment. Previously it was saved turned while the environment was not, so the two no longer fitted together and loading the file turned the sample a second time.

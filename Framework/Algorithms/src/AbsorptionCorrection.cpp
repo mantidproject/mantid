@@ -362,27 +362,23 @@ void AbsorptionCorrection::constructSample(API::Sample &sample) {
   const std::string xmlstring = sampleXML();
   const std::string scatterFrom = getProperty("ScatterFrom");
   if (xmlstring.empty()) {
-    // Get the shape from the proper object
+    // Get the shape from the proper object, where the goniometer puts it beside the beam and detectors.
+    // The environment is turned only when it is the one scattering.
     if (scatterFrom == CALC_SAMPLE)
-      m_sampleObject = &sample.getShape();
+      m_labFrameObject = API::labFrameSampleShape(*m_inputWS);
     else if (scatterFrom == CALC_CONTAINER)
-      m_sampleObject = &(sample.getEnvironment().getContainer());
+      m_labFrameObject = API::labFrameSample(*m_inputWS).getEnvironment().getComponentPtr(0);
     else if (scatterFrom == CALC_ENVIRONMENT)
-      m_sampleObject = &(sample.getEnvironment().getComponent(1));
+      m_labFrameObject = API::labFrameSample(*m_inputWS).getEnvironment().getComponentPtr(1);
     else
       throw std::runtime_error("Somebody forgot to fill in an if/else tree");
+    m_sampleObject = m_labFrameObject.get();
 
     // Check there is one, and fail if not
     if (!m_sampleObject->hasValidShape()) {
       const std::string mess("No shape has been defined for the sample in the input workspace");
       g_log.error(mess);
       throw std::invalid_argument(mess);
-    }
-
-    if (scatterFrom == CALC_SAMPLE) {
-      // The container and environment are not currently goniometer-rotated, so they stay as they are.
-      m_labFrameShape = API::labFrameSampleShape(*m_inputWS);
-      m_sampleObject = m_labFrameShape.get();
     }
   } else if (scatterFrom != CALC_SAMPLE) { // should never be in this case
     std::stringstream msg;

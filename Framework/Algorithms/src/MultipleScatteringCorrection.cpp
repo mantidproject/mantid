@@ -175,6 +175,8 @@ void MultipleScatteringCorrection::exec() {
     //   of the correction method.
     setProperty("OutputWorkspace", outWS);
   } else if (method == "SampleAndContainer") {
+    // The beam and detectors are in the lab frame, so the sample and container are taken from there.
+    m_labFrameSample = API::labFrameSample(*m_inputWS);
     //-- Setup output workspace
     // set the OutputWorkspace to a workspace group with two workspaces:
     //          ${OutputWorkspace}_containerOnly
@@ -184,8 +186,8 @@ void MultipleScatteringCorrection::exec() {
     ws_containerOnly->setYUnit("");          // Need to explicitly set YUnit to nothing
     ws_containerOnly->setDistribution(true); // The output of this is a distribution
     ws_containerOnly->setYUnitLabel("Multiple Scattering Correction factor");
-    const auto &containerShape = m_inputWS->sample().getEnvironment().getContainer();
-    calculateSingleComponent(ws_containerOnly, containerShape, m_containerElementSize);
+    calculateSingleComponent(ws_containerOnly, m_labFrameSample.getEnvironment().getContainer(),
+                             m_containerElementSize);
     // 2. sample and container
     API::MatrixWorkspace_sptr ws_sampleAndContainer = create<HistoWorkspace>(*m_inputWS);
     ws_sampleAndContainer->setYUnit("");          // Need to explicitly set YUnit to nothing
@@ -369,14 +371,10 @@ void MultipleScatteringCorrection::calculateSingleComponent(const API::MatrixWor
  */
 void MultipleScatteringCorrection::calculateSampleAndContainer(const API::MatrixWorkspace_sptr &outws) {
   // retrieve container related properties as they are relevant now
-  const auto &sample = m_inputWS->sample();
-  const auto &sampleMaterial = sample.getShape().material();
-  const auto &containerMaterial = sample.getEnvironment().getContainer().material();
-
-  // get the sample and container shapes
-  const auto labFrameSampleShape = API::labFrameSampleShape(*m_inputWS);
-  const auto &sampleShape = *labFrameSampleShape;
-  const auto &containerShape = sample.getEnvironment().getContainer();
+  const auto &sampleShape = m_labFrameSample.getShape();
+  const auto &containerShape = m_labFrameSample.getEnvironment().getContainer();
+  const auto &sampleMaterial = sampleShape.material();
+  const auto &containerMaterial = containerShape.material();
 
   MultipleScatteringCorrectionDistGraber distGraberSample(sampleShape, m_sampleElementSize);
   distGraberSample.cacheLS1(m_beamDirection);

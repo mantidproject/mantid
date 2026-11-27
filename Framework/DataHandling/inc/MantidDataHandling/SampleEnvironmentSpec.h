@@ -41,13 +41,17 @@ public:
 
   Geometry::SampleEnvironment_uptr buildEnvironment(const std::string &canID) const;
 
-  void addContainer(const Geometry::Container_const_sptr &can);
-  void addComponent(const Geometry::IObject_const_sptr &component);
+  void addContainer(const Geometry::Container_const_sptr &can,
+                    bool onGoniometer = Geometry::SampleEnvironment::onGoniometerByDefault(0));
+  void addComponent(const Geometry::IObject_const_sptr &component,
+                    bool onGoniometer = Geometry::SampleEnvironment::onGoniometerByDefault(1));
 
 private:
   std::string m_name;
   ContainerIndex m_cans;
   ComponentList m_components;
+  std::unordered_map<std::string, bool> m_canOnGoniometer; ///< Keyed like m_cans
+  std::vector<bool> m_componentOnGoniometer;               ///< Parallel to m_components
 };
 
 /// unique_ptr to a SampleEnvironmentSpec

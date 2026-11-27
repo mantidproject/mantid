@@ -8,24 +8,15 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/ShapeRotation.h"
-#include "MantidKernel/Logger.h"
 
 namespace Mantid::API {
-
-namespace {
-Kernel::Logger g_log("LabFrameSample");
-} // namespace
 
 Geometry::IObject_sptr labFrameSampleShape(const ExperimentInfo &experiment) {
   const auto &sample = experiment.sample();
   const auto &goniometerR = experiment.run().getGoniometer().getR();
   if (Geometry::outstandingGoniometerRotation(sample.getShape(), goniometerR) == Kernel::Matrix<double>(3, 3, true)) {
-    return sample.getShapePtr();
-  }
-  if (sample.hasEnvironment()) {
-    g_log.warning("The sample environment is not currently rotated by the goniometer, so the goniometer "
-                  "rotation is not applied to the sample in it either. The sample is used as defined.");
     return sample.getShapePtr();
   }
   return Geometry::getLabFrameShape(sample.getShape(), goniometerR);
@@ -34,6 +25,13 @@ Geometry::IObject_sptr labFrameSampleShape(const ExperimentInfo &experiment) {
 Sample labFrameSample(const ExperimentInfo &experiment) {
   Sample sample(experiment.sample());
   sample.setShape(labFrameSampleShape(experiment));
+  if (sample.hasEnvironment()) {
+    const auto &environment = sample.getEnvironment();
+    const auto &goniometerR = experiment.run().getGoniometer().getR();
+    // An own-frame environment is already where an identity goniometer puts it; a view may not be.
+    if (goniometerR != Kernel::Matrix<double>(3, 3, true) || &environment.ownFrame() != &environment)
+      sample.setEnvironment(environment.inLabFrame(goniometerR));
+  }
   return sample;
 }
 

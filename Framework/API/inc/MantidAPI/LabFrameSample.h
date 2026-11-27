@@ -11,11 +11,8 @@
 #include "MantidGeometry/Objects/IObject.h"
 
 /* The sample as an experiment's goniometer places it in the lab frame, for algorithms that combine
- * it with lab-frame beams, detectors or gauge volumes. Built on Geometry::getLabFrameShape.
- *
- * A sample that sits in an environment is left as defined, with a warning: the environment is not
- * currently goniometer-rotated, so turning the sample alone would push it through the container's walls.
- * SetSample declines to bake the goniometer in for the same reason.
+ * it with lab-frame beams, detectors or gauge volumes. Built on Geometry::getLabFrameShape and
+ * SampleEnvironment::inLabFrame, so the parts of an environment mounted on the goniometer turn with it.
  */
 
 namespace Mantid::API {
@@ -24,7 +21,8 @@ class ExperimentInfo;
 /// The sample shape in the lab frame: the sample's own shape, uncopied, when there is nothing to rotate.
 MANTID_API_DLL Geometry::IObject_sptr labFrameSampleShape(const ExperimentInfo &experiment);
 
-/// A copy of the sample carrying labFrameSampleShape, for code that takes a whole Sample.
+/// A copy of the sample carrying labFrameSampleShape and any environment in the lab frame, for code
+/// that takes a whole Sample.
 MANTID_API_DLL Sample labFrameSample(const ExperimentInfo &experiment);
 
 } // namespace Mantid::API

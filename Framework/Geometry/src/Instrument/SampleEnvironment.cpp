@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/IObjComponent.h"
+#include "MantidGeometry/Objects/ShapeRotation.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 
@@ -16,6 +17,16 @@ namespace Mantid::Geometry {
 using Geometry::BoundingBox;
 using Geometry::Track;
 using Kernel::V3D;
+
+namespace {
+void requireOwnFrame(const IObject &component) {
+  if (component.getAppliedRotation() != Kernel::Matrix<double>(3, 3, true)) {
+    throw std::invalid_argument("Sample environment component '" + component.id() +
+                                "' carries a goniometer rotation. Environments are kept as defined, with the "
+                                "goniometer at zero, and turned only when used. Use rotate-all to orient it.");
+  }
+}
+} // namespace
 
 //------------------------------------------------------------------------------
 // Public methods
@@ -26,9 +37,13 @@ using Kernel::V3D;
  * required by various other users of it
  * @param name A human-readable name for the kit
  * @param container The object that represents the can
+ * @param containerOnGoniometer Whether the can turns with the sample when a goniometer is set
  */
-SampleEnvironment::SampleEnvironment(std::string name, const Container_const_sptr &container)
-    : m_name(std::move(name)), m_components(1, container) {}
+SampleEnvironment::SampleEnvironment(std::string name, const Container_const_sptr &container,
+                                     const bool containerOnGoniometer)
+    : m_name(std::move(name)), m_components(1, container), m_onGoniometer(1, containerOnGoniometer) {
+  requireOwnFrame(*container);
+}
 
 const IObject &SampleEnvironment::getComponent(const size_t index) const {
   if (index >= this->nelements()) {
@@ -82,6 +97,31 @@ int SampleEnvironment::interceptSurfaces(Track &track) const {
 
 /**
  * @param component An object defining some component of the environment
+ * @param onGoniometer Whether it turns with the sample when a goniometer is set
  */
-void SampleEnvironment::add(const IObject_const_sptr &component) { m_components.emplace_back(component); }
+void SampleEnvironment::add(const IObject_const_sptr &component, const bool onGoniometer) {
+  if (m_ownFrame)
+    throw std::logic_error("A lab-frame environment is a view; add to the environment it was made from.");
+  requireOwnFrame(*component);
+  m_components.emplace_back(component);
+  m_onGoniometer.emplace_back(onGoniometer);
+}
+
+std::shared_ptr<SampleEnvironment> SampleEnvironment::inLabFrame(const Kernel::Matrix<double> &goniometerR) const {
+  const auto &own = ownFrame();
+  // Copying shares every component, so fixed ones keep their addresses: Discus finds them by pointer.
+  auto lab = std::make_shared<SampleEnvironment>(own);
+  lab->m_ownFrame = m_ownFrame ? m_ownFrame : std::make_shared<const SampleEnvironment>(own);
+  for (size_t i = 0; i < own.nelements(); ++i) {
+    if (!own.m_onGoniometer[i])
+      continue;
+    if (i == 0) {
+      const auto &can = own.getContainer();
+      lab->m_components[i] = can.withShape(getLabFrameShape(can.getShape(), goniometerR));
+    } else {
+      lab->m_components[i] = getLabFrameShape(*own.m_components[i], goniometerR);
+    }
+  }
+  return lab;
+}
 } // namespace Mantid::Geometry

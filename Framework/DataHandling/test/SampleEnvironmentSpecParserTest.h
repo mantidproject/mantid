@@ -234,6 +234,22 @@ public:
     TS_ASSERT(can8mm->hasCustomizableSampleShape());
   }
 
+  void test_OnGoniometer_Says_Which_Parts_Turn_With_The_Sample() {
+    // unmarked, the container turns and a component does not
+    auto spec = parseSpec("Mounting", mountingSpec(R"(ongoniometer="false")", R"(ongoniometer="true")"));
+    const auto unmarkedCan = spec->buildEnvironment("unmarked");
+    const auto fixedCan = spec->buildEnvironment("fixed");
+
+    TS_ASSERT(unmarkedCan->isOnGoniometer(0));
+    TS_ASSERT(!fixedCan->isOnGoniometer(0));
+    TS_ASSERT(fixedCan->isOnGoniometer(1));
+    TS_ASSERT(!fixedCan->isOnGoniometer(2));
+  }
+
+  void test_OnGoniometer_Other_Than_True_Or_False_Throws_Error() {
+    TS_ASSERT_THROWS(parseSpec("Mounting", mountingSpec(R"(ongoniometer="yes")", "")), const std::invalid_argument &);
+  }
+
   void test_Single_Can_Single_Material_With_SampleGeometry_STL() {
     using Mantid::Geometry::Container_const_sptr;
 
@@ -497,6 +513,18 @@ public:
   // Non-test methods
   //----------------------------------------------------------------------------
 private:
+  /// Cans "unmarked" and "fixed", the latter with canAttribute, then a component with componentAttribute and an
+  /// unmarked one.
+  static std::string mountingSpec(const std::string &canAttribute, const std::string &componentAttribute) {
+    const std::string sphere = R"(<geometry><sphere id="sp-1"><radius val="0.01"/></sphere></geometry>)";
+    return R"(<environmentspec><materials><material id="van" formula="V"/></materials><components><containers>)"
+           R"(<container id="unmarked" material="van">)" +
+           sphere + R"(</container><container id="fixed" material="van" )" + canAttribute + ">" + sphere +
+           R"(</container></containers><component id="marked" material="van" )" + componentAttribute + ">" + sphere +
+           R"(</component><component id="unmarked" material="van">)" + sphere +
+           "</component></components></environmentspec>";
+  }
+
   Mantid::DataHandling::SampleEnvironmentSpec_uptr parseSpec(const std::string &name, const std::string &text) {
     std::istringstream instream(text);
     SampleEnvironmentSpecParser parser;

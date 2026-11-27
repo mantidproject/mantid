@@ -11,6 +11,8 @@ Description
 
 Saves out the sample and environment on a workspace as a binary .stl file, the sample shape and environment must have been set using :ref:`LoadSampleShape <algm-LoadSampleShape>` and :ref:`LoadSampleEnvironment <algm-LoadSampleEnvironment>`, as this algorithm only supports shapes stored as a mesh.
 
+The sample and environment are saved as defined, with the goniometer at zero, even if the sample was turned by the goniometer as it was loaded. Loading the file again therefore turns them by the goniometer once. The file cannot record which parts of the environment are :ref:`on the goniometer <SampleEnvironment_goniometer>`, so set ``OnGoniometer`` in :ref:`LoadSampleEnvironment <algm-LoadSampleEnvironment>` when reloading an environment whose other parts turn with the sample.
+
 The output is of the following type:
 
 * ``*.stl`` stereolithography `https://en.wikipedia.org/wiki/STL_(file_format) <https://en.wikipedia.org/wiki/STL_(file_format)>`_

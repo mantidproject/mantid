@@ -27,6 +27,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/OptionalBool.h"
 
 #include <filesystem>
 #include <fstream>
@@ -35,6 +36,12 @@ namespace Mantid::DataHandling {
 
 namespace {
 double DegreesToRadians(double angle) { return angle * M_PI / 180; }
+
+/// Whether the part loaded at index turns with the sample: as the OnGoniometer property says, or by default.
+bool onGoniometer(const Kernel::OptionalBool &flag, const size_t index) {
+  return flag == Kernel::OptionalBool::Unset ? Geometry::SampleEnvironment::onGoniometerByDefault(index)
+                                             : flag == Kernel::OptionalBool::True;
+}
 } // namespace
 
 // Register the algorithm into the algorithm factory
@@ -69,6 +76,9 @@ void LoadSampleEnvironment::init() {
 
   // New Can or Add
   declareProperty("Add", false);
+  declareProperty(std::make_unique<PropertyWithValue<OptionalBool>>("OnGoniometer", OptionalBool::Unset),
+                  "Whether the loaded parts turn with the sample when a goniometer is set. Unset: a new container "
+                  "does, and parts added to an environment do not.");
 
   // Rotation angles
   declareProperty("XDegrees", 0.0, "The degrees to rotate on the x axis by");
@@ -242,13 +252,14 @@ void LoadSampleEnvironment::loadEnvironmentFromSTL(const std::string &filename, 
   const std::vector<double> translationVector = getProperty("TranslationVector");
   environmentMesh = reader->translate(environmentMesh, translationVector);
 
+  const OptionalBool mounting = getProperty("OnGoniometer");
   if (add) {
-    environment = std::make_unique<SampleEnvironment>(sample.getEnvironment());
-    environment->add(environmentMesh);
+    environment = std::make_unique<SampleEnvironment>(sample.getEnvironment().ownFrame());
+    environment->add(environmentMesh, onGoniometer(mounting, environment->nelements()));
   } else {
     auto can = std::make_shared<Container>(environmentMesh);
     std::string environmentName = getProperty("EnvironmentName");
-    environment = std::make_unique<SampleEnvironment>(environmentName, can);
+    environment = std::make_unique<SampleEnvironment>(environmentName, can, onGoniometer(mounting, 0));
   }
 
   debugString += "Environment has: " + std::to_string(environment->nelements()) + " elements.";
@@ -296,23 +307,24 @@ void LoadSampleEnvironment::loadEnvironmentFrom3MF([[maybe_unused]] const Matrix
   MeshLoader.readMeshObjects(environmentMeshes, sampleMesh);
 
   if (sampleMesh) {
-    // Baking the goniometer in moves the sample into the lab frame, so it is recorded - unlike the
-    // definition-frame rotation applied to the environment meshes below.
+    // Baking the goniometer in moves the sample into the lab frame, so it is recorded. The
+    // environment meshes below are never baked, and turn with the sample only when used.
     sampleMesh->bakeGoniometerRotation(inputWS->run().getGoniometer().getR());
     sample.setShape(sampleMesh);
   }
 
+  const OptionalBool mounting = getProperty("OnGoniometer");
   for (auto environmentMesh : environmentMeshes) {
     if (!environment) {
       if (add) {
-        environment = std::make_unique<SampleEnvironment>(sample.getEnvironment());
-        environment->add(environmentMesh);
+        environment = std::make_unique<SampleEnvironment>(sample.getEnvironment().ownFrame());
+        environment->add(environmentMesh, onGoniometer(mounting, environment->nelements()));
       } else {
         auto can = std::make_shared<Container>(environmentMesh);
-        environment = std::make_unique<SampleEnvironment>(name, can);
+        environment = std::make_unique<SampleEnvironment>(name, can, onGoniometer(mounting, 0));
       }
     } else {
-      environment->add(environmentMesh);
+      environment->add(environmentMesh, onGoniometer(mounting, environment->nelements()));
     }
 
     debugString += "Environment has: " + std::to_string(environment->nelements()) + " elements.";

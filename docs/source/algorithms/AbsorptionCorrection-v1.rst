@@ -75,7 +75,7 @@ defined because detector, source & sample position are needed.
 Sample Orientation
 ##################
 
-When ``ScatterFrom`` is ``Sample``, the sample shape is used where the run's goniometer, for example from :ref:`algm-SetGoniometer`, puts it. A shape that already carries that rotation, for example one copied by :ref:`algm-CopySample`, is not turned again. A sample in a container or sample environment is used as defined, with a warning, and the container and environment themselves are never rotated.
+The sample shape is used where the run's goniometer, for example from :ref:`algm-SetGoniometer`, puts it. A shape that already carries that rotation, for example one copied by :ref:`algm-CopySample`, is not turned again. When ``ScatterFrom`` is ``Container`` or ``Environment``, that part is turned with the sample if it is mounted on the goniometer, as the container is by default; see :ref:`SampleEnvironment_goniometer`.
 
 Usage
 -----

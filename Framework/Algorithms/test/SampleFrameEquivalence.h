@@ -23,7 +23,9 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidGeometry/Instrument/Container.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Matrix.h"
@@ -143,14 +145,27 @@ template <typename Correct> void assertFramesAgree(const Mantid::Kernel::Matrix<
   TS_ASSERT(std::abs(ownFrame.front() - values(correct, unrotated(), false).front()) > 1e-6);
 }
 
-/// Assert that correct(rotation, baked) leaves a sample in its own frame unrotated, as it must when
-/// the sample sits in an environment, which the goniometer does not currently rotate. The lab-frame
-/// answer must differ, or the rotation would have been invisible anyway.
-template <typename Correct>
-void assertGoniometerHeldBack(const Mantid::Kernel::Matrix<double> &rotation, Correct correct) {
-  const auto unrotatedValues = values(correct, unrotated(), false);
-  assertValuesEqual(values(correct, rotation, false), unrotatedValues);
-  TS_ASSERT(std::abs(values(correct, rotation, true).front() - unrotatedValues.front()) > 1e-6);
+/// An axis-aligned cuboid centred on the origin, given its half-widths.
+inline std::string cuboidXML(const std::string &id, const double hx, const double hy, const double hz) {
+  std::ostringstream xml;
+  xml << "<cuboid id=\"" << id << "\">"
+      << "<left-front-bottom-point x=\"" << -hx << "\" y=\"" << -hy << "\" z=\"" << -hz << "\"/>"
+      << "<left-front-top-point x=\"" << -hx << "\" y=\"" << hy << "\" z=\"" << -hz << "\"/>"
+      << "<left-back-bottom-point x=\"" << -hx << "\" y=\"" << -hy << "\" z=\"" << hz << "\"/>"
+      << "<right-front-bottom-point x=\"" << hx << "\" y=\"" << -hy << "\" z=\"" << -hz << "\"/>"
+      << "</cuboid>";
+  return xml.str();
+}
+
+/// Hold the sample in a hollow box around plateXML's plate. Environments are never baked, so whichever
+/// frame setSample put the sample in, the can is in its own and turns only when used.
+inline void addCan(Mantid::API::ExperimentInfo &expt, const bool onGoniometer = true) {
+  auto box = Mantid::Geometry::ShapeFactory().createShape(cuboidXML("outer", 0.025, 0.025, 0.004) +
+                                                          cuboidXML("inner", 0.021, 0.021, 0.0025) +
+                                                          "<algebra val=\"outer (# inner)\"/>");
+  box->setMaterial(vanadium());
+  expt.mutableSample().setEnvironment(std::make_shared<Mantid::Geometry::SampleEnvironment>(
+      "box", std::make_shared<Mantid::Geometry::Container>(box), onGoniometer));
 }
 
 } // namespace SampleFrameEquivalence

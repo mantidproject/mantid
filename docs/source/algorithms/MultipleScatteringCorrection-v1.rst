@@ -93,7 +93,7 @@ where the distance within different material (sample and container) are summed i
 Sample Orientation
 ##################
 
-The sample shape is used where the run's goniometer, for example from :ref:`algm-SetGoniometer`, puts it. A shape that already carries that rotation, for example one copied by :ref:`algm-CopySample`, is not turned again. A sample in a container or sample environment is used as defined, with a warning, because the environment is not currently rotated by the goniometer.
+The sample shape is used where the run's goniometer, for example from :ref:`algm-SetGoniometer`, puts it. A shape that already carries that rotation, for example one copied by :ref:`algm-CopySample`, is not turned again. Parts of a container or sample environment mounted on the goniometer, by default the container, are turned with the sample and the rest stay where they are; see :ref:`SampleEnvironment_goniometer`.
 
 Example
 -------

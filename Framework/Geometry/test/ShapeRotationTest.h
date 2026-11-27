@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidGeometry/Instrument/Container.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidGeometry/Objects/MeshObject2D.h"
@@ -304,6 +305,20 @@ public:
 
     const auto labShape = getLabFrameShape(*sphere, rotationZ(90.0));
     TS_ASSERT_EQUALS(labShape->id(), "my-sample");
+  }
+
+  void test_a_container_is_turned_only_with_its_environment() {
+    const Container can(createOffsetSphere());
+    TS_ASSERT_THROWS(getLabFrameShape(can, rotationZ(90.0)), const std::invalid_argument &);
+  }
+
+  void test_a_shape_with_no_geometry_comes_back_unchanged() {
+    // nothing to turn, and an empty CSGObject has no XML that the turn would otherwise need
+    const CSGObject empty;
+
+    std::shared_ptr<IObject> labShape;
+    TS_ASSERT_THROWS_NOTHING(labShape = getLabFrameShape(empty, rotationZ(90.0)));
+    TS_ASSERT(!labShape->hasValidShape());
   }
 
   void test_a_shape_that_cannot_be_rotated_is_returned_unchanged() {

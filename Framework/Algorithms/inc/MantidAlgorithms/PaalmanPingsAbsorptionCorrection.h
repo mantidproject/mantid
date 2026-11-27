@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Rasterize.h"
@@ -77,9 +78,9 @@ private:
   void initialiseCachedDistances();
   Geometry::Raster rasterize(const Geometry::IObject *object);
 
-  API::MatrixWorkspace_sptr m_inputWS;                  ///< A pointer to the input workspace
-  Geometry::IObject_sptr m_labFrameSampleShape;         ///< Owns the lab-frame shape m_sampleObject points at
-  const Geometry::IObject *m_sampleObject;              ///< Local cache of sample object.
+  API::MatrixWorkspace_sptr m_inputWS;     ///< A pointer to the input workspace
+  API::Sample m_labFrameSample;            ///< Owns the lab-frame shapes m_sampleObject and m_containerObject point at
+  const Geometry::IObject *m_sampleObject; ///< Local cache of sample object.
   const Geometry::IObject *m_containerObject;           ///< Local cache of container object.
   Kernel::V3D m_beamDirection;                          ///< The direction of the beam.
   std::vector<double> m_sampleL1s,                      ///< Cached sample L1 distances

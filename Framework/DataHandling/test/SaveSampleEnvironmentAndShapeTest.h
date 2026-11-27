@@ -51,6 +51,19 @@ public:
     std::filesystem::remove(m_OutputFile);
   }
 
+  void testABakedSampleIsSavedAsDefined() {
+    // as LoadSampleShape and a 3MF file leave it, already turned into the lab frame
+    SaveSampleEnvironmentAndShape alg;
+    auto ws = setup(alg);
+    auto baked = createCube();
+    baked->bakeGoniometerRotation(Kernel::Matrix<double>(std::vector<double>{0, -1, 0, 1, 0, 0, 0, 0, 1}));
+    ws->mutableSample().setShape(baked);
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    assertVectorsMatch(*createCube(), *retrieveSavedMesh());
+    std::filesystem::remove(m_OutputFile);
+  }
+
   void testWithEnvironment() {
     SaveSampleEnvironmentAndShape alg;
     auto ws = setup(alg);

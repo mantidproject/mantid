@@ -732,8 +732,9 @@ void SetSample::setSampleShape(API::ExperimentInfo &experiment, const Kernel::Pr
     auto xml = tryCreateXMLFromArgsOnly(*args, *refFrame);
     if (!xml.empty()) {
       const Kernel::Matrix<double> rotationMatrix = experiment.run().getGoniometer().getR();
-      // Not with a sample environment: the container is never goniometer-rotated, so the sample
-      // would poke out through it. The environment paths below don't bake either.
+      // Not with a sample environment, which is turned only when used: the sample is left for its
+      // consumers to turn too, as on the environment paths below. Baking it would give the same lab
+      // frame, so this keeps what getShape() returns unchanged.
       if (rotationMatrix != Kernel::Matrix<double>(3, 3, true) && !sampleEnv) {
         // A CSG string can already carry a bake, e.g. XML read off a CopySample'd sample. Rebaking
         // replaces it rather than turning the shape twice.

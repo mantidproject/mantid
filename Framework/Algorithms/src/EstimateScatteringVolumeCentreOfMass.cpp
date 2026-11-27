@@ -74,9 +74,7 @@ void EstimateScatteringVolumeCentreOfMass::exec() {
   m_cubeSide *= it->second; // now in m
 
   // The gauge volume, if any, is always in the lab frame; the sample may be in either - see
-  // Geometry::getLabFrameShape. The two branches reconcile that differently, on purpose. Unlike
-  // API::labFrameSampleShape, a sample in an environment is still rotated: the environment plays no
-  // part here, so there is nothing for the sample to overlap.
+  // Geometry::getLabFrameShape. The two branches reconcile that differently, on purpose.
   const Geometry::IObject_sptr sampleObject = extractValidSampleObject(m_inputWS->mutableSample());
   const Kernel::Matrix<double> runGonioR = m_inputWS->run().getGoniometer().getR();
 

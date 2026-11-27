@@ -67,9 +67,11 @@ class SampleShapePlot:
     def create_plot(self, workspace_name, figure=None, test=None, alpha=1.0, custom_color=None):
         self.workspace_name = workspace_name
         workspace = ADS.retrieve(workspace_name)
-        sample_mesh = get_valid_sample_mesh_from_workspace(workspace)
-        container_mesh = get_valid_container_mesh_from_workspace(workspace)
-        component_meshes = get_valid_component_meshes_from_workspace(workspace)
+        # One lab-frame sample for all three, so the environment's mounted parts turn with the sample
+        sample = lab_frame_sample(workspace)
+        sample_mesh = get_valid_sample_mesh(sample)
+        container_mesh = get_valid_container_mesh(sample)
+        component_meshes = get_valid_component_meshes(sample)
         if sample_mesh is None and container_mesh is None and not component_meshes:
             raise Exception("Workspace must have attached Sample Shape or Environment")
         if figure:
@@ -199,47 +201,28 @@ def is_mesh_not_empty(mesh):
         return True
 
 
-def get_valid_sample_mesh_from_workspace(workspace):
-    sample_shape = get_sample_shape_from_workspace(workspace)
-    if sample_shape:
-        mesh = sample_shape.getMesh()
+def get_valid_sample_mesh(sample):
+    mesh = sample.getShape().getMesh()
+    if is_mesh_not_empty(mesh):
+        return mesh
+
+
+def get_valid_container_mesh(sample):
+    if sample.hasEnvironment():
+        mesh = sample.getEnvironment().getContainer().getShape().getMesh()
         if is_mesh_not_empty(mesh):
             return mesh
 
 
-def get_sample_shape_from_workspace(workspace_with_sample):
-    if workspace_with_sample.sample():
-        return lab_frame_sample(workspace_with_sample).getShape()
-
-
-def get_valid_container_mesh_from_workspace(workspace):
-    if workspace.sample().hasEnvironment():
-        container_shape = get_container_shape_from_workspace(workspace)
-        mesh = container_shape.getMesh()
-        if is_mesh_not_empty(mesh):
-            return mesh
-
-
-def get_container_shape_from_workspace(workspace_with_container):
-    if workspace_with_container.sample():
-        return workspace_with_container.sample().getEnvironment().getContainer().getShape()
-
-
-def get_valid_component_meshes_from_workspace(workspace):
+def get_valid_component_meshes(sample):
     component_meshes = []
-    if workspace.sample().hasEnvironment():
-        number_of_components = workspace.sample().getEnvironment().nelements()
-        for component_index in range(1, number_of_components):
-            component_shape = get_component_shape_from_workspace(workspace, component_index)
-            component_mesh = component_shape.getMesh()
+    if sample.hasEnvironment():
+        environment = sample.getEnvironment()
+        for component_index in range(1, environment.nelements()):
+            component_mesh = environment.getComponent(component_index).getMesh()
             if is_mesh_not_empty(component_mesh):
                 component_meshes.append(component_mesh)
     return component_meshes
-
-
-def get_component_shape_from_workspace(workspace_with_components, component_index):
-    if workspace_with_components.sample():
-        return workspace_with_components.sample().getEnvironment().getComponent(component_index)
 
 
 def plot_sample_only(figure, mesh, alpha=1.0, specified_face_color=None):
