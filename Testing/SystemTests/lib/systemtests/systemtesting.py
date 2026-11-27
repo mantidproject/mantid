@@ -11,10 +11,10 @@ to run sets of system tests on the Mantid framework.
 # == for testing conda build of mantid-framework ==========
 import functools
 import os
-import pathlib
-from typing import List
+from contextlib import redirect_stdout, suppress
 from io import StringIO
-from contextlib import redirect_stdout
+from pathlib import Path
+from typing import List
 
 if os.environ.get("MANTID_FRAMEWORK_CONDA_SYSTEMTEST"):
     # conda build of mantid-framework sometimes require importing matplotlib before mantid
@@ -928,8 +928,8 @@ class TestManager(object):
 
         self._tests = list_of_tests
 
-    def _get_sub_dirs(self, parent_dir: str) -> List[pathlib.Path]:
-        parent = pathlib.Path(self._config.testDir) / parent_dir
+    def _get_sub_dirs(self, parent_dir: str) -> List[Path]:
+        parent = Path(self._config.testDir) / parent_dir
         found = []
         for sub_dir in parent.glob("**"):
             # Python 3.13 changed glob("**") to also return files, so filter them out here
@@ -969,7 +969,7 @@ class TestManager(object):
 
         return mod_counts, mod_tests, mod_sub_directories, test_stats, mod_required_files, data_file_lock_status
 
-    def __generateTestList(self, test_path: pathlib.Path):
+    def __generateTestList(self, test_path: Path):
         if not test_path.exists():
             print(f"Cannot find file {str(test_path)}.py. Please check the path.")
             exit(2)
@@ -1273,11 +1273,11 @@ class MantidFrameworkConfig:
         return self._dataDirs
 
     def __moveFile(self, src, dst):
-        if os.path.exists(src):
-            shutil.move(src, dst)
+        with suppress(FileNotFoundError):
+            Path(src).replace(dst)
 
     def __copyFile(self, src, dst):
-        if os.path.exists(src):
+        with suppress(FileNotFoundError):
             shutil.copyfile(src, dst)
 
     saveDir = property(lambda self: self.__saveDir)
