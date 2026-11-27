@@ -73,6 +73,9 @@ if [[ $OSTYPE == "msys"* ]]; then
     fi
     userprops=$binary_dir/Mantid.user.properties
     workbench_ini=$APPDATA/mantidproject/mantidworkbench.ini
+    # Disable the Rebin memory check on Windows CI where RAM scales with usage.
+    echo "algorithms.memorycheck = Off" > $userprops
+
 else
     userconfig_dir=$HOME/.mantid
     userprops=$userconfig_dir/Mantid.user.properties
