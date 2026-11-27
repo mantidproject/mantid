@@ -8,6 +8,8 @@
 
 #include "Common/DllConfig.h"
 
+#include <string>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {

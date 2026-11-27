@@ -11,6 +11,11 @@
 #include "MantidKernel/Logger_fwd.h"
 #include "MantidKernel/Property_fwd.h"
 
+#include <map>
+#include <string>
+#include <utility>
+#include <vector>
+
 namespace Mantid {
 namespace Algorithms {
 

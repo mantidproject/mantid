@@ -35,6 +35,8 @@ jobs:
   automated-ui-tests:
     # scheduled runs on a fork would only queue against runners that do not exist there
     if: ${{ github.repository_owner == 'mantidproject' }}
+    # Without a limit a hung step holds the runner for GitHub's six hour default
+    timeout-minutes: 240
     permissions:
       contents: read
 
@@ -47,6 +49,8 @@ jobs:
           - os: Linux
             cmake_preset: linux-64-ci
           - os: Windows
+            # must match pr_build_and_test.yml, as both share the runner's build directory and a
+            # change of generator forces a full rebuild
             cmake_preset: win-64-ci
           # macOS is missing because there is no self-hosted macOS GitHub Actions runner; osx-arm64
           # exists only as a Jenkins agent. Add an {os: macOS, cmake_preset: osx-arm64-ci} entry here
@@ -82,9 +86,27 @@ jobs:
       - name: Clean build tree
         run: ${GITHUB_WORKSPACE}/buildconfig/Jenkins/Conda/clean-builder ${GITHUB_WORKSPACE}
 
+      # Must match the step of the same name in pr_build_and_test.yml: the cache is shared, and a
+      # smaller CCACHE_MAXSIZE here would evict the pull request builds' entries.
+      - name: Configure ccache
+        if: ${{ runner.os == 'Windows' }}
+        run: |
+          {
+            echo "CCACHE_BASEDIR=${GITHUB_WORKSPACE}"
+            echo "CCACHE_MAXSIZE=30G"
+            echo "CCACHE_COMPILERCHECK=content"
+          } >> "$GITHUB_ENV"
+
+      - name: Install pixi environment
+        # fails a stuck install promptly instead of at the job timeout
+        timeout-minutes: 30
+        run: |
+          pixi install --frozen -v
+
       # JOB_NAME is deliberately left unset: it is what tells the Jenkins scripts to configure with
       # -DPR_JOB=True and to exclude the slower tests, and neither applies to a weekly run.
       - name: Build code
+        timeout-minutes: 100
         run: |
           cd ${GITHUB_WORKSPACE}
           echo "::add-matcher::.github/matchers/gcc.json"

@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <iterator>
 #include <stdexcept>
+#include <string>
 
 namespace Mantid::DataHandling::AlignAndFocusPowderSlim {
 
