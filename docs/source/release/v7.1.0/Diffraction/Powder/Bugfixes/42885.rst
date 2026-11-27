@@ -1,0 +1,1 @@
+- The :ref:`ISIS Powder workflow diagrams <isis-powder-diffraction-workflow-ref>` have been updated to match how ``create_vanadium``, ``focus`` and their sub-processes currently work. The unused ``pearl_run_focus`` workflow diagram has been removed.
