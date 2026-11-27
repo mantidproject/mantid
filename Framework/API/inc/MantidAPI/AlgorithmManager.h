@@ -15,6 +15,7 @@
 #include <Poco/NotificationCenter.h>
 
 #include <deque>
+#include <memory>
 #include <mutex>
 #include <string>
 #include <utility>
@@ -63,6 +64,9 @@ public:
   void cancelAll();
   void shutdown();
 
+  /// Removes any finished algorithms from the list of managed algorithms
+  size_t removeFinishedAlgorithms();
+
 private:
   friend struct Mantid::Kernel::CreateUsingNew<AlgorithmManagerImpl>;
 
@@ -74,13 +78,14 @@ private:
   /// Unimplemented assignment operator
   AlgorithmManagerImpl &operator=(const AlgorithmManagerImpl &);
 
-  /// Removes any finished algorithms from the list of managed algorithms
-  size_t removeFinishedAlgorithms();
-
   /// The list of managed algorithms
   std::deque<IAlgorithm_sptr> m_managed_algs; ///<  pointers to managed algorithms [policy???]
   /// Mutex for modifying/accessing the m_managed_algs member.
   mutable std::recursive_mutex m_managedMutex;
+  /// Observes the ADS to trigger removal of finished algorithms. Declared last so it
+  /// stops observing before the members above are destroyed. Defined in the .cpp
+  struct ADSObservers;
+  std::unique_ptr<ADSObservers> m_adsObservers;
 };
 
 using AlgorithmManager = Mantid::Kernel::SingletonHolder<AlgorithmManagerImpl>;

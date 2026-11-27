@@ -10,7 +10,9 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/ConfigService.h"
+#include <Poco/NObserver.h>
 #include <thread>
 
 namespace Mantid::API {
@@ -19,8 +21,36 @@ namespace {
 Kernel::Logger g_log("AlgorithmManager");
 } // namespace
 
+/// Observers of the ADS that remove finished algorithms when the ADS is cleared or a workspace is deleted
+struct AlgorithmManagerImpl::ADSObservers {
+  explicit ADSObservers(AlgorithmManagerImpl &manager)
+      : m_manager(manager), m_clearObserver(*this, &ADSObservers::handleClear),
+        m_postDeleteObserver(*this, &ADSObservers::handlePostDelete) {
+    // Accessing the ADS here guarantees it is created first and therefore destroyed after the AlgorithmManager
+    auto &ads = AnalysisDataService::Instance();
+    ads.notificationCenter.addObserver(m_clearObserver);
+    ads.notificationCenter.addObserver(m_postDeleteObserver);
+  }
+  ~ADSObservers() {
+    auto &ads = AnalysisDataService::Instance();
+    ads.notificationCenter.removeObserver(m_clearObserver);
+    ads.notificationCenter.removeObserver(m_postDeleteObserver);
+  }
+  ADSObservers(const ADSObservers &) = delete;
+  ADSObservers &operator=(const ADSObservers &) = delete;
+
+  void handleClear(ClearADSNotification_ptr /*notification*/) { m_manager.removeFinishedAlgorithms(); }
+  void handlePostDelete(WorkspacePostDeleteNotification_ptr /*notification*/) { m_manager.removeFinishedAlgorithms(); }
+
+  AlgorithmManagerImpl &m_manager;
+  Poco::NObserver<ADSObservers, ClearADSNotification> m_clearObserver;
+  Poco::NObserver<ADSObservers, WorkspacePostDeleteNotification> m_postDeleteObserver;
+};
+
 /// Private Constructor for singleton class
-AlgorithmManagerImpl::AlgorithmManagerImpl() : m_managed_algs() { g_log.debug() << "Algorithm Manager created.\n"; }
+AlgorithmManagerImpl::AlgorithmManagerImpl() : m_managed_algs(), m_adsObservers(std::make_unique<ADSObservers>(*this)) {
+  g_log.debug() << "Algorithm Manager created.\n";
+}
 
 /** Private destructor
  *  Prevents client from calling 'delete' on the pointer handed
