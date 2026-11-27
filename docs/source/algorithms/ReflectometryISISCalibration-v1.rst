@@ -10,7 +10,7 @@
 ReflectometryISISCalibration
 -------------------------------
 
-This algorithm adjusts the positions of individual detector pixels in a workspace based on the calibration values provided in the calibration file. The algorithm takes a copy of the input workspace before applying the position changes, so the original workspace remains unchanged.
+This algorithm adjusts the positions of individual detector pixels in a workspace based on the calibration values provided in the calibration file. By default, the algorithm copies the input before applying the position changes. Setting ``PreserveInputWorkspace=False`` applies the changes directly to the input instead.
 
 A ``.dat`` calibration file must be provided via the ``CalibrationFile`` property. Lines beginning with ``#`` are ignored.
 

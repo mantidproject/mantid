@@ -21,7 +21,7 @@ import itertools
 import math
 import systemtesting
 from operator import itemgetter
-from mantid.api import mtd, AnalysisDataService
+from mantid.api import mtd
 from mantid.kernel import logger
 from mantid.simpleapi import CreateTransmissionWorkspaceAuto, NRCalculateSlitResolution, SaveNexus, ReflectometryISISLoadAndProcess
 from isis_reflectometry.combineMulti import combineDataMulti, getWorkspace
@@ -48,14 +48,16 @@ class ISISReflectometryAutoreductionTest(systemtesting.MantidSystemTest, ISISRef
 
     def runTest(self):
         self.setupTest()
-        self.workspaces_to_exclude_from_result = AnalysisDataService.Instance().getObjectNames()
 
         stitched_name = stitchedTransmissionWorkspaceName(self.first_transmission_runs[0], self.second_transmission_runs[0])
         stitchTransmissionWorkspaces(self.first_transmission_runs, self.second_transmission_runs, [stitched_name], False)
 
         AutoReduce([stitched_name, stitched_name], self.run_numbers)
 
-        self.finaliseResults()
+        output_names = [f"{run}_{suffix}" for run in self.run_numbers for suffix in ("IvsQ", "IvsQ_binned")]
+        stitched_runs = [44320, 44322, 44324, *range(44327, 44349, 2)]
+        output_names += [f"{run}_{str(run + 1)[-2:]}" for run in stitched_runs]
+        self.finaliseResults([stitched_name, *output_names], expected_workspace_count=141)
 
     def regenerateReferenceFileByReducing(self):
         setupInstrument()

@@ -58,14 +58,12 @@ class ISISReflectometryWorkflowBase:
         if self.input_workspaces_file is not None:
             Load(self.input_workspaces_file, OutputWorkspace=self.input_runs_workspace_name)
 
-        self.workspaces_to_exclude_from_result = AnalysisDataService.Instance().getObjectNames()
-
-    def finaliseResults(self):
-        """Clear interim workspaces and group required outputs into the final
-        result ready for comparison with the reference"""
-        removeWorkspaces(self.workspaces_to_exclude_from_result)
-        GroupWorkspaces(InputWorkspaces=AnalysisDataService.Instance().getObjectNames(), OutputWorkspace=self.result_workspace_name)
+    def finaliseResults(self, workspace_names, expected_workspace_count):
+        """Group the expected outputs for comparison with the reference."""
+        GroupWorkspaces(InputWorkspaces=workspace_names, OutputWorkspace=self.result_workspace_name)
         mtd[self.result_workspace_name].sortByName()
+        # Flag changes to the total so newly introduced workspaces can be reviewed and confirmed.
+        self.assertEqual(len(mtd), expected_workspace_count)
 
     def regenerateRunsFile(self):
         setupInstrument()
