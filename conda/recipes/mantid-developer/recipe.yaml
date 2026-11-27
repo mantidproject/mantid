@@ -96,7 +96,7 @@ requirements:
       then:
         - conda-wrappers
         - lib3mf
-        - mkl {{ mkl }}
+        - mkl ${{ mkl }}
     - if: osx
       then:
         - python.app

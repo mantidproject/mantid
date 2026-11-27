@@ -69,7 +69,7 @@ outputs:
       - if: win
         then:
         - lib3mf
-        - mkl {{ mkl }}
+        - mkl ${{ mkl }}
       - if: osx
         then:
         - libopenblas ${{ libopenblas }}
@@ -116,7 +116,7 @@ outputs:
         - if: win
           then:
             - lib3mf
-            - mkl {{ mkl }}
+            - mkl ${{ mkl }}
 
       ignore_run_exports:
         from_package:
