@@ -124,7 +124,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
   for (it = entries.begin(); it != entries.end(); ++it) {
     std::string entryName = it->first;
     if (entryName.size() > 4) {
-      if (entryName.substr(0, 4) == "bank") {
+      if (entryName.starts_with("bank")) {
         // OK, this is some bank data
         file.openGroup(entryName, it->second);
 
@@ -189,7 +189,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
   for (it = entries.begin(); it != entries.end(); ++it) {
     std::string entryName = it->first;
     if (entryName.size() > 4) {
-      if (entryName.substr(0, 4) == "bank") {
+      if (entryName.starts_with("bank")) {
         // OK, this is some bank data
         file.openGroup(entryName, it->second);
         const auto bankEntries = file.getEntries();
@@ -324,7 +324,7 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::stri
 
     size_t bankNum = 0;
     if (bankName.size() > 4) {
-      if (bankName.substr(0, 4) == "bank") {
+      if (bankName.starts_with("bank")) {
         bankNum = boost::lexical_cast<size_t>(bankName.substr(4));
         bankNum--;
       } else {

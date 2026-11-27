@@ -656,11 +656,11 @@ void LogManager::loadNexus(Nexus::File *file, std::string const &prefix) {
   if (itLower == nxLogEntries.end()) {
     return;
   }
-  if (itLower->compare(0, prefix.size(), prefix) != 0) {
+  if (!itLower->starts_with(prefix)) {
     return;
   }
 
-  for (auto it = itLower; it != nxLogEntries.end() && it->compare(0, prefix.size(), prefix) == 0; ++it) {
+  for (auto it = itLower; it != nxLogEntries.end() && it->starts_with(prefix); ++it) {
     // only next level entries
     const std::string &absoluteEntryName = *it;
     if (std::count(absoluteEntryName.begin(), absoluteEntryName.end(), '/') != levels + 1) {

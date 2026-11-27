@@ -93,11 +93,10 @@ int LoadBBY::confidence(Kernel::FileDescriptor &descriptor) const {
   size_t binFiles = 0;
   const std::vector<std::string> &subFiles = file.files();
   for (const auto &subFile : subFiles) {
-    auto len = subFile.length();
-    if ((len > 4) && (subFile.find_first_of("\\/", 0, 2) == std::string::npos)) {
-      if ((subFile.rfind(".hdf") == len - 4) && (subFile.compare(0, 3, "BBY") == 0))
+    if ((subFile.length() > 4) && (subFile.find_first_of("\\/", 0, 2) == std::string::npos)) {
+      if (subFile.ends_with(".hdf") && subFile.starts_with("BBY"))
         hdfFiles++;
-      else if (subFile.rfind(".bin") == len - 4)
+      else if (subFile.ends_with(".bin"))
         binFiles++;
     }
   }
@@ -219,15 +218,15 @@ void LoadBBY::exec() {
 
   // set title
   const std::vector<std::string> &subFiles = tarFile.files();
-  const auto it = std::find_if(subFiles.cbegin(), subFiles.cend(),
-                               [](const auto &subFile) { return subFile.compare(0, 3, "BBY") == 0; });
+  const auto it =
+      std::find_if(subFiles.cbegin(), subFiles.cend(), [](const auto &subFile) { return subFile.starts_with("BBY"); });
   if (it != subFiles.cend()) {
     std::string title = *it;
 
-    if (title.rfind(".hdf") == title.length() - 4)
+    if (title.ends_with(".hdf"))
       title.resize(title.length() - 4);
 
-    if (title.rfind(".nx") == title.length() - 3)
+    if (title.ends_with(".nx"))
       title.resize(title.length() - 3);
 
     eventWS->setTitle(title);
@@ -473,7 +472,7 @@ void LoadBBY::loadInstrumentParameters(const Nexus::NXEntry &entry, std::map<std
     std::string tmpString;
     float tmpFloat = 0.0f;
     for (auto &x : allParams) {
-      if (x.first.find("log_") == 0) {
+      if (x.first.starts_with("log_")) {
         auto logTag = boost::algorithm::trim_copy(x.first.substr(4));
         auto line = x.second;
 
@@ -551,8 +550,8 @@ void LoadBBY::createInstrument(ANSTO::Tar::File &tarFile, InstrumentInfo &instru
 
   // extract log and hdf file
   const std::vector<std::string> &files = tarFile.files();
-  auto file_it = std::find_if(files.cbegin(), files.cend(),
-                              [](const std::string &file) { return file.rfind(".hdf") == file.length() - 4; });
+  auto file_it =
+      std::find_if(files.cbegin(), files.cend(), [](const std::string &file) { return file.ends_with(".hdf"); });
   if (file_it != files.end()) {
     tarFile.select(file_it->c_str());
     // extract hdf file into tmp file
@@ -716,8 +715,8 @@ void LoadBBY::loadEvents(API::Progress &prog, const char *progMsg, ANSTO::Tar::F
   // select bin file
   int64_t fileSize = 0;
   const std::vector<std::string> &files = tarFile.files();
-  const auto found = std::find_if(files.cbegin(), files.cend(),
-                                  [](const auto &file) { return file.rfind(".bin") == file.length() - 4; });
+  const auto found =
+      std::find_if(files.cbegin(), files.cend(), [](const auto &file) { return file.ends_with(".bin"); });
   if (found != files.cend()) {
     tarFile.select(found->c_str());
     fileSize = tarFile.selected_size();

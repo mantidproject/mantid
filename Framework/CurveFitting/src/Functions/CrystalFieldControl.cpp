@@ -78,7 +78,7 @@ void CrystalFieldControl::setAttribute(const std::string &name, const API::IFunc
           API::IFunction::setAttributeValue("FWHMY", std::vector<double>());
         }
       }
-    } else if ((name.compare(0, 5, "FWHMX") == 0 || name.compare(0, 5, "FWHMY") == 0) && !attr.asVector().empty()) {
+    } else if ((name.starts_with("FWHMX") || name.starts_with("FWHMY")) && !attr.asVector().empty()) {
       m_FWHMs.clear();
     }
     API::IFunction::setAttribute(name, attr);

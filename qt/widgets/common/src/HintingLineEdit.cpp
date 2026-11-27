@@ -93,8 +93,7 @@ void HintingLineEdit::updateMatches() {
   m_matches.clear();
   std::copy_if(m_hints.cbegin(), m_hints.cend(), std::back_inserter(m_matches), [this](Hint const &hint) -> bool {
     auto &hintWord = hint.word();
-    return hintWord.length() >= m_currentPrefix.length() &&
-           hintWord.substr(0, m_currentPrefix.length()) == m_currentPrefix;
+    return hintWord.starts_with(m_currentPrefix);
   });
   m_match = m_matches.cbegin();
 }

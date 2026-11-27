@@ -11,7 +11,6 @@
 #include "ParameterEstimation.h"
 
 #include "MantidAPI/TextAxis.h"
-#include "MantidKernel/Strings.h"
 
 namespace {
 using namespace MantidQt::CustomInterfaces::Inelastic;
@@ -37,7 +36,7 @@ void replaceAxisLabel(TextAxis *axis, std::size_t const index, std::string const
 void convertWidthToHWHM(MatrixWorkspace_sptr workspace, std::vector<std::size_t> const &widthSpectra) {
   for (auto const &spectrumIndex : widthSpectra) {
     auto axis = dynamic_cast<TextAxis *>(workspace->getAxis(1));
-    if (axis && !Mantid::Kernel::Strings::endsWith(axis->label(spectrumIndex), "HWHM")) {
+    if (axis && !axis->label(spectrumIndex).ends_with("HWHM")) {
       replaceAxisLabel(axis, spectrumIndex, "Width", "HWHM");
       replaceAxisLabel(axis, spectrumIndex, "FWHM", "HWHM");
       workspace->mutableY(spectrumIndex) *= 0.5;

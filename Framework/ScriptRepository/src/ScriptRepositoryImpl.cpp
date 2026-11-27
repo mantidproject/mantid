@@ -614,14 +614,14 @@ void ScriptRepositoryImpl::download_directory(const std::string &directory_path)
     // when it first find the directory, it will list all the
     // childrens of this directory, and them,
     // it will list other things, so we can, break the loop
-    if (entry.first.find(directory_path) != 0) {
+    if (!entry.first.starts_with(directory_path)) {
       if (found)
         break; // for the sake of performance
       else
         continue;
     }
     found = true;
-    if (entry.first != directory_path && entry.first.find(directory_path_with_slash) != 0) {
+    if (entry.first != directory_path && !entry.first.starts_with(directory_path_with_slash)) {
       // it is not a children of this entry, just similar. Example:
       // TofConverter/README
       // TofConverter.py
@@ -890,7 +890,7 @@ int ScriptRepositoryImpl::setAutoUpdate(const std::string &input_path, bool opti
     // for every entry, it takes the path and RepositoryEntry
     std::string entryPath = it->first;
     const RepositoryEntry &entry = it->second;
-    if (entryPath.compare(0, path.size(), path) == 0 && entry.status != REMOTE_ONLY && entry.status != LOCAL_ONLY)
+    if (entryPath.starts_with(path) && entry.status != REMOTE_ONLY && entry.status != LOCAL_ONLY)
       filesToUpdate.emplace_back(entryPath);
   }
 

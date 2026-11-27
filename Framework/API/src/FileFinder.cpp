@@ -301,7 +301,7 @@ std::string FileFinderImpl::makeFileName(const std::string &hintstr, const Kerne
       std::string hintUpper = toUpper(hintstr);
       std::string shortName = toUpper(instrument.shortName());
       std::string name = toUpper(instrument.name());
-      if (hintUpper.rfind(shortName, 0) != 0 && hintUpper.rfind(name, 0) != 0) {
+      if (!hintUpper.starts_with(shortName) && !hintUpper.starts_with(name)) {
         instrToUse = getInstrument(hintstr, false);
       }
     } catch (const std::exception &ex) {
@@ -315,9 +315,9 @@ std::string FileFinderImpl::makeFileName(const std::string &hintstr, const Kerne
   std::string delimiter = instrToUse.delimiter();
 
   // see if starts with the provided instrument name
-  if (filename.substr(0, shortName.size()) == shortName) {
+  if (filename.starts_with(shortName)) {
     filename = filename.substr(shortName.size());
-    if ((!delimiter.empty()) && (filename.substr(0, delimiter.size()) == delimiter))
+    if ((!delimiter.empty()) && (filename.starts_with(delimiter)))
       filename = filename.substr(delimiter.size());
 
     filename = shortName + filename;

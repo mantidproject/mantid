@@ -711,7 +711,7 @@ int NexusFileIO::findMantidWSEntries() const {
   std::map<std::string, std::string> entries = m_filehandle->getEntries();
   for (auto &entrie : entries) {
     if (entrie.second == "NXentry") {
-      if (entrie.first.find("mantid_workspace_") == 0)
+      if (entrie.first.starts_with("mantid_workspace_"))
         count++;
     }
   }

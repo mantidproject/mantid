@@ -54,11 +54,7 @@ std::string PropertyManager::getLogNameFromInvalidValuesFilter(const std::string
 /// Determine if the log's name has a substring indicating it should not be filtered
 bool PropertyManager::isAnInvalidValuesFilterLog(const std::string &logName) {
   const auto ending = PropertyManager::INVALID_VALUES_SUFFIX;
-  if (logName.length() >= ending.length()) {
-    return (0 == logName.compare(logName.length() - ending.length(), ending.length(), ending));
-  } else {
-    return false;
-  }
+  return logName.ends_with(ending);
 }
 //-----------------------------------------------------------------------------------------------
 /// Default constructor

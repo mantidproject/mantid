@@ -1038,7 +1038,7 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(const std::map<std::string
     } else if ((key != "OutputBins") && (key != "OutputExtents")) {
       // make sure the names of non-directional dimensions are the same
       const std::string nameData = tempDataWS->getDimension(parametersIndex)->getName();
-      if (value.find(nameData) != 0) {
+      if (!value.starts_with(nameData)) {
         g_log.error() << "Dimension " << nameData
                       << " from the temporary workspace"
                          " is not one of the binning dimensions, "

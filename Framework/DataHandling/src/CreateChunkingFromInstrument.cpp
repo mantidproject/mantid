@@ -175,21 +175,6 @@ map<string, string> CreateChunkingFromInstrument::validateInputs() {
 }
 
 /**
- * Returns true if str starts with prefix.
- *
- * @param str The string to check.
- * @param prefix The prefix to look for.
- * @return true if str starts with prefix.
- */
-bool startsWith(const string &str, const string &prefix) {
-  // can't start with if it is shorter than the prefix
-  if (str.length() < prefix.length())
-    return false;
-
-  return (str.substr(0, prefix.length()) == prefix);
-}
-
-/**
  * Find the name of the parent of the component that starts with the
  * supplied prefix.
  *
@@ -200,13 +185,13 @@ bool startsWith(const string &str, const string &prefix) {
  */
 string parentName(const IComponent_const_sptr &comp, const string &prefix) {
   // handle the special case of the component has the name
-  if (startsWith(comp->getName(), prefix))
+  if (comp->getName().starts_with(prefix))
     return comp->getName();
 
   // find the parent with the correct name
   IComponent_const_sptr parent = comp->getParent();
   if (parent) {
-    if (startsWith(parent->getName(), prefix))
+    if (parent->getName().starts_with(prefix))
       return parent->getName();
     else
       return parentName(parent, prefix);

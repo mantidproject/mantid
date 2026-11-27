@@ -126,7 +126,7 @@ void IFittingAlgorithm::init() {
 void IFittingAlgorithm::afterPropertySet(const std::string &propName) {
   if (propName == "Function") {
     setFunction();
-  } else if (propName.size() >= 14 && propName.substr(0, 14) == "InputWorkspace") {
+  } else if (propName.starts_with("InputWorkspace")) {
     if (getPointerToProperty("Function")->isDefault()) {
       throw std::invalid_argument("Function must be set before InputWorkspace");
     }

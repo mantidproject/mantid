@@ -62,10 +62,10 @@ int LoadGSS::confidence(Kernel::FileDescriptor &descriptor) const {
     std::getline(file, str);
     // Skip over empty and comment lines, as well as those coming from files
     // saved with the 'ExtendedHeader' option
-    if (str.empty() || str[0] == '#' || str.compare(0, 8, "Monitor:") == 0) {
+    if (str.empty() || str[0] == '#' || str.starts_with("Monitor:")) {
       continue;
     }
-    if (str.compare(0, 4, "BANK") == 0 && (str.contains("RALF") || str.contains("SLOG")) && (str.contains("FXYE"))) {
+    if (str.starts_with("BANK") && (str.contains("RALF") || str.contains("SLOG")) && (str.contains("FXYE"))) {
       return 80;
     }
   }

@@ -147,12 +147,10 @@ void PatchBBY::exec() {
   // open file (and select hisotry file if it exists)
   const std::vector<std::string> &files = tarFile.files();
   for (auto itr = files.begin(); itr != files.end(); ++itr) {
-    auto len = itr->length();
-
-    if ((len > 4) && (itr->find_first_of("\\/", 0, 2) == std::string::npos)) {
-      if ((itr->compare(0, 3, "BBY") == 0) && (itr->rfind(".hdf") == len - 4))
+    if ((itr->length() > 4) && (itr->find_first_of("\\/", 0, 2) == std::string::npos)) {
+      if (itr->starts_with("BBY") && itr->ends_with(".hdf"))
         hdfFiles++;
-      else if (itr->rfind(".bin") == len - 4)
+      else if (itr->ends_with(".bin"))
         binFiles++;
       else if (*itr == HistoryStr) {
         if (std::distance(itr, files.end()) != 1)
@@ -218,8 +216,8 @@ void PatchBBY::exec() {
   // load original values from hdf
   bool reset = getProperty("Reset");
   if (reset) {
-    const auto file_it = std::find_if(files.cbegin(), files.cend(),
-                                      [](const std::string &file) { return file.rfind(".hdf") == file.length() - 4; });
+    const auto file_it =
+        std::find_if(files.cbegin(), files.cend(), [](const std::string &file) { return file.ends_with(".hdf"); });
     if (file_it != files.end()) {
       tarFile.select(file_it->c_str());
       // extract hdf file into tmp file

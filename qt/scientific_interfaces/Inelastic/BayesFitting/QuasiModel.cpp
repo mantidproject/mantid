@@ -12,7 +12,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/Strings.h"
 #include "MantidQtWidgets/Common/ConfiguredAlgorithm.h"
 
 #include <memory>
@@ -81,9 +80,7 @@ MatrixWorkspace_sptr QuasiModel::outputFit(std::size_t const index) const {
   return std::dynamic_pointer_cast<MatrixWorkspace>(m_outputFitGroup->getItem(index));
 }
 
-bool QuasiModel::isResolution(std::string const &workspaceName) const {
-  return Mantid::Kernel::Strings::endsWith(workspaceName, "_res");
-}
+bool QuasiModel::isResolution(std::string const &workspaceName) const { return workspaceName.ends_with("_res"); }
 
 std::optional<std::string> QuasiModel::curveColour(std::string const &label) const {
   if (label.contains("fit 1")) {
