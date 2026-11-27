@@ -124,6 +124,12 @@
     </livedata>
   </instrument>
 
+  <instrument name="HRPD-X" shortname="HRPDX">
+    <zeropadding size="8" />
+    <technique>Powder Diffraction</technique>
+    <technique>Neutron Diffraction</technique>
+  </instrument>
+
   <instrument name="IMAT">
     <technique>Neutron Imaging</technique>
     <zeropadding size="8"/>

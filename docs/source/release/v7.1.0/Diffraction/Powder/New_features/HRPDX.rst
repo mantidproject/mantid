@@ -1,0 +1,1 @@
+- Added an instrument definition for HRPD-X, the new ISIS high-resolution powder diffractometer, together with seven detector grouping files in the ``instrument/Grouping`` directory (``HRPDX_Grouping_1.xml`` to ``HRPDX_Grouping_7.xml``) for focussing by module, by bank, or over the equatorial and central modules only.
