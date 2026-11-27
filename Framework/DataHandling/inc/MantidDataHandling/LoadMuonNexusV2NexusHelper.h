@@ -17,6 +17,35 @@
 
 namespace Mantid {
 namespace DataHandling {
+/// Names of the groups and datasets in a Muon Nexus V2 file, shared by the loader and SaveNexusMuon.
+/// Unless absolute, they are relative to the raw data entry.
+namespace NeXusEntry {
+inline const std::string RAWDATA_NAME{"raw_data_1"};
+inline const std::string RAWDATA{"/" + RAWDATA_NAME};
+inline const std::string DEFINITION{RAWDATA + "/definition"};
+inline const std::string BEAMLINE{RAWDATA + "/beamline"};
+inline const std::string GOODFRAMES{"good_frames"};
+inline const std::string DETECTOR{"instrument/detector_1"};
+inline const std::string PERIOD{"periods"};
+inline const std::string ORIENTATON{"instrument/detector_1/orientation"};
+inline const std::string RESOLUTION{"resolution"};
+inline const std::string GROUPING{"grouping"};
+inline const std::string DEADTIME{"dead_time"};
+inline const std::string COUNTS{"counts"};
+inline const std::string FIRSTGOODBIN{"first_good_bin"};
+inline const std::string LASTGOODBIN{"last_good_bin"};
+inline const std::string TIMEZERO{"time_zero"};
+inline const std::string SAMPLE{"sample"};
+inline const std::string TEMPERATURE{"temperature"};
+inline const std::string MAGNETICFIELD{"magnetic_field"};
+inline const std::string SEQUENCES{"sequences"};
+inline const std::string TYPE{"type"};
+inline const std::string REQUESTED{"frames_requested"};
+inline const std::string RAWFRAMES{"raw_frames"};
+inline const std::string PERIODOUTPUT{"output"};
+inline const std::string PERIODCOUNTS{"total_counts"};
+} // namespace NeXusEntry
+
 namespace MuonNexus {
 struct SampleInformation {
   double magneticField = -1;

@@ -37,12 +37,6 @@ using namespace HistogramData;
 using std::size_t;
 using namespace DataObjects;
 
-namespace NeXusEntry {
-const std::string RAWDATA{"/raw_data_1"};
-const std::string DEFINITION{"/raw_data_1/definition"};
-const std::string BEAMLINE{"/raw_data_1/beamline"};
-} // namespace NeXusEntry
-
 /// Empty default constructor
 LoadMuonNexusV2::LoadMuonNexusV2()
     : m_filename(), m_entrynumber(0), m_isFileMultiPeriod(false), m_multiPeriodsLoaded(false) {}
